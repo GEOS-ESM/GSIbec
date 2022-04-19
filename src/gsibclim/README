@@ -1,0 +1,47 @@
+look for USE_ALL_ORIGINAL
+
+- will need to call: init_general_commvars_dims
+- remove regional from gridmod
+- remove hyb from bkgcov; interface change
+- remove lsqrtb, tlnmc, and regional from balmod (balmod to F90)
+- remove hybens from control_vector
+- interface change in random_cv
+- interface change to read_wgt
+- ifdef'ed out aircraft predictors from berror (from f90 to F90)
+- bkerror: f90 to F90; remove lsqrtb check; ifdef hyb out; interface change
+- bkgvar: interface change; from f90 to F90
+- smoothrf.f90 to smoothrf.F90
+
+TODO:
+
+general_commvars - make dvars optional
+
+rid code of bacio lib dependence, ie. replace these:
+baopenwt
+wryte
+baclose
+
+tsensible: is non-sense define CV var name for T should be enough to determine T var
+balmod: decision on when to apply balance operator is too restrictive (should not need all t,ps,sf,vp)
+
+sequence:
+
+bkerror
+tbalmod
+bkgcov
+  bkgvar
+  frfhvo
+  sub2grid
+  smoothrf
+  grid2sub
+  frfhvo
+  bkgvar
+balmod
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++
+   TO DO FOR SABER CONNECTION
+++++++++++++++++++++++++++++++++++++++++++++++++
+- replace kinds w/ OOPS kinds
+- interface to return lats/lons
+- interface to b itself
