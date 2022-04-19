@@ -1,0 +1,56 @@
+# (C) Copyright 2017-2021 UCAR.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+
+# Include macros for creating links and symlinks
+#include( gsibclim_functions )
+
+# Create Data directory for test input config and symlink all files
+list( APPEND gsibclim_test_input
+   testinput/
+)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput/unit_tests)
+#CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${gsibclim_test_input} )
+
+
+# Add files to cmake resources
+ecbuild_add_resources( TARGET gsibclim_test_scripts
+                       SOURCES_PACK
+                       ${gsibclim_test_input}
+                     )
+
+# Create Data directory for test data and symlink files
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
+
+
+ecbuild_add_executable( TARGET  test_bkerror_clim.x
+                        SOURCES mains/test_bkerror_clim.F90
+                        LIBS    gsibclim
+                       )
+
+####################################################################
+# Establish test tiering
+
+set( GSIBCLIM_TEST_TIER 1 CACHE STRING "GSIBCLIM test tier. Run tests up to and including this tier.")
+
+message(STATUS "Running ufo tests for tiers up to and including tier " ${GSIBCLIM_TEST_TIER})
+
+####################################################################
+
+
+# Test GMAO and NCEP B-CLIM:
+
+ecbuild_add_test( TARGET  test_gsibclim_gmao
+                  SOURCES mains/test_bkerror_clim.F90
+                  ARGS    "testinput/gmao_saberror.nml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    gsibclim )
+
+#ecbuild_add_test( TARGET  test_gsibclim_ncep
+#                  SOURCES mains/test_bkerror_clim.F90
+#                  ARGS    "testinput/ncep_saberror.nml"
+#                  ENVIRONMENT OOPS_TRAPFPE=1
+#                  LIBS    gsibclim )
