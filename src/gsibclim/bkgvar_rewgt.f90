@@ -689,7 +689,6 @@ subroutine gather_stuff2(f,g,mype,outpe)
         fsm(i0,j0)=f(i,j)
      end do
   end do
-  print *, 'DEBUG gather stuff: (kind) ', mpi_real8, mpi_rtype, r_kind
   call mpi_gatherv(fsm,g1%ijn(mype+1),mpi_rtype, &
                   tempa,g1%ijn,g1%displs_g,mpi_rtype,outpe,mpi_comm_world,ierror)
 
