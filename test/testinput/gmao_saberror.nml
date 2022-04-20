@@ -15,15 +15,15 @@
 !  adjustozvar=.true.,
    adjustozvar=.false.,
    bkgv_write=.true.,
-   simcv=.false,
+   simcv=.true,
  /
 
 met_guess::
 !var     level   crtm_use    desc                 orig_name
   ps        1      -1         surface_pressure     ps
 # z         1      -1         geopotential_height  phis
-  u        72       2         zonal_wind           u
-  v        72       2         meridional_wind      v
+# u        72       2         zonal_wind           u
+# v        72       2         meridional_wind      v
 # div      72      -1         zonal_wind           div
 # vor      72      -1         meridional_wind      vor
   tv       72       2         virtial_temperature  tv
@@ -86,8 +86,8 @@ state_tendencies::
 
 state_vector::
 !var     level  itracer source     funcof
- u        72      0     met_guess    u
- v        72      0     met_guess    v
+#u        72      0     met_guess    u
+#v        72      0     met_guess    v
  tv       72      0     met_guess    tv
 #tsen     72      0     met_guess    tv,q
 #q        72      1     met_guess    q
