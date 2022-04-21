@@ -42,6 +42,7 @@ m_kinds.F90
 looplimits.f90
 m_berror_stats.f90
 m_grid2sub1var.f90
+m_gsibclim.F90
 m_nc_berror.f90
 mpeu_mpif.F90
 mpeu_util.F90
