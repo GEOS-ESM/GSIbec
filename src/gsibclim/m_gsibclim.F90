@@ -52,7 +52,9 @@ end interface gsibclim_final
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_
+  subroutine init_(cv)
+
+  logical, intent(out) :: cv
 
   integer :: ier
   logical :: already_init_mpi
@@ -71,6 +73,7 @@ contains
   call guess_grids_init()
   call rf_set(mype)
 
+  cv = simcv
   end subroutine init_
   subroutine final_
 
