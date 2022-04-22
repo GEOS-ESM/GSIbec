@@ -31,16 +31,6 @@ ecbuild_add_executable( TARGET  test_bkerror_clim.x
                         LIBS    gsibclim
                        )
 
-####################################################################
-# Establish test tiering
-
-set( GSIBCLIM_TEST_TIER 1 CACHE STRING "GSIBCLIM test tier. Run tests up to and including this tier.")
-
-message(STATUS "Running ufo tests for tiers up to and including tier " ${GSIBCLIM_TEST_TIER})
-
-####################################################################
-
-
 # Test GMAO and NCEP B-CLIM:
 
 ecbuild_add_test( TARGET  test_gsibclim_gmao

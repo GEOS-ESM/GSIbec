@@ -5,7 +5,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 # BClim
-set ( bclim_files
+set ( gsibclim_src_files
 balmod.F90
 berror.F90
 bias_predictors.F90
@@ -73,10 +73,23 @@ write_bkgvars_grid.F90
 m_gbc4saber.f90
 )
 
-PREPEND( _p_bclim_files     "gsibclim"     ${bclim_files} )
+## Create Library target
+ecbuild_add_library( TARGET   gsibclim
+                     SOURCES  ${gsibclim_src_files}
+                    )
 
-set( bclim_src_files
-    ${_p_bclim_files}
-    PARENT_SCOPE
-)
+# Link with dependency libraries
+target_link_libraries(gsibclim PUBLIC MPI::MPI_C MPI::MPI_CXX MPI::MPI_Fortran)
+target_link_libraries(gsibclim PUBLIC NetCDF::NetCDF_C NetCDF::NetCDF_Fortran)
 
+## Include paths
+target_include_directories(gsibclim PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+                                      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+## Fortran modules
+set(MODULE_DIR ${PROJECT_NAME}/module)
+set_target_properties(${PROJECT_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR})
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR}/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/${MODULE_DIR})
+target_include_directories(${PROJECT_NAME} INTERFACE
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${MODULE_DIR}>
+                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_LIBDIR}/${MODULE_DIR}>)
