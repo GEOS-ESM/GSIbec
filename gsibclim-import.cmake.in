@@ -1,5 +1,5 @@
 # gsibclim-import.cmake
-# find_dependency calls for geos-aero target dependencies
+# find_dependency calls for gsibclim target dependencies
 
 include(CMakeFindDependencyMacro)
 
