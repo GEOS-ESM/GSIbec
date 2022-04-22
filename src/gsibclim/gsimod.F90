@@ -43,8 +43,6 @@
 
   use smooth_polcarf, only: norsp,init_smooth_polcas
 
-  use m_berror_stats,only : berror_stats ! filename if other than "berror_stats"
-
   use gsi_metguess_mod, only: gsi_metguess_init,gsi_metguess_final
   use gsi_chemguess_mod, only: gsi_chemguess_init,gsi_chemguess_final
 
@@ -319,8 +317,7 @@
 !      tendsflag,&
        pseudo_q2,&
        cwoption,&
-       qoption,&
-       berror_stats
+       qoption
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
 !     jcap     - spectral resolution
@@ -486,7 +483,7 @@
 
 ! ! IROUTINE: gsimain_finalize
 
- subroutine gsimain_finalize
+ subroutine gsimain_finalize(closempi)
 
 ! !REVISION HISTORY:
 !
@@ -498,8 +495,8 @@
 !---------------------------------------------------------------------------
 
   implicit none
+  logical, intent(in) :: closempi
 ! Deallocate arrays
-  call mpi_comm_rank(mpi_comm_world,mype,ierror)
   call destroy_general_commvars
   call final_grid_vars
   call final_anacv
@@ -507,7 +504,9 @@
   call gsi_chemguess_final
   call gsi_metguess_final
 
-  call mpi_finalize(ierror)
+  if (closempi) then
+     call mpi_finalize(ierror)
+  endif
  
  end subroutine gsimain_finalize
 

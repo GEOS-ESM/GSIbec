@@ -4,7 +4,7 @@ module m_gsibclim
 
 use constants, only: zero,one
 use m_kinds, only: i_kind,r_kind
-use m_mpimod, only: mype
+use m_mpimod, only: mype,mpi_character,mpi_comm_world
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
 use guess_grids, only: nfldsig
 use guess_grids, only: guess_grids_init
@@ -27,6 +27,7 @@ use mpeu_util, only: die
 use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
 use berror, only: simcv
+use m_berror_stats,only : berror_stats
 use jfunc, only: nsubwin,nsclen,npclen,ntclen
 
 implicit none
@@ -35,6 +36,7 @@ private
 public gsibclim_init
 public gsibclim_cv_space
 public gsibclim_sv_space
+public gsibclim_befname
 public gsibclim_final
 
 interface gsibclim_init
@@ -46,6 +48,9 @@ end interface gsibclim_cv_space
 interface gsibclim_sv_space
   module procedure be_sv_space_
 end interface gsibclim_sv_space
+interface gsibclim_befname
+  module procedure befname_
+end interface gsibclim_befname
 interface gsibclim_final
   module procedure final_
 end interface gsibclim_final
@@ -75,12 +80,12 @@ contains
 
   cv = simcv
   end subroutine init_
-  subroutine final_
-
+  subroutine final_(closempi)
+  logical, intent(in) :: closempi
   call rf_unset()
   call guess_grids_final()
   call unset_()
-  call gsimain_finalize()
+  call gsimain_finalize(closempi)
 
   end subroutine final_
   subroutine set_
@@ -399,5 +404,19 @@ contains
   deallocate(subfld)
   deallocate(grdfld)
   end subroutine get_state_perts_
+
+  subroutine befname_ (fname,root)
+  implicit none
+  character(len=*),intent(in) :: fname
+  integer, intent(in) :: root
+  character(len=*), parameter :: myname_ = myname//"*befname"
+  integer ier,clen
+  if(mype==root) then
+    write(6,'(3a)') myname_, ": reading B error-coeffs from ", trim(fname)
+    berror_stats = trim(fname)
+  endif
+  clen=len(berror_stats)
+  call mpi_bcast(berror_stats,clen,mpi_character,root,mpi_comm_world,ier)
+  end subroutine befname_
 
 end module m_gsibclim

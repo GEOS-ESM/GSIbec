@@ -18,6 +18,6 @@ else
    call gsibclim_sv_space()
 endif
 
-call gsibclim_final()
+call gsibclim_final(.true.)
 
 end program test_bkerror_clim
