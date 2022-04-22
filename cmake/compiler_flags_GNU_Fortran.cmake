@@ -11,13 +11,13 @@
 # RELEASE FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS_RELEASE "-r8 -O3 -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
+#set( CMAKE_Fortran_FLAGS_RELEASE "-r8 -O3 -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
 
 ####################################################################
 # DEBUG FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS_DEBUG "-r8 -O0 -g -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
+#set( CMAKE_Fortran_FLAGS_DEBUG "-r8 -O0 -g -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
 
 ####################################################################
 # BIT REPRODUCIBLE FLAGS
@@ -29,11 +29,10 @@ set( CMAKE_Fortran_FLAGS_DEBUG "-r8 -O0 -g -qopt-report0 -ftz -align all -fno-al
 # LINK FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_LINK_FLAGS    "" )
+#set( CMAKE_Fortran_LINK_FLAGS    "" )
 
 ####################################################################
 
 # Meaning of flags
 # ----------------
 # todo
-
