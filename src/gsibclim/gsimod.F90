@@ -63,6 +63,12 @@
    public gsimain_initialize
    public gsimain_finalize
 
+   interface gsimain_initialize
+      module procedure gsimain_initialize_
+   end interface gsimain_initialize
+   interface gsimain_finalize
+      module procedure gsimain_finalize_
+   end interface gsimain_finalize
 !
 ! !DESCRIPTION: This module contains code originally in the GSI main program.
 ! The main
@@ -373,37 +379,39 @@
 
 ! ! INTERFACE:
 
-  subroutine gsimain_initialize
+  subroutine gsimain_initialize_(nmlfile)
 
 !*************************************************************
 ! Begin gsi code
 !
   use mpeu_util,only: die
   implicit none
+  character(len=*),optional,intent(in):: nmlfile
+
   character(len=*),parameter :: myname_='gsimod.gsimain_initialize'
+  character(len=*),parameter :: myrc = 'gsiberror.nml'
   integer:: ier,ios,lendian_in
   logical:: flag
   logical:: already_init_mpi
   real(r_kind):: varqc_max,c_varqc_new
-  character(len=*), parameter :: myrc = 'saberror.nml'
+  character(len=255) :: thisrc
 
   ierror=0
-! call mpi_initialized(already_init_mpi,ierror)
-! if(ierror/=0) call die(myname_,'mpi_initialized(), ierror =',ierror)
-! if(.not.already_init_mpi) then
-!    call mpi_init(ierror)
-!    if(ier/=0) call die(myname_,'mpi_init(), ierror =',ierror)
-! endif
+  if (present(nmlfile)) then
+     thisrc = trim(nmlfile)
+  else
+     thisrc = myrc
+  endif
 
   call mpi_comm_size(mpi_comm_world,npe,ierror)
   call mpi_comm_rank(mpi_comm_world,mype,ierror)
 
 ! Read in user specification of state and control variables
-  call gsi_metguess_init(rcname=myrc)
-  call gsi_chemguess_init(rcname=myrc)
-  call init_anasv(rcname=myrc)
-  call init_anacv(rcname=myrc)
-  call init_anadv(rcname=myrc)
+  call gsi_metguess_init(rcname=thisrc)
+  call gsi_chemguess_init(rcname=thisrc)
+  call init_anasv(rcname=thisrc)
+  call init_anacv(rcname=thisrc)
+  call init_anadv(rcname=thisrc)
 
   call jfunc_init
   call init_constants_derived
@@ -421,12 +429,12 @@
 ! all tasks to read from standard in (unit 5).  Hence, open
 ! namelist to different unit number and have each task read 
 ! namelist file.
-  open(11,file=myrc)
+  open(11,file=thisrc)
   read(11,setup,iostat=ios)
   if(ios/=0) call die(myname_,'read(setup)',ios)  
   close(11)
 
-  open(11,file=myrc)
+  open(11,file=thisrc)
   read(11,gridopts,iostat=ios)
   if(ios/=0) call die(myname_,'read(gridopts)',ios)
 
@@ -474,7 +482,7 @@
   call init_general_commvars
 
   
-  end subroutine gsimain_initialize
+  end subroutine gsimain_initialize_
 
 !-------------------------------------------------------------------------
 !  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
@@ -483,7 +491,7 @@
 
 ! ! IROUTINE: gsimain_finalize
 
- subroutine gsimain_finalize(closempi)
+ subroutine gsimain_finalize_(closempi)
 
 ! !REVISION HISTORY:
 !
@@ -508,6 +516,6 @@
      call mpi_finalize(ierror)
   endif
  
- end subroutine gsimain_finalize
+ end subroutine gsimain_finalize_
 
  end module gsimod

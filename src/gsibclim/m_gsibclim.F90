@@ -43,7 +43,8 @@ interface gsibclim_init
   module procedure init_
 end interface gsibclim_init
 interface gsibclim_cv_space
-  module procedure be_cv_space_
+  module procedure be_cv_space0_
+  module procedure be_cv_space1_
 end interface gsibclim_cv_space
 interface gsibclim_sv_space
   module procedure be_sv_space_
@@ -57,9 +58,10 @@ end interface gsibclim_final
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv)
+  subroutine init_(cv,nmlfile)
 
   logical, intent(out) :: cv
+  character(len=*),optional,intent(in) :: nmlfile
 
   integer :: ier
   logical :: already_init_mpi
@@ -72,7 +74,7 @@ contains
      if(ier/=0) call die(myname,'mpi_init(), ier =',ier)
   endif
 
-  call gsimain_initialize()
+  call gsimain_initialize(nmlfile=nmlfile)
   call set_()
   call set_pointer_()
   call guess_grids_init()
@@ -307,7 +309,7 @@ contains
   endif
   end subroutine set_silly_
 
-  subroutine be_cv_space_
+  subroutine be_cv_space0_
 
   type(control_vector) :: gradx,grady
   type(predictors)     :: sbias
@@ -331,7 +333,30 @@ contains
   call deallocate_cv(gradx)
   call deallocate_cv(grady)
 
-  end subroutine be_cv_space_
+  end subroutine be_cv_space0_
+
+  subroutine be_cv_space1_(gradx)
+
+  type(control_vector) :: gradx
+
+  type(control_vector) :: grady
+  type(predictors)     :: sbias
+
+! apply B to vector: all in control space
+
+! allocate vectors
+  call allocate_cv(grady)
+  grady=zero
+
+  call bkerror(gradx,grady, &
+               1,nsclen,npclen,ntclen)
+
+  call write_bundle(grady%step(1),'cvbundle')
+
+! clean up
+  call deallocate_cv(grady)
+
+  end subroutine be_cv_space1_
 
   subroutine be_sv_space_
 
