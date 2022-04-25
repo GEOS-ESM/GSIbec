@@ -111,6 +111,7 @@ module m_mpimod
   public :: mpi_mode_rdwr,mpi_byte
   public :: mpi_mode_create
   public :: mpi_mode_wronly
+  public :: mpi_character
 
 #ifdef HAVE_ESMF
   integer(i_kind) :: mpi_comm_world
