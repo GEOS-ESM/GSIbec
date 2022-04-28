@@ -335,14 +335,18 @@ contains
 
   end subroutine be_cv_space0_
 
-  subroutine be_cv_space1_(gradx)
+  subroutine be_cv_space1_(gradx,test)
 
   type(control_vector) :: gradx
+  logical,optional,intent(in) :: test
 
   type(control_vector) :: grady
   type(predictors)     :: sbias
 
 ! apply B to vector: all in control space
+  if (present(test)) then
+     if(test) call set_silly_(gradx%step(1))
+  endif
 
 ! allocate vectors
   call allocate_cv(grady)
@@ -352,6 +356,9 @@ contains
                1,nsclen,npclen,ntclen)
 
   call write_bundle(grady%step(1),'cvbundle')
+
+! return result in input vector
+  gradx=grady
 
 ! clean up
   call deallocate_cv(grady)
