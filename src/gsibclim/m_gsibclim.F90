@@ -24,6 +24,7 @@ use gsi_bundlemod, only: gsi_bundlegetpointer
 use gsi_bundlemod, only: gsi_bundleprint
 use gsi_bundlemod, only: assignment(=)
 use mpeu_util, only: die
+use m_mpimod, only: nxpe,nype
 use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
 use berror, only: simcv
@@ -58,10 +59,11 @@ end interface gsibclim_final
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv,nmlfile)
+  subroutine init_(cv,nmlfile,layout)
 
   logical, intent(out) :: cv
   character(len=*),optional,intent(in) :: nmlfile
+  integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
 
   integer :: ier
   logical :: already_init_mpi
@@ -74,6 +76,10 @@ contains
      if(ier/=0) call die(myname,'mpi_init(), ier =',ier)
   endif
 
+  if (present(layout)) then
+     nxpe=layout(1)
+     nype=layout(2)
+  endif
   call gsimain_initialize(nmlfile=nmlfile)
   call set_()
   call set_pointer_()
@@ -335,25 +341,39 @@ contains
 
   end subroutine be_cv_space0_
 
-  subroutine be_cv_space1_(gradx,test)
+  subroutine be_cv_space1_(gradx,internalcv,bypassbe)
 
   type(control_vector) :: gradx
-  logical,optional,intent(in) :: test
+  logical,optional,intent(in) :: internalcv
+  logical,optional,intent(in) :: bypassbe
 
   type(control_vector) :: grady
   type(predictors)     :: sbias
 
+  logical bypassbe_
+
+  bypassbe_ = .false.
+  if (present(bypassbe)) then
+     if (bypassbe) then
+         bypassbe_ = .true.
+     endif  
+  endif
+
 ! apply B to vector: all in control space
-  if (present(test)) then
-     if(test) call set_silly_(gradx%step(1))
+  if (present(internalcv)) then
+     if(internalcv) call set_silly_(gradx%step(1))
   endif
 
 ! allocate vectors
   call allocate_cv(grady)
-  grady=zero
 
-  call bkerror(gradx,grady, &
-               1,nsclen,npclen,ntclen)
+  if (bypassbe_) then
+     grady=gradx
+  else
+     grady=zero
+     call bkerror(gradx,grady, &
+                  1,nsclen,npclen,ntclen)
+  endif
 
   call write_bundle(grady%step(1),'cvbundle')
 
