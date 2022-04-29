@@ -23,7 +23,8 @@
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
      cvarsmd,nrf_var,lcalc_gfdl_cfrac 
   use berror, only: norh,ndeg,vs,bw,init_berror,hzscl,hswgt,pert_berr,pert_berr_fct,&
-     bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,nhscrf,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl
+     bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,nhscrf,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
+     bkgv_write_cv,bkgv_write_sv
   use berror, only: simcv !_RT intro for testing
   use compact_diffs, only: noq,init_compact_diffs
 
@@ -366,7 +367,7 @@
 
   namelist/bkgerr/vs,nhscrf,hzscl,hswgt,norh,ndeg,noq,bw,norsp,fstat,pert_berr,pert_berr_fct, &
 	bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
-        simcv
+        simcv,bkgv_write_cv,bkgv_write_sv
 
    CONTAINS
 

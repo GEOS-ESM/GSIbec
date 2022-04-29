@@ -142,6 +142,7 @@ module berror
   public :: bl,bl2,be,slw2,slw1,slw,mr,inaxs,wtxrs,wtaxs,nx,ny
   public :: inxrs,jj1,ii2,jj2,ii,jj,ii1,table,alv,nhscrf
   public :: cwcoveqqcov
+  public :: bkgv_write_cv,bkgv_write_sv
 
   public  :: simcv
   logical :: simcv
@@ -167,6 +168,7 @@ module berror
   real(r_kind),allocatable,dimension(:,:,:,:):: alv,dssv
 
   logical pert_berr,bkgv_flowdep,bkgv_write,adjustozvar
+  logical bkgv_write_cv,bkgv_write_sv
   real(r_kind) pert_berr_fct,bkgv_rewgtfct
   real(r_kind) adjustozhscl
 
@@ -214,6 +216,8 @@ contains
     adjustozvar = .false.
     adjustozhscl = three
     bkgv_write = .false.
+    bkgv_write_cv = .false.
+    bkgv_write_sv = .false.
     pert_berr_fct = zero
     bkgv_rewgtfct = zero
     norh=2

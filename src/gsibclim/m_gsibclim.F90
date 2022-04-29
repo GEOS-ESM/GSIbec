@@ -27,7 +27,7 @@ use mpeu_util, only: die
 use m_mpimod, only: nxpe,nype
 use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
-use berror, only: simcv
+use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use m_berror_stats,only : berror_stats
 use jfunc, only: nsubwin,nsclen,npclen,ntclen
 
@@ -333,6 +333,7 @@ contains
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
 
+  if(bkgv_write_cv) &
   call write_bundle(grady%step(1),'cvbundle')
 
 ! clean up
@@ -375,6 +376,7 @@ contains
                   1,nsclen,npclen,ntclen)
   endif
 
+  if(bkgv_write_cv) &
   call write_bundle(grady%step(1),'cvbundle')
 
 ! return result in input vector
@@ -417,6 +419,7 @@ contains
                1,nsclen,npclen,ntclen)
 
   call control2state(grady,fcgrad,sbias)
+  if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
 
 ! clean up work space
