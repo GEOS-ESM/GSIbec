@@ -979,7 +979,7 @@ end subroutine tell_dbl_
 
 subroutine dropdead_()
 #ifdef USE_MPI_ABORT
-  use mpeu_mpif, only: mpi_comm_world
+  use mpeu_mpif, only: gsi_mpi_comm_world
 #endif
   implicit none
   integer:: ier
@@ -994,7 +994,7 @@ subroutine dropdead_()
   call mprint(stderr,'dropdead','at '//cdate//':'//ctime//'(z'//czone//'00)')
 
 #ifdef USE_MPI_ABORT
-  call mpi_abort(mpi_comm_world,myer,ier)
+  call mpi_abort(gsi_mpi_comm_world,myer,ier)
 #else
   call exit(myer)
 #endif

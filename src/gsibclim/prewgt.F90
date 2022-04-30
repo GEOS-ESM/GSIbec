@@ -93,7 +93,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
        adjustozvar,adjustozhscl
   use m_berror_stats,only : berror_read_wgt
   use m_mpimod, only: nvar_id,levs_id
-  use m_mpimod, only: mpi_comm_world,ierror,mpi_rtype
+  use m_mpimod, only: gsi_mpi_comm_world,ierror,mpi_rtype
 ! use jfunc, only: varcw,cwoption
 ! use jfunc, only: varq,qoption
   use control_vectors, only: cvars2d,cvars3d
@@ -286,7 +286,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 
      call mpi_allgatherv(zsm,ijn(mm1),mpi_rtype,&
         work1,ijn,displs_g,mpi_rtype,&
-        mpi_comm_world,ierror)
+        gsi_mpi_comm_world,ierror)
 
      do k=1,iglobal
         i=ltosi(k) ; j=ltosj(k)

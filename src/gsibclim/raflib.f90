@@ -64,7 +64,7 @@ module raflib
 !$$$ end documentation block
 
 use m_kinds,only: r_double,r_quad,r_single,i_byte,i_long,i_llong,i_short
-use m_mpimod,only: mpi_comm_world,mpi_integer,mpi_integer1,mpi_integer2,mpi_integer4, &
+use m_mpimod,only: gsi_mpi_comm_world,mpi_integer,mpi_integer1,mpi_integer2,mpi_integer4, &
               mpi_integer8,mpi_max,mpi_min,mpi_real4,mpi_real8,mpi_real16,mpi_sum
 use constants, only: zero,half,one,two,zero_quad,zero_single
 !_RT use gsi_io, only: verbose
@@ -540,11 +540,11 @@ subroutine adjoint_check4(filter,ngauss,ips,ipe,jps,jpe,kps,kpe,mype,npes)
      end do
   end do
   if(r_double==r_quad) then
-     call mpi_gather(yty,1,mpi_real8 ,yty0,1,mpi_real8 ,0,mpi_comm_world,ierror)
-     call mpi_gather(xtz,1,mpi_real8 ,xtz0,1,mpi_real8 ,0,mpi_comm_world,ierror)
+     call mpi_gather(yty,1,mpi_real8 ,yty0,1,mpi_real8 ,0,gsi_mpi_comm_world,ierror)
+     call mpi_gather(xtz,1,mpi_real8 ,xtz0,1,mpi_real8 ,0,gsi_mpi_comm_world,ierror)
   else
-     call mpi_gather(yty,1,mpi_real16,yty0,1,mpi_real16,0,mpi_comm_world,ierror)
-     call mpi_gather(xtz,1,mpi_real16,xtz0,1,mpi_real16,0,mpi_comm_world,ierror)
+     call mpi_gather(yty,1,mpi_real16,yty0,1,mpi_real16,0,gsi_mpi_comm_world,ierror)
+     call mpi_gather(xtz,1,mpi_real16,xtz0,1,mpi_real16,0,gsi_mpi_comm_world,ierror)
   endif
   if(mype==0) then
      yty=zero_quad
@@ -1678,8 +1678,8 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
         end do
      end do
   end do
-  call mpi_reduce(aspect_max,aspect_max_all,3*nvars,mpi_real4,mpi_max,0,mpi_comm_world,ierr)
-  call mpi_reduce(aspect_min,aspect_min_all,3*nvars,mpi_real4,mpi_min,0,mpi_comm_world,ierr)
+  call mpi_reduce(aspect_max,aspect_max_all,3*nvars,mpi_real4,mpi_max,0,gsi_mpi_comm_world,ierr)
+  call mpi_reduce(aspect_min,aspect_min_all,3*nvars,mpi_real4,mpi_min,0,gsi_mpi_comm_world,ierr)
   if(mype==0 .and. print_verbose) then
 
      write(6,*)' corlen multipliers for additive gaussians: '
@@ -1822,7 +1822,7 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
      if(npes==1) then
         nstringsall=nstrings
      else
-        call mpi_allreduce(nstrings,nstringsall,1,mpi_integer4,mpi_sum,mpi_comm_world,ierr)
+        call mpi_allreduce(nstrings,nstringsall,1,mpi_integer4,mpi_sum,gsi_mpi_comm_world,ierr)
      end if
      npoints_send=0
      npoints_recv=0
@@ -1896,7 +1896,7 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
            filter(icolor)%npointsmaxall=filter(icolor)%npointsmax
         else
            call mpi_allreduce(filter(icolor)%npointsmax, &
-                           filter(icolor)%npointsmaxall,1,mpi_integer4,mpi_max,mpi_comm_world,ierr)
+                           filter(icolor)%npointsmaxall,1,mpi_integer4,mpi_max,gsi_mpi_comm_world,ierr)
         end if
         filter(icolor)%npoints_send=npoints_send
         filter(icolor)%npoints_recv=npoints_recv(mype)
@@ -1994,18 +1994,18 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
         jumpyminall(:,icolor)=jumpymin
         jumpzminall(:,icolor)=jumpzmin
      else
-        call mpi_reduce(lenbar,lenbarall(1,icolor),nvars,mpi_real8,mpi_sum,0,mpi_comm_world,ierr)
+        call mpi_reduce(lenbar,lenbarall(1,icolor),nvars,mpi_real8,mpi_sum,0,gsi_mpi_comm_world,ierr)
         call mpi_reduce(nstrings_var,nstrings_varall(1,icolor),nvars, &
-                     mpi_integer4,mpi_sum,0,mpi_comm_world,ierr)
-        call mpi_reduce(lenmax,lenmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,mpi_comm_world,ierr)
-        call mpi_reduce(lenmin,lenminall(1,icolor),nvars,mpi_integer4,mpi_min,0,mpi_comm_world,ierr)
-        call mpi_reduce(npoints1,totalpoints1(1,icolor),nvars,mpi_integer4,mpi_sum,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpxmax,jumpxmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpymax,jumpymaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpzmax,jumpzmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpxmin,jumpxminall(1,icolor),nvars,mpi_integer4,mpi_min,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpymin,jumpyminall(1,icolor),nvars,mpi_integer4,mpi_min,0,mpi_comm_world,ierr)
-        call mpi_reduce(jumpzmin,jumpzminall(1,icolor),nvars,mpi_integer4,mpi_min,0,mpi_comm_world,ierr)
+                     mpi_integer4,mpi_sum,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(lenmax,lenmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(lenmin,lenminall(1,icolor),nvars,mpi_integer4,mpi_min,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(npoints1,totalpoints1(1,icolor),nvars,mpi_integer4,mpi_sum,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpxmax,jumpxmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpymax,jumpymaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpzmax,jumpzmaxall(1,icolor),nvars,mpi_integer4,mpi_max,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpxmin,jumpxminall(1,icolor),nvars,mpi_integer4,mpi_min,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpymin,jumpyminall(1,icolor),nvars,mpi_integer4,mpi_min,0,gsi_mpi_comm_world,ierr)
+        call mpi_reduce(jumpzmin,jumpzminall(1,icolor),nvars,mpi_integer4,mpi_min,0,gsi_mpi_comm_world,ierr)
      end if
 
   end do         !     end big loop over all colors
@@ -2062,7 +2062,7 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
            rout=zero_single
         end if
         call mpi_reduce(rout,routa,(ipe-ips+1)*(jpe-jps+1), &
-                        mpi_real4,mpi_sum,0,mpi_comm_world,ierr)
+                        mpi_real4,mpi_sum,0,gsi_mpi_comm_world,ierr)
         if(mype==0 .and. print_verbose) then
            write(32) routa
            write(6,*) 'amp:',k,maxval(routa),minval(routa)
@@ -2148,7 +2148,7 @@ subroutine normalize2_raf4(filter,ngauss,normal, &
      read(997433) flips
      close(997433)
   end if
-  call mpi_bcast(flips,2**27-8,mpi_integer1,0,mpi_comm_world,ierror)
+  call mpi_bcast(flips,2**27-8,mpi_integer1,0,gsi_mpi_comm_world,ierror)
 
   nsamples=abs(normal)/2
   independent_of_npes=normal<0
@@ -2300,7 +2300,7 @@ subroutine one_color4(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1),filter%nsend,filter%ndsend,mpi_string, &
-                     work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string,mpi_comm_world,ierr)
+                     work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_recv>0) then
      do igauss=1,ngauss
@@ -2345,7 +2345,7 @@ subroutine one_color4(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string, &
-                        work(1,1,1),filter%nsend,filter%ndsend,mpi_string,mpi_comm_world,ierr)
+                        work(1,1,1),filter%nsend,filter%ndsend,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_send>0) then
      do i=1,filter%npoints_send
@@ -2438,7 +2438,7 @@ subroutine one_color24(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string, &
-                     work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string,mpi_comm_world,ierr)
+                     work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_recv>0) then
      do igauss=1,ngauss
@@ -2487,7 +2487,7 @@ subroutine one_color24(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string, &
-                       work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string,mpi_comm_world,ierr)
+                       work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_send>0) then
      do i=1,filter%npoints_send
@@ -2938,7 +2938,7 @@ SUBROUTINE string_assemble4(i1filter,i2filter,nstrings,label_string, &
      nrecv(0)=nsend(0)
   else
      call mpi_alltoall(nsend,1,mpi_integer, &
-         nrecv,1,mpi_integer,mpi_comm_world,ierr)
+         nrecv,1,mpi_integer,gsi_mpi_comm_world,ierr)
   end if
   ndrecv(0)=0
   do mpe=1,npes
@@ -2955,10 +2955,10 @@ SUBROUTINE string_assemble4(i1filter,i2filter,nstrings,label_string, &
      call mpi_type_contiguous(8,mpi_integer2,mpi_string1,ierr)
      call mpi_type_commit(mpi_string1,ierr)
      call mpi_alltoallv(string_info,nsend,ndsend,mpi_string1, &
-                        info_string,nrecv,ndrecv,mpi_string1,mpi_comm_world,ierr)
+                        info_string,nrecv,ndrecv,mpi_string1,gsi_mpi_comm_world,ierr)
      call mpi_type_free(mpi_string1,ierr)
      call mpi_alltoallv(full_aspect,nsend,ndsend,mpi_real4, &
-                        aspect_full,nrecv,ndrecv,mpi_real4,mpi_comm_world,ierr)
+                        aspect_full,nrecv,ndrecv,mpi_real4,gsi_mpi_comm_world,ierr)
   end if
 
 end subroutine string_assemble4
@@ -3085,7 +3085,7 @@ SUBROUTINE string_label(i1filter,i2filter,nstrings,label_string,npoints_recv, &
   if(npes==1) then
      nrecv(0)=nstrings
   else
-     call mpi_allgather(nstrings,1,mpi_integer4,nrecv,1,mpi_integer4,mpi_comm_world,ierr)
+     call mpi_allgather(nstrings,1,mpi_integer4,nrecv,1,mpi_integer4,gsi_mpi_comm_world,ierr)
   end if
   ndrecv(0)=0
   do i=1,npes
@@ -3169,7 +3169,7 @@ SUBROUTINE string_label(i1filter,i2filter,nstrings,label_string,npoints_recv, &
   if(npes==1) then
      npoints_recv=nrecv
   else
-     call mpi_allreduce(nrecv,npoints_recv,npes,mpi_integer4,mpi_sum,mpi_comm_world,ierr)
+     call mpi_allreduce(nrecv,npoints_recv,npes,mpi_integer4,mpi_sum,gsi_mpi_comm_world,ierr)
   end if
 
 end subroutine string_label
@@ -3229,7 +3229,7 @@ if(nlocal>0) then
    end do
 end if
 nlocal1=max(1,nlocal)
-call mpi_gatherv(local1,nlocal1,mpi_integer8,global1,nrecv1,ndrecv1,mpi_integer8,0,mpi_comm_world,ierr)
+call mpi_gatherv(local1,nlocal1,mpi_integer8,global1,nrecv1,ndrecv1,mpi_integer8,0,gsi_mpi_comm_world,ierr)
 do n=0,npes-1
    if(nrecv(n)>0) then
       do i=1,nrecv(n)
@@ -3298,7 +3298,7 @@ do n=0,npes-1
    end if
 end do
 nlocal1=max(1,nlocal)
-call mpi_scatterv(global1,nrecv1,ndrecv1,mpi_integer8,local1,nlocal1,mpi_integer8,0,mpi_comm_world,ierr)
+call mpi_scatterv(global1,nrecv1,ndrecv1,mpi_integer8,local1,nlocal1,mpi_integer8,0,gsi_mpi_comm_world,ierr)
 if(nlocal>0) then
    do i=1,nlocal
       local(i)=local1(i)
@@ -3408,7 +3408,7 @@ subroutine add_halox0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
         ijglob_pe0(i,j)=mype
      end do
   end do
-  call mpi_allreduce(ijglob_pe0,ijglob_pe,(ide-ids+1)*(jde-jds+1),mpi_integer4,mpi_sum,mpi_comm_world,ierror)
+  call mpi_allreduce(ijglob_pe0,ijglob_pe,(ide-ids+1)*(jde-jds+1),mpi_integer4,mpi_sum,gsi_mpi_comm_world,ierror)
 
 !  create list of all points to be recieved
   ii=0
@@ -3431,7 +3431,7 @@ subroutine add_halox0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
      ndrecv_halo(mpe)=ndrecv_halo(mpe-1)+nrecv_halo(mpe-1)
   end do
 
-  call mpi_alltoall(nrecv_halo,1,mpi_integer4,nsend_halo,1,mpi_integer4,mpi_comm_world,ierror)
+  call mpi_alltoall(nrecv_halo,1,mpi_integer4,nsend_halo,1,mpi_integer4,gsi_mpi_comm_world,ierror)
   ndsend_halo(0)=0
   do mpe=1,npes
      ndsend_halo(mpe)=ndsend_halo(mpe-1)+nsend_halo(mpe-1)
@@ -3457,7 +3457,7 @@ subroutine add_halox0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
   call mpi_type_contiguous(2_i_long,mpi_integer4,mpi_string1,ierror)
   call mpi_type_commit(mpi_string1,ierror)
   call mpi_alltoallv(info_recv_halo,nrecv_halo,ndrecv_halo,mpi_string1, &
-                     info_send_halo,nsend_halo,ndsend_halo,mpi_string1,mpi_comm_world,ierror)
+                     info_send_halo,nsend_halo,ndsend_halo,mpi_string1,gsi_mpi_comm_world,ierror)
   call mpi_type_free(mpi_string1,ierror)
 
   filter%nsend_halox_loc=nsend_halo_loc
@@ -3553,7 +3553,7 @@ subroutine add_haloy0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
         ijglob_pe0(i,j)=mype
      end do
   end do
-  call mpi_allreduce(ijglob_pe0,ijglob_pe,(ide-ids+1)*(jde-jds+1),mpi_integer4,mpi_sum,mpi_comm_world,ierror)
+  call mpi_allreduce(ijglob_pe0,ijglob_pe,(ide-ids+1)*(jde-jds+1),mpi_integer4,mpi_sum,gsi_mpi_comm_world,ierror)
 
 !  create list of all points to be recieved
   ii=0
@@ -3576,7 +3576,7 @@ subroutine add_haloy0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
      ndrecv_halo(mpe)=ndrecv_halo(mpe-1)+nrecv_halo(mpe-1)
   end do
 
-  call mpi_alltoall(nrecv_halo,1,mpi_integer4,nsend_halo,1,mpi_integer4,mpi_comm_world,ierror)
+  call mpi_alltoall(nrecv_halo,1,mpi_integer4,nsend_halo,1,mpi_integer4,gsi_mpi_comm_world,ierror)
   ndsend_halo(0)=0
   do mpe=1,npes
      ndsend_halo(mpe)=ndsend_halo(mpe-1)+nsend_halo(mpe-1)
@@ -3602,7 +3602,7 @@ subroutine add_haloy0(filter,nrows,ids,ide,jds,jde,ips,ipe,jps,jpe,mype,npes)
   call mpi_type_contiguous(2_i_long,mpi_integer4,mpi_string1,ierror)
   call mpi_type_commit(mpi_string1,ierror)
   call mpi_alltoallv(info_recv_halo,nrecv_halo,ndrecv_halo,mpi_string1, &
-                     info_send_halo,nsend_halo,ndsend_halo,mpi_string1,mpi_comm_world,ierror)
+                     info_send_halo,nsend_halo,ndsend_halo,mpi_string1,gsi_mpi_comm_world,ierror)
   call mpi_type_free(mpi_string1,ierror)
 
   filter%nsend_haloy_loc=nsend_halo_loc
@@ -3708,7 +3708,7 @@ subroutine add_halo_x(f,g,filter,ngauss,nrows,ids,ide,ips,ipe,jps,jpe,kps,kpe,np
   call mpi_type_contiguous(ngauss*(kpe-kps+1),mpi_real4,mpi_string2,ierror)
   call mpi_type_commit(mpi_string2,ierror)
   call mpi_alltoallv(bufsend,filter%nsend_halox,filter%ndsend_halox,mpi_string2, &
-                     bufrecv,filter%nrecv_halox,filter%ndrecv_halox,mpi_string2,mpi_comm_world,ierror)
+                     bufrecv,filter%nrecv_halox,filter%ndrecv_halox,mpi_string2,gsi_mpi_comm_world,ierror)
   call mpi_type_free(mpi_string2,ierror)
 !   finally distribute points back
   do i=1,filter%nrecv_halox_loc
@@ -3786,7 +3786,7 @@ subroutine add_halo_y(f,g,filter,ngauss,nrows,jds,jde,ips,ipe,jps,jpe,kps,kpe,np
   call mpi_type_contiguous(ngauss*(kpe-kps+1),mpi_real4,mpi_string2,ierror)
   call mpi_type_commit(mpi_string2,ierror)
   call mpi_alltoallv(bufsend,filter%nsend_haloy,filter%ndsend_haloy,mpi_string2, &
-                     bufrecv,filter%nrecv_haloy,filter%ndrecv_haloy,mpi_string2,mpi_comm_world,ierror)
+                     bufrecv,filter%nrecv_haloy,filter%ndrecv_haloy,mpi_string2,gsi_mpi_comm_world,ierror)
   call mpi_type_free(mpi_string2,ierror)
 !   finally distribute points back
   do i=1,filter%nrecv_haloy_loc
@@ -3886,7 +3886,7 @@ subroutine one_color4_new_factorization(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1),filter%nsend,filter%ndsend,mpi_string, &
-                     work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string,mpi_comm_world,ierr)
+                     work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_recv>0) then
      do igauss=1,ngauss
@@ -3930,7 +3930,7 @@ subroutine one_color4_new_factorization(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,2),filter%nrecv,filter%ndrecv,mpi_string, &
-                       work(1,1,1),filter%nsend,filter%ndsend,mpi_string,mpi_comm_world,ierr)
+                       work(1,1,1),filter%nsend,filter%ndsend,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_send>0) then
      do i=1,filter%npoints_send
@@ -4022,7 +4022,7 @@ subroutine one_color24_new_factorization(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string, &
-                     work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string,mpi_comm_world,ierr)
+                     work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_recv>0) then
      do igauss=1,ngauss
@@ -4070,7 +4070,7 @@ subroutine one_color24_new_factorization(g,filter,ngauss,ipass,ifilt_ord, &
      end do
   else
      call mpi_alltoallv(work(1,1,1,2),filter%nrecv,filter%ndrecv,mpi_string, &
-                       work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string,mpi_comm_world,ierr)
+                       work(1,1,1,1),filter%nsend,filter%ndsend,mpi_string,gsi_mpi_comm_world,ierr)
   end if
   if(filter%npoints_send>0) then
      do i=1,filter%npoints_send

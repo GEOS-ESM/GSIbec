@@ -344,7 +344,7 @@ drv_set=.true.
 !   machine:
 !
 !$$$  end subprogram documentation block
-  use m_mpimod, only: mpi_comm_world
+  use m_mpimod, only: gsi_mpi_comm_world
   implicit none
   integer(i_kind) nt,ierror
 

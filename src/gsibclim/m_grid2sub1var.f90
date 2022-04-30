@@ -1,6 +1,6 @@
 module m_grid2sub1var
 use m_kinds, only: i_kind,r_kind
-use m_mpimod, only: mype,mpi_rtype,mpi_comm_world
+use m_mpimod, only: mype,mpi_rtype,gsi_mpi_comm_world
 use gridmod, only: sg=>grd_a
 implicit none
 public :: grid2sub1var
@@ -72,7 +72,7 @@ contains
              call reorder21_(sg,work3d(:,:,k),work)
          endif
          call mpi_scatterv(work,sg%ijn_s,sg%displs_s,mpi_rtype,&
-              work2d,sg%ijn_s(mm1),mpi_rtype,root,mpi_comm_world,ierr)
+              work2d,sg%ijn_s(mm1),mpi_rtype,root,gsi_mpi_comm_world,ierr)
          do j=1,sg%lon2
             do i=1,sg%lat2
                sub(i,j,k) = work2d(i,j)

@@ -106,6 +106,8 @@ module mpeu_mpif
 !#endif
    public :: MPI_BYTE
 
+   public :: GSI_MPI_COMM_WORLD
+
 #ifdef MPICH_
    public :: MPIPRIV     ! the common block name
 #endif
@@ -159,6 +161,7 @@ include "mpif.h"
 !_______________________________________________________________________
 
     integer, parameter:: MPI_IKIND=kind(MPI_COMM_WORLD)
+    integer :: GSI_MPI_COMM_WORLD
 
     character(len=*),parameter :: myname='mpeu_mpif'
 

@@ -723,7 +723,7 @@ subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
 
    use m_kinds,    only: r_single,r_kind
    use constants,only: zero,rozcon,one
-   use m_mpimod,   only: npe,mpi_rtype,mpi_sum,mpi_comm_world
+   use m_mpimod,   only: npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world
 
    use gridmod,only: nlat,nsig
    use gridmod,only: lon1,lat1
@@ -793,7 +793,7 @@ subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
    work_oz(nsig+1,mm1)=float(lon1*lat1)
 
    call mpi_allreduce(work_oz,work_oz1,(nsig+1)*npe,mpi_rtype,mpi_sum,&
-      mpi_comm_world,ierror)
+      gsi_mpi_comm_world,ierror)
    if ( ierror/=0 ) then
       write(6,*) myname_,'(PREWGT): MPI_allreduce() error on PE ',mype
       call stop2(ierror)
@@ -935,7 +935,7 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
    use m_kinds,    only: r_single,r_kind
    use m_mpimod,   only: mype
    use constants,only: zero,one
-   use m_mpimod,   only: npe,mpi_rtype,mpi_sum,mpi_comm_world
+   use m_mpimod,   only: npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world
 
    use gridmod,only: nlat,nsig
    use gridmod,only: lon1,lat1
@@ -1020,7 +1020,7 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
    work_chem(nsig+1,mm1)=float(lon1*lat1)
   
    call mpi_allreduce(work_chem,work_chem1,(nsig+1)*npe,mpi_rtype,mpi_sum,&
-        mpi_comm_world,ierror)
+        gsi_mpi_comm_world,ierror)
    if ( ierror/=0 ) then
       write(6,*) myname_,'(PREWGT): MPI_allreduce() error on PE ',mype
       call stop2(ierror)

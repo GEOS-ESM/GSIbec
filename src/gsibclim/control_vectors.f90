@@ -73,7 +73,7 @@ module control_vectors
 !$$$ end documentation block
 
 use m_kinds, only: r_kind,r_double,r_single,i_kind,r_quad
-use m_mpimod, only: mpi_comm_world,mpi_max,mpi_rtype,mype,npe,ierror
+use m_mpimod, only: gsi_mpi_comm_world,mpi_max,mpi_rtype,mype,npe,ierror
 use constants, only: zero, one, two, three, zero_quad, tiny_r_kind
 !_RTuse gsi_4dvar, only: iadatebgn
 !_RT use file_utility, only : get_lun
@@ -1255,7 +1255,7 @@ subroutine prt_norms_vars(xcv,sgrep)
      enddo
 
      call stats_allreduce(vdot(iv),vsum(iv),vmin(iv),vmax(iv),  &
-                          vnum(iv),MPI_comm_world)
+                          vnum(iv),gsi_mpi_comm_world)
      nv=max(vnum(iv),1)
   
      if(mype==0) then
@@ -1277,7 +1277,7 @@ subroutine prt_norms_vars(xcv,sgrep)
      enddo
 
      call stats_allreduce(vdot(iv),vsum(iv),vmin(iv),vmax(iv),  &
-                          vnum(iv),MPI_comm_world)
+                          vnum(iv),gsi_mpi_comm_world)
      nv=max(vnum(iv),1)
   
      if(mype==0) then
@@ -1594,7 +1594,7 @@ real(r_kind) :: zloc(1),zglo(1)
 
 zloc(1)=maxval(ycv%values(:))
 
-call mpi_allreduce(zloc,zglo,1,mpi_rtype,mpi_max,mpi_comm_world,ierror)
+call mpi_allreduce(zloc,zglo,1,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
 if (ierror/=0) then
    write(6,*)'maxval_cv: MPI error',ierror
    call stop2(117)

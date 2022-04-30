@@ -43,7 +43,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   use constants, only: one,zero,two,zero_quad,tiny_r_kind
   use gridmod, only: nlat,nlon,nsig,lat2,lon2
   use guess_grids, only: nfldsig
-  use m_mpimod, only: npe,mpi_comm_world,ierror,mpi_sum,mpi_rtype,mpi_max
+  use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mpi_sum,mpi_rtype,mpi_max
   use balmod, only: agvz,wgvz,bvz,pput
   use berror, only: bkgv_rewgtfct,bkgv_write,fpsproj,fut2ps
   use gsi_metguess_mod, only: gsi_metguess_bundle
@@ -277,15 +277,15 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   mean_dps0(2,mm1) = mean_dps - mean_dps0(1,mm1)
 
 ! Get task specific max and mean to every task
-  call mpi_allreduce(mean_dz0,mean_dz1,nsig*2*npe,mpi_rtype,mpi_sum,mpi_comm_world,ierror)
-  call mpi_allreduce(mean_dd0,mean_dd1,nsig*2*npe,mpi_rtype,mpi_sum,mpi_comm_world,ierror)
-  call mpi_allreduce(mean_dt0,mean_dt1,nsig*2*npe,mpi_rtype,mpi_sum,mpi_comm_world,ierror)
-  call mpi_allreduce(mean_dps0,mean_dps1,2*npe,mpi_rtype,mpi_sum,mpi_comm_world,ierror)
+  call mpi_allreduce(mean_dz0,mean_dz1,nsig*2*npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(mean_dd0,mean_dd1,nsig*2*npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(mean_dt0,mean_dt1,nsig*2*npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(mean_dps0,mean_dps1,2*npe,mpi_rtype,mpi_sum,gsi_mpi_comm_world,ierror)
 
-  call mpi_allreduce(max_dz,max_dz0,nsig,mpi_rtype,mpi_max,mpi_comm_world,ierror)
-  call mpi_allreduce(max_dd,max_dd0,nsig,mpi_rtype,mpi_max,mpi_comm_world,ierror)
-  call mpi_allreduce(max_dt,max_dt0,nsig,mpi_rtype,mpi_max,mpi_comm_world,ierror)
-  call mpi_allreduce(max_dps,max_dps0,1,mpi_rtype,mpi_max,mpi_comm_world,ierror)
+  call mpi_allreduce(max_dz,max_dz0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(max_dd,max_dd0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(max_dt,max_dt0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
+  call mpi_allreduce(max_dps,max_dps0,1,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
 
 ! Reintegrate quad precision number and sum over all mpi tasks  
   mean_dz =zero_quad ; mean_dd=zero_quad ; mean_dt=zero_quad
@@ -664,7 +664,7 @@ subroutine gather_stuff2(f,g,mype,outpe)
 !
 !$$$
   use m_kinds, only: r_kind,i_kind
-  use m_mpimod, only: mpi_rtype,mpi_comm_world,ierror
+  use m_mpimod, only: mpi_rtype,gsi_mpi_comm_world,ierror
   use m_mpimod, only: mpi_real8
   use general_commvars_mod, only: g1
   implicit none
@@ -690,7 +690,7 @@ subroutine gather_stuff2(f,g,mype,outpe)
      end do
   end do
   call mpi_gatherv(fsm,g1%ijn(mype+1),mpi_rtype, &
-                  tempa,g1%ijn,g1%displs_g,mpi_rtype,outpe,mpi_comm_world,ierror)
+                  tempa,g1%ijn,g1%displs_g,mpi_rtype,outpe,gsi_mpi_comm_world,ierror)
 
   if(mype==outpe) then
      iskip=0

@@ -4,7 +4,8 @@ module m_gsibclim
 
 use constants, only: zero,one
 use m_kinds, only: i_kind,r_kind
-use m_mpimod, only: mype,mpi_character,mpi_comm_world
+use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
+use m_mpimod, only: setworld
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
 use guess_grids, only: nfldsig
 use guess_grids, only: guess_grids_init
@@ -59,11 +60,13 @@ end interface gsibclim_final
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv,nmlfile,layout)
+  subroutine init_(cv,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
   character(len=*),optional,intent(in) :: nmlfile
+  character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
+  integer,optional,intent(in) :: comm
 
   integer :: ier
   logical :: already_init_mpi
@@ -75,10 +78,16 @@ contains
      call mpi_init(ier)
      if(ier/=0) call die(myname,'mpi_init(), ier =',ier)
   endif
+  call setworld(comm=comm)
+  call mpi_comm_size(gsi_mpi_comm_world,npe,ier)
+  call mpi_comm_rank(gsi_mpi_comm_world,mype,ier)
 
   if (present(layout)) then
      nxpe=layout(1)
      nype=layout(2)
+  endif
+  if (present(befile)) then
+     call befname_(befile,0)
   endif
   call gsimain_initialize(nmlfile=nmlfile)
   call set_()
@@ -88,7 +97,9 @@ contains
 
   cv = simcv
   end subroutine init_
+!--------------------------------------------------------
   subroutine final_(closempi)
+
   logical, intent(in) :: closempi
   call rf_unset()
   call guess_grids_final()
@@ -96,7 +107,9 @@ contains
   call gsimain_finalize(closempi)
 
   end subroutine final_
+!--------------------------------------------------------
   subroutine set_
+
    use constants, only: pi,one,half,rearth
    use gridmod, only: rlats,rlons,wgtlats
    use gridmod, only: coslon,sinlon
@@ -161,13 +174,13 @@ contains
    if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)
   end subroutine set_
- 
+!--------------------------------------------------------
   subroutine unset_
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: destroy_cdiff_coefs
    if(cdiff_created()) call destroy_cdiff_coefs
   end subroutine unset_
-
+!--------------------------------------------------------
   subroutine set_pointer_
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -245,7 +258,7 @@ contains
     CALL setup_state_vectors(latlon11,latlon1n,nvals_len,lat2,lon2,nsig)
 
   end subroutine set_pointer_
-
+!--------------------------------------------------------
   subroutine set_silly_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -314,7 +327,7 @@ contains
      return
   endif
   end subroutine set_silly_
-
+!--------------------------------------------------------
   subroutine be_cv_space0_
 
   type(control_vector) :: gradx,grady
@@ -471,7 +484,7 @@ contains
     berror_stats = trim(fname)
   endif
   clen=len(berror_stats)
-  call mpi_bcast(berror_stats,clen,mpi_character,root,mpi_comm_world,ier)
+  call mpi_bcast(berror_stats,clen,mpi_character,root,gsi_mpi_comm_world,ier)
   end subroutine befname_
 
 end module m_gsibclim

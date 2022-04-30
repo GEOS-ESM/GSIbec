@@ -68,7 +68,7 @@ subroutine rmpl_allreduce(klen,rpvals)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe
   implicit none
 
 ! Declare passed variables
@@ -85,7 +85,7 @@ subroutine rmpl_allreduce(klen,rpvals)
 
 !    Gather contributions
      call mpi_allgather(rpvals,klen,mpi_rtype, &
-                        zwork,klen,mpi_rtype, mpi_comm_world,ierror)
+                        zwork,klen,mpi_rtype, gsi_mpi_comm_world,ierror)
 
 !    Sum (note this is NOT reproducible across different numbers of processors)
      do ii=1,klen
@@ -127,7 +127,7 @@ subroutine qmpl_allreduce1d(klen,qpvals)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind,r_quad,r_double
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
   implicit none
 
 ! Declare passed variables
@@ -151,15 +151,15 @@ subroutine qmpl_allreduce1d(klen,qpvals)
 #ifdef PGI
      qpvalsr=qpvals
      call mpi_allgather(qpvalsr,klen,mpi_rtype, &
-                        qpval2r,klen,mpi_rtype, mpi_comm_world,ierror)
+                        qpval2r,klen,mpi_rtype, gsi_mpi_comm_world,ierror)
      qpval2=qpval2r
 #else
      if(r_double==r_quad) then
         call mpi_allgather(qpvals,klen,mpi_real8 , &
-                           qpval2,klen,mpi_real8 , mpi_comm_world,ierror)
+                           qpval2,klen,mpi_real8 , gsi_mpi_comm_world,ierror)
      else
         call mpi_allgather(qpvals,klen,mpi_real16, &
-                           qpval2,klen,mpi_real16, mpi_comm_world,ierror)
+                           qpval2,klen,mpi_real16, gsi_mpi_comm_world,ierror)
      endif
 #endif
 
@@ -205,7 +205,7 @@ subroutine qmpl_allreduce2d(ilen,klen,pvals,pvnew)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind,r_quad,r_double
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
   implicit none
 
 ! Declare passed variables
@@ -227,15 +227,15 @@ subroutine qmpl_allreduce2d(ilen,klen,pvals,pvnew)
 #ifdef PGI
   pvalsr=pvals
   call mpi_allgather(pvalsr,ilen*klen,mpi_rtype, &
-                     pval2r,ilen*klen,mpi_rtype, mpi_comm_world,ierror)
+                     pval2r,ilen*klen,mpi_rtype, gsi_mpi_comm_world,ierror)
   pval2=pval2r
 #else
   if(r_double==r_quad) then
      call mpi_allgather(pvals,ilen*klen,mpi_real8 , &
-                        pval2,ilen*klen,mpi_real8 , mpi_comm_world,ierror)
+                        pval2,ilen*klen,mpi_real8 , gsi_mpi_comm_world,ierror)
   else
      call mpi_allgather(pvals,ilen*klen,mpi_real16, &
-                        pval2,ilen*klen,mpi_real16, mpi_comm_world,ierror)
+                        pval2,ilen*klen,mpi_real16, gsi_mpi_comm_world,ierror)
   endif
 #endif
   
@@ -301,7 +301,7 @@ subroutine mpl_allgatherq(idim,jdim,zloc,zall)
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind,r_kind,r_quad,r_double
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16
   implicit none
 
   integer(i_kind),intent(in   ) :: idim,jdim
@@ -320,15 +320,15 @@ subroutine mpl_allgatherq(idim,jdim,zloc,zall)
 #ifdef PGI
   zlocr=zloc
   call mpi_allgather(zlocr,idim,mpi_rtype, &
-                     zallr,idim,mpi_rtype, mpi_comm_world,ierror)
+                     zallr,idim,mpi_rtype, gsi_mpi_comm_world,ierror)
   zall=zallr
 #else
   if(r_double==r_quad) then
      call mpi_allgather(zloc,idim,mpi_real8 , &
-                        zall,idim,mpi_real8 , mpi_comm_world,ierror)
+                        zall,idim,mpi_real8 , gsi_mpi_comm_world,ierror)
   else
      call mpi_allgather(zloc,idim,mpi_real16, &
-                        zall,idim,mpi_real16, mpi_comm_world,ierror)
+                        zall,idim,mpi_real16, gsi_mpi_comm_world,ierror)
   endif
 #endif
 
@@ -361,7 +361,7 @@ subroutine rmpl_reduce(klen,iroot,rpvals)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe,mype
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe,mype
   implicit none
 
 ! Declare passed variables
@@ -378,7 +378,7 @@ subroutine rmpl_reduce(klen,iroot,rpvals)
 
 !    Gather contributions
      call mpi_gather(rpvals,klen,mpi_rtype, &
-                        zwork,klen,mpi_rtype, iroot,mpi_comm_world,ierror)
+                        zwork,klen,mpi_rtype, iroot,gsi_mpi_comm_world,ierror)
 
      if(mype == iroot)then
 !    Sum (note this is NOT reproducible across different numbers of processors)
@@ -425,7 +425,7 @@ subroutine qmpl_reduce1d(klen,iroot,qpvals)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind,r_quad,r_double
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16,mype
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe,mpi_real8,mpi_real16,mype
   implicit none
 
 ! Declare passed variables
@@ -449,15 +449,15 @@ subroutine qmpl_reduce1d(klen,iroot,qpvals)
 #ifdef PGI
      qpvalsr=qpvals
      call mpi_gather(qpvalsr,klen,mpi_rtype, &
-                        qpval2r,klen,mpi_rtype,iroot, mpi_comm_world,ierror)
+                        qpval2r,klen,mpi_rtype,iroot, gsi_mpi_comm_world,ierror)
      qpval2=qpval2r
 #else
      if(r_double==r_quad) then
         call mpi_gather(qpvals,klen,mpi_real8 , &
-                           qpval2,klen,mpi_real8 , iroot, mpi_comm_world,ierror)
+                           qpval2,klen,mpi_real8 , iroot, gsi_mpi_comm_world,ierror)
      else
         call mpi_gather(qpvals,klen,mpi_real16, &
-                           qpval2,klen,mpi_real16, iroot, mpi_comm_world,ierror)
+                           qpval2,klen,mpi_real16, iroot, gsi_mpi_comm_world,ierror)
      endif
 #endif
 
@@ -508,7 +508,7 @@ subroutine qmpl_reduce2d(ilen,klen,iroot,pvals,pvnew)
 !
 !$$$ end documentation block
   use m_kinds, only: r_kind,i_kind,r_quad,r_double
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,mype,npe,mpi_real8,mpi_real16
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,mype,npe,mpi_real8,mpi_real16
   implicit none
 
 ! Declare passed variables
@@ -530,15 +530,15 @@ subroutine qmpl_reduce2d(ilen,klen,iroot,pvals,pvnew)
 #ifdef PGI
   pvalsr=pvals
   call mpi_gather(pvalsr,ilen*klen,mpi_rtype, &
-                     pval2r,ilen*klen,mpi_rtype, iroot,mpi_comm_world,ierror)
+                     pval2r,ilen*klen,mpi_rtype, iroot,gsi_mpi_comm_world,ierror)
   pval2=pval2r
 #else
   if(r_double==r_quad) then
      call mpi_gather(pvals,ilen*klen,mpi_real8 , &
-                        pval2,ilen*klen,mpi_real8 ,iroot, mpi_comm_world,ierror)
+                        pval2,ilen*klen,mpi_real8 ,iroot, gsi_mpi_comm_world,ierror)
   else
      call mpi_gather(pvals,ilen*klen,mpi_real16, &
-                        pval2,ilen*klen,mpi_real16, iroot,mpi_comm_world,ierror)
+                        pval2,ilen*klen,mpi_real16, iroot,gsi_mpi_comm_world,ierror)
   endif
 #endif
   

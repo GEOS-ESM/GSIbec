@@ -14,7 +14,7 @@
 
   use m_kinds, only: i_kind,r_kind
 
-  use m_mpimod, only: npe,mpi_comm_world,ierror,mype
+  use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mype
   use balmod, only: init_balmod,fstat,lnobalance
 
   use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2
@@ -403,9 +403,6 @@
   else
      thisrc = myrc
   endif
-
-  call mpi_comm_size(mpi_comm_world,npe,ierror)
-  call mpi_comm_rank(mpi_comm_world,mype,ierror)
 
 ! Read in user specification of state and control variables
   call gsi_metguess_init(rcname=thisrc)

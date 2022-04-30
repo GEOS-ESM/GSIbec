@@ -48,6 +48,7 @@ module m_mpimod
   use mpeu_mpif, only : mpi_character
 #ifndef HAVE_ESMF
   use mpeu_mpif, only : mpi_comm_world
+  use mpeu_mpif, only : gsi_mpi_comm_world
 #endif /* HAVE_ESMF */
 #endif
 
@@ -101,6 +102,7 @@ module m_mpimod
 ! set default to private
   private
 ! set subroutines to public
+  public :: setworld
   public :: setcomm
 ! set passed variables to public
   public :: ierror,mpi_comm_world,npe,mpi_rtype,mpi_sum,mype,mpi_max,mpi_itype
@@ -112,9 +114,15 @@ module m_mpimod
   public :: mpi_mode_create
   public :: mpi_mode_wronly
   public :: mpi_character
+  public :: gsi_mpi_comm_world
+
+  interface setworld
+     module procedure setworld_
+  end interface setworld
 
 #ifdef HAVE_ESMF
   integer(i_kind) :: mpi_comm_world
+  integer(i_kind) :: gsi_mpi_comm_world
 #endif
 
 #if defined(ibm_sp) || defined(_JEDI_)
@@ -208,8 +216,8 @@ contains
 
     integer(i_kind) :: ncommva_group
 
-    ncomma=mpi_comm_world
-    iworld=mpi_comm_world
+    ncomma=gsi_mpi_comm_world
+    iworld=gsi_mpi_comm_world
     call mpi_comm_group(iworld,iworld_group,ierr)
 
     call mpi_group_incl(iworld_group,nsize,members,ncommva_group,ierr)
@@ -217,6 +225,19 @@ contains
     call mpi_group_free(ncommva_group,ierr)
     return
   end subroutine setcomm
+
+  subroutine setworld_(comm)
+  implicit none
+  integer,optional,intent(in):: comm
+
+  if(present(comm)) then
+     print *, 'using external comm_world'
+     GSI_MPI_COMM_WORLD = comm
+  else
+     print *, 'using internal comm_world'
+     GSI_MPI_COMM_WORLD = MPI_COMM_WORLD
+  endif
+  end subroutine setworld_
 
 end module m_mpimod
 

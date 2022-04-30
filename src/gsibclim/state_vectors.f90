@@ -368,7 +368,7 @@ subroutine norms_vars(xst,pmin,pmax,psum,pnum)
 !   machine:
 !
 !$$$ end documentation block 
-  use m_mpimod, only: ierror,mpi_comm_world,mpi_rtype,npe
+  use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe
   implicit none
   type(gsi_bundle), intent(in   ) :: xst
   real(r_kind)    , intent(  out) :: pmin(nvars),pmax(nvars),psum(nvars),pnum(nvars)
@@ -446,9 +446,9 @@ subroutine norms_vars(xst,pmin,pmax,psum,pnum)
 
 ! Gather contributions
   call mpi_allgather(zloc,size(zloc),mpi_rtype, &
-                   & zall,size(zloc),mpi_rtype, mpi_comm_world,ierror)
+                   & zall,size(zloc),mpi_rtype, gsi_mpi_comm_world,ierror)
   call mpi_allgather(nloc,size(nloc),mpi_rtype, &
-                   & nall,size(nloc),mpi_rtype, mpi_comm_world,ierror)
+                   & nall,size(nloc),mpi_rtype, gsi_mpi_comm_world,ierror)
 
   ii=0
   do i=1,ns3d

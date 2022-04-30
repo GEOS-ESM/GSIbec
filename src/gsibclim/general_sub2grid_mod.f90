@@ -266,7 +266,7 @@ module general_sub2grid_mod
 !
 !$$$
       use m_kinds, only: r_single
-      use m_mpimod, only: mpi_comm_world
+      use m_mpimod, only: gsi_mpi_comm_world
       implicit none
 
       type(sub2grid_info),     intent(inout) :: s
@@ -281,8 +281,8 @@ module general_sub2grid_mod
       integer(i_kind) i,ierror,j,k,num_loc_groups,nextra,mm1,n,ns,npe_used,iadd
       integer(i_kind),allocatable:: idoit(:)
 
-      call mpi_comm_size(mpi_comm_world,s%npe,ierror)
-      call mpi_comm_rank(mpi_comm_world,s%mype,ierror)
+      call mpi_comm_size(gsi_mpi_comm_world,s%npe,ierror)
+      call mpi_comm_rank(gsi_mpi_comm_world,s%mype,ierror)
       s%inner_vars=inner_vars
       s%nlat=nlat
       s%nlon=nlon
@@ -570,7 +570,6 @@ end subroutine get_iuse_pe
 !   machine:  ibm RS/6000 SP
 !
 !$$$
-      use m_mpimod, only: mpi_comm_world
       implicit none
 
       type(sub2grid_info),     intent(inout) :: s
@@ -1059,7 +1058,7 @@ end subroutine get_iuse_pe
 !   machine:  ibm RS/6000 SP
 !
 !$$$
-      use m_mpimod, only: mpi_comm_world,mpi_real4
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real4
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1088,7 +1087,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_alltoallv(sub_vars0,s%recvcounts,s%rdispls,mpi_string, &
-                        work,s%sendcounts,s%sdispls,mpi_string,mpi_comm_world,ierror)
+                        work,s%sendcounts,s%sdispls,mpi_string,gsi_mpi_comm_world,ierror)
 
       call mpi_type_free(mpi_string,ierror)
 
@@ -1243,7 +1242,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use constants, only: zero
-      use m_mpimod, only: mpi_comm_world,mpi_real4
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real4
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1282,7 +1281,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_alltoallv(temp,s%sendcounts_s,s%sdispls_s,mpi_string, &
-                        sub_vars,s%recvcounts_s,s%rdispls_s,mpi_string,mpi_comm_world,ierror)
+                        sub_vars,s%recvcounts_s,s%rdispls_s,mpi_string,gsi_mpi_comm_world,ierror)
       call mpi_type_free(mpi_string,ierror)
 
    end subroutine general_grid2sub_r_single_rank4
@@ -1409,7 +1408,7 @@ end subroutine get_iuse_pe
 !   machine:  ibm RS/6000 SP
 !
 !$$$
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1438,7 +1437,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_alltoallv(sub_vars0,s%recvcounts,s%rdispls,mpi_string, &
-                        work,s%sendcounts,s%sdispls,mpi_string,mpi_comm_world,ierror)
+                        work,s%sendcounts,s%sdispls,mpi_string,gsi_mpi_comm_world,ierror)
 
       call mpi_type_free(mpi_string,ierror)
 
@@ -1591,7 +1590,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use constants, only: zero
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1629,7 +1628,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_alltoallv(temp,s%sendcounts_s,s%sdispls_s,mpi_string, &
-                        sub_vars,s%recvcounts_s,s%rdispls_s,mpi_string,mpi_comm_world,ierror)
+                        sub_vars,s%recvcounts_s,s%rdispls_s,mpi_string,gsi_mpi_comm_world,ierror)
       call mpi_type_free(mpi_string,ierror)
 
    end subroutine general_grid2sub_r_double_rank4
@@ -1760,7 +1759,7 @@ end subroutine get_iuse_pe
 !   machine:  ibm RS/6000 SP
 !
 !$$$
-      use m_mpimod, only: mpi_comm_world,mpi_real4
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real4
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1790,7 +1789,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_gatherv(sub_vars0,s%ijn(s%mype+1),mpi_string, &
-                        work,s%ijn,s%displs_g,mpi_string,gridpe,mpi_comm_world,ierror)
+                        work,s%ijn,s%displs_g,mpi_string,gridpe,gsi_mpi_comm_world,ierror)
 
       call mpi_type_free(mpi_string,ierror)
 
@@ -1937,7 +1936,7 @@ end subroutine get_iuse_pe
 !   machine:  ibm RS/6000 SP
 !
 !$$$
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -1967,7 +1966,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_gatherv(sub_vars0,s%ijn(s%mype+1),mpi_string, &
-                        work,s%ijn,s%displs_g,mpi_string,gridpe,mpi_comm_world,ierror)
+                        work,s%ijn,s%displs_g,mpi_string,gridpe,gsi_mpi_comm_world,ierror)
 
       call mpi_type_free(mpi_string,ierror)
 
@@ -2121,7 +2120,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use constants, only: zero
-      use m_mpimod, only: mpi_comm_world,mpi_real4
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real4
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -2150,7 +2149,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_scatterv(temp,s%ijn_s,s%displs_s,mpi_string, &
-                        sub_vars,s%ijn_s(s%mype+1),mpi_string,gridpe,mpi_comm_world,ierror)
+                        sub_vars,s%ijn_s(s%mype+1),mpi_string,gridpe,gsi_mpi_comm_world,ierror)
       call mpi_type_free(mpi_string,ierror)
 
    end subroutine general_scatter2sub_r_single_rank3
@@ -2276,7 +2275,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use constants, only: zero
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),intent(in   ) :: s
@@ -2305,7 +2304,7 @@ end subroutine get_iuse_pe
       call mpi_type_commit(mpi_string,ierror)
 
       call mpi_scatterv(temp,s%ijn_s,s%displs_s,mpi_string, &
-                        sub_vars,s%ijn_s(s%mype+1),mpi_string,gridpe,mpi_comm_world,ierror)
+                        sub_vars,s%ijn_s(s%mype+1),mpi_string,gridpe,gsi_mpi_comm_world,ierror)
       call mpi_type_free(mpi_string,ierror)
 
    end subroutine general_scatter2sub_r_double_rank3
@@ -2389,7 +2388,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: g_egrid2agrid,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: se,sa
@@ -2502,7 +2501,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: egrid2agrid,g_egrid2agrid,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: se,sa
@@ -2611,7 +2610,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: egrid2agrid_ad,g_egrid2agrid_ad,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: se,sa
@@ -2720,7 +2719,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: egrid2agrid_ad,g_egrid2agrid_ad,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: se,sa
@@ -2829,7 +2828,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: g_agrid2egrid,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: sa,se
@@ -2941,7 +2940,7 @@ end subroutine get_iuse_pe
 !
 !$$$
       use egrid2agrid_mod, only: agrid2egrid,g_agrid2egrid,egrid2agrid_parm
-      use m_mpimod, only: mpi_comm_world,mpi_real8
+      use m_mpimod, only: gsi_mpi_comm_world,mpi_real8
       implicit none
 
       type(sub2grid_info),   intent(in   ) :: sa,se
