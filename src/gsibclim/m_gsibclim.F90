@@ -31,6 +31,9 @@ use gsimod, only: gsimain_finalize
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use m_berror_stats,only : berror_stats
 use jfunc, only: nsubwin,nsclen,npclen,ntclen
+use general_sub2grid_mod, only: sub2grid_info
+use general_sub2grid_mod, only: general_sub2grid_create_info
+use general_sub2grid_mod, only: general_sub2grid_destroy_info
 
 implicit none
 
@@ -49,7 +52,8 @@ interface gsibclim_cv_space
   module procedure be_cv_space1_
 end interface gsibclim_cv_space
 interface gsibclim_sv_space
-  module procedure be_sv_space_
+  module procedure be_sv_space0_
+  module procedure be_sv_space1_
 end interface gsibclim_sv_space
 interface gsibclim_befname
   module procedure befname_
@@ -60,14 +64,16 @@ end interface gsibclim_final
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv,nmlfile,befile,layout,comm)
+  subroutine init_(cv,lat2out,lon2out,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
+  integer, intent(out) :: lat2out,lon2out
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
   integer,optional,intent(in) :: comm
 
+  type(sub2grid_info) :: sg
   integer :: ier
   logical :: already_init_mpi
 
@@ -95,12 +101,21 @@ contains
   call guess_grids_init()
   call rf_set(mype)
 
+! create subdomain/grid indexes 
+! call general_sub2grid_create_info(sg,0,nlat,nlon,nsig,1,.false.)
+! istart=sg%istart
+! jstart=sg%jstart
+! call general_sub2grid_destroy_info(sg)
+  lat2out=lat2
+  lon2out=lon2
+
   cv = simcv
   end subroutine init_
 !--------------------------------------------------------
   subroutine final_(closempi)
 
   logical, intent(in) :: closempi
+
   call rf_unset()
   call guess_grids_final()
   call unset_()
@@ -331,7 +346,6 @@ contains
   subroutine be_cv_space0_
 
   type(control_vector) :: gradx,grady
-  type(predictors)     :: sbias
 
 ! apply B to vector: all in control space
 
@@ -362,15 +376,12 @@ contains
   logical,optional,intent(in) :: bypassbe
 
   type(control_vector) :: grady
-  type(predictors)     :: sbias
 
   logical bypassbe_
 
   bypassbe_ = .false.
   if (present(bypassbe)) then
-     if (bypassbe) then
-         bypassbe_ = .true.
-     endif  
+     if (bypassbe) bypassbe_ = .true.
   endif
 
 ! apply B to vector: all in control space
@@ -383,7 +394,9 @@ contains
 
   if (bypassbe_) then
      grady=gradx
+     print *, 'debug : bypassing BE operator in GSI'
   else
+     print *, 'debug : applying BE operator in GSI'
      grady=zero
      call bkerror(gradx,grady, &
                   1,nsclen,npclen,ntclen)
@@ -400,7 +413,7 @@ contains
 
   end subroutine be_cv_space1_
 
-  subroutine be_sv_space_
+  subroutine be_sv_space0_
 
   type(gsi_bundle), allocatable :: fcgrad(:)
   type(control_vector) :: gradx,grady
@@ -444,7 +457,68 @@ contains
   end do
   deallocate(fcgrad)
 
-  end subroutine be_sv_space_
+  end subroutine be_sv_space0_
+
+  subroutine be_sv_space1_(fcgrad,internalsv,bypassbe)
+
+  type(gsi_bundle) :: fcgrad(1)
+  logical,optional,intent(in) :: internalsv
+  logical,optional,intent(in) :: bypassbe
+
+  type(control_vector) :: gradx,grady
+  type(predictors)     :: sbias
+  logical bypassbe_
+  integer ii,ier
+
+  if (nsubwin/=1) then
+     if(ier/=0) call die(myname,'cannot handle this nsubwin =',nsubwin)
+  endif
+
+  bypassbe_ = .false.
+  if (present(bypassbe)) then
+     if (bypassbe) bypassbe_ = .true.
+  endif
+
+! start work space
+! do ii=1,nsubwin
+!     call allocate_state(fcgrad(ii))
+!     fcgrad(ii) = zero
+! end do
+  call allocate_preds(sbias)
+
+  call allocate_cv(gradx)
+  call allocate_cv(grady)
+  gradx=zero
+  grady=zero
+
+! get test vector (fcgrad)
+! call get_state_perts_ (fcgrad(1))
+  if (present(internalsv)) then
+     if (internalsv) call set_silly_(fcgrad(1))
+  endif
+
+  call control2state_ad(fcgrad,sbias,gradx)
+
+! apply B to input (transformed) vector
+  if (bypassbe_) then
+    grady=gradx
+  else
+    call bkerror(gradx,grady, &
+                 1,nsclen,npclen,ntclen)
+  endif
+
+  print *, "svbe 1"
+  call control2state(grady,fcgrad,sbias)
+  if(bkgv_write_sv) &
+  call write_bundle(fcgrad(1),'svbundle')
+  print *, "svbe 2"
+
+! clean up work space
+  call deallocate_cv(gradx)
+  call deallocate_cv(grady)
+  call deallocate_preds(sbias)
+
+  end subroutine be_sv_space1_
 
   subroutine get_state_perts_(fc)
   use m_grid2sub1var, only: grid2sub1var

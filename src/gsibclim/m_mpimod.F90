@@ -231,10 +231,8 @@ contains
   integer,optional,intent(in):: comm
 
   if(present(comm)) then
-     print *, 'using external comm_world'
      GSI_MPI_COMM_WORLD = comm
   else
-     print *, 'using internal comm_world'
      GSI_MPI_COMM_WORLD = MPI_COMM_WORLD
   endif
   end subroutine setworld_

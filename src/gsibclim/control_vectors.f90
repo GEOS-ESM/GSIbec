@@ -598,6 +598,7 @@ subroutine allocate_cv(ycv)
   m_vec_alloc=m_vec_alloc+1
   max_vec_alloc=MAX(max_vec_alloc,m_vec_alloc)
 
+  ycv=zero
   return
 end subroutine allocate_cv
 ! ----------------------------------------------------------------------
