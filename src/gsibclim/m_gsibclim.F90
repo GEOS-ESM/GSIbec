@@ -6,7 +6,7 @@ use constants, only: zero,one
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
-use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
+use gridmod, only: nlon,nlat,lon2,lat2,lat1,lon1,nsig
 use guess_grids, only: nfldsig
 use guess_grids, only: guess_grids_init
 use guess_grids, only: guess_grids_final
@@ -181,7 +181,7 @@ contains
       rbs2(2:nlat-1)=one/(rbs2(2:nlat-1)*rbs2(2:nlat-1))
       rbs2(  nlat  )=zero
    else
-      print *, 'Gaussian Grid in Use'
+      if(mype==0) print *, 'Gaussian Grid in Use'
       call gengrid_vars
    endif
 
@@ -394,9 +394,7 @@ contains
 
   if (bypassbe_) then
      grady=gradx
-     print *, 'debug : bypassing BE operator in GSI'
   else
-     print *, 'debug : applying BE operator in GSI'
      grady=zero
      call bkerror(gradx,grady, &
                   1,nsclen,npclen,ntclen)
@@ -480,12 +478,7 @@ contains
   endif
 
 ! start work space
-! do ii=1,nsubwin
-!     call allocate_state(fcgrad(ii))
-!     fcgrad(ii) = zero
-! end do
   call allocate_preds(sbias)
-
   call allocate_cv(gradx)
   call allocate_cv(grady)
   gradx=zero
@@ -507,11 +500,9 @@ contains
                  1,nsclen,npclen,ntclen)
   endif
 
-  print *, "svbe 1"
   call control2state(grady,fcgrad,sbias)
   if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
-  print *, "svbe 2"
 
 ! clean up work space
   call deallocate_cv(gradx)

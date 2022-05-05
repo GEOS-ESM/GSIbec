@@ -228,9 +228,8 @@ do jj=1,nsubwin
    call gsi_bundlegetpointer (wbundle,'vp' ,cv_vp ,istatus)
    call gsi_bundlegetpointer (rval(jj),'u' ,rv_u,  istatus)
    call gsi_bundlegetpointer (rval(jj),'v' ,rv_v,  istatus)
-   cv_sf=zero; cv_vp=zero
-!  call gsi_bundleputvar ( wbundle, 'sf',  zero,   istatus )
-!  call gsi_bundleputvar ( wbundle, 'vp',  zero,   istatus )
+   call gsi_bundleputvar ( wbundle, 'sf',  zero,   istatus )
+   call gsi_bundleputvar ( wbundle, 'vp',  zero,   istatus )
 !  Convert RHS calculations for u,v to st/vp for application of
 !  background error
    if (do_getuv) then
