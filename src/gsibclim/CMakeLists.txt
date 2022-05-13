@@ -5,7 +5,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 # BClim
-set ( gsibclim_src_files
+list( APPEND gsibclim_src_files
 balmod.F90
 berror.F90
 bias_predictors.F90
@@ -74,7 +74,7 @@ m_gbc4saber.f90
 
 # If sp lib not found then add the stubs to the source code list
 if( NOT sp_FOUND )
-  list( APPEND stub_sp.f90 ${gsibclim_src_files} )
+  list( APPEND gsibclim_src_files stub_sp.f90 )
 endif()
 
 ## Create Library target
