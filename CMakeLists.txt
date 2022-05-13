@@ -32,6 +32,9 @@ find_package( jedicmake QUIET )  # Prefer find modules from jedi-cmake
 find_package( MPI REQUIRED COMPONENTS Fortran )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
 
+# NCEP spectral library (optional)
+find_package( sp )
+
 ################################################################################
 # Sources
 ################################################################################

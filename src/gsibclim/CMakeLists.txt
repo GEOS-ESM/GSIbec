@@ -67,11 +67,15 @@ smoothzrf.f90
 state_vectors.f90
 stop1.f90
 stub_bacio_mod.F90
-stub_sp.f90
 tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90
 )
+
+# If sp lib not found then add the stubs to the source code list
+if( NOT sp_FOUND )
+  list( APPEND stub_sp.f90 ${gsibclim_src_files} )
+endif()
 
 ## Create Library target
 ecbuild_add_library( TARGET   gsibclim
@@ -79,8 +83,13 @@ ecbuild_add_library( TARGET   gsibclim
                     )
 
 # Link with dependency libraries
-target_link_libraries(gsibclim PUBLIC MPI::MPI_C MPI::MPI_CXX MPI::MPI_Fortran)
-target_link_libraries(gsibclim PUBLIC NetCDF::NetCDF_C NetCDF::NetCDF_Fortran)
+target_link_libraries(gsibclim PUBLIC MPI::MPI_Fortran)
+target_link_libraries(gsibclim PUBLIC NetCDF::NetCDF_Fortran)
+
+# NCEP spectral library
+if( sp_FOUND )
+    target_link_libraries( gsibclim PUBLIC sp::sp_d)
+endif()
 
 ## Include paths
 target_include_directories(gsibclim PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
