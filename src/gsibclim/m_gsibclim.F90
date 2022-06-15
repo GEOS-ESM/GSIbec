@@ -10,7 +10,6 @@ use gridmod, only: nlon,nlat,lon2,lat2,lat1,lon1,nsig
 use guess_grids, only: nfldsig
 use guess_grids, only: guess_grids_init
 use guess_grids, only: guess_grids_final
-use m_rf, only: rf_set,rf_unset
 use state_vectors, only: allocate_state,deallocate_state
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
@@ -47,35 +46,48 @@ public gsibclim_final
 interface gsibclim_init
   module procedure init_
 end interface gsibclim_init
+
 interface gsibclim_cv_space
   module procedure be_cv_space0_
   module procedure be_cv_space1_
 end interface gsibclim_cv_space
+
 interface gsibclim_sv_space
   module procedure be_sv_space0_
   module procedure be_sv_space1_
 end interface gsibclim_sv_space
+
 interface gsibclim_befname
   module procedure befname_
 end interface gsibclim_befname
+
 interface gsibclim_final
   module procedure final_
 end interface gsibclim_final
 
+logical :: initialized_ = .false.
+
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv,lat2out,lon2out,nmlfile,befile,layout,comm)
+  subroutine init_(cv,lat2out,lon2out,mockbkg,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
   integer, intent(out) :: lat2out,lon2out
+  logical, intent(in)  :: mockbkg
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
   integer,optional,intent(in) :: comm
 
+  character(len=*), parameter :: myname_=myname//"init_"
   type(sub2grid_info) :: sg
   integer :: ier
   logical :: already_init_mpi
+
+  if (initialized_) then
+     print *, myname_, ': already initialized (should not be called twice!)'
+     return
+  endif
 
   ier=0
   call mpi_initialized(already_init_mpi,ier)
@@ -98,8 +110,7 @@ contains
   call gsimain_initialize(nmlfile=nmlfile)
   call set_()
   call set_pointer_()
-  call guess_grids_init()
-  call rf_set(mype)
+  call guess_grids_init(mockbkg=mockbkg)
 
 ! create subdomain/grid indexes 
 ! call general_sub2grid_create_info(sg,0,nlat,nlon,nsig,1,.false.)
@@ -110,13 +121,13 @@ contains
   lon2out=lon2
 
   cv = simcv
+  initialized_=.true.
   end subroutine init_
 !--------------------------------------------------------
   subroutine final_(closempi)
 
   logical, intent(in) :: closempi
 
-  call rf_unset()
   call guess_grids_final()
   call unset_()
   call gsimain_finalize(closempi)
@@ -312,8 +323,10 @@ contains
     iset=1
   endif
   val=one
-  var='t'
   var='sf'
+  var='q'
+  var='t'
+  var='tv'
   if (iset<0) call die(myname_,'no input set',99)
   call gsi_bundlegetpointer(bundle,trim(var),ptr3,ier)
   if(ier==0) then
@@ -326,20 +339,23 @@ contains
      if (mype==0) print *, myname_, ': var= ', trim(var)
      return
   endif
-  var='tv'
-  call gsi_bundlegetpointer(bundle,trim(var),ptr3,ier)
-  if(ier==0) then
-     do k=1,size(zex)
-        ptr3(10,10,zex(k)) = val
-     enddo
-     if (mype==0) print *, myname_, ': var= ', trim(var)
-     return
+  if(var == 'tv') then
+     call gsi_bundlegetpointer(bundle,trim(var),ptr3,ier)
+     if(ier==0) then
+        do k=1,size(zex)
+           ptr3(10,10,zex(k)) = val
+        enddo
+        if (mype==0) print *, myname_, ': var= ', trim(var)
+        return
+     endif
   endif
-  call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
-  if(ier==0) then
-     ptr2(10,10) = 100.
-     if (mype==0) print *, myname_, ': var= ', 'ps'
-     return
+  if (var == 'ps') then
+     call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
+     if(ier==0) then
+        ptr2(10,10) = 100.
+        if (mype==0) print *, myname_, ': var= ', 'ps'
+        return
+     endif
   endif
   end subroutine set_silly_
 !--------------------------------------------------------
@@ -410,7 +426,7 @@ contains
   call deallocate_cv(grady)
 
   end subroutine be_cv_space1_
-
+!--------------------------------------------------------
   subroutine be_sv_space0_
 
   type(gsi_bundle), allocatable :: fcgrad(:)
@@ -456,7 +472,7 @@ contains
   deallocate(fcgrad)
 
   end subroutine be_sv_space0_
-
+!--------------------------------------------------------
   subroutine be_sv_space1_(fcgrad,internalsv,bypassbe)
 
   type(gsi_bundle) :: fcgrad(1)
@@ -510,7 +526,7 @@ contains
   call deallocate_preds(sbias)
 
   end subroutine be_sv_space1_
-
+!--------------------------------------------------------
   subroutine get_state_perts_(fc)
   use m_grid2sub1var, only: grid2sub1var
   use gridmod, only: lat1,lon1
@@ -537,7 +553,7 @@ contains
   deallocate(subfld)
   deallocate(grdfld)
   end subroutine get_state_perts_
-
+!--------------------------------------------------------
   subroutine befname_ (fname,root)
   implicit none
   character(len=*),intent(in) :: fname

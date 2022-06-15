@@ -27,6 +27,7 @@ general_specmod.f90
 general_spectral_transforms.f90
 general_sub2grid_mod.f90
 general_transform.f90
+genqsat.F90
 gengrid_vars.f90
 get.f90
 getprs.F90
@@ -58,6 +59,7 @@ polcarf.f90
 prewgt.F90
 raflib.f90
 rfdpar.f90
+rsearch.F90
 simpin1.f90
 simpin1_init.f90
 smooth_polcarf.f90
@@ -68,6 +70,8 @@ state_vectors.f90
 stop1.f90
 stub_bacio_mod.F90
 stub_sp.f90
+tpause.f90
+tpause_t.F90
 tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90

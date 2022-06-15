@@ -41,15 +41,14 @@ subroutine compute_qvar3d
   use control_vectors, only: cvars3d
   use gridmod, only: lat2,lon2,nsig
   use constants, only: zero,one,fv,r100,qmin
-  use guess_grids, only: fact_tv,ntguessig,nfldsig,ges_tsen,ges_prsl
+  use guess_grids, only: fact_tv,ntguessig,nfldsig,ges_tsen,ges_prsl,ges_qsat
   use mpeu_util, only: getindex
   use gsi_metguess_mod,  only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
-  use jfunc, only: qoption
+  use jfunc, only: qoption,clip_supersaturation
 #ifdef USE_ALL_ORIGINAL
-  use guess_grids, only: ges_qsat
-  use jfunc, only: varq,varcw,cwoption,clip_supersaturation
+  use jfunc, only: varq,varcw,cwoption
   use radiance_mod, only: icloud_cv,n_clouds_fwd,cloud_names_fwd
   use obsmod, only: l_wcp_cwm
 #else
@@ -84,12 +83,10 @@ subroutine compute_qvar3d
 ! Calculate qsat independently of presence of q in guess
   iderivative = 0
   ice=.true.
-#ifdef USE_ALL_ORIGINAL
   do it=1,nfldsig
      call genqsat(ges_qsat(1,1,1,it),ges_tsen(1,1,1,it),ges_prsl(1,1,1,it),lat2,lon2, &
                   nsig,ice,iderivative)
   enddo
-#endif /* USE_ALL_ORIGINAL */
 
 ! If q in guess, check/fix q limits
   ier=0
@@ -102,9 +99,7 @@ subroutine compute_qvar3d
 ! Limit q to be >= qmin
               ges_q(i,j,k)=max(ges_q(i,j,k),qmin)
 ! Limit q to be <= ges_qsat
-#ifdef USE_ALL_ORIGINAL
               if(clip_supersaturation) ges_q(i,j,k)=min(ges_q(i,j,k),ges_qsat(i,j,k,it))
-#endif /* USE_ALL_ORIGINAL */
            end do
         end do
      end do
@@ -117,13 +112,9 @@ subroutine compute_qvar3d
   do k=1,nsig
      do j=1,lon2
         do i=1,lat2
-#ifdef USE_ALL_ORIGINAL
            qgues(i,j,k)=ges_q(i,j,k) ! q guess
            qsatg(i,j,k)=ges_q(i,j,k) ! q guess
            fact_tv(i,j,k)=one/(one+fv*qsatg(i,j,k))      ! factor for tv to tsen conversion
-#else
-           fact_tv(i,j,k)=one/(one+fv*ges_q(i,j,k))      ! factor for tv to tsen conversion
-#endif /* USE_ALL_ORIGINAL */
         end do
      end do
   end do
@@ -135,20 +126,14 @@ subroutine compute_qvar3d
   else
       iderivative = 2
   end if
-#ifdef USE_ALL_ORIGINAL
   ice=.true.
   call genqsat(qsatg,ges_tsen(1,1,1,ntguessig),ges_prsl(1,1,1,ntguessig),lat2,lon2,nsig,ice,iderivative)
-#endif /* USE_ALL_ORIGINAL */
 
   allocate(rhgues(lat2,lon2,nsig))
   do k=1,nsig
      do j=1,lon2
         do i=1,lat2
-#ifdef USE_ALL_ORIGINAL
            rhgues(i,j,k)=qgues(i,j,k)/qsatg(i,j,k)
-#else
-           rhgues(i,j,k)=1.0 !_RT HACK qgues(i,j,k)/qsatg(i,j,k)
-#endif /* USE_ALL_ORIGINAL */
         end do
      end do
   end do

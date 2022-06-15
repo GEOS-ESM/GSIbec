@@ -1,5 +1,6 @@
 module guess_grids
 use m_kinds, only: i_kind, r_kind
+use m_mpimod, only: mype
 use mpeu_util, only: tell,die
 use constants, only: fv,one,max_varname_length
 use constants, only: kPa_per_Pa
@@ -10,19 +11,27 @@ use gsi_metguess_mod, only: gsi_metguess_bundle
 use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
+use m_rf, only: rf_set,rf_unset
 implicit none
 private
 !
 public :: ges_prsi
 public :: ges_prsl
 public :: ges_tsen
+public :: ges_qsat
+public :: ges_z
+
+public :: geop_hgtl
 public :: isli2
 public :: fact_tv
+public :: tropprs
 
 public :: guess_grids_init
 public :: guess_grids_final
-public :: guess_grids_get_ref_gesprs
-!public :: guess_basics
+public :: gsiguess_get_ref_gesprs
+public :: gsiguess_basics
+public :: gsiguess_bkgcov_init
+public :: gsiguess_bkgcov_final
 
 public :: nfldsig
 public :: ntguessig
@@ -37,6 +46,7 @@ logical, parameter ::  tsensible = .false.   ! jfunc: here set as in jfunc
                           !        to generalize the spots
                           !        where cold thinks only temp
                           !        var in cv is tv to be tv and t
+logical, parameter ::  use_compress = .true.   ! wired for now
 
 ! For now turned into wired-in parameters
 integer(i_kind),parameter :: nfldsig =  1
@@ -45,43 +55,104 @@ integer(i_kind),parameter :: ntguessig = 1
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_tsen
+real(r_kind),allocatable,dimension(:,:,:,:):: ges_qsat
+real(r_kind),allocatable,dimension(:,:,:  ):: ges_z
+
+real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgtl
+real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgti
 real(r_kind),allocatable,dimension(:,:,:):: fact_tv
+real(r_kind),allocatable,dimension(:,:):: tropprs
 integer(i_kind),allocatable,dimension(:,:):: isli2
 
 interface guess_grids_init; module procedure init_; end interface
 interface guess_grids_final; module procedure final_; end interface
-interface guess_grids_get_ref_gesprs; module procedure get_ref_gesprs_; end interface
-!interface guess_basics; module procedure guess_basics_; end interface
+interface gsiguess_get_ref_gesprs; module procedure get_ref_gesprs_; end interface
+
+interface gsiguess_basics
+  module procedure guess_basics0_
+  module procedure guess_basics2_
+  module procedure guess_basics3_
+end interface gsiguess_basics
+
+interface gsiguess_bkgcov_init
+  module procedure bkgcov_init_
+end interface gsiguess_bkgcov_init
+
+interface gsiguess_bkgcov_final
+  module procedure bkgcov_final_
+end interface gsiguess_bkgcov_final
 
 character(len=*), parameter :: myname="guess_grids"
 contains
-subroutine init_
-  use m_mpimod, only: mype
-  implicit none
+!--------------------------------------------------------
+subroutine init_(mockbkg)
+  logical,optional :: mockbkg
   integer ier
+  logical mockbkg_
+  call create_metguess_grids_(mype,ier)
+  mockbkg_=.false.
+  if (present(mockbkg)) then
+    if(mockbkg) mockbkg_ = .true.
+  endif
+  if(mockbkg_) then
+    call guess_basics0_
+    if (mype==0) then
+       print *, "Generating mock guess-fields -- for testing only"
+   endif
+  else
+    if (mype==0) then
+       print *, "User expected to provide guess-fields"
+    endif
+  endif
   allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
   allocate(ges_prsl(lat2,lon2,nsig+1,nfldsig))
+  allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
+  allocate(ges_z(lat2,lon2,nfldsig))
+  allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
+  allocate(geop_hgti(lat2,lon2,nsig,nfldsig))
   allocate(isli2(lat2,lon2))
   allocate(fact_tv(lat2,lon2,nsig))
-  call create_metguess_grids_(mype,ier)
-  call guess_basics_
+  allocate(tropprs(lat2,lon2))
+end subroutine init_
+!--------------------------------------------------------
+subroutine other_set_
+  implicit none
+  integer ier
   call load_vert_coord_
   call load_prsges_
+  call load_geop_hgt_
   call load_guess_tsen_
-end subroutine init_
+end subroutine other_set_
+!--------------------------------------------------------
+subroutine bkgcov_init_
+  call other_set_()  ! a little out of place, but ...
+  call rf_set(mype)
+end subroutine bkgcov_init_
+!--------------------------------------------------------
+subroutine bkgcov_final_
+  use m_mpimod, only: mype
+  implicit none
+  integer ier
+  call rf_unset
+end subroutine bkgcov_final_
+!--------------------------------------------------------
 subroutine final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  call destroy_metguess_grids_(mype,ier)
+  deallocate(tropprs)
   deallocate(fact_tv)
   deallocate(isli2)
+  deallocate(geop_hgti)
+  deallocate(geop_hgtl)
+  deallocate(ges_qsat)
   deallocate(ges_prsl)
   deallocate(ges_prsi)
   deallocate(ges_tsen)
+  call destroy_metguess_grids_(mype,ier)
 end subroutine final_
-
+!--------------------------------------------------------
 subroutine load_vert_coord_
 use m_set_eta, only: set_eta
 implicit none
@@ -92,6 +163,262 @@ ak5=kPa_per_Pa*ak5
 ak5=ak5(nsig:1:-1)
 bk5=bk5(nsig:1:-1)
 end subroutine load_vert_coord_
+
+!-------------------------------------------------------------------------
+!    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
+!-------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: load_geop_hgt_ --- Populate guess geopotential height
+!
+! !INTERFACE:
+!
+  subroutine load_geop_hgt_
+
+! !USES:
+
+    use constants, only: one,eps, rd, grav, half, t0c, fv
+    use constants, only: cpf_a0, cpf_a1, cpf_a2, cpf_b0, cpf_b1, cpf_c0, cpf_c1, cpf_d, cpf_e
+    use constants, only: psv_a, psv_b, psv_c, psv_d
+    use constants, only: ef_alpha, ef_beta, ef_gamma
+    use gridmod,   only: lat2, lon2, nsig, twodvar_regional
+
+    implicit none
+
+! !INPUT PARAMETERS:
+
+
+! !DESCRIPTION: populate guess geopotential height
+!
+! !REVISION HISTORY:
+!   2003-10-15  treadon
+!   2004-05-14  kleist, documentation
+!   2004-07-15  todling, protex-compliant prologue
+!   2004-10-28  treadon - replace "tiny" with "tiny_r_kind"
+!   2004-12-15  treadon - replace use of Paul van Delst's Geopotential
+!                         function with simple integration of hydrostatic
+!                         equation (done to be consistent with Lidia
+!                         Cucurull's GPS work)
+!   2005-05-24  pondeca - add regional surface analysis option
+!   2010-08-27  cucurull - add option to compute and use compressibility factors in geopot heights
+!
+! !REMARKS:
+!   language: f90
+!   machine:  ibm rs/6000 sp; SGI Origin 2000; Compaq/HP
+!
+! !AUTHOR:
+!   treadon          org: w/nmc20      date: 2003-10-15
+!
+!EOP
+!-------------------------------------------------------------------------
+
+    character(len=*),parameter::myname_=myname//'*load_geop_hgt_'
+    real(r_kind),parameter:: thousand = 1000.0_r_kind
+
+    integer(i_kind) i,j,k,jj,ier,istatus
+    real(r_kind) h,dz,rdog
+    real(r_kind),dimension(nsig+1):: height
+    real(r_kind) cmpr, x_v, rl_hm, fact, pw, tmp_K, tmp_C, prs_sv, prs_a, ehn_fct, prs_v
+    real(r_kind),dimension(:,:,:),pointer::ges_tv=>NULL()
+    real(r_kind),dimension(:,:,:),pointer::ges_q=>NULL()
+    real(r_kind),dimension(:,:  ),pointer::ges_zz=>NULL()
+
+    if (twodvar_regional) return
+
+    rdog = rd/grav
+
+    if (use_compress) then
+
+!     Compute compressibility factor (Picard et al 2008) and geopotential heights at midpoint 
+!     of each layer
+
+       do jj=1,nfldsig
+          ier=0
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'z' ,ges_zz ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' ,ges_q ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
+          ier=ier+istatus
+          if(ier/=0) exit
+          do j=1,lon2
+             do i=1,lat2
+                k  = 1
+                fact    = one + fv * ges_q(i,j,k)
+                pw      = eps + ges_q(i,j,k)*( one - eps )
+                tmp_K   = ges_tv(i,j,k) / fact
+                tmp_C   = tmp_K - t0c
+                prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! Pvap sat, eq A1.1 (Pa)
+                prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k,jj)) + log(ges_prsl(i,j,k,jj))))     ! (Pa) 
+                ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
+                prs_v   = ges_q(i,j,k) * prs_a / pw   ! vapor pressure (Pa)
+                rl_hm   = prs_v / prs_sv    ! relative humidity
+                x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
+ 
+                ! Compressibility factor (eq A1.4 from Picard et al 2008)
+                cmpr = one - (prs_a/tmp_K) * (cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
+                           + (cpf_b0 + cpf_b1*tmp_C)*x_v + (cpf_c0 + cpf_c1*tmp_C)*x_v**2 ) &
+                           + (prs_a**2/tmp_K**2) * (cpf_d + cpf_e*x_v**2)
+
+                h  = rdog * ges_tv(i,j,k)
+                dz = h * cmpr * log(ges_prsi(i,j,k,jj)/ges_prsl(i,j,k,jj))
+                height(k) = ges_zz(i,j) + dz   
+
+                do k=2,nsig
+                   fact    = one + fv * half * (ges_q(i,j,k-1)+ges_q(i,j,k))
+                   pw      = eps + half * (ges_q(i,j,k-1)+ges_q(i,j,k)) * (one - eps)
+                   tmp_K   = half * (ges_tv(i,j,k-1)+ges_tv(i,j,k)) / fact
+                   tmp_C   = tmp_K - t0c
+                   prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! eq A1.1 (Pa)
+                   prs_a   = thousand * exp(half*(log(ges_prsl(i,j,k-1,jj))+log(ges_prsl(i,j,k,jj))))   ! (Pa)
+                   ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
+                   prs_v   = half*(ges_q(i,j,k-1)+ges_q(i,j,k) ) * prs_a / pw   ! (Pa)
+                   rl_hm   = prs_v / prs_sv    ! relative humidity
+                   x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
+                   cmpr    = one - (prs_a/tmp_K) * ( cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
+                             + (cpf_b0 + cpf_b1*tmp_C)*x_v + (cpf_c0 + cpf_c1*tmp_C)*x_v**2 ) &
+                             + (prs_a**2/tmp_K**2) * (cpf_d + cpf_e*x_v**2)
+                   h       = rdog * half * (ges_tv(i,j,k-1)+ges_tv(i,j,k))
+                   dz      = h * cmpr * log(ges_prsl(i,j,k-1,jj)/ges_prsl(i,j,k,jj))
+                   height(k) = height(k-1) + dz
+                end do
+
+                do k=1,nsig
+                   geop_hgtl(i,j,k,jj)=height(k) - ges_zz(i,j)
+                end do
+             enddo
+          enddo
+       enddo
+       if(ier/=0) return
+
+!      Compute compressibility factor (Picard et al 2008) and geopotential heights at interface
+!      between layers
+
+       do jj=1,nfldsig
+          ier=0
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'z'  ,ges_zz ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q'  ,ges_q ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
+          ier=ier+istatus
+          if(ier/=0) exit
+          do j=1,lon2
+             do i=1,lat2
+                k=1
+                height(k) = ges_zz(i,j)
+
+                do k=2,nsig
+                   fact    = one + fv * ges_q(i,j,k-1)
+                   pw      = eps + ges_q(i,j,k-1)*(one - eps)
+                   tmp_K   = ges_tv(i,j,k-1) / fact
+                   tmp_C   = tmp_K - t0c
+                   prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! eq A1.1 (Pa)
+                   prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k-1,jj))+log(ges_prsi(i,j,k,jj)))) 
+                   ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
+                   prs_v   = ges_q(i,j,k-1) * prs_a / pw   ! vapor pressure (Pa)
+                   rl_hm   = prs_v / prs_sv    ! relative humidity
+                   x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
+                   cmpr    = one - (prs_a/tmp_K) * ( cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
+                            + (cpf_b0 + cpf_b1*tmp_C)*x_v + (cpf_c0 + cpf_c1*tmp_C)*x_v**2 ) &
+                            + (prs_a**2/tmp_K**2) * (cpf_d + cpf_e*x_v**2)
+                   h       = rdog * ges_tv(i,j,k-1)
+                   dz      = h * cmpr * log(ges_prsi(i,j,k-1,jj)/ges_prsi(i,j,k,jj))
+                   height(k) = height(k-1) + dz
+                enddo
+
+                k=nsig+1
+                fact    = one + fv* ges_q(i,j,k-1)
+                pw      = eps + ges_q(i,j,k-1)*(one - eps)
+                tmp_K   = ges_tv(i,j,k-1) / fact
+                tmp_C   = tmp_K - t0c
+                prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! eq A1.1 (Pa)
+                prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k-1,jj))+log(ges_prsl(i,j,k-1,jj))))     ! (Pa)
+                ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
+                prs_v   = ges_q(i,j,k-1) * prs_a / pw  
+                rl_hm   = prs_v / prs_sv    ! relative humidity
+                x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
+                cmpr    = one - (prs_a/tmp_K) * ( cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
+                          + (cpf_b0 + cpf_b1*tmp_C)*x_v + (cpf_c0 + cpf_c1*tmp_C)*x_v**2 ) &
+                          + (prs_a**2/tmp_K**2) * (cpf_d + cpf_e*x_v**2)
+                h       = rdog * ges_tv(i,j,k-1)
+                dz      = h * cmpr * log(ges_prsi(i,j,k-1,jj)/ges_prsl(i,j,k-1,jj))
+                height(k) = height(k-1) + dz
+ 
+                do k=1,nsig+1
+                   geop_hgti(i,j,k,jj)=height(k) - ges_zz(i,j)
+                end do
+             enddo
+          enddo
+       enddo
+       if(ier/=0) return
+
+    else
+
+!      Compute geopotential height at midpoint of each layer
+       do jj=1,nfldsig
+          ier=0
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'z'  ,ges_zz  ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
+          ier=ier+istatus
+          if(ier/=0) exit
+          do j=1,lon2
+             do i=1,lat2
+                k  = 1
+                h  = rdog * ges_tv(i,j,k)
+                dz = h * log(ges_prsi(i,j,k,jj)/ges_prsl(i,j,k,jj))
+                height(k) = ges_zz(i,j) + dz
+ 
+                do k=2,nsig
+                   h  = rdog * half * (ges_tv(i,j,k-1)+ges_tv(i,j,k))
+                   dz = h * log(ges_prsl(i,j,k-1,jj)/ges_prsl(i,j,k,jj))
+                   height(k) = height(k-1) + dz
+                end do
+
+                do k=1,nsig
+                   geop_hgtl(i,j,k,jj)=height(k) - ges_zz(i,j)
+                end do
+             end do
+          end do
+       end do
+       if(ier/=0) return
+
+!      Compute geopotential height at interface between layers
+       do jj=1,nfldsig
+          ier=0
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'z'  ,ges_zz  ,istatus)
+          ier=ier+istatus
+          call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
+          ier=ier+istatus
+          if(ier/=0) call die(myname_,'not all fields available, ier=',ier)
+          do j=1,lon2
+             do i=1,lat2
+                k=1
+                height(k) = ges_zz(i,j)
+
+                do k=2,nsig
+                   h  = rdog * ges_tv(i,j,k-1)
+                   dz = h * log(ges_prsi(i,j,k-1,jj)/ges_prsi(i,j,k,jj))
+                   height(k) = height(k-1) + dz
+                end do
+
+                k=nsig+1
+                h = rdog * ges_tv(i,j,k-1)
+                dz = h * log(ges_prsi(i,j,k-1,jj)/ges_prsl(i,j,k-1,jj))
+                height(k) = height(k-1) + dz
+
+                do k=1,nsig+1
+                   geop_hgti(i,j,k,jj)=height(k) - ges_zz(i,j)
+                end do
+             end do
+          end do
+       end do
+
+    endif
+
+    return
+  end subroutine load_geop_hgt_
 
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
@@ -145,7 +472,7 @@ end subroutine load_vert_coord_
 !   Declare local variables
     real(r_kind) kap1,kapr,trk
     real(r_kind),dimension(:,:)  ,pointer::ges_ps=>NULL()
-!_RTreal(r_kind),dimension(:,:,:),pointer::ges_tv=>NULL()
+    real(r_kind),dimension(:,:,:),pointer::ges_tv=>NULL()
     real(r_kind) pinc(lat2,lon2)
     integer(i_kind) i,j,k,ii,jj,itv,ips,kp
     logical ihaveprs(nfldsig)
@@ -157,10 +484,10 @@ end subroutine load_vert_coord_
     do jj=1,nfldsig
        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ps' ,ges_ps,ips)
        if(ips/=0) call die(myname_,': ps not available in guess, abort',ips)
-!      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv,itv)
-!      if(idvc5==3) then
-!         if(itv/=0) call die(myname_,': tv must be present when idvc5=3, abort',itv)
-!      endif
+       call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv,itv)
+       if(idvc5==3) then
+          if(itv/=0) call die(myname_,': tv must be present when idvc5=3, abort',itv)
+       endif
 
 !!!!!!!!!!!!  load delp to ges_prsi in read_fv3_netcdf_guess !!!!!!!!!!!!!!!!!
 
@@ -174,9 +501,9 @@ end subroutine load_vert_coord_
                          ges_prsi(i,j,k,jj)=ges_ps(i,j)
                       else if (k==nsig+1) then
                          ges_prsi(i,j,k,jj)=zero
-!                     else
-!                        trk=(half*(ges_tv(i,j,k-1)+ges_tv(i,j,k))/tref5(k))**kapr
-!                        ges_prsi(i,j,k,jj)=ak5(k)+(bk5(k)*ges_ps(i,j))+(ck5(k)*trk)
+                      else
+                         trk=(half*(ges_tv(i,j,k-1)+ges_tv(i,j,k))/tref5(k))**kapr
+                         ges_prsi(i,j,k,jj)=ak5(k)+(bk5(k)*ges_ps(i,j))+(ck5(k)*trk)
                          call die(myname_,'opt removed ',99)
                       end if
                    end if
@@ -408,7 +735,7 @@ end subroutine load_vert_coord_
        endif
   end subroutine destroy_metguess_grids_
 
-  subroutine guess_basics_
+  subroutine guess_basics0_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::u =>NULL()
   real(r_kind),dimension(:,:,:),pointer::v =>NULL()
@@ -437,5 +764,30 @@ end subroutine load_vert_coord_
         ps = 100000. * kPa_per_Pa
      endif
   enddo
-  end subroutine guess_basics_
+  end subroutine guess_basics0_
+!--------------------------------------------------------
+  subroutine guess_basics2_(vname,var)
+  character(len=*),intent(in) :: vname
+  real(r_kind),dimension(:,:),pointer::var
+  integer jj,ier
+  do jj=1,nfldsig
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),var,ier)
+     if (ier/=0) then
+       call die(myname,'pointer to '//trim(vname)//" not found",ier)
+     endif
+  enddo
+  end subroutine guess_basics2_
+!--------------------------------------------------------
+  subroutine guess_basics3_(vname,var)
+  character(len=*),intent(in) :: vname
+  real(r_kind),dimension(:,:,:),pointer::var
+  integer jj,ier
+  do jj=1,nfldsig
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),var,ier)
+     if (ier/=0) then
+       call die(myname,'pointer to '//trim(vname)//" not found",ier)
+     endif
+  enddo
+  end subroutine guess_basics3_
+!--------------------------------------------------------
 end module guess_grids

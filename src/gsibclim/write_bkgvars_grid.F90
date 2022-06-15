@@ -128,7 +128,7 @@ subroutine write_bkgvars2_grid
   use m_kinds, only: r_kind,i_kind,r_single
   use m_mpimod, only: mype
   use constants, only: ten
-  use guess_grids, only: guess_grids_get_ref_gesprs
+  use guess_grids, only: gsiguess_get_ref_gesprs
   use gridmod, only: nlat,nlon,nsig
   use control_vectors, only: nc3d,nc2d,mvars
   use control_vectors, only: cvars3d,cvars2d,cvarsmd
@@ -163,7 +163,7 @@ subroutine write_bkgvars2_grid
      call gather_stuff2(dssvs(1,1,nc2d+n),dg(1,1,nc2d+n),mype,0)
   end do
 
-  call guess_grids_get_ref_gesprs(prs)
+  call gsiguess_get_ref_gesprs(prs)
 
   if (mype==0) then
      write(6,*) 'WRITE OUT NEW VARIANCES'
@@ -267,7 +267,7 @@ subroutine write_bundle(bundle,fname)
   use m_kinds, only: r_kind,i_kind,r_single
   use m_mpimod, only: mype
   use constants, only: ten
-  use guess_grids, only: guess_grids_get_ref_gesprs
+  use guess_grids, only: gsiguess_get_ref_gesprs
   use gridmod, only: nlat,nlon,nsig
 ! use control_vectors, only: nc3d,nc2d,mvars
 ! use control_vectors, only: cvars3d,cvars2d,cvarsmd
@@ -327,7 +327,7 @@ subroutine write_bundle(bundle,fname)
      call gather_stuff2(ptr2d,dg(1,1,n),mype,0)
   end do
 
-  call guess_grids_get_ref_gesprs(prs)
+  call gsiguess_get_ref_gesprs(prs)
 
   if (mype==0) then
      write(6,*) 'WRITE OUT BUNDLE'

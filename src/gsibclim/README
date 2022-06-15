@@ -44,4 +44,7 @@ balmod
 ++++++++++++++++++++++++++++++++++++++++++++++++
 - replace kinds w/ OOPS kinds
 - interface to return lats/lons
-- interface to b itself
+- correctly pass guess information, that is:
+  o set pressures as those from JEDI seen guess_grids: guess_grids_get_ref_gesprs
+  o properly fill in required guess fields; see guess_grids guess_basics
+

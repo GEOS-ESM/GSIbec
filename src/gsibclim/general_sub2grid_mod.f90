@@ -202,7 +202,7 @@ module general_sub2grid_mod
 
    end type sub2grid_info
 
-   logical :: print_verbose=.false.
+   logical :: print_verbose=.true.
 
 !  other declarations  ...
 

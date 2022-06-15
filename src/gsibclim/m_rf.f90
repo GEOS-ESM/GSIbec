@@ -5,7 +5,6 @@ use berror, only: create_berror_vars
 use balmod, only: create_balance_vars
 use balmod, only: prebal
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
-use guess_grids, only: nfldsig
 use jfunc, only: qoption,cwoption
 use mpeu_util, only: getindex
 use control_vectors, only: cvars3d
