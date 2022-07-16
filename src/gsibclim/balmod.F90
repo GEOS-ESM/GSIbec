@@ -130,8 +130,10 @@ contains
     use gridmod, only: lat2,nsig
     implicit none
     
-    allocate(agvz(lat2,nsig,nsig),wgvz(lat2,nsig),bvz(lat2,nsig))
-    allocate(pput(lat2,nsig))
+    if(.not.allocated(agvz)) allocate(agvz(lat2,nsig,nsig))
+    if(.not.allocated(wgvz)) allocate(wgvz(lat2,nsig))
+    if(.not.allocated(bvz))  allocate(bvz(lat2,nsig))
+    if(.not.allocated(pput)) allocate(pput(lat2,nsig))
     
     return
   end subroutine create_balance_vars

@@ -66,6 +66,7 @@ interface gsibclim_final
 end interface gsibclim_final
 
 logical :: initialized_ = .false.
+logical :: iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
@@ -152,6 +153,9 @@ contains
    implicit none
    real(r_kind) :: dlat,dlon,pih
    integer i,j,i1,ifail
+
+   if (iamset_ ) return
+
    call create_grid_vars()
    ifail=0
    if(.not.allocated(rlons)) ifail = 1
@@ -199,12 +203,14 @@ contains
    if(.not.cdiff_created()) call create_cdiff_coefs()
    if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)
+   iamset_ = .true.
   end subroutine set_
 !--------------------------------------------------------
   subroutine unset_
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: destroy_cdiff_coefs
    if(cdiff_created()) call destroy_cdiff_coefs
+   iamset_ = .false.
   end subroutine unset_
 !--------------------------------------------------------
   subroutine set_pointer_

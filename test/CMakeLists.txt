@@ -31,6 +31,11 @@ ecbuild_add_executable( TARGET  test_bkerror_clim.x
                         LIBS    gsibclim
                        )
 
+ecbuild_add_executable( TARGET  test_geos_getens.x
+                        SOURCES mains/test_geos_getens.F90
+                        LIBS    gsibclim
+                       )
+
 # Test GMAO and NCEP B-CLIM:
 
 ecbuild_add_test( TARGET  test_gsibclim_gmao

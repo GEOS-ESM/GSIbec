@@ -3382,7 +3382,7 @@ subroutine hadamard_upd_(zst,yst,xst)
 
   if(yst%ndim/=xst%ndim.or.yst%ndim/=zst%ndim) then
      write(6,*)trim(myname_), ': error length'
-     call stop2(313)
+     call stop2(998)
   endif
 
   if (zst%AllKinds<0.or.xst%AllKinds<0.or.yst%AllKinds<0 ) then
@@ -3475,7 +3475,7 @@ subroutine self_add_st(yst,xst)
 
   if(yst%ndim/=xst%ndim) then
      write(6,*)trim(myname_),': error length'
-     call stop2(313)
+     call stop2(998)
   endif
   if (xst%AllKinds<0.or.yst%AllKinds<0 ) then
      write(6,*)trim(myname_),': error bundle precision ',xst%AllKinds,yst%AllKinds
@@ -3541,7 +3541,7 @@ subroutine self_add_R8scal(yst,pa,xst)
 
   if(yst%ndim/=xst%ndim) then
      write(6,*)trim(myname_),': error length'
-     call stop2(313)
+     call stop2(998)
   endif
   if (xst%AllKinds<0.or.yst%AllKinds<0 ) then
      write(6,*)trim(myname_),': error bundle precision ',xst%AllKinds,yst%AllKinds
@@ -3607,7 +3607,7 @@ subroutine self_add_R4scal(yst,pa,xst)
 
   if(yst%ndim/=xst%ndim) then
      write(6,*)trim(myname_),': error length'
-     call stop2(313)
+     call stop2(998)
   endif
   if (xst%AllKinds<0.or.yst%AllKinds<0 ) then
      write(6,*)trim(myname_),': error bundle precision ',xst%AllKinds,yst%AllKinds

@@ -2,8 +2,12 @@ module m_rf
 use m_kinds, only: r_kind, i_kind
 use constants, only: zero
 use berror, only: create_berror_vars
+use berror, only: destroy_berror_vars
+use berror, only: final_rftable
 use balmod, only: create_balance_vars
+use balmod, only: destroy_balance_vars
 use balmod, only: prebal
+use smooth_polcarf, only: destroy_smooth_polcas
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
 use jfunc, only: qoption,cwoption
 use mpeu_util, only: getindex
@@ -26,9 +30,9 @@ character(len=*), parameter :: myname = 'm_rf'
 contains
   subroutine init_
   if (getindex(cvars3d,'q')>0) then
-    allocate(varq(nlat,nsig))
+    if(.not.allocated(varq)) allocate(varq(nlat,nsig))
   endif
-  allocate(varcw(nlat,nsig))
+  if(.not.allocated(varcw)) allocate(varcw(nlat,nsig))
   varcw=zero
   end subroutine init_
   subroutine set_ (mype)
@@ -50,6 +54,10 @@ contains
   call prewgt(varcw,cwoption,varq,qoption,mype)
   end subroutine set_
   subroutine unset_
+  call destroy_smooth_polcas ! the set is called in prewgt - gsi typically has inconsistent set/unset
+  call destroy_berror_vars
+  call destroy_balance_vars
+  call final_rftable         ! out of place as consequence of gsi typically has inconsistent set/unset
   call final_
   end subroutine unset_
   subroutine final_

@@ -82,6 +82,9 @@ interface gsiguess_bkgcov_final
   module procedure bkgcov_final_
 end interface gsiguess_bkgcov_final
 
+logical, save :: initialized_ = .false.
+logical, save :: iamset_ = .false.
+
 character(len=*), parameter :: myname="guess_grids"
 contains
 !--------------------------------------------------------
@@ -119,15 +122,19 @@ end subroutine init_
 subroutine other_set_
   implicit none
   integer ier
+  if(iamset_) return
   call load_vert_coord_
   call load_prsges_
   call load_geop_hgt_
   call load_guess_tsen_
+  iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
 subroutine bkgcov_init_
+  if(initialized_) return
   call other_set_()  ! a little out of place, but ...
   call rf_set(mype)
+  initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
 subroutine bkgcov_final_
@@ -135,6 +142,8 @@ subroutine bkgcov_final_
   implicit none
   integer ier
   call rf_unset
+  initialized_ = .false.
+  iamset_ = .false.
 end subroutine bkgcov_final_
 !--------------------------------------------------------
 subroutine final_

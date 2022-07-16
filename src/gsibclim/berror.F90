@@ -130,6 +130,7 @@ module berror
   public :: vprecond
 #endif /* USE_ALL_ORIGINAL */
   public :: init_rftable
+  public :: final_rftable
   public :: initable
   public :: create_berror_vars_reg
   public :: destroy_berror_vars_reg
@@ -175,6 +176,8 @@ module berror
   logical,save :: fpsproj
   logical,save :: fut2ps
   logical,save :: cwcoveqqcov
+
+  logical, save :: balmod_initialized_ = .false.
 
 contains
 
@@ -275,6 +278,8 @@ contains
   use constants, only: zero,one
   implicit none
   
+  if(balmod_initialized_) return
+
   llmin=1
   llmax=nlat
 
@@ -327,6 +332,8 @@ contains
            ii1(2*nf+1,2*nf+1,nhscrf,nnnn1o),jj1(2*nf+1,2*nf+1,nhscrf,nnnn1o),&
            ii2(2*nf+1,2*nf+1,nhscrf,nnnn1o),jj2(2*nf+1,2*nf+1,nhscrf,nnnn1o))
 
+  balmod_initialized_ = .true.
+
   return
  end subroutine create_berror_vars
 
@@ -370,6 +377,8 @@ contains
 #endif /* USE_ALL_ORIGINAL */
     deallocate(slw,slw1,slw2)
     deallocate(ii,jj,ii1,jj1,ii2,jj2)
+
+    balmod_initialized_ = .false.
 
     return
   end subroutine destroy_berror_vars
@@ -834,7 +843,7 @@ contains
 
     deallocate(iuse,ipoint)
 
-    allocate(table(nta,ndeg)) 
+    if(.not.allocated(table)) allocate(table(nta,ndeg)) 
 
     call rfdparv(dsh,rate,table,nta,ndeg)
 
@@ -843,6 +852,9 @@ contains
     return
   end subroutine init_rftable
 
+  subroutine final_rftable
+    if(allocated(table)) deallocate(table)
+  end subroutine final_rftable
   
   subroutine initable(nxdim,nydim,sli,ntax,ihwlb,iix,jjx,factor,tin,ipoint)
 !$$$  subprogram documentation block
