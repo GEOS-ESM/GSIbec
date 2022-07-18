@@ -79,8 +79,8 @@ use constants, only: zero, one, two, three, zero_quad, tiny_r_kind
 !_RT use file_utility, only : get_lun
 use mpeu_util, only: get_lun => luavail
 use mpl_allreducemod, only: mpl_allreduce
-!_RT use hybrid_ensemble_parameters, only: l_hyb_ens
-!_RT use hybrid_ensemble_parameters, only: grd_ens
+use hybrid_ensemble_parameters, only: l_hyb_ens
+use hybrid_ensemble_parameters, only: grd_ens
 use constants, only : max_varname_length
 
 use m_rerank, only : rerank
@@ -178,7 +178,6 @@ real(r_kind)    ,allocatable,dimension(:) :: atsfc_sdv
 real(r_kind)    ,allocatable,dimension(:) :: an_amp0
 
 logical :: llinit = .false.
-logical :: l_hyb_ens = .false.
 
 ! ----------------------------------------------------------------------
 INTERFACE ASSIGNMENT (=)
@@ -492,11 +491,11 @@ subroutine allocate_cv(ycv)
   n_aens=0
   if (l_hyb_ens) then
       ALLOCATE(ycv%aens(nsubwin,n_ens))
-!_RT      call GSI_GridCreate(ycv%grid_aens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
+         call GSI_GridCreate(ycv%grid_aens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
          if (lsqrtb) then
             n_aens=nval_lenz_en
          else
-!_RT            n_aens=grd_ens%latlon11*grd_ens%nsig
+            n_aens=grd_ens%latlon11*grd_ens%nsig
          endif
   endif
 

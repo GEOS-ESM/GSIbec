@@ -1081,7 +1081,6 @@ subroutine rfhy(p1,p2,nx,ny,ndegy,aly,be)
   return
 end subroutine rfhy
 ! ------------------------------------------------------------------------------
-#ifdef USE_ALL_ORIGINAL
 subroutine sqrt_smoothrf(z,work,nlevs)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -1116,7 +1115,10 @@ subroutine sqrt_smoothrf(z,work,nlevs)
 !   machine:  ibm RS/6000 SP
 !$$$
   use m_kinds, only: r_kind,i_kind
-  use gridmod, only: nlat,nlon,regional,nnnn1o
+  use gridmod, only: nlat,nlon,nnnn1o
+#ifdef USE_ALL_ORIGINAL
+  use gridmod, only: regional
+#endif /* USE_ALL_ORIGINAL */
   use jfunc,only: nval_lenz
   use constants, only: zero,half
   use berror, only: ii,jj,ii1,jj1,nhscrf,&
@@ -1139,6 +1141,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
   real(r_kind),allocatable,dimension(:,:)::pall,zloc
   real(r_kind),dimension(nlat,nlon,3*nlevs) :: workout
 
+#ifdef USE_ALL_ORIGINAL
 ! Regional case
   if(regional)then
 !$omp parallel do  schedule(dynamic,1) private(k,i,j,iz,totwgt,zloc), &
@@ -1170,6 +1173,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
 
 ! Global case
   else
+#endif /* USE_ALL_ORIGINAL */
 
      do j=1,nhscrf
         totwgt(j)=sqrt(hswgt(j)*hzscl(j)*hzscl(j))
@@ -1253,8 +1257,10 @@ subroutine sqrt_smoothrf(z,work,nlevs)
        end do
      end do
 
+#ifdef USE_ALL_ORIGINAL
 ! End of global block
   end if
+#endif /* USE_ALL_ORIGINAL */
 
   return
 end subroutine sqrt_smoothrf
@@ -1294,7 +1300,10 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
 !   machine:  ibm RS/6000 SP
 !$$$
   use m_kinds, only: r_kind,i_kind
-  use gridmod, only: nlat,nlon,nnnn1o,regional
+  use gridmod, only: nlat,nlon,nnnn1o
+#ifdef USE_ALL_ORIGINAL
+  use gridmod, only: regional
+#endif /* USE_ALL_ORIGINAL */
   use jfunc,only: nval_lenz
   use constants, only: zero,half
   use berror, only: ii,jj,ii1,jj1,nhscrf,&
@@ -1316,6 +1325,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
   real(r_kind),allocatable,dimension(:,:):: zloc,pall
 
 
+#ifdef USE_ALL_ORIGINAL
 ! Regional case
   if(regional)then
 !$omp parallel do  schedule(dynamic,1) private(k,i,j,iz,totwgt,zloc), &
@@ -1347,6 +1357,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
 
 ! Global case
   else
+#endif /* USE_ALL_ORIGINAL */
 
      do j=1,nhscrf
         totwgt(j)=sqrt(hswgt(j)*hzscl(j)*hzscl(j))
@@ -1413,8 +1424,10 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
 !    End of k loop over nlevs
      end do
 
+#ifdef USE_ALL_ORIGINAL
 ! End of global block
   end if
+#endif /* USE_ALL_ORIGINAL */
 
   return
 end subroutine sqrt_smoothrf_ad
@@ -1590,4 +1603,3 @@ subroutine sqrt_rfxyyx_ad(z,p1,nx,ny,iix,jjx,dssx,totwgt)
   return
 end subroutine sqrt_rfxyyx_ad
 ! ------------------------------------------------------------------------------
-#endif /* USE_ALL_ORIGINAL */

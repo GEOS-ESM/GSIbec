@@ -19,6 +19,8 @@
 
   use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2
 
+  use gsi_4dvar, only: setup_4dvar,init_4dvar
+
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
      cvarsmd,nrf_var,lcalc_gfdl_cfrac 
@@ -54,6 +56,18 @@
   use derivsmod, only: create_ges_derivatives,init_anadv
 
   use guess_grids, only: nfldsig
+
+  use hybrid_ensemble_parameters,only : l_hyb_ens,uv_hyb_ens,aniso_a_en,generate_ens,&
+                         n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test,oz_univ_static,&
+                         regional_ensemble_option,merge_two_grid_ensperts, &
+                         full_ensemble,pseudo_hybens,pwgtflg,&
+                         beta_s0,s_ens_h,s_ens_v,init_hybrid_ensemble_parameters,&
+                         readin_localization,write_ens_sprd,eqspace_ensgrid,grid_ratio_ens,&
+                         readin_beta,use_localization_grid,use_gfs_ens,q_hyb_ens,i_en_perts_io, &
+                         l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
+                         bens_recenter,upd_ens_spread,upd_ens_localization
+
+  use gsi_io, only: init_io, verbose
 
   implicit none
 
@@ -324,6 +338,7 @@
 !      tendsflag,&
        pseudo_q2,&
        cwoption,&
+       verbose,&
        qoption
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
@@ -369,6 +384,81 @@
 	bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
         simcv,bkgv_write_cv,bkgv_write_sv
 
+
+! HYBRID_ENSEMBLE (parameters for use with hybrid ensemble option)
+!     l_hyb_ens     - if true, then turn on hybrid ensemble option
+!     uv_hyb_ens    - if true, then ensemble perturbation wind variables are u,v,
+!                       otherwise, ensemble perturbation wind variables are stream, pot. functions.
+!     q_hyb_ens     - if true, then use specific humidity ensemble perturbations,
+!                       otherwise, use relative humidity
+!     oz_univ_static- if true, decouple ozone from other variables and defaults to static B (ozone only)
+!     aniso_a_en - if true, then use anisotropic localization of hybrid ensemble control variable a_en.
+!     generate_ens - if true, then generate internal ensemble based on existing background error
+!     n_ens        - number of ensemble members.
+!     nlon_ens     - number of longitudes on ensemble grid (may be different from analysis grid nlon)
+!     nlat_ens     - number of latitudes on ensemble grid (may be different from analysis grid nlat)
+!     jcap_ens     - for global spectral model, spectral truncation
+!     jcap_ens_test- for global spectral model, test spectral truncation (to test dual resolution)
+!     beta_s0      -  the default weight given to static background error covariance if (.not. readin_beta)
+!                              0 <= beta_s0 <= 1,  tuned for optimal performance
+!                             =1, then ensemble information turned off
+!                             =0, then static background turned off
+!                            the weights are applied per vertical level such that : 
+!                                        beta_s(:) = beta_s0     , vertically varying weights given to static B ; 
+!                                        beta_e(:) = 1 - beta_s0 , vertically varying weights given ensemble derived covariance.
+!                            If (readin_beta) then beta_s and beta_e are read from a file and beta_s0 is not used.
+!     s_ens_h             - homogeneous isotropic horizontal ensemble localization scale (km)
+!     s_ens_v             - vertical localization scale (grid units for now)
+!                              s_ens_h, s_ens_v, and beta_s0 are tunable parameters.
+!     use_gfs_ens  - controls use of global ensemble: .t. use GFS (default); .f. uses user-defined ens
+!     readin_localization - flag to read (.true.)external localization information file
+!     readin_beta         - flag to read (.true.) the vertically varying beta parameters beta_s and beta_e
+!                              from a file.
+!     eqspace_ensgrid     - if .true., then ensemble grid is equal spaced, staggered 1/2 grid unit off
+!                               poles.  if .false., then gaussian grid assumed
+!                               for ensemble (global only)
+!     use_localization_grid - if true, then use extra lower res gaussian grid for horizontal localization
+!                                   (global runs only--allows possiblity for non-gaussian ensemble grid)
+!     pseudo_hybens    - if true, turn on pseudo ensemble hybrid for HWRF
+!     merge_two_grid_ensperts  - if true, merge ensemble perturbations from two forecast domains
+!                                to analysis domain (one way to deal with hybrid DA for HWRF moving nest)
+!     regional_ensemble_option - integer, used to select type of ensemble to read in for regional
+!                              application.  Currently takes values from 1 to 4.
+!                                 =1: use GEFS internally interpolated to ensemble grid.
+!                                 =2: ensembles are WRF NMM format
+!                                 =3: ensembles are ARW netcdf format.
+!                                 =4: ensembles are NEMS NMMB format.
+!     full_ensemble    - if true, first ensemble perturbation on first guess istead of on ens mean
+!     pwgtflg          - if true, use vertical integration function on ensemble contribution of Psfc
+!     grid_ratio_ens   - for regional runs, ratio of ensemble grid resolution to analysis grid resolution
+!                            default value = 1  (dual resolution off)
+!     i_en_perts_io - flag to read in ensemble perturbations in ensemble grid.
+!                         This is to speed up RAP/HRRR hybrid runs because the
+!                         same ensemble perturbations are used in 6 cycles    
+!                           =0:  No ensemble perturbations IO (default)
+!                           =2:  skip get_gefs_for_regional and read in ensemble
+!                                 perturbations from saved files.
+!     l_ens_in_diff_time  -  if use ensembles that are available at different time
+!                              from analysis time.
+!                             =false: only ensembles available at analysis time
+!                                      can be used for hybrid. (default)
+!                             =true: ensembles available time can be different
+!                                      from analysis time in hybrid analysis
+!     ensemble_path - path to ensemble members; default './'
+!     ens_fast_read - read ensemble in parallel; default '.false.'
+!     sst_staticB - use only static background error covariance for SST statistic
+!     bens_recenter - center Bens around background/guess
+!     upd_ens_spread - update ens spread with recentering around guess 
+!     upd_ens_localization - update ens localizations (goes together w/ upd_ens_spread)
+!              
+!                         
+  namelist/hybrid_ensemble/l_hyb_ens,uv_hyb_ens,q_hyb_ens,aniso_a_en,generate_ens,n_ens,nlon_ens,nlat_ens,jcap_ens,&
+                pseudo_hybens,merge_two_grid_ensperts,regional_ensemble_option,full_ensemble,pwgtflg,&
+                jcap_ens_test,beta_s0,s_ens_h,s_ens_v,readin_localization,eqspace_ensgrid,readin_beta,&
+                grid_ratio_ens, &
+                oz_univ_static,write_ens_sprd,use_localization_grid,use_gfs_ens, &
+                i_en_perts_io,l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
+                bens_recenter,upd_ens_spread,upd_ens_localization
    CONTAINS
 
 !-------------------------------------------------------------------------
@@ -411,6 +501,7 @@
   call init_anacv(rcname=thisrc)
   call init_anadv(rcname=thisrc)
 
+  call init_io(mype,npe-1)
   call jfunc_init
   call init_constants_derived
   call init_constants(.false.)
@@ -419,6 +510,7 @@
   call init_grid
   call init_compact_diffs
   call init_smooth_polcas
+  call init_hybrid_ensemble_parameters
 ! call set_fgrid2agrid
 
 
@@ -452,6 +544,9 @@
 !_RT call gsi_4dcoupler_setservices(rc=ier)
 !_RT if(ier/=0) call die(myname_,'gsi_4dcoupler_setServices(), rc =',ier)
 
+  call init_4dvar
+
+  call setup_4dvar(mype)
 
 ! Ensure valid number of horizontal scales
   if (nhscrf<0 .or. nhscrf>3) then

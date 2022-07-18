@@ -22,11 +22,20 @@ set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 # Standard compiler flags
 ################################################################################
 
+option( ENABLE_MKL "Use MKL for LAPACK implementation (if available)" ON )
 include( gsibclim_compiler_flags )
 
 ################################################################################
 # Dependencies
 ################################################################################
+if( ENABLE_MKL )
+    find_package( MKL )
+endif()
+if( MKL_FOUND )
+    set( LAPACK_LIBRARIES ${MKL_LIBRARIES} )
+else()
+    find_package( LAPACK REQUIRED )
+endif()
 
 find_package( jedicmake QUIET )  # Prefer find modules from jedi-cmake
 find_package( MPI REQUIRED COMPONENTS Fortran )
@@ -36,7 +45,7 @@ find_package( NetCDF REQUIRED COMPONENTS Fortran )
 # Sources
 ################################################################################
 
-add_subdirectory( src )
+add_subdirectory( src/gsibclim )
 add_subdirectory( test )
 
 ################################################################################

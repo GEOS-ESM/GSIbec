@@ -29,7 +29,8 @@ use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use m_berror_stats,only : berror_stats
-use jfunc, only: nsubwin,nsclen,npclen,ntclen
+use gsi_4dvar, only: nsubwin
+use jfunc, only: nsclen,npclen,ntclen
 use general_sub2grid_mod, only: sub2grid_info
 use general_sub2grid_mod, only: general_sub2grid_create_info
 use general_sub2grid_mod, only: general_sub2grid_destroy_info

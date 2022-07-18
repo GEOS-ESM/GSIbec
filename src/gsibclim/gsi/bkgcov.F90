@@ -90,7 +90,6 @@ subroutine bkgcov(cstate)
 
   return
 end subroutine bkgcov
-#ifdef USE_ALL_ORIGINAL
 ! -----------------------------------------------------------------------------
 subroutine ckgcov(z,cstate,nval_lenz)
 !$$$  subprogram documentation block
@@ -223,8 +222,8 @@ subroutine ckgcov_ad(z,cstate,nval_lenz)
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid
   use general_commvars_mod, only: s2g_raf
-!_RT  use hybrid_ensemble_parameters, only: l_hyb_ens
-!_RT  use hybrid_ensemble_isotropic, only: sqrt_beta_s_mult
+  use hybrid_ensemble_parameters, only: l_hyb_ens
+  use hybrid_ensemble_isotropic, only: sqrt_beta_s_mult
   implicit none
 
 ! Passed Variables
@@ -240,7 +239,7 @@ subroutine ckgcov_ad(z,cstate,nval_lenz)
   nlevs=s2g_raf%nlevs_loc
 
 ! Apply static betas
-!_RT  if(l_hyb_ens) call sqrt_beta_s_mult(cstate)
+  if(l_hyb_ens) call sqrt_beta_s_mult(cstate)
 
 ! Multiply by background error variances, and break up skin temp
 ! into components
@@ -262,4 +261,3 @@ subroutine ckgcov_ad(z,cstate,nval_lenz)
 
   return
 end subroutine ckgcov_ad
-#endif /* USE_ALL_ORIGINAL */

@@ -154,6 +154,7 @@ module mpeu_util
       public :: stdout_close
       public :: stdout_lead
 #endif
+    public :: StrUpCase
 
     integer,parameter :: STDIN = 5
     integer,parameter :: STDOUT= 6
@@ -258,6 +259,10 @@ module mpeu_util
 !EOP ___________________________________________________________________
 
   character(len=*),parameter :: myname="mpeu_util"
+
+  ! List of character for case conversion
+  CHARACTER(*), PARAMETER :: LOWER_CASE = 'abcdefghijklmnopqrstuvwxyz'
+  CHARACTER(*), PARAMETER :: UPPER_CASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 #ifndef NCEP_ENV
   integer,parameter :: Ix=1
@@ -2206,5 +2211,65 @@ subroutine check_iostat_(ierror,myname,message)
    endif
    return
 end subroutine check_iostat_
+
+!------------------------------------------------------------------------------
+!:sdoc+:
+!
+! NAME:
+!       StrUpCase
+!
+! PURPOSE:
+!       Function to convert an input string to upper case.
+!
+! CALLING SEQUENCE:
+!       Result = StrUpCase( String )
+!
+! INPUT ARGUMENTS:
+!       String:  Character string to be converted to upper case.
+!                UNITS:      N/A
+!                TYPE:       CHARACTER(*)
+!                DIMENSION:  Scalar
+!                ATTRIBUTES: INTENT(IN)
+!
+! FUNCTION RESULT:
+!       Result:  The input character string converted to upper case.
+!                UNITS:      N/A
+!                TYPE:       CHARACTER(LEN(String))
+!                DIMENSION:  Scalar
+!
+! EXAMPLE:
+!       string = 'this is a string'
+!       WRITE( *, '( a )' ) StrUpCase( string )
+!   THIS IS A STRING
+!
+! PROCEDURE:
+!       Figure 3.5B, pg 80, "Upgrading to Fortran 90", by Cooper Redwine,
+!       1995 Springer-Verlag, New York.
+!
+! CREATION HISTORY:
+!       Written by:     Paul van Delst, CIMSS/SSEC 18-Oct-1999
+!                       paul.vandelst@ssec.wisc.edu
+!       Stolen from CRTM: R. Todling
+!
+!:sdoc-:
+!------------------------------------------------------------------------------
+
+  FUNCTION StrUpCase( Input_String ) RESULT( Output_String )
+    ! Arguments
+    CHARACTER(*), INTENT(IN)     :: Input_String
+    ! Function result
+    CHARACTER(LEN(Input_String)) :: Output_String
+    ! Local variables
+    INTEGER :: i, n
+
+    ! Copy input string
+    Output_String = Input_String
+
+    ! Convert case character by character
+    DO i = 1, LEN(Output_String)
+      n = INDEX(LOWER_CASE, Output_String(i:i))
+      IF ( n /= 0 ) Output_String(i:i) = UPPER_CASE(n:n)
+    END DO
+  END FUNCTION StrUpCase
 
 end module mpeu_util
