@@ -154,7 +154,7 @@ implicit none
       jda(:)=0
       fha(:)=0.0
       fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      call w3movdat(fha,ida,jda)
+      !call w3movdat(fha,ida,jda)
       nymd=jda(1)*10000+jda(2)*100+jda(3)
       nhms=jda(5)*10000+jda(6)*100
    else
@@ -333,7 +333,7 @@ implicit none
       jda(:)=0
       fha(:)=0.0
       fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      call w3movdat(fha,ida,jda)
+      !call w3movdat(fha,ida,jda)
       nymd=jda(1)*10000+jda(2)*100+jda(3)
       nhms=jda(5)*10000+jda(6)*100
    else

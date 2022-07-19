@@ -2239,7 +2239,7 @@ contains
        ida(5)=mydate(4) ! hour
 
        ! Move date-time forward by nhr_assimilation hours
-       call w3movdat(fha,ida,jda)
+       !call w3movdat(fha,ida,jda)
 
        jdate(1) = jda(1)     ! analysis year
        jdate(2) = jda(2)     ! analysis month
@@ -3067,7 +3067,7 @@ contains
        ida(5)=mydate(4) ! hour
 
        ! Move date-time forward by nhr_assimilation hours
-       call w3movdat(fha,ida,jda)
+       !call w3movdat(fha,ida,jda)
 
        jdate(1) = jda(1)     ! analysis year
        jdate(2) = jda(2)     ! analysis month

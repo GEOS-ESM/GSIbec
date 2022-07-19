@@ -80,7 +80,6 @@ stop1.f90
 stub_bacio_mod.F90
 stub_ensmod.f90
 stub_get_pseudo_ensperts.f90
-stub_sp.f90
 tpause.f90
 tpause_t.F90
 tv_to_tsen.f90
@@ -88,6 +87,11 @@ write_bkgvars_grid.F90
 m_gbc4saber.f90
 
 )
+
+# Stubs for sp lib if package is not found
+if( NOT sp_FOUND )
+  list( APPEND gsi_src_files_list stub_sp.f90 )
+endif()
 
 set( gsi_src_files
 

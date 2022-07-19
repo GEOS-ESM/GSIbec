@@ -16,7 +16,7 @@ ecbuild_add_library( TARGET ${PROJECT_NAME}
                      SOURCES ${${PROJECT_NAME}_src_files}
                      INSTALL_HEADERS LISTED
                      HEADER_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-                     LINKER_LANGUAGE CXX )
+                     LINKER_LANGUAGE ${${PROJECT_NAME}_LINKER_LANGUAGE})
 
 #if(OPENMP)
 #  target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_Fortran )
@@ -24,21 +24,14 @@ ecbuild_add_library( TARGET ${PROJECT_NAME}
 target_link_libraries( ${PROJECT_NAME} PUBLIC NetCDF::NetCDF_Fortran )
 target_link_libraries( ${PROJECT_NAME} PUBLIC MPI::MPI_Fortran )
 target_link_libraries( ${PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} )
-#target_link_libraries( ${PROJECT_NAME} PUBLIC eckit )
-#target_link_libraries( ${PROJECT_NAME} PUBLIC fckit )
-#target_link_libraries( ${PROJECT_NAME} PUBLIC atlas_f )
-#if( oops_FOUND )
-#    target_link_libraries( ${PROJECT_NAME} PUBLIC ${oops_LIBRARIES} )
-#endif()
-#if( gsibclim_FOUND )
-#    target_link_libraries( ${PROJECT_NAME} PUBLIC gsibclim)
-#endif()
+
+# NCEP spectral library
+if( sp_FOUND )
+    target_link_libraries( gsibclim PUBLIC sp::sp_d)
+endif()
 
 # Enable including of local header Fortran file templates
 target_include_directories( ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> )
-
-# Process fypp files
-#fckit_target_preprocess_fypp( ${PROJECT_NAME} )
 
 # Fortran module output directory for build and install interfaces
 set( MODULE_DIR module/${PROJECT_NAME}/${CMAKE_Fortran_COMPILER_ID}/${CMAKE_Fortran_COMPILER_VERSION} )

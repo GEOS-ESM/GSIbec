@@ -19,6 +19,6 @@ if( CMAKE_Fortran_COMPILER_ID MATCHES "Intel" )
 elseif( CMAKE_Fortran_COMPILER_ID MATCHES "GNU" )
   include( compiler_flags_GNU_Fortran )
 else()
-  message( STATUS "Fortran compiler with ID ${CMAKE_CXX_COMPILER_ID} will be used with CMake default options")
+  message( STATUS "Fortran compiler with ID ${CMAKE_Fortran_COMPILER_ID} will be used with CMake default options")
 endif()
 

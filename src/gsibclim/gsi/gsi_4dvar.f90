@@ -454,11 +454,11 @@ idate5(2)=imo
 idate5(3)=idy
 idate5(4)=ihr
 idate5(5)=0
-call w3fs21(idate5,nmin_obs)
-if (MOD(nmin_obs,60)/=0) then
-   write(6,*)'time_4dvar: minutes should be 0',nmin_obs
-   call stop2(136)
-end if
+!call w3fs21(idate5,nmin_obs)
+!if (MOD(nmin_obs,60)/=0) then
+!   write(6,*)'time_4dvar: minutes should be 0',nmin_obs
+!   call stop2(136)
+!end if
 
 nhrobs=nmin_obs*r60inv
 nhrbgn=NINT(real(iwinbgn,r_kind)*r60inv)
