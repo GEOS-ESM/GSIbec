@@ -119,12 +119,12 @@ contains
    end subroutine init_general_commvars_dims
 
    subroutine final_general_commvars_dims
-   deallocate(dvars3d)
-   deallocate(dvars2d)
-   deallocate(cvarsmd)
-   deallocate(nrf_var)
-   deallocate(cvars3d)
-   deallocate(cvars2d)
+   if(allocated(dvars3d)) deallocate(dvars3d)
+   if(allocated(dvars2d)) deallocate(dvars2d)
+   if(allocated(cvarsmd)) deallocate(cvarsmd)
+   if(allocated(nrf_var)) deallocate(nrf_var)
+   if(allocated(cvars3d)) deallocate(cvars3d)
+   if(allocated(cvars2d)) deallocate(cvars2d)
    end subroutine final_general_commvars_dims
   
    subroutine init_general_commvars

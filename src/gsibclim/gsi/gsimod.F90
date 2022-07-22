@@ -19,7 +19,7 @@
 
   use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2
 
-  use gsi_4dvar, only: setup_4dvar,init_4dvar
+  use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
@@ -51,9 +51,10 @@
 
   use general_commvars_mod, only: init_general_commvars,destroy_general_commvars
   use general_commvars_mod, only: init_general_commvars_dims
+  use general_commvars_mod, only: final_general_commvars_dims
 
   use derivsmod, only: dvars2d, dvars3d, drv_set
-  use derivsmod, only: create_ges_derivatives,init_anadv
+  use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
 
   use guess_grids, only: nfldsig
 
@@ -598,12 +599,15 @@
   implicit none
   logical, intent(in) :: closempi
 ! Deallocate arrays
+  call destroy_ges_derivatives
   call destroy_general_commvars
+  call final_general_commvars_dims
   call final_grid_vars
   call final_anacv
   call final_anasv
   call gsi_chemguess_final
   call gsi_metguess_final
+  call clean_4dvar
 
   if (closempi) then
      call mpi_finalize(ierror)

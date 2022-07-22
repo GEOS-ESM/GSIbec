@@ -411,7 +411,7 @@ if(ng2d > 0)then
             usrname2d(ng2d))
 end if
 
-   allocate(levels(nmguess),i4crtm(nmguess),usrname(nmguess),&
+allocate(levels(nmguess),i4crtm(nmguess),usrname(nmguess),&
          mguess(nmguess),metstype(nmguess))
 
 ! Now load information from table
@@ -503,22 +503,24 @@ implicit none
 !EOP
 !-------------------------------------------------------------------------
 !BOC
-if(.not.guess_initialized_) return
-
+ 
 if(allocated(mguess3d)) deallocate(mguess3d)
-if(allocated(mguess2d)) deallocate(mguess2d)
 if(allocated(metsty3d)) deallocate(metsty3d)
-if(allocated(metsty2d)) deallocate(metsty2d) 
 if(allocated(i4crtm3d)) deallocate(i4crtm3d)
-if(allocated(i4crtm2d)) deallocate(i4crtm2d)
-if(allocated(levels3d)) deallocate(levels2d)
-if(allocated(levels))   deallocate(levels)
-if(allocated(i4crtm))   deallocate(i4crtm)
+if(allocated(levels3d)) deallocate(levels3d)
 if(allocated(usrname3d))deallocate(usrname3d)
+
+if(allocated(mguess2d)) deallocate(mguess2d)
+if(allocated(metsty2d)) deallocate(metsty2d) 
+if(allocated(i4crtm2d)) deallocate(i4crtm2d)
+if(allocated(levels2d)) deallocate(levels2d)
 if(allocated(usrname2d))deallocate(usrname2d)
+
 if(allocated(usrname))  deallocate(usrname)
 if(allocated(mguess))   deallocate(mguess)
 if(allocated(metstype)) deallocate(metstype)
+if(allocated(levels))   deallocate(levels)
+if(allocated(i4crtm))   deallocate(i4crtm)
 
 guess_initialized_=.false.
 end subroutine final_

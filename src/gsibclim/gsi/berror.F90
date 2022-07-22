@@ -363,11 +363,14 @@ contains
 !$$$
     implicit none
     if(allocated(table)) deallocate(table)
-    deallocate(wtaxs)
-    deallocate(wtxrs)
-    deallocate(be,bl,bl2)
-!_RT    if(allocated(qvar3d)) deallocate(qvar3d) ! _RTod somehow this makes GSI crash!when only single var in CV/SV
-    deallocate(inaxs,inxrs)
+    if(allocated(wtaxs)) deallocate(wtaxs)
+    if(allocated(wtxrs)) deallocate(wtxrs)
+    if(allocated(be)) deallocate(be)
+    if(allocated(bl)) deallocate(bl)
+    if(allocated(bl2)) deallocate(bl2)
+    if(allocated(qvar3d)) deallocate(qvar3d) ! _RTod somehow this makes GSI crash!when only single var in CV/SV
+    if(allocated(inaxs)) deallocate(inaxs)
+    if(allocated(inxrs)) deallocate(inxrs)
     if(allocated(alv))   deallocate(alv)
     if(allocated(dssv))  deallocate(dssv)
     if(allocated(dssvs)) deallocate(dssvs)

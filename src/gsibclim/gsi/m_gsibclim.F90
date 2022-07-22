@@ -10,6 +10,8 @@ use gridmod, only: nlon,nlat,lon2,lat2,lat1,lon1,nsig
 use guess_grids, only: nfldsig
 use guess_grids, only: guess_grids_init
 use guess_grids, only: guess_grids_final
+!use guess_grids, only: gsiguess_bkgcov_init
+use guess_grids, only: gsiguess_bkgcov_final
 use state_vectors, only: allocate_state,deallocate_state
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
@@ -87,8 +89,7 @@ contains
   logical :: already_init_mpi
 
   if (initialized_) then
-     print *, myname_, ': already initialized (should not be called twice!)'
-     return
+     call final_(.false.) ! finalize what should have been finalized
   endif
 
   ier=0
@@ -130,9 +131,11 @@ contains
 
   logical, intent(in) :: closempi
 
+  call gsiguess_bkgcov_final()
   call guess_grids_final()
   call unset_()
   call gsimain_finalize(closempi)
+  initialized_=.false.
 
   end subroutine final_
 !--------------------------------------------------------
@@ -208,9 +211,12 @@ contains
   end subroutine set_
 !--------------------------------------------------------
   subroutine unset_
+   use gridmod, only: destroy_grid_vars
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: destroy_cdiff_coefs
+   implicit none
    if(cdiff_created()) call destroy_cdiff_coefs
+   call destroy_grid_vars
    iamset_ = .false.
   end subroutine unset_
 !--------------------------------------------------------

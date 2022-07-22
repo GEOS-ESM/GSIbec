@@ -377,8 +377,11 @@ drv_set=.true.
 ! destroy derivative grid
 ! call GSI_GridDestroy(grid,lat2,lon2,nsig)
 
-  deallocate(dvars2d,dvars3d,&
-             dsrcs2d,dsrcs3d,levels)
+  if(allocated(dvars2d)) deallocate(dvars2d)
+  if(allocated(dvars3d)) deallocate(dvars3d)
+  if(allocated(dsrcs2d)) deallocate(dsrcs2d)
+  if(allocated(dsrcs3d)) deallocate(dsrcs3d)
+  if(allocated(levels))  deallocate(levels)
 
   if(mype==0) write(6,*) 'destroy_ges_derivatives: successfully complete'
   end subroutine destroy_ges_derivatives

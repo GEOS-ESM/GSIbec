@@ -64,6 +64,7 @@ use GSI_BundleMod, only : GSI_GridCreate
 
 use mpeu_util, only: gettablesize
 use mpeu_util, only: gettable
+use mpeu_util, only: perr,die
 
 implicit none
 
@@ -255,8 +256,12 @@ end if
 end subroutine init_anasv
 subroutine final_anasv
 implicit none
-deallocate(svars)
-deallocate(svars3d,svars2d,levels)
+integer :: istatus
+character(len=*),parameter :: myname_ = myname//'*final_anasv'
+deallocate(svars,stat=istatus)
+if(istatus/=0) call die(myname_)
+deallocate(svars3d,svars2d,levels,stat=istatus)
+if(istatus/=0) call die(myname_)
 end subroutine final_anasv
 ! ----------------------------------------------------------------------
 subroutine allocate_state(yst)
@@ -682,7 +687,6 @@ end function dot_prod_st
 ! ----------------------------------------------------------------------
 function dot_prod_st_r0(xst,yst,which) result(dotprod_red)
 !  Same as dot_prod_red_st_r0 except reduce to all processors.
-  use mpeu_util, only: perr,die
   implicit none
   type(gsi_bundle), intent(in) :: xst, yst
   character(len=*), optional    , intent(in) :: which  ! variable component name
@@ -703,7 +707,6 @@ end function dot_prod_st_r0
 ! ----------------------------------------------------------------------
 function dot_prod_st_r1(xst,yst,which) result(dotprod_red)
 !  Same as dot_prod_red_st_r1 except reduce to all processors.
-  use mpeu_util, only: perr,die
   implicit none
   type(gsi_bundle), dimension(:), intent(in) :: xst, yst
   character(len=*), optional    , intent(in) :: which  ! variable component name
@@ -732,7 +735,6 @@ end function dot_prod_st_r1
 ! ----------------------------------------------------------------------
 function dot_prod_red_st_r0(xst,yst,iroot,which) result(dotprod_red)
 !  Same as dot_prod_st_r0 except only reduce to one (iroot) processor.
-  use mpeu_util, only: perr,die
   implicit none
   type(gsi_bundle), intent(in) :: xst, yst
   character(len=*), optional    , intent(in) :: which  ! variable component name
@@ -755,7 +757,6 @@ end function dot_prod_red_st_r0
 ! ----------------------------------------------------------------------
 function dot_prod_red_st_r1(xst,yst,iroot,which) result(dotprod_red)
 !  Same as dot_prod_st_r1 except only reduce to one (iroot) processor.
-  use mpeu_util, only: perr,die
   implicit none
   type(gsi_bundle), dimension(:), intent(in) :: xst, yst
   character(len=*), optional    , intent(in) :: which  ! variable component name
