@@ -378,8 +378,15 @@ contains
     deallocate(varprd)
     if(diag_precon)deallocate(vprecond)
 #endif /* USE_ALL_ORIGINAL */
-    deallocate(slw,slw1,slw2)
-    deallocate(ii,jj,ii1,jj1,ii2,jj2)
+    if(allocated(slw)) deallocate(slw)
+    if(allocated(slw1)) deallocate(slw1)
+    if(allocated(slw2)) deallocate(slw2)
+    if(allocated(ii)) deallocate(ii)
+    if(allocated(jj)) deallocate(jj)
+    if(allocated(ii1)) deallocate(ii1)
+    if(allocated(jj1)) deallocate(jj1)
+    if(allocated(ii2)) deallocate(ii2)
+    if(allocated(jj2)) deallocate(jj2)
 
     balmod_initialized_ = .false.
 

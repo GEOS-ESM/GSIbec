@@ -155,7 +155,12 @@ contains
 !$$$ end documentation block
     implicit none
 
-    deallocate(xwtxys,ywtxys,ixwtxys,iywtxys,nxwtxys,nywtxys)
+    if(allocated(xwtxys)) deallocate(xwtxys)
+    if(allocated(ywtxys)) deallocate(ywtxys)
+    if(allocated(ixwtxys)) deallocate(ixwtxys)
+    if(allocated(iywtxys)) deallocate(iywtxys)
+    if(allocated(nxwtxys)) deallocate(nxwtxys)
+    if(allocated(nywtxys)) deallocate(nywtxys)
 
     smooth_polcas_set_ = .false.
 
