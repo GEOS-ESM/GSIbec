@@ -46,7 +46,7 @@ character(len=5),parameter :: cvars3d(nv3d) = (/ &
                                               'tv   ', 'u    ', 'v    ', &
                                               'sphu ', 'qitot', 'qltot', &
                                               'qrtot', 'qstot', 'ozone', &
-                                              'delp '& 
+                                              'delp '&
                                               /)
 
 interface nc_GEOSens_dims; module procedure    &
@@ -69,14 +69,14 @@ interface nc_GEOSens_geos2gsi; module procedure    &
   geos2gsi_ ; end interface
 interface nc_GEOSens_gsi2geos; module procedure    &
   gsi2geos_ ; end interface
-interface nc_GEOSens_getpointer 
-  module procedure get_pointer_2d_ 
+interface nc_GEOSens_getpointer
+  module procedure get_pointer_2d_
   module procedure get_pointer_3d_
 end interface
 
 ! internal only
-interface stddev_ 
-  module procedure stddev2_ 
+interface stddev_
+  module procedure stddev2_
   module procedure stddev3_
 end interface
 contains
@@ -95,14 +95,14 @@ subroutine read_dims_ (fname,nlat,nlon,nlev,rc, myid,root)
 ! Local variables
   character(len=*), parameter :: myname_ = myname//"::dims_"
   logical :: verbose
-   
+
 ! Return code (status)
   rc=0; mype_=0; root_=0
   if(present(myid) .and. present(root) ) then
      mype_ = myid
      root_ = root
   endif
- 
+
 ! Open the file. NF90_NOWRITE tells netCDF we want read-only access to
 ! the file.
 
@@ -146,7 +146,7 @@ subroutine read_GEOSens_ (fname,bvars,rc, myid,root, gsiset)
   logical :: verbose
   logical :: init_
   logical :: gsi_
-  
+
 ! Return code (status)
   rc=0; mype_=0; root_=0
   verbose=.true.
@@ -161,7 +161,7 @@ subroutine read_GEOSens_ (fname,bvars,rc, myid,root, gsiset)
   if(present(gsiset)) then
      gsi_=gsiset
   endif
- 
+
 ! Get dimensions
   call read_dims_ (fname,nlat_,nlon_,nlev_,rc, mype_,root_)
 
@@ -332,7 +332,7 @@ subroutine write_GEOSens_ (fname,bvars,lats,lons,rc, myid,root,plevs)
   integer :: mype_,root_
   integer, allocatable :: varid2d(:), varid3d(:)
   logical :: verbose
-  
+
 ! This is the data array we will write. It will just be filled with
 ! a progression of integers for this example.
   real(4), allocatable :: data_out(:,:,:)
@@ -372,7 +372,7 @@ subroutine write_GEOSens_ (fname,bvars,lats,lons,rc, myid,root,plevs)
   call check_( nf90_create(fname, NF90_CLOBBER, ncid), rc, mype_, root_ )
   if(rc/=0) return
 
-! Define the dimensions. NetCDF will hand back an ID for each. 
+! Define the dimensions. NetCDF will hand back an ID for each.
   call check_( nf90_def_dim(ncid, "lon", nlon, x_dimid), rc, mype_, root_ )
   call check_( nf90_def_dim(ncid, "lat", nlat, y_dimid), rc, mype_, root_ )
   call check_( nf90_def_dim(ncid, "lev", nlev, z_dimid), rc, mype_, root_ )
@@ -468,18 +468,18 @@ subroutine init_GEOSens_vars_(vr,nlon,nlat,nsig,gsi)
     vr%gsiset = gsi
   endif
 
-  vr%nlon=nlon 
+  vr%nlon=nlon
   vr%nlat=nlat
   vr%nsig=nsig
 
 ! allocate single precision arrays
   if (vr%gsiset) then
-     allocate(vr%tv(nlat,nlon,nsig),vr%u (nlat,nlon,nsig),vr%v (nlat,nlon,nsig),vr%qv(nlat,nlon,nsig),&  
+     allocate(vr%tv(nlat,nlon,nsig),vr%u (nlat,nlon,nsig),vr%v (nlat,nlon,nsig),vr%qv(nlat,nlon,nsig),&
               vr%qi(nlat,nlon,nsig),vr%ql(nlat,nlon,nsig),vr%qr(nlat,nlon,nsig),vr%qs(nlat,nlon,nsig),&
               vr%oz(nlat,nlon,nsig),vr%dp(nlat,nlon,nsig) )
      allocate(vr%ps(nlat,nlon),vr%ts(nlat,nlon))
   else
-     allocate(vr%tv(nlon,nlat,nsig),vr%u (nlon,nlat,nsig),vr%v (nlon,nlat,nsig),vr%qv(nlon,nlat,nsig),&  
+     allocate(vr%tv(nlon,nlat,nsig),vr%u (nlon,nlat,nsig),vr%v (nlon,nlat,nsig),vr%qv(nlon,nlat,nsig),&
               vr%qi(nlon,nlat,nsig),vr%ql(nlon,nlat,nsig),vr%qr(nlon,nlat,nsig),vr%qs(nlon,nlat,nsig),&
               vr%oz(nlon,nlat,nsig),vr%dp(nlon,nlat,nsig) )
      allocate(vr%ps(nlon,nlat),vr%ts(nlon,nlat))
@@ -491,7 +491,7 @@ subroutine init_GEOSens_vars_(vr,nlon,nlat,nsig,gsi)
   type(nc_GEOSens_vars) vr
 ! deallocate arrays
   if(.not. vr%initialized) return
-  deallocate(vr%tv,vr%u ,vr%v ,vr%qv,  &  
+  deallocate(vr%tv,vr%u ,vr%v ,vr%qv,  &
              vr%qi,vr%ql,vr%qr,vr%qs,&
              vr%oz,vr%dp)
   deallocate(vr%ps,vr%ts)
@@ -568,7 +568,7 @@ subroutine copy_(ivars,ovars,rc)
       return
   endif
 
-  if (ivars%gsiset /= ovars%gsiset ) then
+  if (ivars%gsiset .neqv. ovars%gsiset ) then
      do kk=1,ovars%nsig
         ovars%dp(:,:,kk) = transpose(ivars%dp(:,:,kk))
         ovars%tv(:,:,kk) = transpose(ivars%tv(:,:,kk))
@@ -703,11 +703,11 @@ subroutine check_(status,rc, myid, root)
     integer, intent (out) :: rc
     integer, intent ( in) :: myid, root
     rc=0
-    if(status /= nf90_noerr) then 
+    if(status /= nf90_noerr) then
       if(myid==root) print *, trim(nf90_strerror(status))
       rc=999
     end if
-end subroutine check_  
+end subroutine check_
 
 subroutine geos2gsi_ (x)
   implicit none
