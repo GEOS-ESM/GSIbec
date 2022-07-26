@@ -13,7 +13,7 @@ character(len=80) crec
     enddo
     close(lu)
 !   do k=nlev-1,1,-1 ! disregard redundant level at the top
-!      write(6,'(f10.3,2x,f11.8)') ak(k), bk(k)  
+!      write(6,'(f10.3,2x,f11.8)') ak(k), bk(k)
 !   enddo
     write(6,'(5(f10.3,a))') (ak(k), ',',k=nlev-1,1,-1)
     write(6,'(5(f11.8,a))') (bk(k), ',',k=nlev-1,1,-1)

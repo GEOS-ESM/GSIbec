@@ -35,8 +35,8 @@ subroutine get_gefs_ensperts_dualres (tau)
 !                         of vort/div and surface height since not needed
 !   2014-12-05  zhu     - set lower bound for cwmr
 !   2016-07-01  mahajan - use GSI ensemble coupler
-!   2018-02-15  wu      - add code for fv3_regional option 
-!   2019-03-13  eliu    - add precipitation component 
+!   2018-02-15  wu      - add code for fv3_regional option
+!   2019-03-13  eliu    - add precipitation component
 !
 !   input argument list:
 !
@@ -100,7 +100,7 @@ subroutine get_gefs_ensperts_dualres (tau)
   integer(i_kind) ipc3d(nc3d),ipc2d(nc2d)
   integer(i_kind) ier
 ! integer(i_kind) il,jl
-  logical ice,hydrometeor 
+  logical ice,hydrometeor
   type(sub2grid_info) :: grd_tmp
 
 ! Create perturbations grid and get variable names from perturbations
@@ -257,7 +257,7 @@ subroutine get_gefs_ensperts_dualres (tau)
                 cycle
              end if
           end if
-          if ( hydrometeor ) then                
+          if ( hydrometeor ) then
 !$omp parallel do schedule(dynamic,1) private(i,j,k)
              do k=1,km
                 do j=1,jm
@@ -290,7 +290,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 
 !_$omp parallel do schedule(dynamic,1) private(i,j,ic2,ipic)
        do ic2=1,nc2d
- 
+
           call gsi_bundlegetpointer(en_read(n),trim(cvars2d(ic2)),p2,istatus)
           if(istatus/=0) then
              write(6,*)' error retrieving pointer to ',trim(cvars2d(ic2)),' from read in member ',m
@@ -321,7 +321,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 ! NOTE: if anyone implements alternative use of SST (as from sst2) care need
 !       be given to those applications getting SST directly from the members of
 !       the ensemble for which this code is already handling - i.e., I don''t
-!       know who would want to commented out code below but be mindful 
+!       know who would want to commented out code below but be mindful
 !       of how it interacts with option sst_staticB, please - Todling.
 !_$omp parallel do schedule(dynamic,1) private(i,j)
 !            do j=1,jm
@@ -498,7 +498,7 @@ subroutine ens_spread_dualres(en_bar,ibin)
 !   output argument list:
 !
 ! NOTE: The update made by Dave to handle dual resolution leads to non-positive
-!       spreads - the interpolation routines are not quarantee to preserve 
+!       spreads - the interpolation routines are not quarantee to preserve
 !       positiveness (Todling). A better version of this routine would
 !       interpolate the errors (x(m)-xbar) and then proceed to calculate the
 !       spreads; but it would be more costly.
@@ -516,7 +516,7 @@ subroutine ens_spread_dualres(en_bar,ibin)
   use constants, only:  zero,two,half,one
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use control_vectors, only: be2d,be3d
-  use mpeu_util, only: getindex   
+  use mpeu_util, only: getindex
   use gsi_bundlemod, only: gsi_bundlecreate
   use gsi_bundlemod, only: gsi_grid
   use gsi_bundlemod, only: gsi_bundle
@@ -640,7 +640,7 @@ subroutine write_spread_dualres(ibin,bundle)
 ! program history log:
 !   2010-01-05  kleist, initial documentation
 !   2010-02-28  parrish - make changes to allow dual resolution capability
-!   2018-04-01  eliu - add hydrometeors 
+!   2018-04-01  eliu - add hydrometeors
 !   2019-07-10  todling - generalize to write out all variables in the ensemble
 !                       - also allows for print out of different time bins
 !   2021-10-08  todling - name wind vars correctly in file when ens uses wind vectors
@@ -659,7 +659,7 @@ subroutine write_spread_dualres(ibin,bundle)
   use mpeu_util, only: die
   use m_mpimod, only: mpi_rtype,mpi_itype,mpi_comm_world
   use m_kinds, only: r_kind,i_kind,r_single
-  use guess_grids, only: gsiguess_get_ref_gesprs 
+  use guess_grids, only: gsiguess_get_ref_gesprs
   use gridmod, only: rlats
   use hybrid_ensemble_parameters, only: grd_anl,uv_hyb_ens
   use gsi_bundlemod, only: gsi_grid

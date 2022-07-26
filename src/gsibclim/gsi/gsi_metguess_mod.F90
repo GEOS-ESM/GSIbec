@@ -17,15 +17,15 @@ refered to here as Meteorological Guess.
 Eventually it would be nice to see all guess fields defined via the present module, and
 a complete revamp of guess\_grids. This is aimed at for example extending the
 current ability to run GSI for say analyzing a single field, such as Ozone, and
-only have to bring in the necessary background fields, such Ozone it self when 
+only have to bring in the necessary background fields, such Ozone it self when
 temperature interdependencies are neglected.
 
 \begin{center}
 \fbox{MetGuess Bundle is a way to ingest Meterological Guess (background fields) into GSI}
 \end{center}
 
-Before the introduction of this module, all guess fields entered GSI through the 
-and the wired-in arrays ges\_x, with x standing for particular fields, defined in 
+Before the introduction of this module, all guess fields entered GSI through the
+and the wired-in arrays ges\_x, with x standing for particular fields, defined in
 the guess\_grids module, e.g., ges\_u, ges\_tv, and so on. This becomes cumbersome the
 more one wants to add new features to GSI. Chemistry-related fields -- aerosols and trace gases -- are
 already handled separately from guess\_grids using GSI\_ChemBundle. The present
@@ -35,18 +35,18 @@ modules extends this capability to any new guess field.
 \fbox{MetGuess\_Bundle is a GSI\_Bundle}
 \end{center}
 
-The GSI\_MetGuess\_Bundle uses the GSI\_Bundle. But while the state and control vectors 
+The GSI\_MetGuess\_Bundle uses the GSI\_Bundle. But while the state and control vectors
 use the GSI\_Bundle to associate fields used by the observation operator and
 those used in the cost function, respectively, the GSI\_MetGuess\_Bundle
 is simply aimed at allowing gather together Guess fields in a flexible way. Just
-as with the bundle, all parallel distribution must have already been done before 
-filling in the fields in the bundle, that is, GSI\_MetGuess\_Bundle does not 
+as with the bundle, all parallel distribution must have already been done before
+filling in the fields in the bundle, that is, GSI\_MetGuess\_Bundle does not
 handle distribution.
 
 As guess\_grids does, this module still treats the Meteorological Guess fields
 as in a common-block-like structure. That is, the GSI\_Bundle defined here to hold the
 Meteorological Guess fields is an internally defined type that cannot be passed
-around; cannot be instanciated. This will change in the future, but for the time being 
+around; cannot be instanciated. This will change in the future, but for the time being
 this is the simplest thing to do given the current code design. This is
 identical to what is done in defining the GSI\_ChemBundle.
 
@@ -56,8 +56,8 @@ identical to what is done in defining the GSI\_ChemBundle.
 
 One of the ideas behind this module is that it defines an opaque-like object.
 That is, functions related to contents of the MetGuess Bundle should only be
-extracted via inquires using a ``get-like'' procedures. This is why, only ``methods'' are 
-made public to this module, that is, 
+extracted via inquires using a ``get-like'' procedures. This is why, only ``methods'' are
+made public to this module, that is,
 
 \begin{verbatim}
 public :: gsi_metguess_create_grids
@@ -67,9 +67,9 @@ public :: gsi_metguess_get
 public :: gsi_metguess_final
 \end{verbatim}
 
-and never the variables themselves; the only exception being the GSI\_MetGuess\_Bundle itself 
-(until it is no longer treated as a common-block).  Some of the public methods above are 
-overloaded and all have internal interfaces (name of which appears in the index of this protex 
+and never the variables themselves; the only exception being the GSI\_MetGuess\_Bundle itself
+(until it is no longer treated as a common-block).  Some of the public methods above are
+overloaded and all have internal interfaces (name of which appears in the index of this protex
 document. It should be a rule here that any new routine to be made public should
 have a declared interface procedure.
 
@@ -77,7 +77,7 @@ have a declared interface procedure.
 \fbox{MetGuess\_Bundle is defined via the {\it met\_guess} table in a resource file}
 \end{center}
 
-\underline{Defining the MetGuess\_Bundle} is done via the table {\it met\_guess}, usually 
+\underline{Defining the MetGuess\_Bundle} is done via the table {\it met\_guess}, usually
 embedded in the {\it anavinfo} file. An example of such table follows:
 \begin{verbatim}
 met_guess::
@@ -96,11 +96,11 @@ The current {\it met\_guess} table has five columns defined as follows:
 \begin{verbatim}
 Column 1: variable name - refers to internally known GSI variable name
 Column 2: indicates number of levels (used to distinguish between 2d and 3d fields)
-Column 3: indicates whether variable is to be passed to CRTM or not according to 
+Column 3: indicates whether variable is to be passed to CRTM or not according to
           the following scheme:
-          if<0    general variable; not used in CRTM 
+          if<0    general variable; not used in CRTM
           if=0    general variable; use prescribed global mean data to affect CRTM
-          if=1    general variable; use variable in guess field to affect CRTM 
+          if=1    general variable; use variable in guess field to affect CRTM
 Column 4: description of variable (defined by user)
 Column 5: user-defined variable name associated with name read in from file
 \end{verbatim}
@@ -117,13 +117,13 @@ Column 5: user-defined variable name associated with name read in from file
       call gsi_metguess_get ( 'var::cw', ivar, ier )
       \end{verbatim}
       if ivar is grater than zero, the variable is present in the bundle.
-\item Say a routine wants to know how $qi$ is to be used in CRTM. 
+\item Say a routine wants to know how $qi$ is to be used in CRTM.
       This is done via the {\it i4crtm::} tag, as in:
       \begin{verbatim}
       call gsi_metguess_get ( 'i4crtm::qi', iqi, ier )
       \end{verbatim}
-       where the value returned {\it iqi} is an integer following the 
-       scheme laid out for entries in column 3 of the resource file (anavinfo). 
+       where the value returned {\it iqi} is an integer following the
+       scheme laid out for entries in column 3 of the resource file (anavinfo).
 
 \item Say a routine wants to get the number of all 3d cloud fields in the
       MetGuess\_Bundle, this can use the tag {\it clouds::3d}, as in:
@@ -135,16 +135,16 @@ Column 5: user-defined variable name associated with name read in from file
 
 \item Say a routine wants the name of all 3d met-fields
       \begin{verbatim}
-      call gsi_metguess_get ('clouds::3d',met3dnames,ier)     
+      call gsi_metguess_get ('clouds::3d',met3dnames,ier)
       \end{verbatim}
-      now the returned variable {\it met3dnames} is a character array with the 
+      now the returned variable {\it met3dnames} is a character array with the
       names of all 3d-met-guess. Notice it is important to inquire before hand
       about the number of 3d-met-guess fields available and to properly allocate space
       for the character arrays {\it met3dnames}, and only then make the call above.
 
 \end{enumerate}
 
-Other possible mnemonics known by this package can be found in the 
+Other possible mnemonics known by this package can be found in the
 prologue description of the {it get} routines.
 
 \begin{center}
@@ -158,9 +158,9 @@ prologue description of the {it get} routines.
   \item Only methods should be made public from this module.
   \item New routines should be defined via interface procedure.
 \end{itemize}
- 
+
 A general remark about the correct {\it met\_guess} table: it is recognized that
-the format for general specification related to specific entries in the table is 
+the format for general specification related to specific entries in the table is
 not general enough. A better approach is the one used by the Registry used in
 GEOS-5 GOCART where a table exists to control a particular functionality
 applicable to a certain set of constituents. For example, use of a variable in
@@ -168,13 +168,13 @@ CRTM could be control instead by a specific table listing constituents to be
 used in the CRTM and at what extent, for example, a table of the form:
 \begin{verbatim}
 use_in_crtm::
- !var     use  
+ !var     use
   qr       1
   ql       0
 ::
 \end{verbatim}
-Something of this form should eventually replace some of the columns in the 
-{\it met\_guess} table. 
+Something of this form should eventually replace some of the columns in the
+{\it met\_guess} table.
 
 #endif
 !EOI
@@ -184,7 +184,7 @@ Something of this form should eventually replace some of the columns in the
 !  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.1, GMAO  !
 !-------------------------------------------------------------------------
 !BOP
-!  
+!
 ! !MODULE: GSI_MetGuess_Mod -- Implements Meteorological Guess for GSI
 !
 ! !INTERFACE:
@@ -201,9 +201,9 @@ module gsi_metguess_mod
 !                      Each object must be opaque with a get and
 !                      a put method associated with it.
 !   2. This is still functioning as a common-block when it comes
-!      to the met type itself - needs some work to make it into 
+!      to the met type itself - needs some work to make it into
 !      a self-contained type
-! 
+!
 ! !USES:
 
 use m_kinds, only: i_kind,r_kind
@@ -237,7 +237,7 @@ public :: gsi_metguess_init
 public :: gsi_metguess_get
 public :: gsi_metguess_final
 
-public :: GSI_MetGuess_Bundle   ! still a common for now, ultimately should 
+public :: GSI_MetGuess_Bundle   ! still a common for now, ultimately should
                                 ! be a dynamic "type", passed around in arg list
 
 ! !INTERFACE:
@@ -246,7 +246,7 @@ interface gsi_metguess_init
           module procedure init_
 end interface
 interface gsi_metguess_final
-          module procedure final_ 
+          module procedure final_
 end interface
 interface gsi_metguess_create_grids
           module procedure create_
@@ -322,16 +322,16 @@ subroutine init_ (iamroot,rcname)
 ! USES:
 implicit none
 ! !INPUT PARAMETER:
-   logical,optional,intent(in) :: iamroot 
-   character(len=*),optional,intent(in) :: rcname 
-! !DESCRIPTION: Define contents of Meteorological Guess Bundle through rc 
+   logical,optional,intent(in) :: iamroot
+   character(len=*),optional,intent(in) :: rcname
+! !DESCRIPTION: Define contents of Meteorological Guess Bundle through rc
 !               file (typilcally embedded in anavinfo text file.
 !
 ! !REVISION HISTORY:
 !   2011-04-29  todling  initial code
 !   2013-09-30  todling  allow 40-char var description
 !   2014-02-03  todling  negative level entry in table means rank-3 array
-!                         
+!
 !
 ! !REMARKS:
 !   language: f90
@@ -357,7 +357,7 @@ logical iamroot_
 if(guess_initialized_) return
 
 iamroot_=mype==0
-if(present(iamroot)) iamroot_=iamroot 
+if(present(iamroot)) iamroot_=iamroot
 
 ! load file
 luin=get_lun()
@@ -508,7 +508,7 @@ if(.not.guess_initialized_) return
 if(allocated(mguess3d)) deallocate(mguess3d)
 if(allocated(mguess2d)) deallocate(mguess2d)
 if(allocated(metsty3d)) deallocate(metsty3d)
-if(allocated(metsty2d)) deallocate(metsty2d) 
+if(allocated(metsty2d)) deallocate(metsty2d)
 if(allocated(i4crtm3d)) deallocate(i4crtm3d)
 if(allocated(i4crtm2d)) deallocate(i4crtm2d)
 if(allocated(levels3d)) deallocate(levels2d)
@@ -683,12 +683,12 @@ end subroutine final_
 ! \begin{verbatim}
 !      Known mnemonics        retrieve
 !      ---------------        --------
-!      dim                    total number of meteorological guesses 
+!      dim                    total number of meteorological guesses
 !      i4crtm::XXX            information related to CRTM usage of gas XXX
 !      var::XXX               index of gas XXX in met-bundle
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
@@ -779,9 +779,9 @@ end subroutine final_
 !      ---------------        --------
 !      metguess_level         levels of all variables in metguess
 !      clouds_level::3d       levels of all 3d clouds
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2011-05-17  todling  initial code
@@ -810,7 +810,7 @@ end subroutine final_
   if(trim(desc)=='guesses_level') then
      labfound=.true.
      do i=1,nmguess
-        ivar(i)=levels(i) 
+        ivar(i)=levels(i)
      enddo
      istatus=0
   endif
@@ -820,7 +820,7 @@ end subroutine final_
      do i=1,nmguess
         if(i4crtm(i)>=10.and.i4crtm(i)<20) then
            ii=ii+1
-           ivar(ii)=levels(i) 
+           ivar(ii)=levels(i)
         endif
      enddo
      if(ii>0) istatus=0
@@ -831,7 +831,7 @@ end subroutine final_
      do i=1,ng3d
         if(i4crtm3d(i)>=10.and.i4crtm3d(i)<20) then
            ii=ii+1
-           ivar(ii)=levels3d(i) 
+           ivar(ii)=levels3d(i)
         endif
      enddo
      if(ii>0) istatus=0
@@ -845,7 +845,7 @@ end subroutine final_
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  get_char0d_ --- inquire rank-0 character 
+! !IROUTINE:  get_char0d_ --- inquire rank-0 character
 !
 ! !INTERFACE:
   subroutine get_char0d_ ( desc, ivar, istatus )
@@ -858,9 +858,9 @@ end subroutine final_
 !      ---------------        --------
 !      list                   list of all guesses
 !      list::clouds           list of all cloud-related guesses
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
@@ -938,7 +938,7 @@ end subroutine final_
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  get_char1d_ --- inquire rank-1 character 
+! !IROUTINE:  get_char1d_ --- inquire rank-1 character
 !
 ! !INTERFACE:
   subroutine get_char1d_ ( desc, ivar, istatus )
@@ -955,9 +955,9 @@ end subroutine final_
 !      meteo_4crtm_jac::3d    list of 3d meteorology fields to participate in CRTM-Jac calc
 !      clouds_4crtm_jac::3d   list of 3d cloud fields to participate in CRTM-Jac calc
 !      clouds_4crtm_fwd::3d   list of 3d cloud fields to participate in CRTM-fwd calc
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
@@ -1011,7 +1011,7 @@ end subroutine final_
         do i=1,nmguess
            if(abs(i4crtm(i))>=10.and.abs(i4crtm(i))<20) then
               ii=ii+1
-              ivar(ii)=mguess(ii) 
+              ivar(ii)=mguess(ii)
            endif
         enddo
         if(ii>0) istatus=0
@@ -1023,7 +1023,7 @@ end subroutine final_
      do i=1,ng3d
         if(i4crtm3d(i)==2) then
            ii=ii+1
-           ivar(ii)=mguess3d(i) 
+           ivar(ii)=mguess3d(i)
         endif
      enddo
      if(ii>0) istatus=0
@@ -1034,7 +1034,7 @@ end subroutine final_
      do i=1,ng3d
         if(i4crtm3d(i)==12) then
            ii=ii+1
-           ivar(ii)=mguess3d(i) 
+           ivar(ii)=mguess3d(i)
         endif
      enddo
      if(ii>0) istatus=0
@@ -1057,7 +1057,7 @@ end subroutine final_
         do i=1,ng3d
            if(abs(i4crtm3d(i))>=10.and.abs(i4crtm3d(i))<20) then
               ii=ii+1
-              ivar(ii)=mguess3d(i) 
+              ivar(ii)=mguess3d(i)
            endif
         enddo
         if(ii>0) istatus=0
@@ -1070,7 +1070,7 @@ end subroutine final_
         do i=1,ng2d
            if(abs(i4crtm2d(i))>=10.and.abs(i4crtm2d(i))<20) then
               ii=ii+1
-              ivar(ii)=mguess2d(i) 
+              ivar(ii)=mguess2d(i)
            endif
         enddo
         if(ii>0) istatus=0

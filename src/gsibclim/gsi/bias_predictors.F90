@@ -216,7 +216,7 @@ subroutine deallocate_preds(yst)
   implicit none
   type(predictors), intent(inout) :: yst
 
-  if (yst%lallocated) then 
+  if (yst%lallocated) then
      NULLIFY(yst%predr)
      NULLIFY(yst%predp)
      NULLIFY(yst%predt)
@@ -328,7 +328,7 @@ subroutine read_preds (yst,filename)
   integer(i_kind) :: ii,iunit,nsclen_in,npclen_in,ntclen_in
   real(r_kind),allocatable,dimension(:)::preds,predp,predt
   logical :: allwell
-  
+
   allwell=.true.
   allocate(preds(nsclen),predp(npclen),predt(ntclen))
 
@@ -388,7 +388,7 @@ subroutine write_preds (yst,filename,mype)
 
   integer(i_kind) :: ii,iunit
   real(r_kind),allocatable,dimension(:)::preds,predp,predt
-  
+
   allocate(preds(nsclen),predp(npclen),predt(ntclen))
   ii=0
   preds = yst%values(ii+1:ii+nsclen)
@@ -468,8 +468,8 @@ subroutine update_bias_preds(regional2d,sbias)
         end do
      end do
 
-!    Aircraft temperature bias 
-     if (aircraft_t_bc_pof .or. aircraft_t_bc) then 
+!    Aircraft temperature bias
+     if (aircraft_t_bc_pof .or. aircraft_t_bc) then
         ij=0
         do j=1,ntail
            do i=1,npredt

@@ -23,7 +23,7 @@ contains
       integer(i_kind) i,j,k,mm1,ierr
       integer(i_kind) imr,jnp,nl
 
-      mm1 = mype+1 
+      mm1 = mype+1
       stat_= 0
       imr  =sg%nlon
       jnp  =sg%nlat
@@ -35,7 +35,7 @@ contains
             if(mype==ROOT) print*, trim(myname_), ': Alloc(work3d)'
             return
         end if
-                                                                                                                           
+
 !     Gather GCM perturbations to root processor
 !     ------------------------------------------
       call mygather3d_( fld, work3d )
@@ -107,7 +107,7 @@ contains
       use m_kinds, only: r_kind,r_double
       use general_sub2grid_mod, only: sub2grid_info
       implicit none
-   
+
       type(sub2grid_info),                    intent(in  ) :: sg        ! subdomain info
       real(r_kind),dimension(sg%nlon,sg%nlat),intent(in  ) :: grid_in   ! input grid
       real(r_kind),dimension(sg%itotsub)     ,intent( out) :: grid_out  ! output gridend subroutine reorder21_

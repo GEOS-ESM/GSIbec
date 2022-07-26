@@ -17,7 +17,7 @@ subroutine smoothrf(work,nlevs)
 !   2005-05-27  kleist/parrish - add option to use new patch interpolation
 !                  if (norsp==0) will default to polar cascade
 !   2005-11-16  wgu - set nmix=nr+1+(ny-nlat)/2 to make sure
-!                  nmix+nrmxb=nr no matter what number nlat is.   
+!                  nmix+nrmxb=nr no matter what number nlat is.
 !   2010-05-05  derber create diag2tr - diag2nh -diag2sh routines to simplify smoothrf routines
 !   2010-05-22  todling - remove implicit ordering requirement in nvar_id
 !   2010-10-08  derber - optimize and clean up
@@ -66,14 +66,14 @@ subroutine smoothrf(work,nlevs)
         do j=1,nhscrf
            totwgt(j)=hswgt(j)*hzscl(j)*hzscl(j)
         end do
-        
+
         if(nrf_var(nvar_id(k))=='sf'.or.nrf_var(nvar_id(k))=='vp')then
            totwgt(3)=half*totwgt(3)
         end if
-        
+
         call rfxyyx(work(1,1,k),ny,nx,ii(1,1,1,k),&
              jj(1,1,1,k),slw(1,k),totwgt)
-        
+
      end do
 
 ! Global case
@@ -82,7 +82,7 @@ subroutine smoothrf(work,nlevs)
      do j=1,nhscrf
         totwgt(j)=hswgt(j)*hzscl(j)*hzscl(j)
      end do
-     
+
 !$omp parallel do  schedule(dynamic,1) private(kk) &
 !$omp private(i,j,k,kkk,pall), &
 !$omp shared(nlevs,workout,nx,ny,ii,jj,slw,nhscrf,nf,nfg,totwgt, &
@@ -117,7 +117,7 @@ subroutine smoothrf(work,nlevs)
           call rfxyyx(pall,nfg,nfg,ii1(1,1,1,k),jj1(1,1,1,k),slw1(1,k),totwgt)
           call grid2nh_ad(workout(1,1,kk),pall)
           deallocate(pall)
- 
+
         else if (kkk == 3)then
 
 !         South pole patch --interpolate - recursive filter - adjoint interpolate
@@ -128,7 +128,7 @@ subroutine smoothrf(work,nlevs)
           deallocate(pall)
 
         end if
-        
+
 !    End of kk loop over 3*nlevs
      end do
 
@@ -571,7 +571,7 @@ end subroutine grid2sh_ad
 
 
 subroutine rfxyyx(p1,nx,ny,iix,jjx,dssx,totwgt)
-  
+
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    rfxyyx      perform horizontal smoothing
@@ -628,7 +628,7 @@ subroutine rfxyyx(p1,nx,ny,iix,jjx,dssx,totwgt)
   enddo
 
 ! Loop over number of scales
- 
+
   do n=1,nhscrf
 
      do iy=1,ny
@@ -683,7 +683,7 @@ subroutine rfhx0(p1,p2,nx,ny,ndeg,alx,be)
 !     p1       - field to be smoothed
 !     nx       - first dimension of p1
 !     ny       - second dimension of p1
-!     ndeg     - degree of smoothing   
+!     ndeg     - degree of smoothing
 !     alx      - smoothing coefficients
 !     be       - smoothing coefficients
 !
@@ -716,7 +716,7 @@ subroutine rfhx0(p1,p2,nx,ny,ndeg,alx,be)
     end do
   end do
 
-  if (mod(ndeg,2) == 1) then  
+  if (mod(ndeg,2) == 1) then
 
 !    Advancing filter:
      do ix=1,nx
@@ -775,9 +775,9 @@ subroutine rfhx0(p1,p2,nx,ny,ndeg,alx,be)
               gap(kr,iy)=alx(ix,iy,kr)*gakr-alx(ix,iy,ki)*gaki+bekr*p1(ix,iy)
               gap(ki,iy)=alx(ix,iy,ki)*gakr+alx(ix,iy,kr)*gaki+beki*p1(ix,iy)
               p2(ix,iy)=p2(ix,iy)+gap(kr,iy)
-              
+
            end do
-           
+
         !       Backing filter:
         ! treat remaining complex roots:
            do ix=nx,1,-1
@@ -786,7 +786,7 @@ subroutine rfhx0(p1,p2,nx,ny,ndeg,alx,be)
               deki=dep(ki,iy)+beki*p1(ix,iy)
               dep(kr,iy)=alx(ix,iy,kr)*dekr-alx(ix,iy,ki)*deki
               dep(ki,iy)=alx(ix,iy,ki)*dekr+alx(ix,iy,kr)*deki
-              
+
            enddo
         end do
      end do
@@ -895,7 +895,7 @@ subroutine rfhyt(p1,p2,nx,ny,ndegy,aly,be)
         enddo
      enddo
 
-  else  
+  else
 
 !    Advancing filter:
      do iy=1,ny
@@ -916,7 +916,7 @@ subroutine rfhyt(p1,p2,nx,ny,ndegy,aly,be)
            enddo
         enddo
      enddo
-     
+
 !    Backing filter:
      do iy=ny,1,-1
         ! treat remaining complex roots:
@@ -1039,7 +1039,7 @@ subroutine rfhy(p1,p2,nx,ny,ndegy,aly,be)
         enddo
      enddo
 
-  else  
+  else
 
 !    Advancing filter:
      do iy=1,ny
@@ -1060,7 +1060,7 @@ subroutine rfhy(p1,p2,nx,ny,ndegy,aly,be)
            enddo
         enddo
      enddo
-     
+
 !    Backing filter:
      do iy=ny,1,-1
         ! treat remaining complex roots:
@@ -1100,7 +1100,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
 !   2005-05-27  kleist/parrish - add option to use new patch interpolation
 !                  if (norsp==0) will default to polar cascade
 !   2005-11-16  wgu - set nmix=nr+1+(ny-nlat)/2 to make sure
-!                  nmix+nrmxb=nr no matter what number nlat is.   
+!                  nmix+nrmxb=nr no matter what number nlat is.
 !   2010-05-22  todling - remove implicit ordering requirement in nvar_id
 !
 !   input argument list:
@@ -1153,7 +1153,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
         do j=1,nhscrf
            totwgt(j)=sqrt(hswgt(j)*hzscl(j)*hzscl(j))
         end do
-        
+
         if(nrf_var(nvar_id(k))=='sf'.or.nrf_var(nvar_id(k))=='vp')then
            totwgt(3)=sqrt(half)*totwgt(3)
         end if
@@ -1164,10 +1164,10 @@ subroutine sqrt_smoothrf(z,work,nlevs)
               zloc(i,j)=z(i+iz)
            end do
         end do
-        
+
         call sqrt_rfxyyx(zloc,work(1,1,k),ny,nx,ii(1,1,1,k),&
              jj(1,1,1,k),slw(1,k),totwgt)
-        
+
         deallocate(zloc)
      end do
 
@@ -1178,7 +1178,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
      do j=1,nhscrf
         totwgt(j)=sqrt(hswgt(j)*hzscl(j)*hzscl(j))
      end do
-     
+
 !       zero output array
      do k=1,nlevs
      end do
@@ -1242,7 +1242,7 @@ subroutine sqrt_smoothrf(z,work,nlevs)
            call grid2sh_ad(workout(1,1,kk),pall)
            deallocate(pall,zloc)
         end if
-        
+
 !    End of k loop over nlevs
      end do
 
@@ -1284,7 +1284,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
 !   2005-05-27  kleist/parrish - add option to use new patch interpolation
 !                   if (norsp==0) will default to polar cascade
 !   2005-11-16  wgu - set nmix=nr+1+(ny-nlat)/2 to make sure
-!                   nmix+nrmxb=nr no matter what number nlat is.   
+!                   nmix+nrmxb=nr no matter what number nlat is.
 !   2010-05-22  todling - remove implicit ordering requirement in nvar_id
 !   2013-01-26  parrish - change work from intent(in) to intent(inout)
 !
@@ -1352,7 +1352,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
            end do
         end do
         deallocate(zloc)
-        
+
      end do
 
 ! Global case
@@ -1362,7 +1362,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
      do j=1,nhscrf
         totwgt(j)=sqrt(hswgt(j)*hzscl(j)*hzscl(j))
      end do
-     
+
 
 !$omp parallel do  schedule(dynamic,1) private(kk) &
 !$omp private(i,j,k,iz,kkk,pall,zloc), &
@@ -1433,7 +1433,7 @@ subroutine sqrt_smoothrf_ad(z,work,nlevs)
 end subroutine sqrt_smoothrf_ad
 ! ------------------------------------------------------------------------------
 subroutine sqrt_rfxyyx(z,p1,nx,ny,iix,jjx,dssx,totwgt)
-  
+
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    sqrt_rfxyyx   sqrt perform horizontal smoothing
@@ -1490,7 +1490,7 @@ subroutine sqrt_rfxyyx(z,p1,nx,ny,iix,jjx,dssx,totwgt)
   enddo
 
 ! Loop over number of scales
- 
+
   do n=1,nhscrf
 
      do im=1,ndeg
@@ -1519,7 +1519,7 @@ subroutine sqrt_rfxyyx(z,p1,nx,ny,iix,jjx,dssx,totwgt)
 end subroutine sqrt_rfxyyx
 ! ------------------------------------------------------------------------------
 subroutine sqrt_rfxyyx_ad(z,p1,nx,ny,iix,jjx,dssx,totwgt)
-  
+
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    rfxyyx      perform horizontal smoothing
@@ -1569,7 +1569,7 @@ subroutine sqrt_rfxyyx_ad(z,p1,nx,ny,iix,jjx,dssx,totwgt)
   real(r_kind),dimension(nx,ny,ndeg):: alx,aly
 
 ! Loop over number of scales
- 
+
   do n=1,nhscrf
 
      do iy=1,ny

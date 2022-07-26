@@ -3,7 +3,7 @@ MODULE MODULE_pmat1
 !              .      .    .                                       .
 ! module:  module_pmat1
 !
-! abstract:  Routines for basic algebraic operations on general matrices 
+! abstract:  Routines for basic algebraic operations on general matrices
 !             and vectors
 !
 ! additional notes:
@@ -408,7 +408,7 @@ pro_res=DOT_PRODUCT(d,g)
 END FUNCTION dpro333
 
 
-SUBROUTINE cro33(a,b,c) 
+SUBROUTINE cro33(a,b,c)
 !$$$  subprogram documentation block
 !                .      .    .
 ! subprogram:    cro33
@@ -613,7 +613,7 @@ END FUNCTION dnorq
 SUBROUTINE swpvv(d,e)
 !$$$  subprogram documentation block
 !                .      .    .
-! subprogram:    swpvv 
+! subprogram:    swpvv
 !
 !   prgrmmr:
 !
@@ -623,10 +623,10 @@ SUBROUTINE swpvv(d,e)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d, e       - 
+!     d, e       -
 !
 !   output argument list:
-!     d, e       - 
+!     d, e       -
 !
 ! attributes:
 !   language:  f90
@@ -656,10 +656,10 @@ SUBROUTINE dswpvv(d,e)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d, e       - 
+!     d, e       -
 !
 !   output argument list:
-!     d, e       - 
+!     d, e       -
 !
 ! attributes:
 !   language:  f90
@@ -683,16 +683,16 @@ SUBROUTINE mulmd(a,d,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a, b       - 
+!     a, b       -
 !     d          -
 !   output argument list:
-!     a, b       - 
+!     a, b       -
 !
 ! attributes:
 !   language:  f90
@@ -701,7 +701,7 @@ SUBROUTINE mulmd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
@@ -724,11 +724,11 @@ SUBROUTINE dmulmd(a,d,b)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a, b       - 
-!     d          - 
+!     a, b       -
+!     d          -
 !
 !   output argument list:
-!     a, b       - 
+!     a, b       -
 !
 ! attributes:
 !   language:  f90
@@ -754,17 +754,17 @@ SUBROUTINE multd(a,d,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a, b       - 
-!     d          - 
+!     a, b       -
+!     d          -
 !
 !   output argument list:
-!     a, b       - 
+!     a, b       -
 !
 ! attributes:
 !   language:  f90
@@ -773,7 +773,7 @@ SUBROUTINE multd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
@@ -790,7 +790,7 @@ SUBROUTINE dmultd(a,d,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -809,7 +809,7 @@ SUBROUTINE dmultd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
@@ -826,7 +826,7 @@ SUBROUTINE muldm(d,a,b)
 !
 !   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -845,7 +845,7 @@ SUBROUTINE muldm(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)                :: m1,i
@@ -862,7 +862,7 @@ SUBROUTINE dmuldm(d,a,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -881,7 +881,7 @@ SUBROUTINE dmuldm(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)             :: m1,i
@@ -898,7 +898,7 @@ SUBROUTINE muldt(d,a,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -917,7 +917,7 @@ SUBROUTINE muldt(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)                :: m1,i
@@ -934,7 +934,7 @@ SUBROUTINE dmuldt(d,a,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -952,7 +952,7 @@ SUBROUTINE dmuldt(d,a,b)
 !
 !$$$ end documentation block
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
 REAL(r_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m1,i
@@ -1289,7 +1289,7 @@ SUBROUTINE prgv(d)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -1324,7 +1324,7 @@ SUBROUTINE dprgv(d)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -1547,7 +1547,7 @@ SUBROUTINE ldum(a,ipiv,d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(INOUT) :: a(:,:) 
+REAL(r_kind),    INTENT(INOUT) :: a(:,:)
 REAL(r_kind),    INTENT(OUT  ) :: d
 INTEGER(i_kind), INTENT(OUT  ) :: ipiv(:)
 
@@ -1630,7 +1630,7 @@ SUBROUTINE DLDUM(A,IPIV,D)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind)   , INTENT(INOUT) :: a(:,:) 
+REAL(r_kind)   , INTENT(INOUT) :: a(:,:)
 REAL(r_kind)   , INTENT(  OUT) :: d
 INTEGER(i_kind), INTENT(  OUT) :: ipiv(:)
 
@@ -1693,8 +1693,8 @@ SUBROUTINE udlmm(a,b,ipiv)
 !
 !   prgrmmr:     R.J.Purser, NCEP, Washington D.C.      1993
 !
-! abstract:  use l-u factors in A to back-substitute for mm rhs in B, 
-!            using ipiv to define the pivoting permutation used in the l-u 
+! abstract:  use l-u factors in A to back-substitute for mm rhs in B,
+!            using ipiv to define the pivoting permutation used in the l-u
 !            decomposition.
 !
 ! program history log:
@@ -1717,9 +1717,9 @@ SUBROUTINE udlmm(a,b,ipiv)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind),    INTENT(IN   ) :: a(:,:) 
-REAL(r_kind),    INTENT(INOUT) :: b(:,:) 
+INTEGER(i_kind), INTENT(IN   ) :: ipiv(:)
+REAL(r_kind),    INTENT(IN   ) :: a(:,:)
+REAL(r_kind),    INTENT(INOUT) :: b(:,:)
 
 INTEGER(i_kind)                :: m,mm,i, k, l
 REAL(r_kind)                   :: s,aiii
@@ -1766,7 +1766,7 @@ SUBROUTINE dudlmm(a,b,ipiv)
 !   output argument list:
 !     b          - right-hand-sides on entry, corresponding matrix of solution
 !                  vectors on return
-!     
+!
 ! attributes:
 !   language:  f90
 !   machine:   ibm RS/6000 SP
@@ -1774,9 +1774,9 @@ SUBROUTINE dudlmm(a,b,ipiv)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind)   , INTENT(IN   ) :: a(:,:) 
-REAL(r_kind)   , INTENT(INOUT) :: b(:,:) 
+INTEGER(i_kind), INTENT(IN   ) :: ipiv(:)
+REAL(r_kind)   , INTENT(IN   ) :: a(:,:)
+REAL(r_kind)   , INTENT(INOUT) :: b(:,:)
 
 INTEGER(i_kind)                :: m,mm,i, k, l
 REAL(r_kind)                   :: s,aiii
@@ -1807,8 +1807,8 @@ SUBROUTINE udlmv(a,b,ipiv)
 !
 !   prgrmmr:     R.J.Purser, NCEP, Washington D.C.      1993
 !
-! abstract:  use l-u factors in A to back-substitute for mm rhs in B, using 
-!            ipiv to define the pivoting permutation used in the l-u 
+! abstract:  use l-u factors in A to back-substitute for mm rhs in B, using
+!            ipiv to define the pivoting permutation used in the l-u
 !            decomposition.
 !
 ! program history log:
@@ -1823,7 +1823,7 @@ SUBROUTINE udlmv(a,b,ipiv)
 !   output argument list:
 !     b          - right-hand-side on entry, corresponding vector solution
 !                  on return
-!     
+!
 ! attributes:
 !   language:  f90
 !   machine:   ibm RS/6000 SP
@@ -1831,9 +1831,9 @@ SUBROUTINE udlmv(a,b,ipiv)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind),    INTENT(IN   ) :: a(:,:) 
-REAL(r_kind),    INTENT(INOUT) :: b(:) 
+INTEGER(i_kind), INTENT(IN   ) :: ipiv(:)
+REAL(r_kind),    INTENT(IN   ) :: a(:,:)
+REAL(r_kind),    INTENT(INOUT) :: b(:)
 
 INTEGER(i_kind)                :: m,i, l
 REAL(r_kind)                   :: s,aiii
@@ -1886,9 +1886,9 @@ SUBROUTINE dudlmv(a,b,ipiv)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind),  INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind)   ,  INTENT(IN   ) :: a(:,:) 
-REAL(r_kind)   ,  INTENT(INOUT) :: b(:) 
+INTEGER(i_kind),  INTENT(IN   ) :: ipiv(:)
+REAL(r_kind)   ,  INTENT(IN   ) :: a(:,:)
+REAL(r_kind)   ,  INTENT(INOUT) :: b(:)
 
 INTEGER(i_kind)                 :: m,i, l
 REAL(r_kind)                    :: s,aiii
@@ -1917,7 +1917,7 @@ SUBROUTINE linvan(w,ab)
 !
 !   prgrmmr:     R.J.Purser, NCEP, Washington D.C.      1993
 !
-! abstract:  
+! abstract:
 !   Take square matrix W and seek row and column scalings to produce non-
 !   vanishing elements of rescaled W having magnitudes as close to unity
 !   as possible. The approach is make the geometric mean of the nonvanishing
@@ -2058,7 +2058,7 @@ v=v-MATMUL(w2,ab)
 v = d1 * v    ! rescale the residual vector by d1
 wv(:,1) = v ! convert shape of array
 CALL udlmm(w,wv(:,1:1),ipiv) ! solve linear system with this rhs.
-ab=ab+wv(:,1)*d2 ! add residual solution vector, 
+ab=ab+wv(:,1)*d2 ! add residual solution vector,
                                       ! scaled, to ab
 
 DEALLOCATE(wv)
@@ -2075,7 +2075,7 @@ SUBROUTINE dlinvan(w,ab)
 !                .      .    .
 !   prgrmmr:     R.J.Purser, NCEP, Washington D.C.      1996
 !
-! abstract: 
+! abstract:
 !   Take square matrix W and seek row and column scalings to produce non-
 !   vanishing elements of rescaled W having magnitudes as close to unity
 !   as possible. The approach is make the geometric mean of the nonvanishing
@@ -2154,7 +2154,7 @@ DO j=1,nc
    d2(j)=EXP(-p/e)
 ENDDO
 CALL mulmd_d(w,d2,w)
- 
+
 c=1.e-8_r_kind  ! reset the criterion for "negligible" elements
 
 ! revert to iterations of the more efficient method without logarithms:
@@ -2216,7 +2216,7 @@ v=v-MATMUL(w2,ab)
 v = d1 * v    ! Rescale the residual vector by D1
 wv(:,1) = v ! Convert shape of array
 CALL UDLMM_d(w,wv(:,1:1),ipiv) ! Solve linear system with THIS rhs.
-ab=ab+wv(:,1)*d2 ! Add residual solution vector, 
+ab=ab+wv(:,1)*d2 ! Add residual solution vector,
                                       ! scaled, to AB
 
 DEALLOCATE(wv)
@@ -2231,18 +2231,18 @@ SUBROUTINE copdm(d,a)
 !                .      .    .
 ! subprogram:    copdm
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d          - 
+!     d          -
 !
 !   output argument list:
-!     a          - 
+!     a          -
 !
 ! attributes:
 !   language:  f90
@@ -2262,18 +2262,18 @@ SUBROUTINE dcopdm(d,a)
 !                .      .    .
 ! subprogram:    dcopdm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d          - 
+!     d          -
 !
 !   output argument list:
-!     a          - 
+!     a          -
 !
 ! attributes:
 !   language:  f90
@@ -2294,9 +2294,9 @@ SUBROUTINE copsm(s,a)
 !                .      .    .
 ! subprogram:    copsm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -2325,18 +2325,18 @@ SUBROUTINE dcopsm(s,a)
 !                .      .    .
 ! subprogram:    dcopsm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     s          - 
+!     s          -
 !
 !   output argument list:
-!     a          - 
+!     a          -
 !
 ! attributes:
 !   language:  f90
@@ -2356,16 +2356,16 @@ SUBROUTINE addmd(a,b,d)
 !                .      .    .
 ! subprogram:    addmd
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
 !     a, b       -
-!     d          - 
+!     d          -
 !
 !   output argument list:
 !     a, b       -
@@ -2391,19 +2391,19 @@ SUBROUTINE daddmd(a,b,d)
 !                .      .    .
 ! subprogram:    daddmd
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a, b       - 
+!     a, b       -
 !     d          -
 !
 !   output argument list:
-!     a, b       - 
+!     a, b       -
 !
 ! attributes:
 !   language:  f90
@@ -2425,7 +2425,7 @@ SUBROUTINE l1lm(a,b)
 !                .      .    .
 ! subprogram:    l1lm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Cholesky, M -> L*U, U(i,j)=L(j,i)
 !
@@ -2433,11 +2433,11 @@ SUBROUTINE l1lm(a,b)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          - 
-!     b          - 
+!     a          -
+!     b          -
 !
 !   output argument list:
-!     b          - 
+!     b          -
 !
 ! attributes:
 !   language:  f90
@@ -2475,13 +2475,13 @@ SUBROUTINE DL1LM(A,B)
 !                .      .    .
 ! subprogram:    dl1lm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Cholesky, M -> L*U, U(i,j)=L(j,i)
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
-! 
+!
 !   input argument list:
 !     a          -
 !     b          -
@@ -2496,8 +2496,8 @@ SUBROUTINE DL1LM(A,B)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:) 
-REAL(r_kind), INTENT(INOUT) :: b(:,:) 
+REAL(r_kind), INTENT(IN   ) :: a(:,:)
+REAL(r_kind), INTENT(INOUT) :: b(:,:)
 
 INTEGER(i_kind) :: m,j, jm, jp, i
 REAL(r_kind) :: s, bjji
@@ -2527,13 +2527,13 @@ SUBROUTINE ldlm(a,b,d) ! Modified Cholesky decompose Q --> L*D*U, U(i,j)=L(j,i)
 !                .      .    .
 ! subprogram:    ldlm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Modified Cholesky decompose Q --> L*D*U, U(i,j)=L(j,i)
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block, rm unused vars
-! 
+!
 !   input argument list:
 !     a          -
 !     b          -
@@ -2561,7 +2561,7 @@ DO j=1,m
    jm=j-1
    jp=j+1
    d(j)=a(j,j) - SUM(b(1:jm,j)*b(j,1:jm))
-  
+
    b(j,j) = one
    IF(d(j) == zero)THEN
       PRINT '(" LDLM detects singularity at diagonal index",i2)',J
@@ -2583,13 +2583,13 @@ SUBROUTINE dldlm(a,b,d) ! Modified Cholesky  Q --> L*D*U, U(i,j)=L(j,i)
 !                .      .    .
 ! subprogram:    dldlm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Modified Cholesky  Q --> L*D*U, U(i,j)=L(j,i)
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block, rm unused vars
-! 
+!
 !   input argument list:
 !     a          -
 !     b          -
@@ -2642,10 +2642,10 @@ SUBROUTINE invh(a)
 !
 ! limitation:  This routine incorporates no pivoting - it is intended for matrices
 !              that are already diagonally dominant
-!  
+!
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
-! 
+!
 !   input argument list:
 !     A          - symmetric square matrix, output as inverse of input
 !
@@ -2659,7 +2659,7 @@ SUBROUTINE invh(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:)
 
 INTEGER(i_kind)                  :: m,k, kp, i, ip, j
 REAL(r_kind),DIMENSION(SIZE(a,1)):: d
@@ -2699,19 +2699,19 @@ END SUBROUTINE invh
 
 SUBROUTINE dinvh(a)
 !$$$  subprogram documentation block
-!                .      .    .    
-! subprogram:    dinvh 
+!                .      .    .
+! subprogram:    dinvh
 !
-!   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1993 
+!   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1993
 !
 ! abstract:   Inver,t in place, a symmetric matrix
 !
 ! limitation:  This routine incorporates no pivoting - it is intended for matrices
 !              that are already diagonally dominant
-!  
-! program history log: 
+!
+! program history log:
 !   2008-04-25  safford -- add subprogram doc block
-! 
+!
 !   input argument list:
 !     A          - symmetric square matrix, output as inverse of input
 !
@@ -2719,13 +2719,13 @@ SUBROUTINE dinvh(a)
 !     A          - symmetric square matrix, output as inverse of input
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:)
 
 INTEGER(i_kind)                  :: m,k, kp, i, ip, j
 REAL(r_kind),DIMENSION(SIZE(a,1)):: d
@@ -2766,30 +2766,30 @@ END SUBROUTINE dinvh
 
 SUBROUTINE invl(a)
 !$$$  subprogram documentation block
-!                .      .    .    
-! subprogram:    invl 
+!                .      .    .
+! subprogram:    invl
 !
 !   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1994
 !
 ! abstract:   Invert lower triangular matrix in place if A are same
 !
-! program history log: 
+! program history log:
 !   2008-04-25  safford -- add subprogram doc block
-! 
+!
 !   input argument list:
-!     a          - 
+!     a          -
 !
 !   output argument list:
-!     a          - 
+!     a          -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:)
 
 INTEGER(i_kind)             :: m,j, i
 REAL(r_kind)                :: s
@@ -2819,10 +2819,10 @@ SUBROUTINE dinvl(a)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          - 
+!     a          -
 !
 !   output argument list:
-!     a          - 
+!     a          -
 !
 ! attributes:
 !   language:  f90
@@ -2831,7 +2831,7 @@ SUBROUTINE dinvl(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(r_kind), INTENT(INOUT) :: a(:,:)
 INTEGER(i_kind)             :: m,j, i
 REAL(r_kind)                :: s
 m=SIZE(a,1)
@@ -2861,11 +2861,11 @@ SUBROUTINE linlv(a,u)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          - 
-!     u          - 
+!     a          -
+!     u          -
 !
 !   output argument list:
-!     u          - 
+!     u          -
 !
 ! attributes:
 !   language:  f90
@@ -2899,11 +2899,11 @@ SUBROUTINE dlinlv(a,u)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          - 
-!     u          - 
+!     a          -
+!     u          -
 !
 !   output argument list:
-!     u          - 
+!     u          -
 !
 ! attributes:
 !   language:  f90
@@ -2924,14 +2924,14 @@ DO j=m,1,-1; jp=j+1; u(j) = (u(j) - SUM(a(jp:m,j)*u(jp:m)))/a(j,j); ENDDO
 END SUBROUTINE dlinlv
 
 
-SUBROUTINE powp(a,b,n) 
+SUBROUTINE powp(a,b,n)
 !$$$  subprogram documentation block
 !                .      .    .
 ! subprogram:    powp
 !
-!   prgrmmr: 
+!   prgrmmr:
 !
-! abstract:  Raise power series A to the power 
+! abstract:  Raise power series A to the power
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -2962,10 +2962,10 @@ END SUBROUTINE powp
 
 SUBROUTINE DPOWP(A,B,N)        ! Raise power series A to the power
 !$$$  subprogram documentation block
-!                .      .    . 
+!                .      .    .
 ! subprogram:    dpowp
 !
-!   prgrmmr:  
+!   prgrmmr:
 !
 ! abstract:  Raise power series A to the power
 !
@@ -2998,10 +2998,10 @@ END SUBROUTINE dpowp
 
 SUBROUTINE polps(a,s1,s2) ! Apply series A to scalar S1 to obtain S2
 !$$$  subprogram documentation block
-!                .      .    . 
+!                .      .    .
 ! subprogram:    polps
 !
-!   prgrmmr:  
+!   prgrmmr:
 !
 ! abstract:  Apply series A to scalar S1 to obtain S2
 !
@@ -3009,11 +3009,11 @@ SUBROUTINE polps(a,s1,s2) ! Apply series A to scalar S1 to obtain S2
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          -  
-!     s1         - 
+!     a          -
+!     s1         -
 !
 !   output argument list:
-!     s2         -  
+!     s2         -
 !
 ! attributes:
 !   language:  f90
@@ -3045,11 +3045,11 @@ SUBROUTINE dpolps(a,s1,s2) ! Apply series A to scalar S1 to obtain S2
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a          -  
-!     s1         -  
+!     a          -
+!     s1         -
 !
 !   output argument list:
-!     s2         -  
+!     s2         -
 !
 ! attributes:
 !   language:  f90
@@ -3082,10 +3082,10 @@ SUBROUTINE polpp(a,b,c)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a,b,c      -  
+!     a,b,c      -
 !
 !   output argument list:
-!     a,b,c      -  
+!     a,b,c      -
 !
 ! attributes:
 !   language:  f90
@@ -3212,7 +3212,7 @@ SUBROUTINE invmt(a)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3270,7 +3270,7 @@ SUBROUTINE dinvmt(a)
 !
 !   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3328,7 +3328,7 @@ SUBROUTINE linmmt(a,b)
 !
 !   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3366,7 +3366,7 @@ SUBROUTINE dlinmmt(a,b)
 !
 !   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3387,7 +3387,7 @@ implicit none
 REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a,b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
-INTEGER(i_kind)                          :: m 
+INTEGER(i_kind)                          :: m
 REAL(r_kind)                             :: d
 
 m=SIZE(a,1)
@@ -3404,7 +3404,7 @@ SUBROUTINE linmvt(a,b)
 !
 !   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3443,7 +3443,7 @@ SUBROUTINE dlinmvt(a,b)
 !
 !   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -3723,7 +3723,7 @@ CONTAINS
 
 
 !=============================================================================
-SUBROUTINE davco(na,nb,za,zb,z0,a,b) 
+SUBROUTINE davco(na,nb,za,zb,z0,a,b)
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -3734,7 +3734,7 @@ SUBROUTINE davco(na,nb,za,zb,z0,a,b)
 ! abstract:  Compute one row of the coefficients for the compact mid-interval
 !            interpolation scheme characterized by matrix equation of the form,
 !			 A.t = B.s			       (*)
-!            Where s is the vector of "source" values, t the staggered "target" 
+!            Where s is the vector of "source" values, t the staggered "target"
 !            values.
 !
 ! program history log:
@@ -3780,7 +3780,7 @@ END SUBROUTINE davco
 
 
 !=============================================================================
-SUBROUTINE avco(na,nb,za,zb,z0,a,b) 
+SUBROUTINE avco(na,nb,za,zb,z0,a,b)
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -3807,8 +3807,8 @@ SUBROUTINE avco(na,nb,za,zb,z0,a,b)
 !   output argument list:
 !     A   - the NA coefficients A for this scheme
 !     B   - the NB coefficients B for this scheme
-!   
-! attributes:  
+!
+! attributes:
 !   language:  f90
 !   machine:   ibm RS/6000 SP
 !
@@ -3833,11 +3833,11 @@ w(1,1:na)=one; ab(1)=one
 DO i=2,nab; w(i,1:na)=pa;    pa=pa*za0; w(i,na1:nab)=pb; pb=pb*zb0; ENDDO
 CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
-END SUBROUTINE avco 
+END SUBROUTINE avco
 
 
 !=============================================================================
-SUBROUTINE ddfco(na,nb,za,zb,z0,a,b) 
+SUBROUTINE ddfco(na,nb,za,zb,z0,a,b)
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -3845,8 +3845,8 @@ SUBROUTINE ddfco(na,nb,za,zb,z0,a,b)
 !
 !   prgrmmr:    purser                                        1999
 !
-! abstract:  Compute one row of the coefficients for either the compact 
-!            differencing or quadrature scheme characterized by matrix 
+! abstract:  Compute one row of the coefficients for either the compact
+!            differencing or quadrature scheme characterized by matrix
 !            equation of the form,
 !			 A.d = B.c			       (*)
 !            In either case, d is the derivative of c.
@@ -3864,8 +3864,8 @@ SUBROUTINE ddfco(na,nb,za,zb,z0,a,b)
 !   output argument list:
 !     A   - the A-coefficients for this scheme
 !     B   - the B-coefficients for this scheme
-!   
-! attributes:  
+!
+! attributes:
 !   language:  f90
 !   machine:   ibm RS/6000 SP
 !
@@ -3891,7 +3891,7 @@ DO i=3,nab; w(i,1:na)   =pa*(i-2); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;              pb=pb*zb0; ENDDO
 CALL inv_d(w,ab)
 a=ab(1:na); b=ab(na1:nab)
-END SUBROUTINE ddfco 
+END SUBROUTINE ddfco
 
 
 !=============================================================================
@@ -3949,11 +3949,11 @@ DO i=3,nab; w(i,1:na)   =pa*(i-2); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;              pb=pb*zb0; ENDDO
 CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
-END SUBROUTINE dfco 
+END SUBROUTINE dfco
 
 
 !=============================================================================
-SUBROUTINE ddfco2(na,nb,za,zb,z0,a,b) 
+SUBROUTINE ddfco2(na,nb,za,zb,z0,a,b)
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -4006,11 +4006,11 @@ DO i=4,nab; w(i,1:na)   =pa*(i-2)*(i-3); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;                           pb=pb*zb0; ENDDO
 CALL inv_d(w,ab)
 a=ab(1:na); b=ab(na1:nab)
-END SUBROUTINE ddfco2 
+END SUBROUTINE ddfco2
 
 
 !=============================================================================
-SUBROUTINE dfco2(na,nb,za,zb,z0,a,b) 
+SUBROUTINE dfco2(na,nb,za,zb,z0,a,b)
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -4063,7 +4063,7 @@ DO i=4,nab; w(i,1:na)   =pa*(i-2)*(i-3); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;                           pb=pb*zb0; ENDDO
 CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
-END SUBROUTINE dfco2 
+END SUBROUTINE dfco2
 
 
 !=============================================================================
@@ -4073,15 +4073,15 @@ SUBROUTINE clib(a,m1,m2,mah1,mah2) ! Clip the dead space of the band matrix, a
 !                .      .    .
 ! subprogram:    clib
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  Clip the dead space of the band matrix 
+! abstract:  Clip the dead space of the band matrix
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2  - 
+!     m1, m2, mah1, mah2  -
 !
 !   output argument list:
 !     a                   -
@@ -4110,7 +4110,7 @@ SUBROUTINE dclib(a,m1,m2,mah1,mah2)
 !                .      .    .
 ! subprogram:    dclib
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Clip the dead space of the band matrix
 !
@@ -4118,10 +4118,10 @@ SUBROUTINE dclib(a,m1,m2,mah1,mah2)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2  - 
+!     m1, m2, mah1, mah2  -
 !
 !   output argument list:
-!     a                   - 
+!     a                   -
 !
 ! attributes:
 !   language:  f90
@@ -4147,7 +4147,7 @@ SUBROUTINE cad1b(a,m1,mah1,mah2,mirror2)
 !                .      .    .
 ! subprogram:    cad1b
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Incorporate operand symmetry near end-1 of a band matrix operator
 !
@@ -4205,7 +4205,7 @@ SUBROUTINE cad2b(a,m1,m2,mah1,mah2,mirror2)
 !                .      .    .
 ! subprogram:    cad2b
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Incorporate operand symmetry near end-2 of a band matrix operator
 !
@@ -4330,19 +4330,19 @@ SUBROUTINE copmb(afull,aband,m1,m2,mah1,mah2)
 !                .      .    .
 ! subprogram:    copmb
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2  - 
+!     m1, m2, mah1, mah2  -
 !     afull               -
 !
 !   output argument list:
-!     aband               - 
+!     aband               -
 !
 ! attributes:
 !   language:  f90
@@ -4379,19 +4379,19 @@ SUBROUTINE copbm(aband,afull,m1,m2,mah1,mah2)
 !                .      .    .
 ! subprogram:    copbm
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2  - 
+!     m1, m2, mah1, mah2  -
 !     aband               -
 !
 !   output argument list:
-!     afull               - 
+!     afull               -
 !
 ! attributes:
 !   language:  f90
@@ -4420,7 +4420,7 @@ DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
 ENDDO
 END SUBROUTINE copbm
 
- 
+
 !=============================================================================
 SUBROUTINE mulbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 !=============================================================================
@@ -4428,21 +4428,21 @@ SUBROUTINE mulbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 !                .      .    .
 ! subprogram:    mulbb
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2     - 
-!     mbh1, mbh2, mch1, mch2 - 
+!     m1, m2, mah1, mah2     -
+!     mbh1, mbh2, mch1, mch2 -
 !     a, b                   -
 !     c                      -
 !
 !   output argument list:
-!     c                   - 
+!     c                   -
 !
 ! attributes:
 !   language:  f90
@@ -4476,20 +4476,20 @@ SUBROUTINE msbbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 !                .      .    .
 ! subprogram:    msbbb
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m1, m2, mah1, mah2     - 
+!     m1, m2, mah1, mah2     -
 !     mbh1, mbh2, mch1, mch2 -
 !     a, b                   -
 !
 !   output argument list:
-!     c                      - 
+!     c                      -
 !
 ! attributes:
 !   language:  f90
@@ -4552,8 +4552,8 @@ SUBROUTINE LDUB(a,m,mah1,mah2)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2 
-REAL(r_kind),    INTENT(INOUT) :: a(m,-mah1:mah2) 
+INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2
+REAL(r_kind),    INTENT(INOUT) :: a(m,-mah1:mah2)
 
 INTEGER(i_kind)               :: j, imost, jmost, jp, i
 REAL(r_kind)                  :: ajj, ajji, aij
@@ -4586,19 +4586,19 @@ SUBROUTINE DLDUB(a,m,mah1,mah2)
 !                .      .    .
 ! subprogram:    dldub
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:  
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     m, mah1, mah2  - 
-!     a              - 
+!     m, mah1, mah2  -
+!     a              -
 !
 !   output argument list:
-!     a              - 
+!     a              -
 !
 ! attributes:
 !   language:  f90
@@ -4606,8 +4606,8 @@ SUBROUTINE DLDUB(a,m,mah1,mah2)
 !
 !$$$ end documentation block
 
-INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2 
-REAL(r_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2) 
+INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2
+REAL(r_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2)
 
 INTEGER(i_kind)                :: j, imost, jmost, jp, i
 REAL(r_kind)                   :: ajj, ajji, aij
@@ -4641,8 +4641,8 @@ SUBROUTINE L1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 !
 !   prgrmmr:    R.J.Purser, 1996
 !
-! abstract:  Form the [L]*[D]*[U] decomposition of asymmetric band-matrix  
-!            [A] replace lower triangular elements of [A] by [D**-1]*[L]*[D], 
+! abstract:  Form the [L]*[D]*[U] decomposition of asymmetric band-matrix
+!            [A] replace lower triangular elements of [A] by [D**-1]*[L]*[D],
 !            the upper by [U], replace matrix [B] by [D**-1]*[B].
 !
 ! program history log:
@@ -4672,7 +4672,7 @@ SUBROUTINE L1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) ::  m,mah1, mah2, mbh1, mbh2 
+INTEGER(i_kind), INTENT(IN   ) ::  m,mah1, mah2, mbh1, mbh2
 REAL(r_kind)   , INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: j, imost, jmost, jleast, jp, i
@@ -4737,7 +4737,7 @@ SUBROUTINE DL1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind),  INTENT(IN   ) ::  mah1, mah2, mbh1, mbh2 
+INTEGER(i_kind),  INTENT(IN   ) ::  mah1, mah2, mbh1, mbh2
 REAL(r_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: m,j, imost, jmost, jleast, jp, i
@@ -4806,7 +4806,7 @@ SUBROUTINE l1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
+INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2
 REAL(r_kind)   , INTENT(INOUT) :: a(0:m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind) :: j, imost, jmost, jleast, jp, i
@@ -4875,7 +4875,7 @@ SUBROUTINE dl1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 !$$$ end documentation block
 implicit none
 
-INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
+INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2
 REAL(r_kind)   ,  INTENT(INOUT) :: a(0:,-mah1:), b(:,-mbh1:)
 
 INTEGER(i_kind)                   :: j, imost, jmost, jleast, jp, i
@@ -4907,7 +4907,7 @@ SUBROUTINE L1LB(a,b,m,mah)   ! Cholesky LU decomposition of Banded.
 !                .      .    .
 ! subprogram:    l1lb
 !
-!   prgrmmr: 
+!   prgrmmr:
 !
 ! abstract:  Cholesky LU decomposition of Banded.
 !
@@ -4915,12 +4915,12 @@ SUBROUTINE L1LB(a,b,m,mah)   ! Cholesky LU decomposition of Banded.
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     A     - 
-!     M     - 
-!     MAH   - 
+!     A     -
+!     M     -
+!     MAH   -
 !
 !   output argument list:
-!     B     - 
+!     B     -
 !
 ! attributes:
 !   language:  f90
@@ -4957,7 +4957,7 @@ SUBROUTINE LDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 !                .      .    .
 ! subprogram:    ldlb
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:   Modified Cholesky [L(D**-1)U, without sqrt]
 !
@@ -4965,13 +4965,13 @@ SUBROUTINE LDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a     - 
-!     m     - 
-!     mah   - 
+!     a     -
+!     m     -
+!     mah   -
 !
 !   output argument list:
-!     b     - 
-!     d     - 
+!     b     -
+!     d     -
 !
 ! attributes:
 !   language:  f90
@@ -4983,7 +4983,7 @@ implicit none
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah
 REAL(r_kind),     INTENT(IN   ) :: a(m,-mah:mah)
 REAL(r_kind),     INTENT(  OUT) :: b(m,-mah:0)
-REAL(r_kind),     INTENT(  OUT) :: d(m) 
+REAL(r_kind),     INTENT(  OUT) :: d(m)
 
 INTEGER(i_kind)                 :: i, j,k,jmi,lj,li
 REAL(r_kind)                    :: s,t
@@ -5017,7 +5017,7 @@ SUBROUTINE DLDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 !                .      .    .
 ! subprogram:    dl1lb
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:  Modified Cholesky [L(D**-1)U, without sqrt]
 !
@@ -5025,13 +5025,13 @@ SUBROUTINE DLDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a     - 
-!     m     - 
-!     mah   - 
+!     a     -
+!     m     -
+!     mah   -
 !
 !   output argument list:
-!     b     - 
-!     d     - 
+!     b     -
+!     d     -
 !
 ! attributes:
 !   language:  f90
@@ -5043,7 +5043,7 @@ implicit none
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah
 REAL(r_kind)   ,  INTENT(IN   ) :: a(m,-mah:mah)
 REAL(r_kind)   ,  INTENT(  OUT) :: b(m,-mah:0)
-REAL(r_kind)   ,  INTENT(  OUT) :: d(m) 
+REAL(r_kind)   ,  INTENT(  OUT) :: d(m)
 
 INTEGER(i_kind)                 :: i, j,k,jmi,lj,li
 REAL(r_kind)                    :: s,t
@@ -5059,9 +5059,9 @@ DO j=1,m; lj=MAX(-mah,1-j)
       STOP
    ENDIF
    d(j)=s; s=one/s
-   DO i=j+1,MIN(m,j+mah); jmi=j-i;  
-      li=MAX(-mah,1-i); 
-      lj=li-jmi; 
+   DO i=j+1,MIN(m,j+mah); jmi=j-i;
+      li=MAX(-mah,1-i);
+      lj=li-jmi;
       t=a(i,jmi)
       do k=li,jmi-1
          t=t-b(i,k)*b(j,k-jmi)*d(i+k)
@@ -5079,7 +5079,7 @@ SUBROUTINE UDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 !                .      .    .
 ! subprogram:    udub
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
 ! abstract:   Modified reverse Cholesky [U(D**-1)U^t],
 !
@@ -5087,13 +5087,13 @@ SUBROUTINE UDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a     - 
-!     m     - 
-!     mah   - 
+!     a     -
+!     m     -
+!     mah   -
 !
 !   output argument list:
-!     b     - 
-!     d     - 
+!     b     -
+!     d     -
 !
 ! attributes:
 !   language:  f90
@@ -5105,7 +5105,7 @@ implicit none
 INTEGER(i_kind),        INTENT(IN   ) :: m, mah
 REAL(r_kind),           INTENT(IN   ) :: a(m,-mah:mah)
 REAL(r_kind),           INTENT(  OUT) :: b(m,0:mah)
-REAL(r_kind),           INTENT(  OUT) :: d(m) 
+REAL(r_kind),           INTENT(  OUT) :: d(m)
 
 REAL(r_kind), DIMENSION(m,-mah:mah  ) :: at
 REAL(r_kind), DIMENSION(m,-mah:0)     :: bt
@@ -5123,7 +5123,7 @@ SUBROUTINE DUDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 !                .      .    .
 ! subprogram:    dudub
 !
-!   prgrmmr:       
+!   prgrmmr:
 !
 ! abstract:   Modified reverse Cholesky [U(D**-1)U^t],
 !
@@ -5131,9 +5131,9 @@ SUBROUTINE DUDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     a     - 
-!     m     - 
-!     mah   - 
+!     a     -
+!     m     -
+!     mah   -
 !
 !   output argument list:
 !     b     -
@@ -5149,7 +5149,7 @@ implicit none
 INTEGER(i_kind),        INTENT(IN   ) :: m, mah
 REAL(r_kind),           INTENT(IN   ) :: a(m,-mah:mah)
 REAL(r_kind),           INTENT(  OUT) :: b(m,0:mah)
-REAL(r_kind),           INTENT(  OUT) :: d(m) 
+REAL(r_kind),           INTENT(  OUT) :: d(m)
 
 REAL(r_kind), DIMENSION(m,-mah:mah  ) :: at
 REAL(r_kind), DIMENSION(m,-mah:0)     :: bt
@@ -5196,7 +5196,7 @@ INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
 REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
 REAL(r_kind),     INTENT(  OUT) :: v2(m1)
 
-INTEGER(i_kind)                 :: j, i1,i2 
+INTEGER(i_kind)                 :: j, i1,i2
 
 v2 = zero
 !=============================================================================
@@ -5595,17 +5595,17 @@ SUBROUTINE maddb(d,a,b,m1,mah1,mah2)
 !                .      .    .
 ! subprogram:    maddb
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:      
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d    - 
-!     M1   - 
-!     MAH1 - 
+!     d    -
+!     M1   -
+!     MAH1 -
 !     MAH2 -
 !     a    -
 !     b    -
@@ -5646,10 +5646,10 @@ SUBROUTINE msbdb(d,a,b,m1,mah1,mah2)
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
-!     d    - 
-!     M1   - 
-!     MAH1 - 
-!     MAH2 - 
+!     d    -
+!     M1   -
+!     MAH1 -
+!     MAH2 -
 !     a    -
 !     b    -
 !
@@ -5665,7 +5665,7 @@ SUBROUTINE msbdb(d,a,b,m1,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, mah1, mah2
-REAL(r_kind),     INTENT(IN   ) :: d(m1) 
+REAL(r_kind),     INTENT(IN   ) :: d(m1)
 REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                 :: j
@@ -5988,7 +5988,7 @@ SUBROUTINE u1lbv(a,v, m,mah1,mah2)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1996
 !
-! abstract:      BACk-substitution step ((U**-1)*(L**-1)) of linear inversion 
+! abstract:      BACk-substitution step ((U**-1)*(L**-1)) of linear inversion
 !                involving special Banded matrix and right-Vector.
 !
 ! program history log:
@@ -6039,7 +6039,7 @@ SUBROUTINE u1lbx(a,v, mx,mah1,mah2,my)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1996
 !
-! abstract:      Special BaCk-substitution step of parallel linear inversion 
+! abstract:      Special BaCk-substitution step of parallel linear inversion
 !                involving Banded matrix and X-right-Vectors.
 !
 ! program history log:
@@ -6089,7 +6089,7 @@ SUBROUTINE u1lby(a,v, my,mah1,mah2,mx)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1996
 !
-! abstract:      Special BaCk-substitution step of parallel linear inversion 
+! abstract:      Special BaCk-substitution step of parallel linear inversion
 !                involving Banded matrix and Y-right-Vectors.
 !
 ! program history log:
@@ -6190,7 +6190,7 @@ SUBROUTINE u1lxb(v,a, mx,mah1,mah2,my)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1996
 !
-! abstract:      Special BaCk-substitution step of parallel linear inversion 
+! abstract:      Special BaCk-substitution step of parallel linear inversion
 !                involving Banded matrix and X-left-Vectors.
 !
 ! program history log:
@@ -6240,7 +6240,7 @@ SUBROUTINE u1lyb(v,a, my,mah1,mah2,mx)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1996
 !
-! abstract:      Special BaCk-substitution step of parallel linear inversion 
+! abstract:      Special BaCk-substitution step of parallel linear inversion
 !                involving special Banded matrix and Y-left-Vectors.
 !
 ! program history log:
@@ -6328,9 +6328,9 @@ SUBROUTINE wrtb(a,m1,m2,mah1,mah2)
 !                .      .    .
 ! subprogram:    wrtb
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -6338,7 +6338,7 @@ SUBROUTINE wrtb(a,m1,m2,mah1,mah2)
 !   input argument list:
 !     m1   -
 !     m2   -
-!     mah1 - 
+!     mah1 -
 !     mah2 -
 !     a    -
 !
@@ -6431,7 +6431,7 @@ contains
 
 
 !============================================================================
-SUBROUTINE setq(q,x,n) 
+SUBROUTINE setq(q,x,n)
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -6439,7 +6439,7 @@ SUBROUTINE setq(q,x,n)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1994
 !
-! abstract:      Precompute the N constant denominator factors of the 
+! abstract:      Precompute the N constant denominator factors of the
 !                N-point Lagrange polynomial interpolation formula.
 !
 ! program history log:
@@ -6472,11 +6472,11 @@ DO i=1,n
       IF(j /= i)q(i)=q(i)/(x(i)-x(j))
    ENDDO
 ENDDO
-END SUBROUTINE setq 
+END SUBROUTINE setq
 
 
 !============================================================================
-SUBROUTINE lagw(x,xt,q,w,dw,n) 
+SUBROUTINE lagw(x,xt,q,w,dw,n)
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -6484,8 +6484,8 @@ SUBROUTINE lagw(x,xt,q,w,dw,n)
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1994
 !
-! abstract:      Construct the Lagrange weights and their derivatives when 
-!                target abscissa is known and denominators Q have already 
+! abstract:      Construct the Lagrange weights and their derivatives when
+!                target abscissa is known and denominators Q have already
 !                been precomputed
 !
 ! program history log:
@@ -6558,7 +6558,7 @@ ELSE             ! xt is not a grid point - use generic code:
       dw(i)=w(i)*sdit(i)
    ENDDO
 ENDIF
-END SUBROUTINE lagw 
+END SUBROUTINE lagw
 
 
 
@@ -6571,7 +6571,7 @@ subroutine infit
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1994
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block, rm unused vars
@@ -6624,14 +6624,14 @@ subroutine coefrf(sig,nu,n,m,bnf,lnf)
 !
 !   prgrmmr:     R.J.Purser, NCEP 2001
 !
-! abstract:    
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
 !
 !   input argument list:
 !     n, m    -
-!     sig, nu - 
+!     sig, nu -
 !
 !   output argument list:
 !     bnf     -
@@ -6653,7 +6653,7 @@ integer(i_kind),              intent(IN   ) :: n,m
 real(r_kind), dimension(n),   intent(IN   ) :: sig,nu
 real(r_kind), dimension(n),   intent(  OUT) :: bnf
 real(r_kind), dimension(m,n), intent(  OUT) :: lnf
-!-------------------------------------------------------------------------- 
+!--------------------------------------------------------------------------
 integer(i_kind), parameter                  :: irmax=6
 real(r_kind), dimension(n,-m:m)             :: s
 real(r_kind), dimension(n,-m:0)             :: sl
@@ -6672,7 +6672,7 @@ do i=1,n
 enddo
 k=zero
 !-------------------------------------------------------------------------
-! Set k(:, -1:1, 1) to be the K-matrix of (4.8)--(4.10) of NCEP O.N. 431: 
+! Set k(:, -1:1, 1) to be the K-matrix of (4.8)--(4.10) of NCEP O.N. 431:
 !--------------------------------------------------------------------------
 do i=1,n-1
    k(i  , 0,1)=k(i  ,0,1)+eta(i+1)/eta(i  )
@@ -6741,9 +6741,9 @@ subroutine ldlb1i(nol,lnf,bnf,                                              &
 !                .      .    .
 ! subprogram:    ldlb1i
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:    
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -6797,7 +6797,7 @@ do i=its,ite
 enddo
 end subroutine ldlb1i
 
-   
+
 !============================================================================
 subroutine ldlb2i(nol,lnf,bnf,                                              &
        ims,ime, jms,jme,                                                    &
@@ -6807,9 +6807,9 @@ subroutine ldlb2i(nol,lnf,bnf,                                              &
 !                .      .    .
 ! subprogram:    ldlb2i
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -6865,7 +6865,7 @@ do j=jts,jte
 enddo
 end subroutine ldlb2i
 
-   
+
 !============================================================================
 subroutine ldlb2j(nol,lnf,bnf,                                              &
        ims,ime, jms,jme,                                                    &
@@ -6875,9 +6875,9 @@ subroutine ldlb2j(nol,lnf,bnf,                                              &
 !                .      .    .
 ! subprogram:    ldlb2
 !
-!   prgrmmr:     
+!   prgrmmr:
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -6888,7 +6888,7 @@ subroutine ldlb2j(nol,lnf,bnf,                                              &
 !     its,ite, jts,jte -
 !     bnf              -
 !     lnf              -
-! 
+!
 !   output argument list:
 !     bnf              -
 !     lnf              -
@@ -6933,7 +6933,7 @@ do j=jts,jte
 enddo
 end subroutine ldlb2j
 
-   
+
 !============================================================================
 subroutine ldlb3i(nol,lnf,bnf,                                              &
        ims,ime, jms,jme, kms,kme,                                           &
@@ -6943,9 +6943,9 @@ subroutine ldlb3i(nol,lnf,bnf,                                              &
 !                .      .    .
 ! subprogram:    ldlb3i
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:    
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -7003,7 +7003,7 @@ do j=jts,jte
 enddo
 end subroutine ldlb3i
 
-   
+
 !============================================================================
 subroutine ldlb3j(nol,lnf,bnf,                                              &
        ims,ime, jms,jme, kms,kme,                                           &
@@ -7015,7 +7015,7 @@ subroutine ldlb3j(nol,lnf,bnf,                                              &
 !
 !   prgrmmr:     R.J.Purser, National Meteorological Center, 1994
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
@@ -7073,7 +7073,7 @@ do j=jts,jte
 enddo
 end subroutine ldlb3j
 
-   
+
 SUBROUTINE hbnrf1i(a,nol,lnf,bnf,                                           &
        ims,ime,                                                             &
        its,ite                                                              )
@@ -7082,9 +7082,9 @@ SUBROUTINE hbnrf1i(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    hbnrf1i
 !
-!   prgrmmr:    
+!   prgrmmr:
 !
-! abstract:      Horizontal basic inhomogeneous recursive filter, 
+! abstract:      Horizontal basic inhomogeneous recursive filter,
 !                1-dimensional, active index i
 !
 ! program history log:
@@ -7151,9 +7151,9 @@ SUBROUTINE hbnrf2i(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    hbnrf2i
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Horizontal basic inhomogeneous recursive filter, 
+! abstract:      Horizontal basic inhomogeneous recursive filter,
 !                2-dimensional, active index i
 !
 ! program history log:
@@ -7173,7 +7173,7 @@ SUBROUTINE hbnrf2i(a,nol,lnf,bnf,                                           &
 !     lnf              -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7222,9 +7222,9 @@ SUBROUTINE hbnrf2j(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    hbnrf1i
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Horizontal basic inhomogeneous recursive filter, 
+! abstract:      Horizontal basic inhomogeneous recursive filter,
 !                2-dimensional, active index j
 !
 ! program history log:
@@ -7244,7 +7244,7 @@ SUBROUTINE hbnrf2j(a,nol,lnf,bnf,                                           &
 !     lnf              -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7297,9 +7297,9 @@ SUBROUTINE hbnrf3i(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    hbnrf3i
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Horizontal basic inhomogeneous recursive filter, 
+! abstract:      Horizontal basic inhomogeneous recursive filter,
 !                3-dimensional, active index i
 !
 ! program history log:
@@ -7319,7 +7319,7 @@ SUBROUTINE hbnrf3i(a,nol,lnf,bnf,                                           &
 !     lnf                       -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7370,9 +7370,9 @@ SUBROUTINE hbnrf3j(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    hbnrf3j
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Horizontal basic inhomogeneous recursive filter, 
+! abstract:      Horizontal basic inhomogeneous recursive filter,
 !                3-dimensional, active index j
 !
 ! program history log:
@@ -7392,7 +7392,7 @@ SUBROUTINE hbnrf3j(a,nol,lnf,bnf,                                           &
 !     lnf                       -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7451,9 +7451,9 @@ SUBROUTINE vbnrf1k(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    vbnrf1k
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Vertical bounded grid inhomogeneous recursive filter, 
+! abstract:      Vertical bounded grid inhomogeneous recursive filter,
 !                1-dimensional, active index k
 !
 ! program history log:
@@ -7473,7 +7473,7 @@ SUBROUTINE vbnrf1k(a,nol,lnf,bnf,                                           &
 !     lnf     -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7520,9 +7520,9 @@ SUBROUTINE vbnrf2k(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    vbnrf2k
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Vertical bounded grid inhomogeneous recursive filter, 
+! abstract:      Vertical bounded grid inhomogeneous recursive filter,
 !                2-dimensional, active index k
 !
 ! program history log:
@@ -7542,7 +7542,7 @@ SUBROUTINE vbnrf2k(a,nol,lnf,bnf,                                           &
 !     lnf              -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7595,9 +7595,9 @@ SUBROUTINE vbnrf3k(a,nol,lnf,bnf,                                           &
 !                .      .    .
 ! subprogram:    vbnrf3k
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      Vertical bounded grid inhomogeneous recursive filter, 
+! abstract:      Vertical bounded grid inhomogeneous recursive filter,
 !                3-dimensional, active index k
 !
 ! program history log:
@@ -7617,7 +7617,7 @@ SUBROUTINE vbnrf3k(a,nol,lnf,bnf,                                           &
 !     lnf                       -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7670,11 +7670,11 @@ SUBROUTINE hbncij(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
-! subprogram:    hbncij 
+! subprogram:    hbncij
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:      
+! abstract:
 !
 ! program history log:
 !   2008-04-28  safford -- add subprogram doc block
@@ -7691,7 +7691,7 @@ SUBROUTINE hbncij(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !     a                -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7737,9 +7737,9 @@ SUBROUTINE hbncji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !                .      .    .
 ! subprogram:    hbncji
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-28  safford -- add subprogram doc block
@@ -7756,7 +7756,7 @@ SUBROUTINE hbncji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !     a                -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7802,9 +7802,9 @@ SUBROUTINE hbncijk(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !                .      .    .
 ! subprogram:    hbncijk
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-28  safford -- add subprogram doc block
@@ -7821,7 +7821,7 @@ SUBROUTINE hbncijk(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !     a                         -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7872,7 +7872,7 @@ SUBROUTINE hbnckji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !                .      .    .
 ! subprogram:    hbnckji
 !
-!   prgrmmr:   
+!   prgrmmr:
 !
 ! abstract:
 !
@@ -7891,7 +7891,7 @@ SUBROUTINE hbnckji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !     a                         -
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7936,7 +7936,7 @@ END SUBROUTINE hbnckji
 
 
 !============================================================================
-subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)  
+subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -7944,7 +7944,7 @@ subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)
 !
 !   prgrmmr:     R. J. Purser, NCEP 2001
 !
-! abstract:     
+! abstract:
 !
 ! program history log:
 !   2008-04-28  safford -- add subprogram doc block, rm unused vars
@@ -7962,7 +7962,7 @@ subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)
 !     ssig,snu
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -7991,7 +7991,7 @@ do i=1,ng
    dcdg(i)=one/sig(i)
    if(sig(i) <= sigb)then
 !----------------------------------------------------------------------------
-! sig(i) below threshold; cleave to original grid spacing with ds/dg and 
+! sig(i) below threshold; cleave to original grid spacing with ds/dg and
 ! dh/dg set accordingly:
 !----------------------------------------------------------------------------
       dsdg(i)=one     ;      dhdg(i)=zero
@@ -8040,21 +8040,21 @@ ns=0
 ! 2) Each segment must shorten the tally of working grid points by at least 3.
 !     Subject to the above conditions, the coarse grid is blended smoothly
 ! with the original grid at internal thresholds and is designed to provide
-! a resolution such that the smoothing scale, sigma, never exceeds the 
+! a resolution such that the smoothing scale, sigma, never exceeds the
 ! product, sigc*dg/ds, where sigc is a dimensionless parameter (e.g. sigc=3.)
 ! and dg/ds is the local working grid (s) spacing in units of the original
-! grid (g) spacing. 
+! grid (g) spacing.
 !
 ! Each segment found is defined by its end points in the original grid,
 ! i1 and im. k is the counter for segments along this line.
 ! ns keeps count of the number of working grid (s-grid) points found so far.
 !----------------------------------------------------------------------------
 cofs(0)=zero
-do k=1,ng 
+do k=1,ng
    do i1=im+1,ng
       if(i1< ng-3 .and. dhdg(i1) /= zero)exit
 !----------------------------------------------------------------------------
-! working s-grid continues to track the original g-grid; Set indices and 
+! working s-grid continues to track the original g-grid; Set indices and
 ! weight for the trivial "interpolation" between these coincident grids:
 !----------------------------------------------------------------------------
       ns=ns+1
@@ -8082,8 +8082,8 @@ do k=1,ng
       enddo
    else
 !----------------------------------------------------------------------------
-! Segment long enough to be potentially viable. Call jfit to determine if 
-! the final condition is met, namely that the number of s-grid points 
+! Segment long enough to be potentially viable. Call jfit to determine if
+! the final condition is met, namely that the number of s-grid points
 ! in this segment is smaller than the g-grid tally by at least 3. If so,
 ! Fit an exact integer number of s-points into this segment and compute
 ! the indices and weights for the associated nontrivial interpolation
@@ -8129,7 +8129,7 @@ subroutine jfit(ng,ig1,igm,ns,iw,cofg,dsdg,dhdg,cofs,ins1,wts)
 !
 !   prgrmmr:     R. J. Purser, NCEP 2001
 !
-! abstract: 
+! abstract:
 !
 ! program history log:
 !   2008-04-28  safford -- add subprogram doc block, rm unused vars
@@ -8150,7 +8150,7 @@ subroutine jfit(ng,ig1,igm,ns,iw,cofg,dsdg,dhdg,cofs,ins1,wts)
 !     wts
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -8177,7 +8177,7 @@ integer(i_kind)                                       :: i,l,ie,iep,ie1,ien,ig0,
 !----------------------------------------------------------------------------
 ! Form the definite integral sm, of ds/dg, within this segment:
 !----------------------------------------------------------------------------
-sm=sum(dsdg(ig1:igm)) 
+sm=sum(dsdg(ig1:igm))
 
 !---------------------------------------------------------------------------
 ! Test whether it is worthwhile to allow s-grid to deviate from the original
@@ -8202,7 +8202,7 @@ endif
 ! of the working grid. The tasks of the rest of this routine are to:
 ! (1) adjust the segment length in the s-metric to make it an integer;
 ! (2) find the s-coordinates of each g-grid points in this segment
-!     and hence the nontrivial interpolation indices and weights required 
+!     and hence the nontrivial interpolation indices and weights required
 !     to go from the s-grid to the g-grid (or adjoints going the other way);
 ! (3) use Newton iterations to find the accurate interpolation formulae
 !     that enable c(s) to be interpolated from the given c(g).
@@ -8212,7 +8212,7 @@ is0=ns; ism=sm
 !----------------------------------------------------------------------------
 ! Fractional remainder of sm, divided by the definite integral of dh/dg
 ! provides the adjustment factor that scales the perturbative component,
-! dhdg, by exactly the amount that will make the segment integral of the 
+! dhdg, by exactly the amount that will make the segment integral of the
 ! perturbed grid-to-grid jacobian, dsdgt, the exact integer, ism:
 !----------------------------------------------------------------------------
 r=(sm-ism)/sum(dhdg(ig1:igm))
@@ -8220,11 +8220,11 @@ do i=ig1,igm
    dsdgt(i)=dsdg(i)-r*dhdg(i)
 enddo
 !----------------------------------------------------------------------------
-! Mirror-extrapolate adjusted ds/dg as an even-symmetry function at the 
+! Mirror-extrapolate adjusted ds/dg as an even-symmetry function at the
 ! ends of this segment. Note that the grid on which derivatives such as
 ! ds/dg reside is the one staggered wrt domain boundaries and segment
 ! end points. The indices of this grid go from ig1 to igm inside the
-! segment. (The convention for the companion grid, NOT staggered wrt 
+! segment. (The convention for the companion grid, NOT staggered wrt
 ! boundaries, is such that the two segment ends are denoted by indices,
 ! ig0=ig1-1 and igm.)
 !----------------------------------------------------------------------------
@@ -8263,12 +8263,12 @@ do i=ig1,igm
    call lagw(hunit2,r,q1,wt1,dwt1,nom)   ! weights for right-biased stencil
    wts(2:   ,iw) = wts(2:   ,iw)  +r*wt1 !   bias weight, r.
 !----------------------------------------------------------------------------
-! Exploit the mirror symmetries to confine the weight stencil to the 
+! Exploit the mirror symmetries to confine the weight stencil to the
 ! domain interior, even though this may entail padding innermost end of
 ! the stencil with useless zeroes:
 !----------------------------------------------------------------------------
    L=1-INS1(I)
-   IF(L > 0)THEN ! FOLD LEFT OVERLAP OF L ELEMENTS BACK INSIDE: 
+   IF(L > 0)THEN ! FOLD LEFT OVERLAP OF L ELEMENTS BACK INSIDE:
       WTS(1:L,IW)      =WTS(L:1:-1,IW)+WTS(L+1:L*2,IW) ! FOLD INTO 1ST L
       WTS(L+1:NO-L,IW) =WTS(L*2+1:NO,IW)            ! SHIFT THE REST LEFT
       WTS(NOP-L:NO,IW)=zero ! SET TRAILING L ELEMENTS TO ZERO
@@ -8294,7 +8294,7 @@ ie=ig0
 iloop: do i=is0+1,ism-1 ! Loop over s-grid target points interior to this segment
    et=i
 !----------------------------------------------------------------------------
-! Find the g-grid interval containing this target: 
+! Find the g-grid interval containing this target:
 !----------------------------------------------------------------------------
    do iep=ie+1,igm-1;  if(sofg(iep) > et)exit; enddo
    do ie=iep-1,ig1,-1; if(sofg(ie) <= et)exit; enddo
@@ -8318,8 +8318,8 @@ iloop: do i=is0+1,ism-1 ! Loop over s-grid target points interior to this segmen
         cycle iloop
       end if
    enddo
- ! stop 'Too many Newton iterations'           ! <- It never convergenced! 
-   write(6,*)' Too many Newton iterations'           ! <- It never convergenced! 
+ ! stop 'Too many Newton iterations'           ! <- It never convergenced!
+   write(6,*)' Too many Newton iterations'           ! <- It never convergenced!
    ns=-1
    return
 enddo iloop
@@ -8329,7 +8329,7 @@ end subroutine jfit
 
 
 !============================================================================
-subroutine stog(ns,ng,ins1,wts, as,ag) 
+subroutine stog(ns,ng,ins1,wts, as,ag)
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -8352,7 +8352,7 @@ subroutine stog(ns,ng,ins1,wts, as,ag)
 !     ag    - g-grid array of interpolated target data.
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
@@ -8386,7 +8386,7 @@ end subroutine stog
 
 
 !============================================================================
-subroutine stogt(ns,ng,ins1,wts, as,ag) 
+subroutine stogt(ns,ng,ins1,wts, as,ag)
 !============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
@@ -8409,7 +8409,7 @@ subroutine stogt(ns,ng,ins1,wts, as,ag)
 !     as
 !
 ! attributes:
-!   language:  f90  
+!   language:  f90
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block

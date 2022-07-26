@@ -4,10 +4,10 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 ! subprogram:    prewgt
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: setup smoothing and grid transform for background error     
+! abstract: setup smoothing and grid transform for background error
 !
 ! program history log:
-!   2000-03-15  wu           
+!   2000-03-15  wu
 !   2004-02-03  kleist, updated to load background stats according
 !               to updated mpi distribution on horizontal slabs
 !   2004-03-15  derber, kleist, incorporate variances into this routine
@@ -17,8 +17,8 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 !   2004-10-26  wu - include factors hzscl in the range of RF table
 !   2004-11-02  treadon - add horizontal resolution error check on berror_stats
 !   2004-11-16  treadon - add longitude dimension to variance array dssv
-!   2004-11-20  derber - modify to make horizontal table more reproducable and  
-!               move most of table calculations to berror 
+!   2004-11-20  derber - modify to make horizontal table more reproducable and
+!               move most of table calculations to berror
 !   2005-01-22  parrish - split out balance variables to subroutine prebal--this
 !               to make anisotropic filtering option less confusing
 !   2005-02-23  wu - setup background variance for qoption=2
@@ -70,7 +70,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 !   2013-10-25  todling - reposition ltosi and others to commvars
 !   2014-02-01  todling - update interface to berror_read_wgt
 !   2014-02-05  mkim/todling - move cw overwrite w/ q to m_berror_stats
-!   2014-08-02  zhu     - set up new background error variance and correlation lengths of cw 
+!   2014-08-02  zhu     - set up new background error variance and correlation lengths of cw
 !                         for all-sky radiance assimilation
 !   2020-07-14  todling- add adjustozhscl as optional
 !
@@ -238,13 +238,13 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
      write(6,*) 'prewgt: trouble bl2 coeffs negative ', bl2
      call stop2(99)
   endif
-  do k=1,nmix    
+  do k=1,nmix
     bl2(k)=sqrt(bl2(k))
   end do
-  
+
 ! Modify precision to be consistent with bl2 for higher res grids
 ! ** NOTE ** bl and bl2 are actually defined to be r_kind
-! 
+!
   nmix=(nx-nlon)
   dxx=1._r_quad/real((nmix+1),r_quad)
   ndx=(nx-nlon)
@@ -448,7 +448,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 ! vertical length scales
 !!!$omp parallel do  schedule(dynamic,1) private(i,n,k,j,jx,ix,loc,dsv)
   do n=1,nc3d
-     do j=1,lat2         
+     do j=1,lat2
         jx=istart(mm1)+j-2
         jx=max(jx,2)
         jx=min(nlat-1,jx)
@@ -480,7 +480,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
                  do i=1,lon2
                     my_corz = max(ges_oz(j,i,k),0.000000002_r_kind)
                     ! Reduce weight in the stratosphere
-                    if (my_corz .gt. 0.0000001_r_kind) my_corz = my_corz/4.0 
+                    if (my_corz .gt. 0.0000001_r_kind) my_corz = my_corz/4.0
                     dssv(j,i,k,n)=dsv(i,k)*my_corz*as3d(n)   ! ozone
                  end do
               end do
@@ -501,13 +501,13 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
 !!!$omp parallel do  schedule(dynamic,1) private(i,n,j,jx,ix,loc)
   do n=1,nc2d
      if (n==nrf2_ps) then
-        do j=1,lat2         
+        do j=1,lat2
            do i=1,lon2
               dssvs(j,i,n)=psvar(j,i)*as2d(n)             ! surface pressure
            end do
         end do
      else if (n==nrf2_sst) then
-        do j=1,lat2         
+        do j=1,lat2
            do i=1,lon2
               if(mvars>=2 .and. isli2(j,i)==1)then
                  dssvs(j,i,nc2d+1)= atsfc_sdv(1)          ! land surface temperature
@@ -617,7 +617,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
               factx(i,j)=zero
            end do
         end do
-     else 
+     else
         n=nvar_id(k)
         nn=-1
         do ii=1,nc3d
@@ -643,13 +643,13 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
                           factx(i,j)=s2u/hsst(i,j)
                        end do
                     end do
-                 else if (nn>nc2d) then 
+                 else if (nn>nc2d) then
                     do j=1,nlon
                        do i=2,nlat-1
                           factx(i,j)=two*s2u/minhsst
                        end do
                     end do
-                 else  
+                 else
                     do j=1,nlon
                        do i=2,nlat-1
                           factx(i,j)=s2u/hwllp(i,nn)
@@ -677,11 +677,11 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
         do i=1,ny
            iii=i+ndy
            slw((j-1)*ny+i,k)=scsli(i,j,1)*factx(iii,jjj)**2
-           sli(i,j,1,k)=scsli(i,j,2)*factx(iii,jjj)        
-           sli(i,j,2,k)=scsli(i,j,3)*factx(iii,jjj)        
+           sli(i,j,1,k)=scsli(i,j,2)*factx(iii,jjj)
+           sli(i,j,2,k)=scsli(i,j,3)*factx(iii,jjj)
         enddo
-     enddo           
-! now load sli1/sli2 
+     enddo
+! now load sli1/sli2
      do j=-nf,nf
         do i=-nf,nf
            slw2((j+nf)*nf2p+nf+1+i,k)=scs12(i,j,1)*fact1(i,j)**2

@@ -1,11 +1,11 @@
 subroutine getuv(u,v,st,vp,iflg)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    getuv     
+! subprogram:    getuv
 !
 !   prgmmr: kleist           org: np22                date: 2004-10-15
 !
-! abstract: performs setup and calls routine to get conversion from 
+! abstract: performs setup and calls routine to get conversion from
 !           streamfunction and velocity potential to u,v
 !
 ! program history log:
@@ -18,14 +18,14 @@ subroutine getuv(u,v,st,vp,iflg)
 !   2014-12-03  derber - restructure if and do statements.
 !
 !   input argument list:
-!     st        - stream function grid values 
-!     vp        - velocity potential grid values 
+!     st        - stream function grid values
+!     vp        - velocity potential grid values
 !     iflg      = 0 forward model
 !               = 1 adjoint model
 !
 !   output argument list:
-!     u         - u grid values 
-!     v         - v grid values 
+!     u         - u grid values
+!     v         - v grid values
 !
 ! attributes:
 !   language: f90

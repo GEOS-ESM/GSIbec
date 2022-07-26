@@ -238,7 +238,7 @@ end subroutine load_vert_coord_
 
     if (use_compress) then
 
-!     Compute compressibility factor (Picard et al 2008) and geopotential heights at midpoint 
+!     Compute compressibility factor (Picard et al 2008) and geopotential heights at midpoint
 !     of each layer
 
        do jj=1,nfldsig
@@ -258,12 +258,12 @@ end subroutine load_vert_coord_
                 tmp_K   = ges_tv(i,j,k) / fact
                 tmp_C   = tmp_K - t0c
                 prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! Pvap sat, eq A1.1 (Pa)
-                prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k,jj)) + log(ges_prsl(i,j,k,jj))))     ! (Pa) 
+                prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k,jj)) + log(ges_prsl(i,j,k,jj))))     ! (Pa)
                 ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
                 prs_v   = ges_q(i,j,k) * prs_a / pw   ! vapor pressure (Pa)
                 rl_hm   = prs_v / prs_sv    ! relative humidity
                 x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
- 
+
                 ! Compressibility factor (eq A1.4 from Picard et al 2008)
                 cmpr = one - (prs_a/tmp_K) * (cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
                            + (cpf_b0 + cpf_b1*tmp_C)*x_v + (cpf_c0 + cpf_c1*tmp_C)*x_v**2 ) &
@@ -271,7 +271,7 @@ end subroutine load_vert_coord_
 
                 h  = rdog * ges_tv(i,j,k)
                 dz = h * cmpr * log(ges_prsi(i,j,k,jj)/ges_prsl(i,j,k,jj))
-                height(k) = ges_zz(i,j) + dz   
+                height(k) = ges_zz(i,j) + dz
 
                 do k=2,nsig
                    fact    = one + fv * half * (ges_q(i,j,k-1)+ges_q(i,j,k))
@@ -323,7 +323,7 @@ end subroutine load_vert_coord_
                    tmp_K   = ges_tv(i,j,k-1) / fact
                    tmp_C   = tmp_K - t0c
                    prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! eq A1.1 (Pa)
-                   prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k-1,jj))+log(ges_prsi(i,j,k,jj)))) 
+                   prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k-1,jj))+log(ges_prsi(i,j,k,jj))))
                    ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
                    prs_v   = ges_q(i,j,k-1) * prs_a / pw   ! vapor pressure (Pa)
                    rl_hm   = prs_v / prs_sv    ! relative humidity
@@ -344,7 +344,7 @@ end subroutine load_vert_coord_
                 prs_sv  = exp(psv_a*tmp_K**2 + psv_b*tmp_K + psv_c + psv_d/tmp_K)  ! eq A1.1 (Pa)
                 prs_a   = thousand * exp(half*(log(ges_prsi(i,j,k-1,jj))+log(ges_prsl(i,j,k-1,jj))))     ! (Pa)
                 ehn_fct = ef_alpha + ef_beta*prs_a + ef_gamma*tmp_C**2 ! enhancement factor (eq. A1.2)
-                prs_v   = ges_q(i,j,k-1) * prs_a / pw  
+                prs_v   = ges_q(i,j,k-1) * prs_a / pw
                 rl_hm   = prs_v / prs_sv    ! relative humidity
                 x_v     = rl_hm * ehn_fct * prs_sv / prs_a     ! molar fraction of water vapor (eq. A1.3)
                 cmpr    = one - (prs_a/tmp_K) * ( cpf_a0 + cpf_a1*tmp_C + cpf_a2*tmp_C**2 &
@@ -353,7 +353,7 @@ end subroutine load_vert_coord_
                 h       = rdog * ges_tv(i,j,k-1)
                 dz      = h * cmpr * log(ges_prsi(i,j,k-1,jj)/ges_prsl(i,j,k-1,jj))
                 height(k) = height(k-1) + dz
- 
+
                 do k=1,nsig+1
                    geop_hgti(i,j,k,jj)=height(k) - ges_zz(i,j)
                 end do
@@ -378,7 +378,7 @@ end subroutine load_vert_coord_
                 h  = rdog * ges_tv(i,j,k)
                 dz = h * log(ges_prsi(i,j,k,jj)/ges_prsl(i,j,k,jj))
                 height(k) = ges_zz(i,j) + dz
- 
+
                 do k=2,nsig
                    h  = rdog * half * (ges_tv(i,j,k-1)+ges_tv(i,j,k))
                    dz = h * log(ges_prsl(i,j,k-1,jj)/ges_prsl(i,j,k,jj))
@@ -572,7 +572,7 @@ end subroutine load_vert_coord_
 
   subroutine get_ref_gesprs_(prs)
 
-! !USES: 
+! !USES:
 
   use constants, only: zero,one_tenth,r100,r1000,ten
   use gridmod, only: idvc5
@@ -586,7 +586,7 @@ end subroutine load_vert_coord_
 ! !DESCRIPTION: get reference pressures
 !
 ! !REVISION HISTORY:
-!   2020-05-11  Todling  - bug fix for idvc5=1,2,3: ak5 are in cbar, thus 
+!   2020-05-11  Todling  - bug fix for idvc5=1,2,3: ak5 are in cbar, thus
 !                          needed multiply by 10 to be in mb
 !
 ! !REMARKS:
@@ -655,7 +655,7 @@ end subroutine load_vert_coord_
 
   integer(i_kind), intent(out) :: istatus
 
-! !DESCRIPTION: initialize meteorological background fields beyond 
+! !DESCRIPTION: initialize meteorological background fields beyond
 !               the standard ones - wired-in this module.
 !
 ! !REVISION HISTORY:
@@ -666,7 +666,7 @@ end subroutine load_vert_coord_
 !   language: f90
 !   machine:  ibm rs/6000 sp; Linux Cluster
 !
-! !AUTHOR: 
+! !AUTHOR:
 !   todling         org: w/nmc20     date: 2011-04-29
 !
 !EOP
@@ -676,7 +676,7 @@ end subroutine load_vert_coord_
    character(len=max_varname_length),allocatable:: mguess(:)   ! names of meterol. fields
 
    istatus=0
-  
+
 !  When proper connection to ESMF is complete,
 !  the following will not be needed here
 !  ------------------------------------------
@@ -731,7 +731,7 @@ end subroutine load_vert_coord_
 !   language: f90
 !   machine:  ibm rs/6000 sp; Linux Cluster
 !
-! !AUTHOR: 
+! !AUTHOR:
 !   todling         org: w/nmc20     date: 2011-04-29
 !
 !EOP

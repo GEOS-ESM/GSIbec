@@ -6,8 +6,8 @@ subroutine rfdpar1(be,rate,m)
 !
 ! abstract:  This routine finds the quadratic factors and (if present) the
 !            single linear factor of the generic quasi-Gaussian recursive
-!            filter of degree m. 
-!            
+!            filter of degree m.
+!
 !
 ! program history log:
 !   1998-01-01  purser
@@ -23,7 +23,7 @@ subroutine rfdpar1(be,rate,m)
 !     rate - Decay rate factors for the characteristic modes of the filter
 !
 !   remarks:
-!            This is one of several possible variants of 
+!            This is one of several possible variants of
 !            the construction procedure described in Purser et al, 2003, MWR
 !            131, 1524--1535. An earlier version, with additional material,
 !            is Purser et al. 2001: NCEP Office Note 431. The style of
@@ -162,7 +162,7 @@ subroutine rfdpar2(be,rate,turn,samp,m)
   real(r_kind),dimension(m)  ,intent(in   ) :: be,rate
   real(r_kind),dimension(m,m),intent(  out) :: turn
   real(r_kind)               ,intent(  out) :: samp
-  
+
   integer(i_kind) kr,li,lr,ki,kmod2
   real(r_kind) beki,bekr,be1,r1,s
   complex(r_kind) cbe,crl,cl1,c1l,crk,crj,cbeh,clk,clj
@@ -221,9 +221,9 @@ subroutine rfdparv(dsh,rate,al,n,m)
 !     prgmmr:    purser      org:  np20              date:  1998-01-01
 !
 ! abstract: Convert filter mode decay rates and effective grid steps into
-!           actual recursive filter "alpha" coefficients for each 
+!           actual recursive filter "alpha" coefficients for each
 !           characteristic mode of the filter.
-!            
+!
 ! program history log:
 !   1998-01-01  purser
 !   2004-06-23  purser - added documentation
@@ -236,7 +236,7 @@ subroutine rfdparv(dsh,rate,al,n,m)
 !     m    - degree of the recursive filter
 !
 !   output argument list:
-!     al   - "alpha" coefficients for each of the characteristic modes 
+!     al   - "alpha" coefficients for each of the characteristic modes
 !
 !$$$
   use m_kinds, only: r_kind,i_kind
@@ -249,7 +249,7 @@ subroutine rfdparv(dsh,rate,al,n,m)
 
   integer(i_kind) i,kr,ki,kmod2
   real(r_kind):: c0i,c0r,c1,c2
-  
+
   kmod2=mod(m,2)
   if(kmod2 == 1)then
      c0r=-rate(1)
@@ -329,7 +329,7 @@ subroutine ldum(a,ipiv,d,m,na)
 !   2004-06-23  purser  - added documentation
 !
 !   input argument list:
-!     a    - matrix of a linear system 
+!     a    - matrix of a linear system
 !     m    - order of the system matrix
 !     na   - first fortran dimension of matrix, a
 !
@@ -422,10 +422,10 @@ subroutine udlmm(a,b,ipiv,m,mm,na,nb)
 !     prgmmr:    purser      org:  np20              date:  1998-01-01
 !
 ! abstract:  This routine performs the L, the D and the U back-substitution
-!            steps on each of the mm right-hand side vectors, taking due 
+!            steps on each of the mm right-hand side vectors, taking due
 !            account of the encoded pivoting sequence. Note: the calls to
 !            subr. dsbvr could be replaced by the f90 intrinsic, "dot_product",
-!            (or "sum"), not available when this routine was originally coded. 
+!            (or "sum"), not available when this routine was originally coded.
 !
 ! program history log:
 !   1998-01-01  purser
@@ -628,7 +628,7 @@ subroutine laguer(a,m,x,small,polish)
 !
 !   output argument list:
 !     x    - one of the complex roots of the polynomial
-! 
+!
 !$$$
   use m_kinds, only: r_kind,i_kind,r_single,r_double
   use constants, only: zero,two

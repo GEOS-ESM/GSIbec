@@ -30,13 +30,13 @@ module control_vectors
 !   2016-02-15  Johnson, Y. Wang, X. Wang - add variables to control reading
 !                                           state variables for radar DA. POC: xuguang.wang@ou.edu
 !   2019-03-14  eliu     - add logic to turn on using full set of hydrometeors
-!                          in obs operator and analysis 
+!                          in obs operator and analysis
 !   2019-07-11  Todling  - move WRF specific variables w_exist and dbz_exit to a new wrf_vars_mod.f90.
 !                        . move imp_physics and lupp to ncepnems_io.f90.
 !
 ! subroutines included:
-!   sub init_anacv   
-!   sub final_anacv   
+!   sub init_anacv
+!   sub final_anacv
 !   sub setup_control_vectors
 !   sub allocate_cv
 !   sub deallocate_cv
@@ -64,7 +64,7 @@ module control_vectors
 !
 ! variable definitions:
 !   def n_ens     - number of ensemble perturbations (=0 except when hybrid ensemble option turned on)
-!   def lcalc_gfdl_cfrac - if T, calculate and use GFDL cloud fraction in obs operator 
+!   def lcalc_gfdl_cfrac - if T, calculate and use GFDL cloud fraction in obs operator
 !
 ! attributes:
 !   language: f90
@@ -101,19 +101,19 @@ use mpeu_util, only: gettable
 implicit none
 save
 private
-! 
+!
 ! Public functions
 !
 public control_vector
 public allocate_cv
 public deallocate_cv
 public assignment(=)
-public dot_product  
+public dot_product
 public prt_control_norms, axpy, random_cv, setup_control_vectors, &
      write_cv, read_cv, inquire_cv, maxval, qdot_prod_sub, init_anacv, &
      final_anacv
 
-! 
+!
 ! Public variables
 !
 public cvars2d, cvars3d, cvarsmd, evars2d, evars3d, nrf_var
@@ -129,7 +129,7 @@ public be3d        ! normalized scale factor for ensemble background error 3d-va
 public be2d        ! normalized scale factor for ensemble background error 2d-variables
 public atsfc_sdv   ! standard deviation of surface temperature error over (1) land (and (2) ice
 public an_amp0     ! multiplying factors on reference background error variances
-public lcalc_gfdl_cfrac ! when .t., calculate and use GFDL cloud fraction in obs operator 
+public lcalc_gfdl_cfrac ! when .t., calculate and use GFDL cloud fraction in obs operator
 
 public nrf2_loc,nrf3_loc,nmotl_loc   ! what are these for??
 public ntracer
@@ -153,7 +153,7 @@ character(len=*),parameter:: myname='control_vectors'
 integer(i_kind) :: nclen,nclen1,nsclen,npclen,ntclen,nrclen,nsubwin,nval_len
 integer(i_kind) :: latlon11,latlon1n,lat2,lon2,nsig,n_ens
 integer(i_kind) :: nval_lenz_en
-logical :: lsqrtb,lcalc_gfdl_cfrac  
+logical :: lsqrtb,lcalc_gfdl_cfrac
 
 integer(i_kind) :: m_vec_alloc, max_vec_alloc, m_allocs, m_deallocs
 
@@ -459,7 +459,7 @@ subroutine allocate_cv(ycv)
   type(control_vector), intent(  out) :: ycv
   integer(i_kind) :: ii,jj,nn,ndim,ierror,n_step,n_aens
   character(len=256)::bname
-  character(len=max_varname_length)::ltmp(1) 
+  character(len=max_varname_length)::ltmp(1)
   type(gsi_grid) :: grid_motley
 
   if (ycv%lallocated) then
@@ -564,9 +564,9 @@ subroutine allocate_cv(ycv)
      call stop2(109)
   end if
 
-! Construct a list of integer pointers to the static and motley part of the 
+! Construct a list of integer pointers to the static and motley part of the
 ! control vector (this is to support operations on current (mpi) distribution)
-! it's enough to get these pointers to nsubwin=1, since they only serve the 
+! it's enough to get these pointers to nsubwin=1, since they only serve the
 ! purpose of indexing arrays operating on single window (e.g. see grid2sub)
 ! allocate(ycv%ivalues(n3d+n2d+mvars))
 ! ii=0
@@ -905,7 +905,7 @@ real(r_quad) function qdot_prod_sub(xcv,ycv)
 ! Duplicated part of vector
   if(mype == 0)then
      do j=nclen1+1,nclen
-        qdot_prod_sub=qdot_prod_sub+xcv%values(j)*ycv%values(j) 
+        qdot_prod_sub=qdot_prod_sub+xcv%values(j)*ycv%values(j)
      end do
   end if
 
@@ -971,7 +971,7 @@ subroutine qdot_prod_vars_eb(xcv,ycv,prods,eb)
      endif
   else
      if(trim(eb) == 'cost_b') then
-        do ii=1,nsubwin                                                         
+        do ii=1,nsubwin
            m3d=xcv%step(ii)%n3d
            m2d=xcv%step(ii)%n2d
            allocate(partsum(m2d+m3d))
@@ -1257,7 +1257,7 @@ subroutine prt_norms_vars(xcv,sgrep)
      call stats_allreduce(vdot(iv),vsum(iv),vmin(iv),vmax(iv),  &
                           vnum(iv),gsi_mpi_comm_world)
      nv=max(vnum(iv),1)
-  
+
      if(mype==0) then
         write(6,'(2(1x,a),4(1x,ES20.12),1x,i10)')               &
           sgrep,cvars3d(iv),sqrt(vdot(iv)/nv),vsum(iv)/nv,       &
@@ -1279,7 +1279,7 @@ subroutine prt_norms_vars(xcv,sgrep)
      call stats_allreduce(vdot(iv),vsum(iv),vmin(iv),vmax(iv),  &
                           vnum(iv),gsi_mpi_comm_world)
      nv=max(vnum(iv),1)
-  
+
      if(mype==0) then
         write(6,'(2(1x,a),4(1x,ES20.12),1x,i10)')               &
           sgrep,cvars2d(iv),sqrt(vdot(iv)/nv),vsum(iv)/nv,       &
@@ -1290,7 +1290,7 @@ subroutine prt_norms_vars(xcv,sgrep)
 
 ! release pointer
   piv => null()
-  
+
 end subroutine prt_norms_vars
 ! ----------------------------------------------------------------------
 subroutine axpy(alpha,xcv,ycv)

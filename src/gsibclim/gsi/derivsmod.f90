@@ -3,7 +3,7 @@ module derivsmod
 !                .      .    .                                       .
 ! module:    derivsmod
 !
-! abstract:  This module defines and holds bundles that contain 
+! abstract:  This module defines and holds bundles that contain
 !            guess derivative fields.
 !
 ! program history log:
@@ -11,7 +11,7 @@ module derivsmod
 !   2014-06-18 Carley - add lgues and dlcbasdlog
 !   2015-07-10 Pondeca - add cldchgues and dcldchdlog
 !   2016-05-10 Thomas - remove references to cwgues0
-!   2019-05-08 mtong - replace set_ with init_anadv 
+!   2019-05-08 mtong - replace set_ with init_anadv
 !   2019-05-08 eliu - recover logic (drv_set) to indicate the derivative
 !                     vars are allocated and defined
 !
@@ -26,7 +26,7 @@ module derivsmod
 !  dvars2d, dvars3d        - names of 2d/3d derivatives
 !  dsrcs2d, dsrcs3d        - names of where original fields reside
 !  drv_initialized         - flag indicating initialization status
-!  drv_set                 - flag indicating the variables are allocated and defined 
+!  drv_set                 - flag indicating the variables are allocated and defined
 !
 ! attributes:
 !   language: f90
@@ -65,14 +65,14 @@ public :: gsi_xderivative_bundle
 public :: gsi_yderivative_bundle
 public :: dvars2d, dvars3d
 public :: dsrcs2d, dsrcs3d
-public :: cwgues,cfgues 
+public :: cwgues,cfgues
 public :: ggues,vgues,pgues,lgues,dvisdlog,dlcbasdlog
 public :: w10mgues,howvgues,cldchgues,dcldchdlog
 public :: qsatg,qgues,dqdt,dqdrh,dqdp
 public :: init_anadv
 
 logical :: drv_initialized = .false.
-logical :: drv_set = .false.  
+logical :: drv_set = .false.
 
 type(gsi_bundle),pointer :: gsi_xderivative_bundle(:)
 type(gsi_bundle),pointer :: gsi_yderivative_bundle(:)
@@ -82,7 +82,7 @@ character(len=max_varname_length),allocatable,dimension(:):: dsrcs2d, dsrcs3d
 real(r_kind),allocatable,dimension(:,:,:):: qsatg,qgues,dqdt,dqdrh,dqdp
 real(r_kind),allocatable,dimension(:,:):: ggues,vgues,pgues,lgues,dvisdlog,dlcbasdlog
 real(r_kind),allocatable,dimension(:,:):: w10mgues,howvgues,cldchgues,dcldchdlog
-real(r_kind),target,allocatable,dimension(:,:,:):: cwgues,cfgues 
+real(r_kind),target,allocatable,dimension(:,:,:):: cwgues,cfgues
 
 ! below this point: declare vars not to be made public
 
@@ -103,7 +103,7 @@ subroutine init_anadv(rcname)
 ! program history log:
 !   2013-09-27  todling  - initial code
 !   2014-02-03  todling  - negative levels mean rank-3 array
-!   2019-05-08  mtong    - replace set_ with init_anadv 
+!   2019-05-08  mtong    - replace set_ with init_anadv
 !   2019-05-08  eliu     - recover logic (drv_set) to indicate the derivative
 !                          vars are allocated and defined
 !
@@ -136,7 +136,7 @@ character(len=max_varname_length),allocatable,dimension(:):: sources
 logical matched
 
 n2d=0; n3d=0
-if(drv_set) return 
+if(drv_set) return
 
 if(present(rcname)) then
  open(newunit=luin,file=trim(rcname),form='formatted')
@@ -188,13 +188,13 @@ do ii=1,nrows
       if(associated(gsi_metguess_bundle)) then
          call gsi_bundlegetpointer(gsi_metguess_bundle(1),trim(vars(ii)),ipnt,istatus,irank=irank);
          if (ipnt>0) then
-            if(irank==2) then 
+            if(irank==2) then
                i2d=i2d+1
                dvars2d(i2d)=trim(vars(ii))
                dsrcs2d(i2d)=trim(sources(ii))
                matched=.true.
             endif
-            if(irank==3) then 
+            if(irank==3) then
                i3d=i3d+1
                dvars3d(i3d)=trim(vars(ii))
                dsrcs3d(i3d)=trim(sources(ii))
@@ -214,7 +214,7 @@ do ii=1,nrows
                dsrcs2d(i2d)=trim(sources(ii))
                matched=.true.
             endif
-            if(irank==3) then 
+            if(irank==3) then
                i3d=i3d+1
                dvars3d(i3d)=trim(vars(ii))
                dsrcs3d(i3d)=trim(sources(ii))
@@ -252,7 +252,7 @@ if (mype == 0) then
 end if
 
 deallocate(vars,nlevs,sources)
-drv_set=.true.  
+drv_set=.true.
 
  end subroutine init_anadv
 
@@ -291,7 +291,7 @@ drv_set=.true.
   call create_auxiliar_
 
   if (.not.switch_on_derivatives) return
-  if (drv_initialized) return 
+  if (drv_initialized) return
 
 ! create derivative grid
   call GSI_GridCreate(grid,lat2,lon2,nsig)
@@ -300,7 +300,7 @@ drv_set=.true.
   allocate(gsi_xderivative_bundle(nfldsig))
   allocate(gsi_yderivative_bundle(nfldsig))
 
-! Note: 
+! Note:
 !   Original code needed ps derivatives in all time slots
 !   Present code creates all derivatives in all time slots
   do nt=1,nfldsig
@@ -395,7 +395,7 @@ drv_set=.true.
 !   2003-11-24  treadon
 !   2004-05-18  kleist, documentation
 !   2004-07-28  treadon - simplify subroutine argument list
-!   2005-03-28  wu - replace mlath with mlat, modify dim of varq 
+!   2005-03-28  wu - replace mlath with mlat, modify dim of varq
 !   2005-06-15  treadon - remove "use guess_grids"
 !   2008-05-12  safford - rm unused uses
 !   2011-02-16  zhu     - add ggues,vgues,pgues
@@ -524,7 +524,7 @@ drv_set=.true.
 
     return
   end subroutine create_auxiliar_
-    
+
   subroutine destroy_auxiliar_
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -541,7 +541,7 @@ drv_set=.true.
 !   2013-10-25  todling, revisit deallocs
 !   2014-03-19  pondeca - add w10mgues
 !   2014-05-07  pondeca - add howvgues
-!   2014-06-18  carley - add lgues and dlcbasdlog 
+!   2014-06-18  carley - add lgues and dlcbasdlog
 !   2015-07-10  pondeca- add cldchgues and dcldchdlog
 !
 !   input argument list:
@@ -561,7 +561,7 @@ drv_set=.true.
     if(allocated(qsatg)) deallocate(qsatg)
     if(allocated(qgues)) deallocate(qgues)
     if(allocated(cwgues)) deallocate(cwgues)
-    if(allocated(cfgues)) deallocate(cfgues) 
+    if(allocated(cfgues)) deallocate(cfgues)
     if(allocated(ggues)) deallocate(ggues)
     if(allocated(vgues)) deallocate(vgues)
     if(allocated(dvisdlog)) deallocate(dvisdlog)

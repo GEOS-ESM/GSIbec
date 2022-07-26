@@ -159,7 +159,7 @@ subroutine allreduce_(vdot,vsum,vmin,vmax,vdim,comm)
   real(r_kind)   ,intent(inout) :: vmin,vmax
   integer(i_kind),intent(inout) :: vdim
   integer        ,intent(in   ) :: comm
-  
+
   integer(i_kind):: vdim_local
 
   character(len=*),parameter :: myname_=myname//"::allreduce_"

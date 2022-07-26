@@ -15,9 +15,9 @@ module hybrid_ensemble_parameters
 !   should still work.  This is an initial working formulation.  It is expected that many changes
 !   will be made over the next several years.
 !
-! This formulation is based on 
-!    Wang, X.,  D. M. Barker, C. Snyder, and T. M. Hamill, 2008:  A Hybrid ETKF.3DVAR 
-!	Data Assimilation Scheme for the WRF Model.  Part I: Observing System 
+! This formulation is based on
+!    Wang, X.,  D. M. Barker, C. Snyder, and T. M. Hamill, 2008:  A Hybrid ETKF.3DVAR
+!	Data Assimilation Scheme for the WRF Model.  Part I: Observing System
 !	Simulation Experiment.  Mon. Wea. Rev., 136, 5116-5131.
 !
 !  only difference is that preconditioning is based on full B instead of sqrt(B):
@@ -37,8 +37,8 @@ module hybrid_ensemble_parameters
 !   beta_s and beta_e are currently allowed to vary in the vertical.
 !
 !   The 1st version of the hybrid ensemble code had beta_s, beta_e a single
-!   constant, with the constraint 
-!     
+!   constant, with the constraint
+!
 !        0 <= beta_s <= 1 , and  beta_e = 1 - beta_s
 !
 !   Now, vertical profiles of beta_s, beta_e are read in from file beta_profile
@@ -46,7 +46,7 @@ module hybrid_ensemble_parameters
 !
 !  The state variable x is recovered from the control variable pair (x1,a) using
 !
-!         x = L*(x1 + sum(n=1,n_ensemble (a(n) o x_ensemble(n)))  
+!         x = L*(x1 + sum(n=1,n_ensemble (a(n) o x_ensemble(n)))
 !
 !          where L is tlnmc or identity.
 !
@@ -57,7 +57,7 @@ module hybrid_ensemble_parameters
 !          Each a(n) is technically the same length as x_ensemble(n), but in practice
 !            the actual stored size is one 3D grid.
 !
-!   Conversion from x1,a to x is implemented by  subroutine ensemble_forward_model, 
+!   Conversion from x1,a to x is implemented by  subroutine ensemble_forward_model,
 !                located in file hybrid_ensemble_isotropic.f90
 !
 !
@@ -79,14 +79,14 @@ module hybrid_ensemble_parameters
 !
 !   NAMELIST HYBRID_ENSEMBLE:
 !
-!      l_hyb_ens:  logical variable, if .true., then turn on hybrid ensemble option, default = .false. 
+!      l_hyb_ens:  logical variable, if .true., then turn on hybrid ensemble option, default = .false.
 !      n_ens:      ensemble size, default = 0
 !      nlon_ens            - number of longitudes to use for ensemble members and ensemble control vector
 !      nlat_ens            - number of latitudes to use for ensemble members and ensemble control vector
-!      beta_s0:    value between 0 and 1, default = 1.0, 
+!      beta_s0:    value between 0 and 1, default = 1.0,
 !                  relative weight given to static background B when (readin_beta=.false.)
 !                  when (readin_beta=.true.), the vertical weighting parameters are read from a file,
-!                  instead of being defined based on beta_s0 namelist or default value. 
+!                  instead of being defined based on beta_s0 namelist or default value.
 !      s_ens_h:    horizontal localization correlation length (units of km), default = 2828.0
 !      s_ens_v:    vertical localization correlation length (grid units), default = 30.0
 !      generate_ens:  if .true., generate ensemble perturbations internally as random samples of background B.
@@ -111,7 +111,7 @@ module hybrid_ensemble_parameters
 !                    if false, first member perturbed on ensemble mean as the rest of the menbers
 !      grid_ratio_ens: ratio of ensemble grid resolution to analysis resolution (default value is 1)
 !      vvlocal:  logical variable, if .true., then horizontal localization length
-!                function of z, default = .false. 
+!                function of z, default = .false.
 !      ensemble_path: path to ensemble members; default './'
 !      ens_fast_read: read ensemble in parallel; default '.false.'
 !      sst_staticB:   if .true. (default) uses only static part of B error covariance for SST
@@ -138,7 +138,7 @@ module hybrid_ensemble_parameters
 !   2011-09-15  todling - add use_gfs_ens to control when to use other
 !   2012-01-17  wu      - add switches and arrays for new options: full_ensemble,pwgtflg
 !   2012-01-17  parrish - add integer parameter regional_ensemble_option which currently takes values
-!                              1-5.  See def below for details. 
+!                              1-5.  See def below for details.
 !   2012-02-07  tong    - remove logical parameter gefs_in_regional and reduce regional_ensemble_option
 !                         to 4 options.
 !   12-05-2012  el akkraoui - revised comments related to change in vertically varying beta weights
@@ -147,7 +147,7 @@ module hybrid_ensemble_parameters
 !   2014-05-14  wu      - add logical variable vvlocal for vertically verying horizontal localization length in regional
 !   2015-01-22  Hu      - add flag i_en_perts_io to control reading ensemble perturbation.
 !   2015-02-11  Hu      - add flag l_ens_in_diff_time to force GSI hybrid use ensembles not available at analysis time
-!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance 
+!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance
 !   2020-05-01  todling - allow for centering Bens around background/guess
 !
 ! subroutines included:
@@ -168,8 +168,8 @@ module hybrid_ensemble_parameters
 !   def beta_s0             - default weight given to static background error covariance
 !                             =1, then ensemble information turned off
 !                             =0, then static background turned off
-!                             the weights are applied per vertical level such that : 
-!                                   beta_s(:) = beta_s0     , vertically varying weights given to B ; 
+!                             the weights are applied per vertical level such that :
+!                                   beta_s(:) = beta_s0     , vertically varying weights given to B ;
 !                                   beta_e(:) = 1 - beta_s0 , vertically varying weights given to A.
 !                            If (readin_beta) then beta_s and beta_e are read from a file and beta_s0 is not used.
 !   def s_ens_h             - homogeneous isotropic horizontal ensemble localization scale (km)
@@ -219,13 +219,13 @@ module hybrid_ensemble_parameters
 !   def use_localization_grid - if true, then use extra lower res gaussian grid for horizontal localization
 !                                   (global runs only--allows possiblity for non-gaussian ensemble grid)
 !   def vvlocal             - logical switch for vertically varying horizontal localization length
-!   def i_en_perts_io       - flag to write out and read in ensemble perturbations in ensemble grid.   
+!   def i_en_perts_io       - flag to write out and read in ensemble perturbations in ensemble grid.
 !                             This is to speed up RAP/HRRR hybrid runs because the
-!                             same ensemble perturbations are used in 6 cycles    
+!                             same ensemble perturbations are used in 6 cycles
 !                               =0:  No ensemble perturbations IO (default)
 !                               =2:  skip get_gefs_for_regional and read in ensemble
 !                                     perturbations from saved files.
-!   def  l_ens_in_diff_time  -  if use ensembles that are available at different       
+!   def  l_ens_in_diff_time  -  if use ensembles that are available at different
 !                               time from analysis time.
 !                             =false: only ensembles available at analysis time
 !                                      can be used for hybrid. (default)
@@ -359,13 +359,13 @@ subroutine init_hybrid_ensemble_parameters
 ! abstract: initialize hybird 3dvar hybrid ensemble parameters
 !
 ! program history log:
-!   
+!
 !   2010-01-13  lueken - added subprogram doc block
 !   12-05-2012  el akkraoui - hybrid beta parameters now vertically varying
 !   2014-09-15  carley - moved the init of variables sqrt_beta_s, sqrt_beta_e, and
 !                         pwgt, to routine  create_hybens_localization_parameters.
 !                         Otherwise these variables were referenced prior to
-!                         memory allocation. 
+!                         memory allocation.
 !
 !   input argument list:
 !
@@ -406,9 +406,9 @@ subroutine init_hybrid_ensemble_parameters
   nlon_ens=0
   beta_s0=one
   grid_ratio_ens=one
-  s_ens_h = 2828._r_kind     !  km (this was optimal value in 
+  s_ens_h = 2828._r_kind     !  km (this was optimal value in
                              !   Wang, X.,D. M. Barker, C. Snyder, and T. M. Hamill, 2008: A hybrid
-                             !      ETKF.3DVAR data assimilation scheme for the WRF Model. Part II: 
+                             !      ETKF.3DVAR data assimilation scheme for the WRF Model. Part II:
                              !      Observing system simulation experiment. Mon.  Wea. Rev., 136, 5132-5147.)
 
   s_ens_v = 30._r_kind       ! grid units
@@ -418,7 +418,7 @@ subroutine init_hybrid_ensemble_parameters
   ensemble_path = './'       ! default for path to ensemble members
   ens_fast_read=.false.
   bens_recenter=.false.      ! center ensemble cov around background/guess
-  upd_ens_spread=.false.     ! redefine ens spread (for jiter>1) by recentering ens around guess 
+  upd_ens_spread=.false.     ! redefine ens spread (for jiter>1) by recentering ens around guess
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
 
 end subroutine init_hybrid_ensemble_parameters
@@ -427,7 +427,7 @@ subroutine create_hybens_localization_parameters
   use constants, only: one
   use constants, only: zero
   implicit none
-  
+
   allocate( s_ens_hv(grd_ens%nsig),s_ens_vv(grd_ens%nsig) )
   allocate( beta_s(grd_ens%nsig),beta_e(grd_ens%nsig))
   allocate( sqrt_beta_s(grd_ens%nsig),sqrt_beta_e(grd_ens%nsig) )
@@ -437,13 +437,13 @@ subroutine create_hybens_localization_parameters
   sqrt_beta_s=one
   sqrt_beta_e=zero
   pwgt=zero
-  
+
 end subroutine create_hybens_localization_parameters
 
 subroutine destroy_hybens_localization_parameters
   implicit none
-  
-  deallocate(s_ens_vv,s_ens_hv) 
+
+  deallocate(s_ens_vv,s_ens_hv)
   deallocate(beta_s,beta_e)
   deallocate(sqrt_beta_s,sqrt_beta_e,pwgt)
 

@@ -21,10 +21,10 @@ module berror
 !               nmix+nrmxb=nr in routine smoothrf no matter what
 !               number nlat is
 !   2005-11-16  wgu - set ny to be odd number if nlat is odd number
-!               to support GMAO grid 
+!               to support GMAO grid
 !   2005-11-29  derber -  remove set_ozone_var (included in prewgt_reg and prewgt)
 !   2006-01-09  derber - remove set_nrh_var and move capability to compute_derived
-!   2006-04-21  kleist - add capability to perturb background error parameters 
+!   2006-04-21  kleist - add capability to perturb background error parameters
 !   2006-11-30  todling - add fpsproj to control full nsig projection onto ps
 !   2007-03-13  derber - add qvar3d array to allow qoption=2 to work similar to others
 !   2007-07-03  kleist - add variables for flow-dependent background error variances
@@ -38,15 +38,15 @@ module berror
 ! subroutines included:
 !   sub init_berror         - initialize background error related variables
 !   sub create_berror_vars  - allocate global background error related variables
-!   sub destroy_berror_vars - deallocate global background error 
+!   sub destroy_berror_vars - deallocate global background error
 !                                    related variables
 !   sub set_predictors_var  - set background variances for bias correction coefs
-!   sub init_rftable        - load global/global pointers and tables for 
+!   sub init_rftable        - load global/global pointers and tables for
 !                                    recursive filters
 !   sub initable            - initialize tables/pointers for recursive filters
-!   sub create_berror_vars_reg - allocate regional background error 
+!   sub create_berror_vars_reg - allocate regional background error
 !                                    related variables
-!   sub destroy_berror_vars_reg - deallocate regional background error 
+!   sub destroy_berror_vars_reg - deallocate regional background error
 !                                    related variables
 !
 ! Variable Definitions:
@@ -95,7 +95,7 @@ module berror
 !   def hzscl     - scale factor for background error horizontal scales
 !   def hswgt     - empirical weights to apply to each horizontal scale
 !   def pert_berr - logical for turning on background error parameter perturbations
-!   def pert_berr_fct - scaling factor for randum numbers for berror perturbations 
+!   def pert_berr_fct - scaling factor for randum numbers for berror perturbations
 !   def bkgv_flowdep  - logical to turn on flow-dependence to background error variances
 !   def bkgv_rewgtfct - scaling factor to reweight flow-dependent background error variances
 !   def fpsproj   - controls full nsig projection onto surface pressure
@@ -277,7 +277,7 @@ contains
   use gridmod, only: nlat,nlon,lat2,lon2,nsig,nnnn1o
   use constants, only: zero,one
   implicit none
-  
+
   if(balmod_initialized_) return
 
   llmin=1
@@ -285,7 +285,7 @@ contains
 
 ! Grid constant to transform to 3 pieces
 
-  nx=nlon*3/2  
+  nx=nlon*3/2
   nx=nx/2*2
   ny=nlat*8/9
   ny=ny/2*2
@@ -422,13 +422,13 @@ contains
     real(r_kind) stndev
     real(r_kind) obs_count
     logical new_tail
-    
+
     stndev = one/biaspredvar
     do i=1,max(1,nrclen)
        varprd(i)=stndev
     end do
 
-    if ((aircraft_t_bc_pof .or. aircraft_t_bc) .and. ntclen>0) then 
+    if ((aircraft_t_bc_pof .or. aircraft_t_bc) .and. ntclen>0) then
        do i=nrclen-ntclen+1,max(1,nrclen)
           varprd(i)=one/biaspredt
        end do
@@ -444,7 +444,7 @@ contains
              if (inew_rad(i)) then
                 varprd(ii)=10000.0_r_kind
              else
-                if (ostats(i)<=20.0_r_kind) then 
+                if (ostats(i)<=20.0_r_kind) then
                    varA(j,i)=two*varA(j,i)+1.0e-6_r_kind
                    varprd(ii)=varA(j,i)
                 else
@@ -462,11 +462,11 @@ contains
              do j=1,npredt
                 ii=ii+1
 
-                if (aircraft_t_bc_pof) then 
+                if (aircraft_t_bc_pof) then
                    obs_count = ostats_t(j,i)
                    new_tail = varA_t(j,i)==zero
                 end if
-                if (aircraft_t_bc) then 
+                if (aircraft_t_bc) then
                    obs_count = ostats_t(1,i)
                    new_tail = .true.
                    if (any(varA_t(:,i)/=zero)) new_tail = .false.
@@ -536,7 +536,7 @@ contains
 
     integer(i_kind) i,j,ii,obs_count
     real(r_kind) stndev
-    
+
     stndev = one/biaspredt
 
 !   reset variances for bias predictor coeff. based on current data count
@@ -584,7 +584,7 @@ contains
 !
 ! program history log:
 !   2009-11-29   zhu
-!   2016-01-07   derber - apply the same preconditioning formula (for obs_count>3 or 20) 
+!   2016-01-07   derber - apply the same preconditioning formula (for obs_count>3 or 20)
 !                         to the cases with obs_count<=3 or 20 as well
 !
 ! attributes:
@@ -703,7 +703,7 @@ contains
     integer(i_kind) i,j,k,n,nynx
     integer(i_kind) ihwlb
     integer(i_kind) ntax,iloc
-    
+
     real(r_kind):: hwlmax,hwlmin,hwlb,hwle,wni2,hzsmax,hzsmin
     real(r_kind),parameter:: r999         = 999.0_r_kind
     real(r_kind),allocatable,dimension(:):: dsh
@@ -819,7 +819,7 @@ contains
     end do
 !   write(6,*)'INIT_RFTABLE:  ntax,nta = ',ntax,nta
 
-!   Loop over number of sigma levels per task    
+!   Loop over number of sigma levels per task
     do k=1,nnn
 
 !      Load pointers into table array
@@ -838,12 +838,12 @@ contains
 
        end do
 
-!   End of loop over number of sigma levels per mpi task       
+!   End of loop over number of sigma levels per mpi task
     end do
 
     deallocate(iuse,ipoint)
 
-    if(.not.allocated(table)) allocate(table(nta,ndeg)) 
+    if(.not.allocated(table)) allocate(table(nta,ndeg))
 
     call rfdparv(dsh,rate,table,nta,ndeg)
 
@@ -855,7 +855,7 @@ contains
   subroutine final_rftable
     if(allocated(table)) deallocate(table)
   end subroutine final_rftable
-  
+
   subroutine initable(nxdim,nydim,sli,ntax,ihwlb,iix,jjx,factor,tin,ipoint)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -950,13 +950,13 @@ contains
     use balmod, only: llmin,llmax
     use gridmod, only: nlat,nlon,nsig,nnnn1o,lat2,lon2
     implicit none
-    
+
     nx=nlon
     ny=nlat
     mr=1
     nr=1
     nf=nr
-    
+
 !   Grid constant for background error
 
     allocate(be(ndeg), &
@@ -969,16 +969,16 @@ contains
           dssvs = zero
        endif
     endif
-    
+
 #ifdef USE_ALL_ORIGINAL
-    allocate(varprd(max(1,nrclen) ) )     
+    allocate(varprd(max(1,nrclen) ) )
     if(diag_precon)allocate(vprecond(nclen))
 #endif /* USE_ALL_ORIGINAL */
 
     allocate(slw(ny*nx,nnnn1o) )
     allocate(ii(ny,nx,3,nnnn1o),jj(ny,nx,3,nnnn1o) )
-    
-    
+
+
     return
   end subroutine create_berror_vars_reg
 

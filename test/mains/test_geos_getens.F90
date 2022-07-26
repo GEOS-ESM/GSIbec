@@ -65,7 +65,7 @@ enddo
 
 deallocate(lats,lons)
 
-contains 
+contains
 
 subroutine readone_(fname,myid)
 implicit none

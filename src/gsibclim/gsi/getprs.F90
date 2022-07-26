@@ -54,7 +54,7 @@ subroutine getprs(ps,prs)
 ! Declare local parameter
   real(r_kind),parameter:: ten = 10.0_r_kind
 
-! prs=zero 
+! prs=zero
   it=ntguessig
 
 #ifdef USE_ALL_ORIGINAL
@@ -173,7 +173,7 @@ subroutine getprs_horiz(ps_x,ps_y,prs,prs_x,prs_y)
 !   machine:   ibm RS/6000 SP
 !
 !$$$
-  
+
   use m_kinds,only: r_kind,i_kind
   use constants,only: zero
   use gridmod,only: nsig,lat2,lon2
@@ -282,7 +282,7 @@ subroutine getprs_tl(ps,t,prs)
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
-  
+
   use m_kinds,only: r_kind,i_kind
   use constants,only: zero,one,rd_over_cp,half
   use gridmod,only: nsig,lat2,lon2,bk5,ck5,idvc5,tref5
@@ -511,12 +511,12 @@ subroutine getprs_ad(ps,t,prs)
 !   machine:   ibm RS/6000 SP
 !
 !$$$ end documentation block
-  
+
   use m_kinds,only: r_kind,i_kind
   use gridmod,only: nsig,lat2,lon2,bk5,ck5,tref5,idvc5
   use gridmod,only: wrf_nmm_regional,nems_nmmb_regional,eta2_ll,regional,wrf_mass_regional,cmaq_regional,eta1_ll,&
        twodvar_regional,fv3_regional
-  use guess_grids, only: ntguessig 
+  use guess_grids, only: ntguessig
   use constants,only: zero,half,one,rd_over_cp
   use gsi_metguess_mod, only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -604,8 +604,8 @@ subroutine getprs_ad(ps,t,prs)
            prs(i,j,k)=zero
         end do
      end do
-  end do 
- 
+  end do
+
   return
 end subroutine getprs_ad
 

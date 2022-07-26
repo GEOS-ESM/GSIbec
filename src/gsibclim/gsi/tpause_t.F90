@@ -4,10 +4,10 @@ subroutine tpause_t(km,p,t,h,ptp)
 ! subprogram:    tpause_t    locate tropopause using temperature
 !   prgmmr: iredell          org: np23                date: 1999-10-18
 !
-! abstract: This subprogram finds the tropopause level.  The tropopause 
-!   is defined as the lowest level above 500 mb which has a temperature 
-!   lapse rate of less than 2 K/km.  The lapse rate must average less 
-!   than 2 K/km over a 2 km depth.  If no such level is found below 
+! abstract: This subprogram finds the tropopause level.  The tropopause
+!   is defined as the lowest level above 500 mb which has a temperature
+!   lapse rate of less than 2 K/km.  The lapse rate must average less
+!   than 2 K/km over a 2 km depth.  If no such level is found below
 !   50 mb, the tropopause is set to 50 mb.
 !
 !   The tropopause pressure is found hydrostatically.

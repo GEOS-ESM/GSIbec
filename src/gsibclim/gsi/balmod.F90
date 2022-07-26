@@ -21,12 +21,12 @@ module balmod
 !   2010-03-04  zhu  - add horizontally interpolated agvk,wgvk,bvk for regional
 !   2011-09-07  todling - note that implementation of hybrid in sqrt-B case
 !                         does not follow Dave''s statement above (2009-06-15)
-!   2012-02-08  kleist - remove ref to l_hyb_ens in subroutines balance, tbalance, strong_bk, 
+!   2012-02-08  kleist - remove ref to l_hyb_ens in subroutines balance, tbalance, strong_bk,
 !                          and strong_bk_ad.  add new parameter tlnmc_option.
 !   2012-02-08  parrish - replace nn_i_kind with nn, for nn any integer.
 !   2012-10-09  Gu - add fut2ps to project unbalanced temp to surface pressure in static B modeling
-!   2016-08-24  lippi - Add namelist variable lnobalance to run univariate 
-!                       analysis and init_balmod to initialize the variable. 
+!   2016-08-24  lippi - Add namelist variable lnobalance to run univariate
+!                       analysis and init_balmod to initialize the variable.
 !
 ! subroutines included:
 !   sub create_balance_vars      - create arrays for balance vars
@@ -129,15 +129,15 @@ contains
 !$$$
     use gridmod, only: lat2,nsig
     implicit none
-    
+
     if(.not.allocated(agvz)) allocate(agvz(lat2,nsig,nsig))
     if(.not.allocated(wgvz)) allocate(wgvz(lat2,nsig))
     if(.not.allocated(bvz))  allocate(bvz(lat2,nsig))
     if(.not.allocated(pput)) allocate(pput(lat2,nsig))
-    
+
     return
   end subroutine create_balance_vars
-  
+
   subroutine destroy_balance_vars
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -200,10 +200,10 @@ contains
     allocate(rllat1(lat2,lon2))
     allocate(f1(lat2,lon2))
     call locatelat_reg(mype)
-    
+
     allocate(agvk(lat2,lon2,nsig,nsig),agvk_lm(nsig,nsig), &
              wgvk(lat2,lon2,nsig),bvk(lat2,lon2,nsig))
-    
+
     return
   end subroutine create_balance_vars_reg
 
@@ -246,7 +246,7 @@ contains
 ! abstract: load balance variables agvz, bvz, wgvz, and ke_vp
 !
 ! program history log:
-!   2000-03-15  wu           
+!   2000-03-15  wu
 !   2004-02-03  kleist, updated to load background stats according
 !               to updated mpi distribution on horizontal slabs
 !   2004-03-15  derber, kleist, incorporate variances into this routine
@@ -256,10 +256,10 @@ contains
 !   2004-10-26  wu - include factors hzscl in the range of RF table
 !   2004-11-02  treadon - add horizontal resolution error check on berror_stats
 !   2004-11-16  treadon - add longitude dimension to variance array dssv
-!   2004-11-20  derber - modify to make horizontal table more reproducable and  
-!               move most of table calculations to berror 
+!   2004-11-20  derber - modify to make horizontal table more reproducable and
+!               move most of table calculations to berror
 !   2005-01-22  parrish - split off from old prewgt
-!   2005-03-28  wu - replace mlath with mlat            
+!   2005-03-28  wu - replace mlath with mlat
 !   2005-04-14  treadon - add corq2 to global berror_stats read
 !   2005-04-22  treadon - change berror file to 4-byte reals
 !   2006-04-17  treadon - remove calculation of ke_vp
@@ -285,7 +285,7 @@ contains
     use constants, only: zero
     use m_berror_stats,only: berror_set,berror_read_bal
     implicit none
-    
+
     logical              ,intent(in   ) :: fut2ps
     logical              ,intent(in   ) :: cwcoveqqcov
 
@@ -293,11 +293,11 @@ contains
     integer(i_kind) i,j,k
     integer(i_kind) mm1
     integer(i_kind) jx
-    
+
     real(r_single),dimension(nlat,nsig,nsig):: agvin
     real(r_single),dimension(nlat,nsig) :: wgvin,bvin
     real(r_single),dimension(nlat,nsig) :: pputin
-    
+
 !   Initialize local variables
     mm1=mype+1
 
@@ -309,7 +309,7 @@ contains
 
 !   Set ke_vp=nsig (note:  not used in global)
     ke_vp=nsig
-    
+
 !   load balance projections
     agvz=zero
     bvz=zero
@@ -358,11 +358,11 @@ contains
 !   2005-01-23  parrish - split off from old prewgt_reg
 !   2005-02-07  treadon - add deallocate(corz,corp,hwll,hwllp,vz,agvi,bvi,wgvi)
 !   2005-03-28  wu - replace mlath with mlat and modify dim of corz, corp
-!   2006-04-17  treadon - replace sigl with ges_prslavg/ges_psfcavg 
+!   2006-04-17  treadon - replace sigl with ges_prslavg/ges_psfcavg
 !   2008-11-13  zhu - add changes for generalized control variables
 !                   - change the structure of covariance error file
 !                   - move horizontal interpolation into this subroutine
-!   2014-10-08  zhu - add cwcoveqqco in the interface 
+!   2014-10-08  zhu - add cwcoveqqco in the interface
 !
 !   input argument list:
 !
@@ -410,10 +410,10 @@ contains
 !   Allocate arrays in stats file
     allocate ( agvi(0:mlat+1,1:nsig,1:nsig) )
     allocate ( bvi(0:mlat+1,1:nsig),wgvi(0:mlat+1,1:nsig) )
-    
+
 !   Read in background error stats and interpolate in vertical to that specified in namelist
     call berror_read_bal_reg(msig,mlat,agvi,bvi,wgvi,mype,inerr)
-    
+
 !   ke_vp used to project SF to balanced VP
 !   below sigma level 0.8
 
@@ -425,7 +425,7 @@ contains
           exit j_loop
        endif
     enddo j_loop
-    
+
     agvk=zero
     bvk=zero
     wgvk=zero
@@ -483,19 +483,19 @@ contains
 !   Alternatively, zero out all balance correlation matrices
 !   for univariate surface analysis
     if (twodvar_regional .or. lnobalance) then
-       if(mype==0) write(6,*)"***WARNING*** running univariate analysis." 
+       if(mype==0) write(6,*)"***WARNING*** running univariate analysis."
        bvk(:,:,:)=zero
        agvk(:,:,:,:)=zero
        wgvk(:,:,:)=zero
        if(lnobalance) agvk_lm(:,:)=zero
     endif
-    
+
     deallocate (agvi,bvi,wgvi)
-    
+
     return
   end subroutine prebal_reg
 #endif /* USE_ALL_ORIGINAL */
-  
+
   subroutine balance(t,p,st,vp,fpsproj,fut2ps)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -503,7 +503,7 @@ contains
 !
 !   prgmmr: parrish          org: np22                date: 1990-10-06
 !
-! abstract: balance equation and conversion from streamfunction 
+! abstract: balance equation and conversion from streamfunction
 !           and velocity potential to uv
 !
 ! program history log:
@@ -513,41 +513,41 @@ contains
 !   1999-06-28  yang w., second structure mpp version
 !   1999-08-24  derber, j., treadon, r., yang, w., first frozen mpp version
 !   1999-12-07  wu               grid version
-!   2003-12-22  derber 
+!   2003-12-22  derber
 !   2004-02-03  kleist, new mpi strategy
 !   2004-05-06  derber separate out balance equation from vertical correlation
 !   2004-07-28  treadon - add only on use declarations; add intent in/out
 !   2004-10-26  kleist - remove u,v - st,vp conversion outside of bkerror, modified
-!               ps balance 
-!   2005-02-23  wu - add variable conversion for normalized relative humidity        
+!               ps balance
+!   2005-02-23  wu - add variable conversion for normalized relative humidity
 !   2005-03-05  parrish - for qoption=2, leave q unchanged, so in/out is normalized rh
 !   2005-06-06  wu - use f1 in balance projection (st->t) when fstat=.true.
 !   2005-07-14  wu - add max bound to l2
 !   2005-11-21  derber modify to make qoption =1 work same as =2
 !   2006-01-11  kleist - add full nsig projection for surface pressure
 !   2006-10-15  gu - add back vp projection onto surface pressure
-!   2006-11-30  todling - add fpsproj to control diff projection contributions to ps  
+!   2006-11-30  todling - add fpsproj to control diff projection contributions to ps
 !   2008-06-05  safford - rm unused vars
 !   2008-12-29  todling - remove q from arg list
 !   2010-03-09  zhu     - move the interpolation for regional to prebal_reg
-!   2011-09-07  todling - in sqrt-b case, always apply balance (even in hyb mode) 
+!   2011-09-07  todling - in sqrt-b case, always apply balance (even in hyb mode)
 !   2012-02-08  kleist  - replace "use hybrid_ensemble_parameters, only: l_hyb_ens"
 !                           with   "use mod_strong, only: tlnmc_option".
-!                           then trigger call to strong_bk at end of subroutine balance with 
+!                           then trigger call to strong_bk at end of subroutine balance with
 !                           new parameter tlnmc_option and add uvflag=.false. to call strong_bk.
 !
 !   input argument list:
-!     t        - t grid values 
-!     p        - p surface grid values 
-!     st       - streamfunction grid values 
-!     vp       - velocity potential grid values 
+!     t        - t grid values
+!     p        - p surface grid values
+!     st       - streamfunction grid values
+!     vp       - velocity potential grid values
 !     fpsproj
 !
 !   output argument list:
-!     t        - t grid values 
-!     p        - p surface grid values 
-!     st       - streamfunction grid values 
-!     vp       - velocity potential grid values 
+!     t        - t grid values
+!     p        - p surface grid values
+!     st       - streamfunction grid values
+!     vp       - velocity potential grid values
 !
 ! attributes:
 !   language: f90
@@ -561,7 +561,7 @@ contains
     use mod_strong, only: tlnmc_option
 #endif /* USE_ALL_ORIGINAL */
     implicit none
-    
+
 !   Declare passed variables
     real(r_kind),dimension(lat2,lon2)     ,intent(inout) :: p
     real(r_kind),dimension(lat2,lon2,nsig),intent(inout) :: t,vp,st
@@ -582,7 +582,7 @@ contains
              end do
           end do
        end do
-       
+
 
        if (fstat) then
 !      Add contribution from streamfunction to unbalanced temperature.
@@ -618,7 +618,7 @@ contains
              end do
           end do
        end do
-       
+
 !   GLOBAL BRANCH
     else
 
@@ -692,7 +692,7 @@ contains
 
     return
   end subroutine balance
-  
+
   subroutine tbalance(t,p,st,vp,fpsproj,fut2ps)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -713,13 +713,13 @@ contains
 !   2004-07-09  treadon - use qsatg_fix instead of qsatg in normalization of q (bug fix)
 !   2004-10-26  kleist - remove u,v -- st,vp conversion oustide of bkerror, modified ps
 !               balance
-!   2005-02-23  wu - add adjoint of variable conversion for normalized relative humidity        
+!   2005-02-23  wu - add adjoint of variable conversion for normalized relative humidity
 !   2005-03-05  parrish - for qoption=2, leave q unchanged, so in/out is normalized rh
 !   2005-07-15  wu - use f1 in adjoint of balance projection (st->t) when fstat=.true. Add max bound to l2
 !   2005-11-21  derber modify to make qoption =1 work same as =2
 !   2006-01-11  kleist - add full nsig projection for surface pressure
 !   2006-10-15  gu - add back vp projection onto surface pressure
-!   2006-11-30  todling - add fpsproj to control diff projection contributions to ps  
+!   2006-11-30  todling - add fpsproj to control diff projection contributions to ps
 !   2008-06-05  safford - rm unused vars
 !   2008-12-29  todling - remove q from arg list
 !   2009-06-15  parrish - add logical l_hyb_ens to balance, t_balance so strong constraint
@@ -727,16 +727,16 @@ contains
 !                         (strong constraint gets moved to control2state and control2state_ad routines
 !                            when l_hyb_ens=.true.)
 !   2010-03-09  zhu     - move the interpolation for regional to prebal_reg
-!   2011-09-07  todling - in sqrt-b case, always apply balance (even in hyb mode) 
+!   2011-09-07  todling - in sqrt-b case, always apply balance (even in hyb mode)
 !   2012-02-08  kleist  - replace "use hybrid_ensemble_parameters, only: l_hyb_ens"
 !                           with   "use mod_strong, only: tlnmc_option".
-!                           then trigger call to strong_bk_ad at beginning of subroutine tbalance with 
+!                           then trigger call to strong_bk_ad at beginning of subroutine tbalance with
 !                           new parameter tlnmc_option and add uvflag=.false. to call strong_bk_ad.
 !
 !   input argument list:
-!     t        - t grid values from int routines 
-!     p        - p surface grid values from int routines 
-!     st       - streamfunction grid values from int routines 
+!     t        - t grid values from int routines
+!     p        - p surface grid values from int routines
+!     st       - streamfunction grid values from int routines
 !     vp       - velocity potential grid values from int routines
 !     fpsproj
 !
@@ -769,7 +769,7 @@ contains
 !   Declare local variables
     integer(i_kind) l,m,i,j,k
 
-  
+
 !  Adjoint of strong balance constraint
 !  pass uvflag=.false.
 #ifdef USE_ALL_ORIGINAL
@@ -809,7 +809,7 @@ contains
           end do
        endif ! fstat
 
-!      Adjoint of streamfunction contribution to surface pressure.  
+!      Adjoint of streamfunction contribution to surface pressure.
 !      Add contributions from u and v to streamfunction and velocity potential
        do k=1,nsig
           do j=1,lon2
@@ -827,7 +827,7 @@ contains
              end do
           end do
        end do
-       
+
 !   GLOBAL BRANCH
     else
 
@@ -879,7 +879,7 @@ contains
                    end do
                  end do
               end if
-             
+
           endif
        end do
 !   End of REGIONAL/GLOBAL if-then block
@@ -888,18 +888,18 @@ contains
     return
   end subroutine tbalance
 
-  subroutine locatelat_reg(mype)      
+  subroutine locatelat_reg(mype)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    locatelat_reg   calc interp coeffs for background stats
 !   prgmmr: wu               org: np22                date: 2004-03-15
 !
-! abstract: calculates interpolation indexes and weights between 
-!           the background error statistics and the analysis grids                        
+! abstract: calculates interpolation indexes and weights between
+!           the background error statistics and the analysis grids
 !
 ! program history log:
-!   2004-03-15  wu       
-!   2004-06-14  wu, documentation and clean up       
+!   2004-03-15  wu
+!   2004-06-14  wu, documentation and clean up
 !   2004-07-28  treadon - simplify subroutine call list
 !   2005-03-28  wu - replace mlath with mlat
 !   2005-04-22  treadon - change berror file to 4-byte reals
@@ -921,7 +921,7 @@ contains
     use gridmod, only: nlon,nlat,lat2,lon2,istart,jstart,region_lat
     use constants, only: deg2rad,one
     implicit none
-    
+
 !   Declare passed variables
     integer(i_kind),intent(in   ) :: mype
 
@@ -937,7 +937,7 @@ contains
     open(lunin,file='berror_stats',form='unformatted')
     rewind lunin
     read(lunin)msig,mlat
-    
+
 
 !   Allocate and read in lat array in stats file
     allocate( clat_avn(mlat), clat_avn4(mlat) )
@@ -947,7 +947,7 @@ contains
        clat_avn(i)=clat_avn4(i)*deg2rad
     end do
     deallocate(clat_avn4)
-    
+
 
 !   Decide and output rllat,rllat1,llmax,llmin (through module berror )
 !   rllat: location of analysis grid in stats grid unit (whole domain)
@@ -956,8 +956,8 @@ contains
 
     llmax=-999
     llmin=999
-    do j=1,nlon 
-       do i=1,nlat   
+    do j=1,nlon
+       do i=1,nlat
           if(region_lat(i,j)>=clat_avn(mlat))then
              rllat(i,j)=float(mlat)
              llmax=max0(mlat,llmax)
@@ -983,14 +983,14 @@ contains
     end do
     llmax=min0(mlat,llmax+1)
     llmin=max0(1,llmin-1)
-    
+
     deallocate(clat_avn)
-    
+
     mm1=mype+1
-    do j=1,lon2            
+    do j=1,lon2
        jl=j+jstart(mm1)-2
        jl=min0(max0(1,jl),nlon)
-       do i=1,lat2            
+       do i=1,lat2
           il=i+istart(mm1)-2
           il=min0(max0(1,il),nlat)
           rllat1(i,j)=rllat(il,jl)
@@ -1008,10 +1008,10 @@ contains
           enddo
        enddo
     endif
-    
+
     return
 end subroutine locatelat_reg
-  
+
 #ifdef USE_ALL_ORIGINAL
 subroutine strong_bk(st,vp,p,t,uvflag)
 !$$$  subprogram documentation block
@@ -1026,7 +1026,7 @@ subroutine strong_bk(st,vp,p,t,uvflag)
 !   2008-09-19  derber,j.
 !   2008-12-29  todling   - redefine interface
 !   2009-04-21  derber - modify interface with calctends_no
-!   2012-02-08  kleist  - add uvflag input parameter, passed in call to calctends_no_tl 
+!   2012-02-08  kleist  - add uvflag input parameter, passed in call to calctends_no_tl
 !                            and strong_bal_correction
 !
 !   input argument list:
@@ -1064,14 +1064,14 @@ subroutine strong_bk(st,vp,p,t,uvflag)
   real(r_kind),dimension(latlon1n)::u_t,v_t,t_t
   real(r_kind),dimension(latlon11):: ps_t
 
-!******************************************************************************  
+!******************************************************************************
   if(nvmodes_keep <= 0 .or. nstrong <= 0) return
 
 ! compute derivatives
 
   fullfield=.false.
   do istrong=1,nstrong
- 
+
      call calctends_no_tl(st,vp,t,p,mype,u_t,v_t,t_t,ps_t,uvflag)
 
      call strong_bal_correction(u_t,v_t,t_t, &
@@ -1095,7 +1095,7 @@ subroutine strong_bk_ad(st,vp,p,t,uvflag)
 !   2008-09-19  derber,j.
 !   2008-12-29  todling   - redefine interface
 !   2009-04-21  derber - modify interface with calctends_no
-!   2012-02-08  kleist  - add uvflag input parameter, passed in call to calctends_no_ad 
+!   2012-02-08  kleist  - add uvflag input parameter, passed in call to calctends_no_ad
 !                            and strong_bal_correction_ad
 !
 !   input argument list:
@@ -1122,8 +1122,8 @@ subroutine strong_bk_ad(st,vp,p,t,uvflag)
   use mod_vtrans,only: nvmodes_keep
   use mod_strong,only: nstrong
   implicit none
-  
-! Declare passed variables  
+
+! Declare passed variables
   real(r_kind),dimension(latlon1n),intent(inout) :: st,vp
   real(r_kind),dimension(latlon11),intent(inout) :: p
   real(r_kind),dimension(latlon1n),intent(inout) :: t
@@ -1138,7 +1138,7 @@ subroutine strong_bk_ad(st,vp,p,t,uvflag)
 !******************************************************************************
 
   if(nvmodes_keep <= 0 .or. nstrong <= 0) return
-     
+
   do istrong=1,nstrong
 ! Zero gradient arrays
      do i=1,latlon1n
@@ -1152,7 +1152,7 @@ subroutine strong_bk_ad(st,vp,p,t,uvflag)
 
      call strong_bal_correction_ad(u_t,v_t,t_t,ps_t,mype,st,vp,t,p,uvflag)
 
-     call calctends_no_ad(st,vp,t,p,mype,u_t,v_t,t_t,ps_t,uvflag)  
+     call calctends_no_ad(st,vp,t,p,mype,u_t,v_t,t_t,ps_t,uvflag)
 !
   end do
 

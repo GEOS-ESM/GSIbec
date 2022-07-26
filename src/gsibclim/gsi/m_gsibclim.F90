@@ -114,7 +114,7 @@ contains
   call set_pointer_()
   call guess_grids_init(mockbkg=mockbkg)
 
-! create subdomain/grid indexes 
+! create subdomain/grid indexes
 ! call general_sub2grid_create_info(sg,0,nlat,nlon,nsig,1,.false.)
 ! istart=sg%istart
 ! jstart=sg%jstart
@@ -220,13 +220,13 @@ contains
 ! subprogram:    set_pointer
 !   prgmmr: treadon          org: np23                date: 2004-07-28
 !
-! abstract: Set length of control vector and other control 
+! abstract: Set length of control vector and other control
 !           vector constants
 !
 ! program history log:
 !   2004-07-28  treadon
 !   2006-04-21  kleist - include pointers for more time tendency arrays
-!   2008-12-04  todling - increase number of 3d fields from 6 to 8 
+!   2008-12-04  todling - increase number of 3d fields from 6 to 8
 !   2009-09-16  parrish - add hybrid_ensemble connection in call to setup_control_vectors
 !   2010-03-01  zhu     - add nrf_levb and nrf_leve, generalize nval_levs
 !                       - generalize vector starting points such as nvpsm, nst2, and others
@@ -279,7 +279,7 @@ contains
     nrclen=nsclen+npclen+ntclen
     nclen1=nclen-nrclen
     nclen2=nclen1+nsclen
-  
+
     n_ensz=0
     nval_lenz_enz=0
     nval2d=latlon11

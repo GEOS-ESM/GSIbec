@@ -35,7 +35,7 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
 !     iwgts   - absolute grid addresses ( iwgts(nin,lbig) )
 !     iflag   - flag for each interpolatee (iflag(nin))
 !                 =0, then point too close to edge of domain, but weights
-!                     are computed anyway, in case it is considered 
+!                     are computed anyway, in case it is considered
 !                     OK to extrapolate.
 !                 =1, then weights computed
 !
@@ -48,7 +48,7 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero, half, one
   implicit none
-  
+
   integer(i_kind),intent(in   ) :: nin,iord,lbig,n1grid,nf,ndx1,ndx11
   real(r_kind)   ,intent(in   ) :: x1in(nin),x1grid(n1grid)
   real(r_kind)   ,intent(  out) :: wgts(nin,lbig)
@@ -71,7 +71,7 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
   integer(i_kind) i1ref0,i1fine,l,iflip,nn,j,k,ip,nend,nstart,lp,&
        nthis,nmaxright,n,nminleft,iximx,ntl
   integer(i_kind) ii,n1fine,iximax,iximn,i
-  
+
   ntl=max(64,nin/lbig)
 
 
@@ -139,9 +139,9 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
 !     write(6,*)' x1fine,x1grid=',x1ref,x1grid(ix1grid(i))
   end do
 
- 
+
 ! Now get i1ref, index of interval containing point
- 
+
   i1ref=-1
   do n=1,nin
      i1fine=1+nint((x1in(n)-x1grid(1))*dxfinei)
@@ -192,9 +192,9 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
 !     write(6,*)' max,min(ix1temp)=',maxval(ix1temp),minval(ix1temp)
   end do
 !  write(6,*)' max,min(iwgts)=',maxval(iwgts),minval(iwgts)
-!  write(6,*)' both of above should be >= 1 and <= ',n1grid 
-    
- 
+!  write(6,*)' both of above should be >= 1 and <= ',n1grid
+
+
       ! check that we got all points
 !  dx1max=-huge(dx1max)
 !  dx1min=huge(dx1min)
@@ -227,16 +227,16 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
 
 
 ! Get taylor matrices and invert
-  
+
   nstart=1
   nend=min(nin,ntl)
   do while (nstart<=nend)
      nthis=nend-nstart+1
-     
+
      if(nf==1) then    ! get weights for interpolating function
- 
+
     ! get taylor vector(s)
- 
+
         lp=0
         x1p(nstart:nend)=one
         do ip=0,iord
@@ -253,7 +253,7 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
         end do
 
     ! get interpolation weights
-  
+
         do k=1,lbig
            wgts(nstart:nend,k)=zero
            do j=1,lbig
@@ -269,9 +269,9 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
      end if
 
      if(ndx1==1) then    ! get weights for df/dx1
- 
+
     ! get taylor vector(s)
- 
+
         lp=0
         x1p(nstart:nend)=one
         do ip=0,iord
@@ -293,9 +293,9 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
               end do
            end if
         end do
-        
+
     ! get interpolation weights
-  
+
         do k=1,lbig
            wgtsx1(nstart:nend,k)=zero
            do j=1,lbig
@@ -311,9 +311,9 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
      end if
 
      if(ndx11==1) then    ! get weights for d2f/(dx1*dx1)
-        
+
     ! get taylor vector(s)
- 
+
         lp=0
         x1p(nstart:nend)=one
         do ip=0,iord
@@ -337,7 +337,7 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
         end do
 
     ! get interpolation weights
-  
+
         do k=1,lbig
            wgtsx11(nstart:nend,k)=zero
            do j=1,lbig
@@ -349,12 +349,12 @@ subroutine simpin1(wgts,wgtsx1,wgtsx11,iwgts, &
               end do
            end do
         end do
-        
+
      end if
-     
+
      nstart=nstart+ntl
      nend=min(nend+ntl,nin)
-     
+
   end do
 
   return
@@ -366,8 +366,8 @@ subroutine vinvmm(b,a,m,nb,na,ninv,ninv0)
 ! subprogram:    vinvmm
 !     prgmmr:    purser      org: np20                date: 1998-01-01
 !
-! abstract:  This routine is a vector version of purserlib routine 
-!            invmm.  The purpose of this routine is to invert a 
+! abstract:  This routine is a vector version of purserlib routine
+!            invmm.  The purpose of this routine is to invert a
 !            collection of matrices, possibly in place (a=b), using
 !            the l-u decomposition method
 !
@@ -396,15 +396,15 @@ subroutine vinvmm(b,a,m,nb,na,ninv,ninv0)
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero, one
   implicit none
-  
+
   integer(i_kind),intent(in   ) :: m,nb,na,ninv,ninv0
   real(r_kind)   ,intent(inout) :: a(ninv0,na,*),b(ninv0,nb,*)
-  
+
 
   integer(i_kind) ipiv(ninv,m)
   real(r_kind) s(ninv),d(ninv)
   integer(i_kind) i,j,k,n
-  
+
   do j=1,m
      do i=1,m
         a(1:ninv,i,j)=b(1:ninv,i,j)
@@ -457,7 +457,7 @@ subroutine vinvmm(b,a,m,nb,na,ninv,ninv0)
         a(1:ninv,i,j)=s(1:ninv)
      end do
   end do
-  
+
   !  permute columns according to ipiv
 
   do j=m-1,1,-1
@@ -469,7 +469,7 @@ subroutine vinvmm(b,a,m,nb,na,ninv,ninv0)
         end do
      end do
   end do
-  
+
   return
 end subroutine vinvmm
 
@@ -510,17 +510,17 @@ subroutine vlufm(a,ipiv,d,m,na,ninv,ninv0,s)
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero, one
   implicit none
-  
+
   integer(i_kind),intent(in   ) :: m,na,ninv,ninv0
   real(r_kind)   ,intent(inout) :: a(ninv0,na,*)
   integer(i_kind),intent(  out) :: ipiv(ninv,m)
   real(r_kind)   ,intent(  out) :: d(ninv)
   real(r_kind)   ,intent(inout) :: s(ninv)
-  
+
   real(r_kind) ajj(ninv)
   integer(i_kind) i,j,jm,jp,k,n
   real(r_kind) aa
-  
+
   d=one
   ipiv(1:ninv,m)=m
   do j=1,m-1
@@ -536,7 +536,7 @@ subroutine vlufm(a,ipiv,d,m,na,ninv,ninv0,s)
            end if
         end do
      end do
-     
+
    !  swap rows, recording changed sign of determinant
 
      do n=1,ninv
@@ -549,7 +549,7 @@ subroutine vlufm(a,ipiv,d,m,na,ninv,ninv0,s)
            a(n,ipiv(n,j),k)=s(n)
         end do
      end do
-     
+
      do n=1,ninv
         ajj(n)=a(n,j,j)
         if(ajj(n)==zero)then
@@ -565,8 +565,8 @@ subroutine vlufm(a,ipiv,d,m,na,ninv,ninv0,s)
            a(1:ninv,i,k)=a(1:ninv,i,k)-a(1:ninv,i,j)*a(1:ninv,j,k)
         end do
      end do
-     
+
   end do
-  
+
   return
 end subroutine vlufm

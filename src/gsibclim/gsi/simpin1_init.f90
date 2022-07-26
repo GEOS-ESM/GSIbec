@@ -52,12 +52,12 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
   real(r_kind) alocal(max(64,2*n1grid/lbig)),blocal(max(64,2*n1grid/lbig))
   real(r_kind) xmaxlocal(max(64,2*n1grid/lbig)),xminlocal(max(64,2*n1grid/lbig))
   integer(i_kind), allocatable, dimension(:) :: ix1grid
-  
+
   real(r_kind) delx1,dxa,dxb,dxc,dxd,dxe,dxf,dxg,dxfinei,dxmax,rhigh,rlow,x1ref,xlocal
   real(r_kind) xboundright,xboundleft,dxfine,dxminmin,dxmin,dxthis
   integer(i_kind) i1fine,i1ref0,ih,ii,ip,iximx,j,l,lp,n1fine,nend,np,nstart,nthis,ntl
   integer(i_kind) nmaxright,nn,nin,n,iximax,nminleft,iximn,nm,i
-  
+
   nin=2*n1grid
   do n=1,n1grid
      nm=max(1,n-1)
@@ -67,10 +67,10 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
      delx1=x1grid(nm+1)-x1grid(nm)
      x1in(n1grid+n)=x1grid(n)-one_tenth*delx1
   end do
-  
+
   ntl=max(64,nin/lbig)
   ! set ixi, the coordinate order counter
- 
+
   do i=0,iord
      ih=(i+1)/2
      if(2*ih==i) then
@@ -109,7 +109,7 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
   end if
 
   !  set up uniform fine grid to use in finding interpolation coordinates
- 
+
   dxmax=-huge(dxmax) ; dxmin=huge(dxmin)
   do i=1,n1grid-1
      dxthis=x1grid(i+1)-x1grid(i)
@@ -138,9 +138,9 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
      ix1grid(i)=ii
 !     write(6,)' x1fine,x1grid=',x1ref,x1grid(ix1grid(i))
   end do
- 
+
   ! now get i1ref, index of interval containing point
- 
+
   rlow=-epsilon(rlow)
   rhigh=one+epsilon(rhigh)
   do n=1,nin
@@ -177,12 +177,12 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
   end do
 
   ! get taylor matrices and invert
-  
+
   nstart=1
   nend=min(nin,ntl)
   do while (nstart<=nend)
      nthis=nend-nstart+1
-     
+
 !  compute limits of local x coordinate
 
      xmaxlocal=-huge(xmaxlocal) ; xminlocal=huge(xminlocal)
@@ -199,7 +199,7 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
      alocal=zero
      blocal=zero
      do n=nstart,nend
-        if(iflag(n)>0) then 
+        if(iflag(n)>0) then
            nn=n-nstart+1
            alocal(nn)=two/(xmaxlocal(nn)-xminlocal(nn))
            blocal(nn)=-one-two*xminlocal(nn)/(xmaxlocal(nn)-xminlocal(nn))
@@ -207,7 +207,7 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
            blocalout(n)=blocal(nn)
         end if
      end do
-     
+
      tl=zero
      do i=1,lbig
         tl(1:nthis,i,i)=one
@@ -231,9 +231,9 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
            x1p(nstart:nend)=x1p(nstart:nend)*x1temp(nstart:nend)
         end do
      end do
-     
+
      call vinvmm(tl,tl,lbig,lbig,lbig,nthis,ntl)
-     
+
      do n=nstart,nend
         nn=n-nstart+1
         do j=1,lbig
@@ -242,11 +242,11 @@ subroutine simpin1_init(ixi,tlout,alocalout,blocalout,iord,lbig,x1grid,n1grid)
            end do
         end do
      end do
-     
+
      nstart=nstart+ntl
      nend=min(nend+ntl,nin)
-     
+
   end do
-  
+
   return
 end subroutine simpin1_init

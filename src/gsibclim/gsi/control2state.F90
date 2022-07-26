@@ -28,9 +28,9 @@ subroutine control2state(xhat,sval,bval)
 !   2011-05-15  auligne/todling - generalized cloud handling
 !   2011-07-12   zhu     - add do_cw_to_hydro and cwhydromod for cloudy radiance assimilation
 !   2011-11-01  eliu     - generalize the use of do_cw_to_hydro
-!   2012-02-08  kleist   - remove call to strong_bk, ensemble_forward_model, 
+!   2012-02-08  kleist   - remove call to strong_bk, ensemble_forward_model,
 !                             ensemble_forward_model_dual_res, and related parameters
-!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS  - updated for obs adjoint test and added ladtest_obs  
+!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS  - updated for obs adjoint test and added ladtest_obs
 !   2013-10-24  todling  - nullify work pointers
 !   2013-10-28  todling  - rename p3d to prse
 !   2013-05-23   zhu     - add ntclen and predt for aircraft temperature bias correction
@@ -59,7 +59,7 @@ use m_kinds, only: r_kind,i_kind
 use control_vectors, only: control_vector
 use control_vectors, only: cvars3d,cvars2d
 use bias_predictors, only: predictors
-use gridmod, only: regional,lat2,lon2,nsig, nlat, nlon, twodvar_regional            
+use gridmod, only: regional,lat2,lon2,nsig, nlat, nlon, twodvar_regional
 use jfunc, only: nsclen,npclen,ntclen
 #ifdef USE_ALL_ORIGINAL
 use gsi_4dvar, only: nsubwin, l4dvar, lsqrtb, ladtest_obs
@@ -81,8 +81,8 @@ use constants, only : max_varname_length, zero
 use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
 use general_commvars_mod, only: s2g_cv
 implicit none
-  
-! Declare passed variables  
+
+! Declare passed variables
 type(control_vector), intent(in   ) :: xhat
 type(gsi_bundle)    , intent(inout) :: sval(1)
 type(predictors)    , intent(inout) :: bval
@@ -92,7 +92,7 @@ character(len=*),parameter::myname='control2state'
 character(len=max_varname_length),allocatable,dimension(:) :: gases
 character(len=max_varname_length),allocatable,dimension(:) :: clouds
 real(r_kind),dimension(nlat*nlon*s2g_cv%nlevs_alloc)      :: hwork
-integer(i_kind) :: ii,jj,ic,id,ngases,nclouds,istatus,istatus_oz 
+integer(i_kind) :: ii,jj,ic,id,ngases,nclouds,istatus,istatus_oz
 type(gsi_bundle):: wbundle ! work bundle
 
 ! Note: The following does not aim to get all variables in
@@ -160,7 +160,7 @@ if (nsubwin/=1 .and. .not.l4dvar) then
 end if
 #endif /* USE_ALL_ORIGINAL */
 
-! Inquire about cloud-vars 
+! Inquire about cloud-vars
 call gsi_metguess_get('clouds::3d',nclouds,istatus)
 if (nclouds>0) then
    allocate(clouds(nclouds))
@@ -188,7 +188,7 @@ ls_u  =isps(1)>0; ls_v   =isps(2)>0; ls_prse=isps(3)>0
 ls_q  =isps(4)>0; ls_tsen=isps(5)>0; ls_ql =isps(6)>0
 ls_qi =isps(7)>0; ls_w   =isps(8)>0
 ls_qr  =isps(9)>0; ls_qs =isps(10)>0
-ls_qg =isps(11)>0; ls_qh =isps(12)>0 
+ls_qg =isps(11)>0; ls_qh =isps(12)>0
 
 ! Define what to do depending on what''s in CV and SV
 do_getprs_tl     =lc_ps.and.lc_t .and.ls_prse
@@ -202,7 +202,7 @@ if (regional) then
    do_cw_to_hydro=lc_cw.and.ls_ql.and.ls_qi
    do_cw_to_hydro_hwrf=lc_cw.and.ls_ql.and.ls_qi.and.ls_qr.and.ls_qs.and.ls_qg.and.ls_qh
 else
-   do_cw_to_hydro=lc_cw.and.ls_tsen.and.ls_ql.and.ls_qi.and.(.not.lc_ql) !ncep global 
+   do_cw_to_hydro=lc_cw.and.ls_tsen.and.ls_ql.and.ls_qi.and.(.not.lc_ql) !ncep global
 endif
 
 call gsi_bundlegetpointer (xhat%step(1),'oz',icoz,istatus)
@@ -246,7 +246,7 @@ do jj=1,nsubwin
    end if
 #endif /* USE_ALL_ORIGINAL */
 
-!$omp parallel sections private(istatus,ii,ic,id,sv_u,sv_v,sv_prse,sv_q,sv_tsen,uland,vland,uwter,vwter) 
+!$omp parallel sections private(istatus,ii,ic,id,sv_u,sv_v,sv_prse,sv_q,sv_tsen,uland,vland,uwter,vwter)
 
 !$omp section
 
@@ -309,10 +309,10 @@ do jj=1,nsubwin
    if(do_normal_rh_to_q) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
 
 !  Calculate sensible temperature
-   if(do_tv_to_tsen) call tv_to_tsen(cv_t,sv_q,sv_tsen) 
+   if(do_tv_to_tsen) call tv_to_tsen(cv_t,sv_q,sv_tsen)
 
 !  Copy other variables
-   call gsi_bundlegetvar ( wbundle, 't'  , sv_tv,  istatus )  
+   call gsi_bundlegetvar ( wbundle, 't'  , sv_tv,  istatus )
 
    if (do_cw_to_hydro .and. .not.do_cw_to_hydro_hwrf) then
 !     Case when cloud-vars do not map one-to-one (cv-to-sv)
@@ -346,11 +346,11 @@ do jj=1,nsubwin
    call gsi_bundlegetvar ( wbundle, 'ps' , sv_ps,  istatus )
    call gsi_bundlegetpointer (sval(jj),'sst' ,sv_sst, istatus)
    call gsi_bundlegetvar ( wbundle, 'sst', sv_sst, istatus )
-   call gsi_bundlegetpointer (sval(jj),'oz'  ,sv_oz , istatus_oz)  
+   call gsi_bundlegetpointer (sval(jj),'oz'  ,sv_oz , istatus_oz)
    if (icoz>0) then
       call gsi_bundlegetvar ( wbundle, 'oz' , sv_oz,  istatus )
    else
-      if(istatus_oz==0) sv_oz=zero   
+      if(istatus_oz==0) sv_oz=zero
    end if
    if (icgust>0) then
       call gsi_bundlegetpointer (sval(jj),'gust' ,sv_gust, istatus)
@@ -366,7 +366,7 @@ do jj=1,nsubwin
    end if
    if (icwspd10m>0) then
       call gsi_bundlegetpointer (sval(jj),'wspd10m' ,sv_wspd10m, istatus)
-      call gsi_bundlegetvar ( wbundle, 'wspd10m', sv_wspd10m, istatus )      
+      call gsi_bundlegetvar ( wbundle, 'wspd10m', sv_wspd10m, istatus )
    end if
    if (ictd2m>0) then
       call gsi_bundlegetpointer (sval(jj),'td2m' ,sv_td2m, istatus)
@@ -376,11 +376,11 @@ do jj=1,nsubwin
       call gsi_bundlegetpointer (sval(jj),'mxtm' ,sv_mxtm, istatus)
       call gsi_bundlegetvar ( wbundle, 'mxtm', sv_mxtm, istatus )
    end if
-   if (icmitm>0) then 
+   if (icmitm>0) then
       call gsi_bundlegetpointer (sval(jj),'mitm' ,sv_mitm, istatus)
       call gsi_bundlegetvar ( wbundle, 'mitm', sv_mitm, istatus )
    end if
-   if (icpmsl>0) then 
+   if (icpmsl>0) then
       call gsi_bundlegetpointer (sval(jj),'pmsl' ,sv_pmsl, istatus)
       call gsi_bundlegetvar ( wbundle, 'pmsl', sv_pmsl, istatus )
    end if
@@ -388,7 +388,7 @@ do jj=1,nsubwin
       call gsi_bundlegetpointer (sval(jj),'howv' ,sv_howv, istatus)
       call gsi_bundlegetvar ( wbundle, 'howv', sv_howv, istatus )
    end if
-   if (icw>0) then 
+   if (icw>0) then
       call gsi_bundlegetpointer (sval(jj),'w' ,sv_w, istatus)
       call gsi_bundlegetvar ( wbundle, 'w', sv_w, istatus )
 #ifdef USE_ALL_ORIGINAL
@@ -398,12 +398,12 @@ do jj=1,nsubwin
       end if
 #endif /* USE_ALL_ORIGINAL */
    end if
-   if (ictcamt>0) then 
+   if (ictcamt>0) then
       call gsi_bundlegetpointer (sval(jj),'tcamt' ,sv_tcamt, istatus)
       call gsi_bundlegetvar ( wbundle, 'tcamt', sv_tcamt, istatus )
    end if
 #ifdef USE_ALL_ORIGINAL
-   if (iclcbas >0) then 
+   if (iclcbas >0) then
       call gsi_bundlegetpointer (wbundle,'lcbas',cv_lcbas,istatus)
       call gsi_bundlegetpointer (sval(jj),'lcbas' ,sv_lcbas, istatus)
       ! Convert log(lcbas) to lcbas
@@ -423,7 +423,7 @@ do jj=1,nsubwin
       call gsi_bundlegetvar ( wbundle, 'vwnd10m', sv_vwnd10m, istatus )
    end if
 
-!  Same one-to-one map for chemistry-vars; take care of them together 
+!  Same one-to-one map for chemistry-vars; take care of them together
    do ic=1,ngases
       id=getindex(cvars3d,gases(ic))
       if (id>0) then

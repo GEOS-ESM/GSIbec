@@ -52,7 +52,7 @@ subroutine general_g2s0(grd,sp,spectral_out,grid_in)
   do i=1,sp%nc
      if(sp%factsml(i))spectral_out(i)=zero
   end do
- 
+
   return
 end subroutine general_g2s0
 
@@ -67,7 +67,7 @@ subroutine general_g2s0_ad(grd,sp,spectral_in,grid_out)
 !
 ! program history log:
 !   2006-07-15  kleist
-!   2007-05-15  errico  - Correct for proper use if grid includes equator 
+!   2007-05-15  errico  - Correct for proper use if grid includes equator
 !   2008-04-11  safford - rm unused var
 !   2010-02-18  parrish, copy g2s0_ad to general_g2s0_ad--replace 'use specmod' with input structure var sp
 !                           also replace 'use gridmod' with input structure variable grd
@@ -105,21 +105,21 @@ subroutine general_g2s0_ad(grd,sp,spectral_in,grid_out)
   do i=2*sp%jcap+3,sp%nc
      spec_work(i)=half*spec_work(i)
   end do
- 
+
   call general_sptez_s(sp,spec_work,work,1)
 
 !
-! If nlat odd, then j=je is the equator.  The factor of 2 is because, 
-! je is referenced only once, not twice as in the spectral transform 
+! If nlat odd, then j=je is the equator.  The factor of 2 is because,
+! je is referenced only once, not twice as in the spectral transform
 ! routines where half of the equator is considered in each hemisphere,
-! separately. 
+! separately.
   do j=sp%jb,sp%je-mod(grd%nlat,2)
      do i=1,grd%nlon
         work(i,j)=work(i,j)*sp%wlat(j)
         work(i,grd%nlat-1-j)=work(i,grd%nlat-1-j)*sp%wlat(j)
      end do
   end do
-  
+
   if (mod(grd%nlat,2) /= 0) then
      do i=1,grd%nlon
         work(i,sp%je)=work(i,sp%je)*two*sp%wlat(sp%je)
@@ -190,7 +190,7 @@ subroutine general_s2g0(grd,sp,spectral_in,grid_out)
      spec_work(i)=spectral_in(i)
      if(sp%factsml(i))spec_work(i)=zero
   end do
- 
+
 !  fill in pole points using spectral coefficients
 !  (replace earlier algorithm that assumed zero gradient next to pole)
   call general_spectra_pole_scalar (grd,sp,grid_out,spec_work)
@@ -221,7 +221,7 @@ subroutine general_s2g0_ad(grd,sp,spectral_out,grid_in)
 ! program history log:
 !   2006-07-15  kleist
 !   2007-04-22  errico    correction for proper treatment of equator
-!                         also add call to spectra_pole_scalar_ad 
+!                         also add call to spectra_pole_scalar_ad
 !   2010-02-18  parrish, copy s2g0 to general_s2g0--replace 'use specmod' with input structure var sp
 !                           also replace 'use gridmod' with input structure variable grd
 !
@@ -382,7 +382,7 @@ subroutine sfilter(grd,sp,filter,grid)
   do i=1,sp%nc
      spec_work(i)=spec_work(i)*filter(i)
   end do
- 
+
 !  fill in pole points using spectral coefficients
 !  (replace earlier algorithm that assumed zero gradient next to pole)
   call general_spectra_pole_scalar (grd,sp,grid,spec_work)
@@ -445,7 +445,7 @@ subroutine general_uvg2zds(grd,sp,zsp,dsp,ugrd,vgrd)
   real(r_kind),dimension(sp%nc)       ,intent(  out) :: zsp,dsp
 
 ! Local variables
-  real(r_kind),dimension(grd%nlon,grd%nlat-2):: grdwrk1,grdwrk2 
+  real(r_kind),dimension(grd%nlon,grd%nlat-2):: grdwrk1,grdwrk2
   real(r_kind),dimension(sp%nc):: spcwrk1,spcwrk2
   integer(i_kind) i,j,jj
 
@@ -559,7 +559,7 @@ subroutine general_uvg2zds_ad(grd,sp,zsp,dsp,ugrd,vgrd)
         grdwrk1(i,sp%je)=grdwrk1(i,sp%je)*two*sp%wlat(sp%je)
         grdwrk2(i,sp%je)=grdwrk2(i,sp%je)*two*sp%wlat(sp%je)
      end do
-  endif 
+  endif
 
 
 ! Transfer contents of input grid to local work array
@@ -793,7 +793,7 @@ subroutine general_zds2uvg_ad(grd,sp,zsp,dsp,ugrd,vgrd)
 ! program history log:
 !   2006-07-15  kleist
 !   2007-04-22  errico -  correction for proper treatment of equator
-!                      -  also add call to spectra_pole_scalar_ad 
+!                      -  also add call to spectra_pole_scalar_ad
 !   2008-04-11  safford - rm unused uses
 !   2010-02-18  parrish, copy zds2uvg_ad to general_zds2uvg_ad--replace 'use specmod' with structure var sp
 !                           also replace 'use gridmod' with input structure variable grd
@@ -855,7 +855,7 @@ subroutine general_zds2uvg_ad(grd,sp,zsp,dsp,ugrd,vgrd)
         grdwrk1(i,sp%je)=grdwrk1(i,sp%je)/(two*sp%wlat(sp%je))
         grdwrk2(i,sp%je)=grdwrk2(i,sp%je)/(two*sp%wlat(sp%je))
      end do
-  endif 
+  endif
 
   call general_sptez_v(sp,spcwrk1,spcwrk2,grdwrk1,grdwrk2,-1)
 
@@ -876,7 +876,7 @@ subroutine general_zds2uvg_ad(grd,sp,zsp,dsp,ugrd,vgrd)
      spcwrk2(i)=two*spcwrk2(i)
   end do
 
-!  adjoint of pole fill 
+!  adjoint of pole fill
   call  general_spectra_pole_wind_ad (grd,sp,ugrd,vgrd,spcwrk2,spcwrk1)
 
   do i=1,sp%nc
@@ -895,7 +895,7 @@ subroutine general_spectra_pole_scalar (grd,sp,field,coefs)
 
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    spectra_pole_scalar    
+! subprogram:    spectra_pole_scalar
 !   prgmmr: errico           org:                 date: 2007-05-15
 !
 ! abstract: fill pole values for scalar field using spectral coefficients
@@ -929,21 +929,21 @@ subroutine general_spectra_pole_scalar (grd,sp,field,coefs)
   use general_sub2grid_mod, only: sub2grid_info
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero,half,three
-  
-  implicit none      
+
+  implicit none
 
   type(spec_vars),intent(in   ) :: sp
   type(sub2grid_info),intent(in   ) :: grd
       real(r_kind), intent(in   ) :: coefs(sp%nc)        ! all spectral coefs
-      real(r_kind), intent(inout) :: field(grd%nlat,grd%nlon) ! field, including pole    
-! 
+      real(r_kind), intent(inout) :: field(grd%nlat,grd%nlon) ! field, including pole
+!
 !  Local variables
 
-      integer(i_kind) :: n           ! order of assoc. legendre polynomial 
+      integer(i_kind) :: n           ! order of assoc. legendre polynomial
       integer(i_kind) :: n1          ! offset for real zonal wavenumber m=0 coefs
-      integer(i_kind) :: j           ! longitude index      
-      real(r_kind)  :: afac           ! alp for S. pole 
-      real(r_kind) :: fpole_n, fpole_s    ! value of scalar field at n and s pole 
+      integer(i_kind) :: j           ! longitude index
+      real(r_kind)  :: afac           ! alp for S. pole
+      real(r_kind) :: fpole_n, fpole_s    ! value of scalar field at n and s pole
 !
 !  The spectral coefs are assumed to be ordered
 !      alternating real, imaginary
@@ -958,31 +958,31 @@ subroutine general_spectra_pole_scalar (grd,sp,field,coefs)
       fpole_n=zero
       fpole_s=zero
       n1=1
-      do n=0,sp%jcap 
+      do n=0,sp%jcap
          if (mod(n,2)==1) then
             afac=-sp%alp0(n)
-         else 
+         else
             afac= sp%alp0(n)
-         endif  
+         endif
          fpole_n=fpole_n+sp%alp0(n)*coefs(2*n+n1)
          fpole_s=fpole_s+   afac*coefs(2*n+n1)
       enddo
 !
 ! set field for all "longitudes" at the pole to the same value
       do j=1,grd%nlon
-         field(   1,j)=fpole_s  
+         field(   1,j)=fpole_s
          field(grd%nlat,j)=fpole_n
       enddo
 
-      end subroutine general_spectra_pole_scalar 
+      end subroutine general_spectra_pole_scalar
 !
 !  x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 !
 subroutine general_spectra_pole_scalar_ad (grd,sp,field,coefs)
- 
+
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    spectra_pole_scalar_ad    
+! subprogram:    spectra_pole_scalar_ad
 !   prgmmr: errico           org:                 date: 2007-05-15
 !
 ! abstract: adjoint of spectra_pole_scalar
@@ -1016,23 +1016,23 @@ subroutine general_spectra_pole_scalar_ad (grd,sp,field,coefs)
   use general_sub2grid_mod, only: sub2grid_info
  use m_kinds, only: r_kind,i_kind
  use constants, only: zero,half,three
-  
-      implicit none      
+
+      implicit none
 
   type(spec_vars),intent(in   ) :: sp
   type(sub2grid_info),intent(in   ) :: grd
       real(r_kind), intent(inout) :: coefs(sp%nc)  ! adjoint of all spectral coefs
-      real(r_kind), intent(in   ) :: field(grd%nlat,grd%nlon) ! adjoint field, including pole    
-! 
+      real(r_kind), intent(in   ) :: field(grd%nlat,grd%nlon) ! adjoint field, including pole
+!
 !  Local variables
 
-      integer(i_kind) :: n           ! order of assoc. legendre polynomial 
+      integer(i_kind) :: n           ! order of assoc. legendre polynomial
       integer(i_kind) :: n1          ! offset for real zonal wavenumber m=0 coefs
-      integer(i_kind) :: j           ! longitude index      
+      integer(i_kind) :: j           ! longitude index
       real(r_kind)  :: afac           ! alp for S. pole
-      real(r_kind) :: fpole_n, fpole_s    ! value of scalar field at n and s pole 
+      real(r_kind) :: fpole_n, fpole_s    ! value of scalar field at n and s pole
 
-  
+
 !
 !  The spectral coefs are assumed to be ordered
 !      alternating real, imaginary
@@ -1050,23 +1050,23 @@ subroutine general_spectra_pole_scalar_ad (grd,sp,field,coefs)
          fpole_n=fpole_n+field(grd%nlat,j)
          fpole_s=fpole_s+field(   1,j)
       enddo
-       
+
       n1=1
-      do n=0,sp%jcap 
+      do n=0,sp%jcap
          if (mod(n,2)==1) then
             afac=-sp%alp0(n)
-         else 
+         else
             afac= sp%alp0(n)
          endif
-         coefs(2*n+n1)=coefs(2*n+n1)+afac*fpole_s+sp%alp0(n)*fpole_n  
+         coefs(2*n+n1)=coefs(2*n+n1)+afac*fpole_s+sp%alp0(n)*fpole_n
       enddo
 !
-      end subroutine general_spectra_pole_scalar_ad 
+      end subroutine general_spectra_pole_scalar_ad
 !
 !  x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 !
-subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)               
- 
+subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
+
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:  spectra_pole_wind          grid to spectral
@@ -1101,26 +1101,26 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
   use general_sub2grid_mod, only: sub2grid_info
  use m_kinds, only: r_kind,i_kind
  use constants, only: zero,two,three,rearth,pi
-     
-      implicit none  
-  
+
+      implicit none
+
   type(spec_vars),intent(in   ) :: sp
   type(sub2grid_info),intent(in   ) :: grd
       real(r_kind), intent(in   ) :: vort(sp%nc) ! spect. coefs for vorticity
       real(r_kind), intent(in   ) :: divg(sp%nc) ! spect. coefs for divergence
-      real(r_kind), intent(inout) :: ufield(grd%nlat,grd%nlon) ! u field, including pole    
-      real(r_kind), intent(inout) :: vfield(grd%nlat,grd%nlon) ! v field, including pole    
-! 
+      real(r_kind), intent(inout) :: ufield(grd%nlat,grd%nlon) ! u field, including pole
+      real(r_kind), intent(inout) :: vfield(grd%nlat,grd%nlon) ! v field, including pole
+!
 !  Local variables
 
       integer(i_kind) :: n      ! order of assoc. Legendre polynomial
       integer(i_kind) :: n1     ! offset value for location of m=1 coefs
-      integer(i_kind) :: j      ! longitude index 
+      integer(i_kind) :: j      ! longitude index
       real(r_kind) :: alp1(1:sp%jcap)  ! Assoc Legendre Poly for m=1 at the North Pole
       real(r_kind) :: epsi1(1:sp%jcap) ! epsilon factor for zonal wavenumber m=1
       real(r_kind) :: fnum, fden, fac
       real(r_kind) :: coslon, sinlon ! sines and cosines of longitudes
-      real(r_kind) :: afac       ! alp for S. pole 
+      real(r_kind) :: afac       ! alp for S. pole
       real(r_kind) :: s_vort_R_n  ! sum of real part of P(n)*vort(n)/(n*n+n) for N.pole
       real(r_kind) :: s_vort_I_n  ! sum of imag part of P(n)*vort(n)/(n*n+n) for N.pole
       real(r_kind) :: s_divg_R_n  ! sum of real part of P(n)*divg(n)/(n*n+n) for N.pole
@@ -1129,15 +1129,15 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
       real(r_kind) :: s_vort_I_s  ! sum of imag part of P(n)*vort(n)/(n*n+n) for S.pole
       real(r_kind) :: s_divg_R_s  ! sum of real part of P(n)*divg(n)/(n*n+n) for S.pole
       real(r_kind) :: s_divg_I_s  ! sum of imag part of P(n)*divg(n)/(n*n+n) for S.pole
-      real(r_kind) :: uR_n, vR_n ! twice real part of m=1 Fourier coef for u,v (N.pole) 
-      real(r_kind) :: uI_n, vI_n ! twice imag part of m=1 Fourier coef for u,v (N.pole) 
-      real(r_kind) :: uR_s, vR_s ! twice real part of m=1 Fourier coef for u,v (S.pole)  
-      real(r_kind) :: uI_s, vI_s ! twice imag part of m=1 Fourier coef for u,v (S.pole)      
-      real(r_kind) :: tworearth             
-    
+      real(r_kind) :: uR_n, vR_n ! twice real part of m=1 Fourier coef for u,v (N.pole)
+      real(r_kind) :: uI_n, vI_n ! twice imag part of m=1 Fourier coef for u,v (N.pole)
+      real(r_kind) :: uR_s, vR_s ! twice real part of m=1 Fourier coef for u,v (S.pole)
+      real(r_kind) :: uI_s, vI_s ! twice imag part of m=1 Fourier coef for u,v (S.pole)
+      real(r_kind) :: tworearth
+
 !  spectral components of u:
 !  u(n)=a( -e(n)*vort(n-1)/n + e(n+1)*vort(n+1)/(n+1) -i*divg(n)/(n*n+n)
-!  where a=earth's radius, vort and divg are spectral coefs, and e=epsi1 factor 
+!  where a=earth's radius, vort and divg are spectral coefs, and e=epsi1 factor
 !  complex Fourier coef for wavenumber 1 of u at the pole is
 !  u_coef= sum_(n=1 to n=jcap+1) p_(n,m=1)*u(n)
 !  At rhe poles, the sum over vort contribution is simplified by noting that
@@ -1146,12 +1146,12 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
 !  for all vort(n), n=1,...,jcap
 !  Therefore
 !  u_coef= a* (-   sum (n=1 to n=jcap)   p_(n,m=1)*vort(n)/(n*n+n)
-!              - i*sum (n=1 to n=jcap)   p_(n,m=1)*divg(n)/(n*n+n) ) 
+!              - i*sum (n=1 to n=jcap)   p_(n,m=1)*divg(n)/(n*n+n) )
 !  v_coef=-i*u_coef
 !  u(lon)=2.*modulus(u_coef) cos(u_phase + lon/twopi)
 !  where the 2 is because m=-1 is implicitly considered, with the m=-1
 !    Fourier coef equal to the complex conjugate of that for m=1
-!  u_phase is atan(imag part of u_coef/ real part of u_coef) 
+!  u_phase is atan(imag part of u_coef/ real part of u_coef)
 !
 !  The spectral coefs are assumed to be ordered
 !      alternating real, imaginary
@@ -1165,8 +1165,8 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
 !
       n1=2*(sp%jcap+1)
 !
-!  Specify cosine and sines of longitudes assuming that 
-!  the phases of spectral coefs are with repect to the 
+!  Specify cosine and sines of longitudes assuming that
+!  the phases of spectral coefs are with repect to the
 !  origin being the first longitude.
 
       do n=1,sp%jcap
@@ -1176,7 +1176,7 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
       enddo
 !
 !  Compute Legendre polynomials / cos for m=1 at North Pole
-!  This is actually limit Pn,m / abs (cos) as pole is approached 
+!  This is actually limit Pn,m / abs (cos) as pole is approached
       alp1(1)=sqrt(three)/two
       alp1(2)=sqrt(two+three)*alp1(1)
       do n=3,sp%jcap
@@ -1197,39 +1197,39 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
       s_vort_I_s=zero
       s_divg_R_s=zero
       s_divg_I_s=zero
-      
-      do n=1,sp%jcap 
+
+      do n=1,sp%jcap
          if (mod(n,2)==0) then
             afac=-alp1(n)
-         else 
+         else
             afac= alp1(n)
-         endif  
+         endif
          s_vort_R_n = s_vort_R_n + alp1(n)*vort(2*n-1+n1)
-         s_vort_I_n = s_vort_I_n + alp1(n)*vort(2*n  +n1)        
+         s_vort_I_n = s_vort_I_n + alp1(n)*vort(2*n  +n1)
          s_divg_R_n = s_divg_R_n + alp1(n)*divg(2*n-1+n1)
-         s_divg_I_n = s_divg_I_n + alp1(n)*divg(2*n  +n1) 
+         s_divg_I_n = s_divg_I_n + alp1(n)*divg(2*n  +n1)
          s_vort_R_s = s_vort_R_s + afac*vort(2*n-1+n1)
-         s_vort_I_s = s_vort_I_s + afac*vort(2*n  +n1)        
+         s_vort_I_s = s_vort_I_s + afac*vort(2*n  +n1)
          s_divg_R_s = s_divg_R_s + afac*divg(2*n-1+n1)
-         s_divg_I_s = s_divg_I_s + afac*divg(2*n  +n1) 
+         s_divg_I_s = s_divg_I_s + afac*divg(2*n  +n1)
       enddo
       s_vort_R_s = -s_vort_R_s
       s_vort_I_s = -s_vort_I_s
 !
 !  Determine 2* real and imag parts for m=1 u wind at pole
-!  The factor -1 if south is because as the south pole is approached, 
-!  the limit of abs(cos)/cos = -1.  
+!  The factor -1 if south is because as the south pole is approached,
+!  the limit of abs(cos)/cos = -1.
       tworearth=two*rearth
       uR_n= tworearth * (s_divg_I_n - s_vort_R_n)
-      uI_n=-tworearth * (s_divg_R_n + s_vort_I_n) 
+      uI_n=-tworearth * (s_divg_R_n + s_vort_I_n)
       vR_n=-uI_n
       vI_n= uR_n
       uR_s= tworearth * (s_divg_I_s - s_vort_R_s)
-      uI_s=-tworearth * (s_divg_R_s + s_vort_I_s) 
+      uI_s=-tworearth * (s_divg_R_s + s_vort_I_s)
       vR_s= uI_s
       vI_s=-uR_s
 !
-!  Perform Fourier projection for m=1 at pole             
+!  Perform Fourier projection for m=1 at pole
       fac=two*pi/grd%nlon
       do j=1,grd%nlon
          coslon=cos(fac*(j-1))
@@ -1240,7 +1240,7 @@ subroutine general_spectra_pole_wind (grd,sp,ufield,vfield,vort,divg)
          vfield(   1,j)=vR_s*coslon-vI_s*sinlon
       enddo
 !
-      end subroutine general_spectra_pole_wind 
+      end subroutine general_spectra_pole_wind
 !
 !  x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 !
@@ -1249,7 +1249,7 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
 
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:  spectra_pole_wind_ad 
+! subprogram:  spectra_pole_wind_ad
 !   prgmmr: errico           org:                 date: 2007-05-15
 !
 ! abstract: adjoint of routine spectra_pole_wind
@@ -1283,26 +1283,26 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
   use general_sub2grid_mod, only: sub2grid_info
  use m_kinds, only: r_kind,i_kind
  use constants, only: zero,two,three,rearth,pi
-     
-      implicit none  
-  
+
+      implicit none
+
   type(spec_vars),intent(in   ) :: sp
   type(sub2grid_info),intent(in   ) :: grd
-      real(r_kind), intent(in   ) :: ufield(grd%nlat,grd%nlon) ! adjoint of u field, including pole    
-      real(r_kind), intent(in   ) :: vfield(grd%nlat,grd%nlon) ! adjoint of v field, including pole    
+      real(r_kind), intent(in   ) :: ufield(grd%nlat,grd%nlon) ! adjoint of u field, including pole
+      real(r_kind), intent(in   ) :: vfield(grd%nlat,grd%nlon) ! adjoint of v field, including pole
       real(r_kind), intent(inout) :: vort(sp%nc) ! adjoint of spect. coefs for vorticity
       real(r_kind), intent(inout) :: divg(sp%nc) ! adjoint of spect. coefs for divergence
-! 
+!
 !  Local variables
 
       integer(i_kind) :: n      ! order of assoc. Legendre polynomial
       integer(i_kind) :: n1     ! offset value for location of m=1 coefs
-      integer(i_kind) :: j      ! longitude index 
+      integer(i_kind) :: j      ! longitude index
       real(r_kind) :: alp1(1:sp%jcap)  ! Assoc Legendre Poly for m=1 at the North Pole
       real(r_kind) :: epsi1(1:sp%jcap) ! epsilon factor for zonal wavenumber m=1
       real(r_kind) :: fnum, fden, fac
       real(r_kind) :: coslon, sinlon ! sines and cosines of longitudes
-      real(r_kind) :: afac       ! alp for S. pole 
+      real(r_kind) :: afac       ! alp for S. pole
       real(r_kind) :: s_vort_R_n  ! sum of real part of P(n)*vort(n)/(n*n+n) for N.pole
       real(r_kind) :: s_vort_I_n  ! sum of imag part of P(n)*vort(n)/(n*n+n) for N.pole
       real(r_kind) :: s_divg_R_n  ! sum of real part of P(n)*divg(n)/(n*n+n) for N.pole
@@ -1311,18 +1311,18 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
       real(r_kind) :: s_vort_I_s  ! sum of imag part of P(n)*vort(n)/(n*n+n) for S.pole
       real(r_kind) :: s_divg_R_s  ! sum of real part of P(n)*divg(n)/(n*n+n) for S.pole
       real(r_kind) :: s_divg_I_s  ! sum of imag part of P(n)*divg(n)/(n*n+n) for S.pole
-      real(r_kind) :: uR_n, vR_n ! twice real part of m=1 Fourier coef for u,v (N.pole) 
-      real(r_kind) :: uI_n, vI_n ! twice imag part of m=1 Fourier coef for u,v (N.pole) 
-      real(r_kind) :: uR_s, vR_s ! twice real part of m=1 Fourier coef for u,v (S.pole)  
-      real(r_kind) :: uI_s, vI_s ! twice imag part of m=1 Fourier coef for u,v (S.pole)      
-      real(r_kind) :: tworearth             
+      real(r_kind) :: uR_n, vR_n ! twice real part of m=1 Fourier coef for u,v (N.pole)
+      real(r_kind) :: uI_n, vI_n ! twice imag part of m=1 Fourier coef for u,v (N.pole)
+      real(r_kind) :: uR_s, vR_s ! twice real part of m=1 Fourier coef for u,v (S.pole)
+      real(r_kind) :: uI_s, vI_s ! twice imag part of m=1 Fourier coef for u,v (S.pole)
+      real(r_kind) :: tworearth
 !  The phases of the spectra are assumed to be with respect
 !  to the first longitude being 0.
 !
       n1=2*(sp%jcap+1)
 !
-!  Specify cosine and sines of longitudes assuming that 
-!  the phases of spectral coefs are with repect to the 
+!  Specify cosine and sines of longitudes assuming that
+!  the phases of spectral coefs are with repect to the
 !  origin being the first longitude.
 
       do n=1,sp%jcap
@@ -1332,7 +1332,7 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
       enddo
 !
 !  Compute Legendre polynomials / cos for m=1 at North Pole
-!  This is actually limit Pn,m / abs (cos) as pole is approached 
+!  This is actually limit Pn,m / abs (cos) as pole is approached
       alp1(1)=sqrt(three)/two
       alp1(2)=sqrt(two+three)*alp1(1)
       do n=3,sp%jcap
@@ -1344,15 +1344,15 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
          alp1(n)=alp1(n)/(n*n+n)
       enddo
 !
-!  Perform adjoint of Fourier projection for m=1 at pole         
-      uR_n=zero    
-      uI_n=zero    
-      vR_n=zero    
-      vI_n=zero    
-      uR_s=zero    
-      uI_s=zero    
-      vR_s=zero    
-      vI_s=zero    
+!  Perform adjoint of Fourier projection for m=1 at pole
+      uR_n=zero
+      uI_n=zero
+      vR_n=zero
+      vI_n=zero
+      uR_s=zero
+      uI_s=zero
+      vR_s=zero
+      vI_s=zero
       fac=two*pi/grd%nlon
       do j=1,grd%nlon
          coslon=cos(fac*(j-1))
@@ -1367,7 +1367,7 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
          vI_s=vI_s-sinlon*vfield(   1,j)
       enddo
 
-!  the limit of abs(cos)/cos = -1.  
+!  the limit of abs(cos)/cos = -1.
       uI_n=uI_n-vR_n
       uR_n=uR_n+vI_n
       uI_s=uI_s+vR_s
@@ -1382,12 +1382,12 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
       s_divg_R_s=-tworearth*uI_s
       s_divg_I_s= tworearth*uR_s
 !
-      do n=1,sp%jcap 
+      do n=1,sp%jcap
          if (mod(n,2)==0) then
             afac=-alp1(n)
-         else 
+         else
             afac= alp1(n)
-         endif  
+         endif
          vort(2*n-1+n1)=vort(2*n-1+n1)+alp1(n)*s_vort_R_n  &
                                    +   afac*s_vort_R_s
          vort(2*n  +n1)=vort(2*n  +n1)+alp1(n)*s_vort_I_n  &
@@ -1398,7 +1398,7 @@ subroutine general_spectra_pole_wind_ad (grd,sp,ufield,vfield,vort,divg)
                                    +   afac*s_divg_I_s
       enddo
 !
-      end subroutine general_spectra_pole_wind_ad 
+      end subroutine general_spectra_pole_wind_ad
 !
 !
 
@@ -1410,14 +1410,14 @@ subroutine general_test_inverses(grd,sp,mype)
 !   prgmmr: kleist           org: np23                date: 2006-07-15
 !
 ! abstract: test that corresponding inverse routines for spectral transforms
-!           are indeed the inverses of each other (up to roundoff error) and 
-!           that corresponding adjoints are indeed adjoints (up to roundoff 
-!           error)           
+!           are indeed the inverses of each other (up to roundoff error) and
+!           that corresponding adjoints are indeed adjoints (up to roundoff
+!           error)
 !
 ! program history log:
 !   2006-07-15  kleist
-!   2007-04-22  errico - addition of some further tests, including for vector 
-!                        transforms and adjoint testing 
+!   2007-04-22  errico - addition of some further tests, including for vector
+!                        transforms and adjoint testing
 !   2009-01-02  todling - remove unused vars
 !   2010-02-18  parrish, test_inverses to general_test_inverses--
 !                          replace 'use specmod' with structure var sp
@@ -1431,23 +1431,23 @@ subroutine general_test_inverses(grd,sp,mype)
 !   language: f90
 !   machine:  ibm RS/6000 SP
 !
-! Notes: 
+! Notes:
 !
 !   The test of inverses requires either checking spectral coefs or checking
 !   fields, but the latter only if the starting field has been spectrally truncated,
-!   otherwise the starting field has components that can not be reconstituted 
+!   otherwise the starting field has components that can not be reconstituted
 !   by the spectra.
 !
-!   The jacobian test for adjoints uses the fact that the matrix operator for 
-!   the adjoint is the transpose of the forward operator matrix. Each of these 
-!   matrices have elements in common. Individual elements can be implicitly 
-!   determined by inputing unit vectors (say element j) to the operator 
+!   The jacobian test for adjoints uses the fact that the matrix operator for
+!   the adjoint is the transpose of the forward operator matrix. Each of these
+!   matrices have elements in common. Individual elements can be implicitly
+!   determined by inputing unit vectors (say element j) to the operator
 !   (transform) and then looking at particular single values (say i) of the ouput:
 !   the result is element i,j of the matrix for the operator.
 !
 !   The norm test uses the fact that <x, My> = <M^T x, y>, where M^T is the adjoint
 !   of M and x and y are arbitrary vectors in the appropriate subspaces. This is
-!   the definition of the adjoint, defined for the norm <,>.  
+!   the definition of the adjoint, defined for the norm <,>.
 !
 !$$$
 
@@ -1472,7 +1472,7 @@ subroutine general_test_inverses(grd,sp,mype)
   real(r_kind),dimension(sp%nc):: s1,s2,s3
   real(r_kind),dimension(sp%nc):: d1,d2,d3
   real(r_kind):: diffmax, absmax
-! smallfrac is expected size of lagest fractional roundoff error 
+! smallfrac is expected size of lagest fractional roundoff error
   real(r_kind),parameter:: smallfrac=1.e-9_r_kind
   real(r_kind),dimension(:,:,:),pointer::ges_tv_nt=>NULL()
 
@@ -1504,7 +1504,7 @@ subroutine general_test_inverses(grd,sp,mype)
 ! TEST SCALAR TRANSFORM AND ITS INVERSE
      call general_g2s0(grd,sp,s1,t1)  ! compute spectral coefs s1
      call general_s2g0(grd,sp,s1,t2)  ! compute spectrally truncated field t2
-     call general_g2s0(grd,sp,s3,t2)  ! recompute spectra from field  
+     call general_g2s0(grd,sp,s3,t2)  ! recompute spectra from field
 !
 ! check all spectral coefficients
      write(777,*) ' '
@@ -1531,9 +1531,9 @@ subroutine general_test_inverses(grd,sp,mype)
      s2=zero; s3=zero
      d2=zero; d3=zero
      s1(1)=zero  ! this component is always zero
-     d1=0.1_r_kind*s1 
-     call general_zds2uvg(grd,sp,s1,d1,u1,v1)  
-     call general_uvg2zds(grd,sp,s2,d2,u1,v1) 
+     d1=0.1_r_kind*s1
+     call general_zds2uvg(grd,sp,s1,d1,u1,v1)
+     call general_uvg2zds(grd,sp,s2,d2,u1,v1)
 !
      write(777,*) ' '
      write(777,*) ' **** Test that zds2uvg and uvg2zds are inverses for vorticity ****'
@@ -1570,10 +1570,10 @@ subroutine general_test_inverses(grd,sp,mype)
 !
 ! *********************************************************
 ! TEST THAT ADJOINT SCALAR ROUTINES ARE INVERSES OF EACH OTHER
-    
+
      call general_s2g0_ad(grd,sp,s1,t1)  ! compute spectral adjoint coefs s1
      call general_g2s0_ad(grd,sp,s1,t2)  ! compute spectrally truncated adjoint field t2
-     call general_s2g0_ad(grd,sp,s3,t2)  ! recompute spectra from field  
+     call general_s2g0_ad(grd,sp,s3,t2)  ! recompute spectra from field
 !
 ! check all spectra
      write(777,*) ' '
@@ -1594,12 +1594,12 @@ subroutine general_test_inverses(grd,sp,mype)
 !
 !
 !   ***********************************************************
-!   TEST THAT ADJOINT VECTOR ROUTINES ARE INVERSES OF EACH OTHER     
+!   TEST THAT ADJOINT VECTOR ROUTINES ARE INVERSES OF EACH OTHER
      u1=zero; v1=zero
      s2=zero; d2=zero
      s1(1)=zero
-     d1=0.1_r_kind*s1 
-     call general_uvg2zds_ad(grd,sp,s1,d1,u1,v1) 
+     d1=0.1_r_kind*s1
+     call general_uvg2zds_ad(grd,sp,s1,d1,u1,v1)
      call general_zds2uvg_ad(grd,sp,s2,d2,u1,v1)
 !
      write(777,*) ' '
@@ -1643,7 +1643,7 @@ subroutine general_test_inverses(grd,sp,mype)
 !
      write(777,*) ' '
      write(777,*) ' **** Apply Jacobian test to selected elements' &
-                 ,' of s2g0_ad and s2g0 ***' 
+                 ,' of s2g0_ad and s2g0 ***'
 !
      absmax=zero
      diffmax=zero
@@ -1652,18 +1652,18 @@ subroutine general_test_inverses(grd,sp,mype)
      index(1)=1                   ! S. pole
      index(2)=2                   ! 1st Lat next to S. pole
      index(3)=(grd%nlat+1)/2      ! equator or ist N. of equator if no equator
-     index(4)=grd%nlat-1          ! 1st lat next to N. pole 
+     index(4)=grd%nlat-1          ! 1st lat next to N. pole
      index(5)=grd%nlat            ! N. pole
 !
 ! Only check a subset of spectral coefs to reduce computation
      ncstep=4*sp%jcap/3
      if (mod(ncstep,2) == 0) ncstep=ncstep+1 ! then both real and imag parts tested
-   
+
      do n=1,sp%nc,ncstep
         if (mod(n,2) ==0 .and. n <= 2*sp%jcap+2) then
            d1(n)=zero   ! these are imag parts of coefs for zonal wave number 0
         else
-           i=3         ! only one longitude tested 
+           i=3         ! only one longitude tested
 !
            do ig=1,5     !loop over selected lats to test
               d1=zero; d2=zero
@@ -1671,28 +1671,28 @@ subroutine general_test_inverses(grd,sp,mype)
               j = index(ig)
               d1(n)=one
               u2(j,i)=one
-              call general_s2g0_ad(grd,sp,d2,u2)  
+              call general_s2g0_ad(grd,sp,d2,u2)
               call general_s2g0(grd,sp,d1,u1)
               d3(n)=u1(j,i)-d2(n)
-              if (abs(d3(n)) > smallfrac*(abs(d2(n))+abs(u1(j,i))) ) then 
+              if (abs(d3(n)) > smallfrac*(abs(d2(n))+abs(u1(j,i))) ) then
                  write(777,'(a,2i7,1p3e18.10)') ' latindex,spec-index,s,g,diff ' &
                                                 ,j,n,d2(n),u1(j,i),d3(n)
               endif
               if (abs(d2(n))  > absmax) absmax=abs(d2(n))
               if (abs(u1(j,i)) > absmax) absmax=abs(u1(j,i))
-              if (abs(d3(n))  > diffmax) diffmax=abs(d3(n))      
+              if (abs(d3(n))  > diffmax) diffmax=abs(d3(n))
            enddo   ! loop over selected lats
         endif     ! test if imag part of zonal wave 0 coef
- 
+
      enddo       ! loop over spec index n
- 
+
      write(777,*) ' max of absolute values tested =',absmax
      write(777,*) ' max of absolute diff obtained =',diffmax
 !
 !
 !   *******************************************
 !   TEST ADJOINT USING NORM TEST
-!   test that uvg2zds_ad is adjoint of uvg2zds      
+!   test that uvg2zds_ad is adjoint of uvg2zds
 !   s is vort spectral coefs here
      u1=zero; u2=zero; v1=zero; v2=zero
      s1=zero; s2=zero; d1=zero; d2=zero
@@ -1703,10 +1703,10 @@ subroutine general_test_inverses(grd,sp,mype)
      call general_uvg2zds(grd,sp,s1,d1,u1,v1)
      u1=zero
      v1=zero
-     call general_zds2uvg(grd,sp,s1,d1,u1,v1)  
+     call general_zds2uvg(grd,sp,s1,d1,u1,v1)
 !
 !  fill spectral adjoint variables with random numbers
-!  but with magnitudes like we have in real cases   
+!  but with magnitudes like we have in real cases
      call random_number(d2)
      call random_number(s2)
      d2=d2*d1 ! this will set values that should be 0 to 0.
@@ -1716,11 +1716,11 @@ subroutine general_test_inverses(grd,sp,mype)
      s1=zero
      d1=zero
      u2=zero
-     v2=zero  
-     call general_uvg2zds_ad(grd,sp,s2,d2,u2,v2)   
-     call general_uvg2zds(grd,sp,s1,d1,u1,v1)  
+     v2=zero
+     call general_uvg2zds_ad(grd,sp,s2,d2,u2,v2)
+     call general_uvg2zds(grd,sp,s1,d1,u1,v1)
 !
-!  d3(1) is the norm in terms of spectra 
+!  d3(1) is the norm in terms of spectra
      d3(1:3)=zero
      do i=1,sp%nc
         d3(1)=d3(1) + s1(i)*s2(i) + d1(i)*d2(i)
@@ -1735,7 +1735,7 @@ subroutine general_test_inverses(grd,sp,mype)
 !
 !  d3(3) is the difference in the norms
      d3(3)=d3(1)-d3(2)
-! 
+!
      write(777,*) ' '
      write(777,*) ' **** Apply norm test to uvg2zds and uvg2zds_ad ****'
      write(777,'(a,1p3e18.10)') ' zdnorm, uvnorm, diff ',d3(1:3)
@@ -1743,7 +1743,7 @@ subroutine general_test_inverses(grd,sp,mype)
 !
 !   ****************************************************
 !   TEST VECTOR TRANSFORM ADJOINT ZDS2UVG USING NORM TEST
-!   test that zds2uvg_ad is adjoint of zds2uvg      
+!   test that zds2uvg_ad is adjoint of zds2uvg
 !   s is vort spectral coefs here
      u1=zero; u2=zero; v1=zero; v2=zero
      s1=zero; s2=zero; d1=zero; d2=zero
@@ -1754,10 +1754,10 @@ subroutine general_test_inverses(grd,sp,mype)
      call general_uvg2zds(grd,sp,s1,d1,u1,v1)
      u1=zero
      v1=zero
-     call general_zds2uvg(grd,sp,s1,d1,u1,v1)  
+     call general_zds2uvg(grd,sp,s1,d1,u1,v1)
 !
 !  fill spectral adjoint variables with random numbers
-!  but with magnitudes like we have in real cases   
+!  but with magnitudes like we have in real cases
      call random_number(d2)
      call random_number(s2)
      d2=d2*d1 ! this will set values that should be 0 to 0.
@@ -1767,11 +1767,11 @@ subroutine general_test_inverses(grd,sp,mype)
      s1=zero
      d1=zero
      u2=zero
-     v2=zero  
-     call general_zds2uvg(grd,sp,s2,d2,u2,v2)  
-     call general_zds2uvg_ad(grd,sp,s1,d1,u1,v1)  
+     v2=zero
+     call general_zds2uvg(grd,sp,s2,d2,u2,v2)
+     call general_zds2uvg_ad(grd,sp,s1,d1,u1,v1)
 !
-!  d3(1) is the norm in terms of spectra 
+!  d3(1) is the norm in terms of spectra
      d3(1:3)=zero
      do i=1,sp%nc
         d3(1)=d3(1) + s1(i)*s2(i) + d1(i)*d2(i)
@@ -1786,7 +1786,7 @@ subroutine general_test_inverses(grd,sp,mype)
 !
 !  d3(3) is the difference in the norms
      d3(3)=d3(1)-d3(2)
-! 
+!
      write(777,*) ' '
      write(777,*) ' **** Apply norm test to zds2uvg and zds2uvg_ad ****'
      write(777,'(a,1p3e18.10)') ' zdnorm, uvnorm, diff ',d3(1:3)
@@ -1800,7 +1800,7 @@ subroutine general_test_inverses(grd,sp,mype)
      call random_number(u1)
      u3=u1
      s1=zero
-     call general_s2g0_ad(grd,sp,s1,u3)   
+     call general_s2g0_ad(grd,sp,s1,u3)
 
 !  fill spectral variables with random numbers
 !  but with magnitudes like we have in real cases
@@ -1810,22 +1810,22 @@ subroutine general_test_inverses(grd,sp,mype)
      u2=zero
      call general_s2g0(grd,sp,s3,u2)
 !
-!  d3(1) is the norm in terms of spectra 
+!  d3(1) is the norm in terms of spectra
      d3(1:3)=zero
      do i=1,sp%nc
-        d3(1)=d3(1) + s1(i)*s2(i) 
+        d3(1)=d3(1) + s1(i)*s2(i)
      enddo
 !
 !  d3(2) is the norm in terms of grid values
      do i=1,grd%nlat
         do j=1,grd%nlon
-           d3(2)=d3(2) + u1(i,j)*u2(i,j) 
+           d3(2)=d3(2) + u1(i,j)*u2(i,j)
         enddo
      enddo
 !
 !  d3(3) is the difference in the norms
      d3(3)=d3(1)-d3(2)
-! 
+!
      write(777,*) ' '
      write(777,*) ' **** Apply norm test to s2g0 and s2g0_ad ****'
      write(777,'(a,1p3e18.10)') ' snorm, gnorm, diff ',d3(1:3)
@@ -1849,22 +1849,22 @@ subroutine general_test_inverses(grd,sp,mype)
      u2=zero
      call general_g2s0_ad(grd,sp,s3,u2)
 !
-!  d3(1) is the norm in terms of spectra 
+!  d3(1) is the norm in terms of spectra
      d3(1:3)=zero
      do i=1,sp%nc
-        d3(1)=d3(1) + s1(i)*s2(i) 
+        d3(1)=d3(1) + s1(i)*s2(i)
      enddo
 !
 !  d3(2) is the norm in terms of grid values
      do i=1,grd%nlat
         do j=1,grd%nlon
-           d3(2)=d3(2) + u1(i,j)*u2(i,j) 
+           d3(2)=d3(2) + u1(i,j)*u2(i,j)
         enddo
      enddo
 !
 !  d3(3) is the difference in the norms
      d3(3)=d3(1)-d3(2)
-! 
+!
      write(777,*) ' '
      write(777,*) ' **** Apply norm test to g2s0 and g2s0_ad ****'
      write(777,'(a,1p3e18.10)') ' snorm, gnorm, diff ',d3(1:3)

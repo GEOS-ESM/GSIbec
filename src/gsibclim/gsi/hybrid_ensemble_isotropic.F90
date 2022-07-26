@@ -6,7 +6,7 @@ module hybrid_ensemble_isotropic
 !   prgmmr: parrish          org: np22                date: 2009-09-28
 !
 ! abstract: contains routines for localization of the hybrid ensemble
-!            control variable a_en.  this application is for 
+!            control variable a_en.  this application is for
 !            localization with a regional model with homogeneous scale in horizontal
 !            and vertical scale a function of vertical only.
 !
@@ -23,26 +23,26 @@ module hybrid_ensemble_isotropic
 !   2010-05-20  todling - renamed all cstate to bundle to avoid confusion; the
 !                         bundles here are not necessarily idendical to the control vector,
 !                         but rather what this module take the ensemble to be composed of
-!   2010-07-29  kleist  - combine hybrid_ensemble_isotropic global/regional modules 
+!   2010-07-29  kleist  - combine hybrid_ensemble_isotropic global/regional modules
 !   2011-02-28  parrish - introduce more complete use of gsi_bundlemod to eliminate hard-wired variables
 !   2011-06-28  parrish - add code to allow sqrt of localization correlation so hybrid ensemble option
 !                            can be extended to sqrt(B) minimization option.
 !   2011-08-31  todling - revisit en_perts (single-prec) in light of extended bundle
 !   2011-10-26  kleist - add time dimension to en_perts for 4d extensions
 !   2011-11-01  kleist - 4d-ensemble-var available as part of ensemble forward models(s) and adjoints,
-!                        as described in Liu et al. (2008), MWR, vol.36 and Buehner et al. (2010), 
-!                        MWR, vol.138.  This specific implementation uses the linearized observation 
-!                        operators as in Buehner et al., but also has the capability to allow for a 
+!                        as described in Liu et al. (2008), MWR, vol.36 and Buehner et al. (2010),
+!                        MWR, vol.138.  This specific implementation uses the linearized observation
+!                        operators as in Buehner et al., but also has the capability to allow for a
 !                        contribution from a static, time-invariant (3DVAR) B.  Capability also exists
 !                        for actual hybrid Ens-4DVAR (with TL/AD).
-!   2012-01-17  wu      - option "pwgtflg": psfc with vertically integrated contribution 
+!   2012-01-17  wu      - option "pwgtflg": psfc with vertically integrated contribution
 !                          in forward and adjoint routines
-!   2012-02-08  parrish - add changes to allow regional dual res 
+!   2012-02-08  parrish - add changes to allow regional dual res
 !   2012-02-08  parrish - cleanup
-!   2012-10-11  wu      - dual resolution for regional hybens options; 
+!   2012-10-11  wu      - dual resolution for regional hybens options;
 !                         use ensemble dimensions on control variable: alpha
 !   2013-04-17  wu      - bug fix in normalizing the recursive filter
-!   2014-05-22  wu      - increase dimension of variables used in the recursive filter 
+!   2014-05-22  wu      - increase dimension of variables used in the recursive filter
 !                         for vertically varying ability
 !   2014-12-02  derber  - many optimization changes
 !   2015-04-07  carley  - bug fix to allow grd_loc%nlat=grd_loc%nlon
@@ -66,17 +66,17 @@ module hybrid_ensemble_isotropic
 !   sub ensemble_forward_model_ad         - adjoint of ensemble_forward_model
 !   sub ensemble_forward_model_dual_res   - dual resolution version of ensemble_forward_model
 !   sub ensemble_forward_model_ad_dual_res- adjoint of ensemble_forward_model_dual_res
-!   get_new_alpha_beta - 
-!   bkerror_a_en - 
-!   ckgcov_a_en_new_factorization - 
-!   ckgcov_a_en_new_factorization_ad - 
-!   hybens_grid_setup - 
-!   hybens_localization_setup - 
-!   convert_km_to_grid_units - 
-!   get_region_lat_lon_ens - 
-!   get_region_dx_dy_ens - 
-!   get_regional_dual_res_grid - 
-!   acceptable_for_essl_fft - 
+!   get_new_alpha_beta -
+!   bkerror_a_en -
+!   ckgcov_a_en_new_factorization -
+!   ckgcov_a_en_new_factorization_ad -
+!   hybens_grid_setup -
+!   hybens_localization_setup -
+!   convert_km_to_grid_units -
+!   get_region_lat_lon_ens -
+!   get_region_dx_dy_ens -
+!   get_regional_dual_res_grid -
+!   acceptable_for_essl_fft -
 !
 ! Variable Definitions:
 !   def yyyy      - what yyyy is
@@ -211,7 +211,7 @@ subroutine init_rf_z(z_len)
 !                             fixed surface pressure of 1000mb.  This is because at the point where this
 !                             is currently called, the background 3d pressure field is not yet available.
 !                             A later version will correct this.
-!                             For the current s_ens_v > 0, the measure is vertical grid units.  
+!                             For the current s_ens_v > 0, the measure is vertical grid units.
 !                             s_ens_v = 20 and s_ens_v = -0.44 are roughly comparable, and
 !                             connection of .44 is .44 = (sqrt(.15)/sqrt(2))*1.6, where 1.6 is the value used
 !                             by Jeff Whitaker for his distance in which the Gaspari-Cohn function 1st = 0.
@@ -341,7 +341,7 @@ subroutine init_rf_z(z_len)
 !!            if(mype == 0) write(400,'(" k, vertical localization in grid units for ln(p) scaling =",i4,f10.2,f10.2,f10.2)') &
 !!                                         k,sqrt(aspect(k))
            enddo
-   
+
            call get_new_alpha_beta(aspect,nsig,fmatz_tmp,fmat0z_tmp)
            do l=1,2
              do k=1,nsig
@@ -633,7 +633,7 @@ subroutine new_factorization_rf_x(f,iadvance,iback,nlevs)
         end if
 
      enddo
-  else 
+  else
 !$omp parallel do schedule(dynamic,1) private(k,j,i,l)
      do k=1,nz
 
@@ -1021,12 +1021,12 @@ subroutine normal_new_factorization_rf_y
 
   if(grd_loc%nlat <= grd_loc%nlon)then
     lend=1
-    iend=grd_loc%nlat 
+    iend=grd_loc%nlat
   else
     lend=grd_loc%nlat/grd_loc%nlon + 1
-    iend=grd_loc%nlon 
+    iend=grd_loc%nlon
   endif
-              
+
   do loop=1,lend
      ll=(loop-1)*iend
      f=zero
@@ -1068,7 +1068,7 @@ subroutine normal_new_factorization_rf_y
         iadvance=1 ; iback=2
         call new_factorization_rf_y(f,iadvance,iback,kl)
         iadvance=2 ; iback=1
-        call new_factorization_rf_y(f,iadvance,iback,kl) 
+        call new_factorization_rf_y(f,iadvance,iback,kl)
 
         do k=1,kl
            do i=1,iend
@@ -1089,7 +1089,7 @@ end subroutine normal_new_factorization_rf_y
 ! subprogram:    create_ensemble        allocate space for ensembles
 !   prgmmr: parrish          org: np22                date: 2009-06-16
 !
-! abstract: allocate space for ensemble perturbations used with the 
+! abstract: allocate space for ensemble perturbations used with the
 !             hybrid ensemble option.
 !
 ! program history log:
@@ -1122,7 +1122,7 @@ end subroutine normal_new_factorization_rf_y
 
     allocate(en_perts(n_ens,ntlevs_ens))
     call gsi_gridcreate(grid_ens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
- 
+
     do m=1,ntlevs_ens
        do n=1,n_ens
           call gsi_bundlecreate(en_perts(n,m),grid_ens,'ensemble perts',istatus, &
@@ -1166,7 +1166,7 @@ end subroutine normal_new_factorization_rf_y
 !   2011-12-07  tong    - add the option to read wrf_nmm ensemble
 !   2012-01-30  parrish - remove wrf_nmm_regional,wrf_mass_regional,netcdf,nems_nmmb_regional
 !   2013-10-25  todling - nullify work pointer
-!   2015-01-22  Hu      - add namelist (i_en_perts_io) and functions to save and 
+!   2015-01-22  Hu      - add namelist (i_en_perts_io) and functions to save and
 !                         read ensemble perturbations in ensemble grid.
 !
 !   input argument list:
@@ -1238,7 +1238,7 @@ end subroutine normal_new_factorization_rf_y
        call special_sd2h0
        allocate(seed(nval2f,nscl))
        seed=-one
- 
+
        do m=1,ntlevs_ens
          en_bar(m)%values=zero
        enddo
@@ -1266,7 +1266,7 @@ end subroutine normal_new_factorization_rf_y
                 en_bar(m)%values(ii)=en_bar(m)%values(ii)+bundle_ens%values(ii)
              enddo
           enddo
-       
+
 ! Load ps_bar for use with vertical localization later
           call gsi_bundlegetpointer (en_bar(m),'ps' ,cv_ps ,istatus)
           do j=1,grd_ens%lon2
@@ -1425,7 +1425,7 @@ end subroutine normal_new_factorization_rf_y
 !
 !   input argument list:
 !     seed     - old random number seeds (used for bit reproducibility of
-!                 generated random ensemble perturbations on different 
+!                 generated random ensemble perturbations on different
 !                 numbers of processors)
 !
 !   output argument list:
@@ -1476,7 +1476,7 @@ end subroutine normal_new_factorization_rf_y
     if(maxval(seed) <  zero) then
 
 !       create initial seed for random numbers for each horizontal location.
-  
+
        if(mype == 0) then
           call random_number(seed)
           do is=1,nscl
@@ -1621,7 +1621,7 @@ end subroutine normal_new_factorization_rf_y
        enddo
     enddo
     return
-    
+
   end subroutine fix_belt
 
   subroutine rescale_ensemble_rh_perturbations
@@ -1690,7 +1690,7 @@ end subroutine normal_new_factorization_rf_y
        enddo
     enddo
     return
- 
+
   end subroutine rescale_ensemble_rh_perturbations
 
   subroutine destroy_ensemble
@@ -1699,7 +1699,7 @@ end subroutine normal_new_factorization_rf_y
 ! subprogram:    destroy_ensemble       deallocate space for ensembles
 !   prgmmr: parrish          org: np22                date: 2009-06-16
 !
-! abstract: deallocate space for ensemble perturbations used with the 
+! abstract: deallocate space for ensemble perturbations used with the
 !             hybrid ensemble option.
 !
 ! program history log:
@@ -1760,14 +1760,14 @@ end subroutine normal_new_factorization_rf_y
 !   2011-12-01  todling - explicit dim for a_en()
 !
 !   input argument list:
-!     cvec      - 
-!     a_en      - 
-!     ibin      - integer bin number for ensemble perturbations  
-! 
-!   output argument list:
-!     cvec      - 
+!     cvec      -
+!     a_en      -
+!     ibin      - integer bin number for ensemble perturbations
 !
-! remarks:  
+!   output argument list:
+!     cvec      -
+!
+! remarks:
 !    need to reconcile grid in gsi_bundle w/ grid_ens/grid_anl
 !
 ! attributes:
@@ -1813,7 +1813,7 @@ end subroutine normal_new_factorization_rf_y
       write(6,*) myname_,': cannot find 2d pointers'
       call stop2(999)
     endif
- 
+
     ipx=1
 
 !$omp parallel do schedule(dynamic,1) private(j,n,ic3,k,i,ipic)
@@ -1846,9 +1846,9 @@ end subroutine normal_new_factorization_rf_y
        enddo
 
        select case ( trim(StrUpCase(cvars2d(ic2))) )
- 
+
           case('PS')
-   
+
              if ( pwgtflg ) then
                 km_tmp = km
              else
@@ -1867,7 +1867,7 @@ end subroutine normal_new_factorization_rf_y
              enddo ! enddo n_ens
 
           case('SST')
- 
+
              do n=1,n_ens
                 do j=1,jm
                    do i=1,im
@@ -1876,7 +1876,7 @@ end subroutine normal_new_factorization_rf_y
                    enddo
                 enddo
              enddo ! enddo n_ens
- 
+
        end select
 
     enddo
@@ -1914,9 +1914,9 @@ end subroutine normal_new_factorization_rf_y
 !     ibin      - integer bin number for ensemble perturbations
 !
 !   output argument list:
-!     cvec      - 
+!     cvec      -
 !
-! remarks:  
+! remarks:
 !    need to reconcile grid in gsi_bundle w/ grid_ens/grid_anl
 !
 ! attributes:
@@ -2089,7 +2089,7 @@ end subroutine normal_new_factorization_rf_y
 !     cvec      -
 !     a_en      -
 !
-! remarks:  
+! remarks:
 !    need to reconcile grid in gsi_bundle w/ grid_ens/grid_anl
 !
 ! attributes:
@@ -2153,9 +2153,9 @@ end subroutine normal_new_factorization_rf_y
 
           ipic=ipc2d(ic2)
           select case ( trim(StrUpCase(cvars2d(ic2))) )
- 
+
              case('PS')
- 
+
                 if ( pwgtflg ) then
                    km_tmp = km
                 else
@@ -2170,16 +2170,16 @@ end subroutine normal_new_factorization_rf_y
                       enddo
                    enddo
                 enddo
-  
+
              case('SST')
-  
+
                 do j=1,jm
                    do i=1,im
                       a_en(n)%r3(ipx)%q(i,j,1)=a_en(n)%r3(ipx)%q(i,j,1) &
                          +cvec%r2(ipic)%q(i,j)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)
                    enddo
                 enddo
- 
+
           end select
        enddo
     enddo ! enddo n_ens
@@ -2219,7 +2219,7 @@ end subroutine normal_new_factorization_rf_y
 !     cvec      -
 !     a_en      -
 !
-! remarks:  
+! remarks:
 !    need to reconcile grid in gsi_bundle w/ grid_ens/grid_anl
 !
 ! attributes:
@@ -2354,7 +2354,7 @@ end subroutine normal_new_factorization_rf_y
 ! subprogram:    special_sd2h0  initialize subroutine special_sd2h
 !   prgmmr: parrish          org: np22                date: 2009-06-16
 !
-! abstract: initialize subroutine special_sd2h (subdomain to slab for  
+! abstract: initialize subroutine special_sd2h (subdomain to slab for
 !             variable a_en).
 !
 ! program history log:
@@ -2549,7 +2549,7 @@ end subroutine normal_new_factorization_rf_y
      enddo
   enddo
   return
-  
+
 end subroutine special_sd2h
 
 subroutine sqrt_beta_s_mult_cvec(grady)
@@ -2566,7 +2566,7 @@ subroutine sqrt_beta_s_mult_cvec(grady)
 !   2010-04-28  todling  update to use gsi_bundle
 !   2011-06-13  wu       used height dependent beta for regional
 !   2012-05-12  el akkraoui  hybrid beta parameters now vertically varying
-!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance 
+!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance
 !
 !   input argument list:
 !     grady    - input field  grady_x1
@@ -2671,7 +2671,7 @@ subroutine sqrt_beta_s_mult_bundle(grady)
 !   2010-04-28  todling  update to use gsi_bundle
 !   2011-06-13  wu       used height dependent beta for regional
 !   2012-05-12  el akkraoui  hybrid beta parameters now vertically varying
-!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance 
+!   2015-09-18  todling - add sst_staticB to control use of ensemble SST error covariance
 !
 !   input argument list:
 !     grady    - input field  grady_x1
@@ -3160,7 +3160,7 @@ subroutine init_sf_xy(jcap_in)
            call general_s2g0(grd_sploc,sp_loc,g,f)
            pn0_npole(n)=f(grd_sploc%nlat,1)
         enddo
-   
+
         g=zero
         do n=0,sp_loc%jcap
            g(2*n+1)=gsave(2*n+1)/pn0_npole(n)
@@ -3263,7 +3263,7 @@ subroutine sf_xy(f,k_start,k_end)
   use m_kinds, only: r_kind,i_kind
   use hybrid_ensemble_parameters, only: grd_ens,sp_loc,p_sploc2ens,grd_sploc
   use hybrid_ensemble_parameters,only: use_localization_grid
-  use egrid2agrid_mod,only: g_egrid2agrid,g_egrid2agrid_ad  
+  use egrid2agrid_mod,only: g_egrid2agrid,g_egrid2agrid_ad
   implicit none
 
   integer(i_kind),intent(in   ) :: k_start,k_end
@@ -3485,7 +3485,7 @@ end subroutine get_new_alpha_beta
 subroutine bkerror_a_en(gradx,grady)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    bkerror_a_en  copy of bkerror for hybrid ensemble          
+! subprogram:    bkerror_a_en  copy of bkerror for hybrid ensemble
 !   prgmmr: parrish          org: np22                date: 2009-09-17
 !
 ! abstract: copy of bkerror for applying localization recursive filter
@@ -3496,10 +3496,10 @@ subroutine bkerror_a_en(gradx,grady)
 !   2010-05-20  todling  update to use bundle
 !
 !   input argument list:
-!     gradx    - input field  
+!     gradx    - input field
 !
 !   output
-!     grady    - background structure * gradx 
+!     grady    - background structure * gradx
 !
 ! attributes:
 !   language: f90
@@ -3577,7 +3577,7 @@ end subroutine bkerror_a_en
 subroutine bkgcov_a_en_new_factorization(a_en)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    bkgcov_a_en copy of bkgcov for hybrid ens var a_en 
+! subprogram:    bkgcov_a_en copy of bkgcov for hybrid ens var a_en
 !   prgmmr: parrish        org: np22                date: 2009-09-17
 !
 ! abstract: copy of bkgcov to apply localization with recursive filters
@@ -3849,7 +3849,7 @@ subroutine ckgcov_a_en_new_factorization_ad(z,a_en)
 
      iadvance=1 ; iback=2
      call new_factorization_rf_z(a_en(k)%r3(ipnt)%q,iadvance,iback)
- 
+
   enddo
 
 ! To avoid my having to touch the general sub2grid and grid2sub,
@@ -4098,7 +4098,7 @@ subroutine hybens_localization_setup
    if ( readin_localization .or. readin_beta ) then ! read info from file
 
       inquire(file=trim(fname),exist=lexist)
-      if ( lexist ) then 
+      if ( lexist ) then
          open(lunin,file=trim(fname),form='formatted')
          rewind(lunin)
          read(lunin,100,iostat=istat) msig
@@ -4107,7 +4107,7 @@ subroutine hybens_localization_setup
             write(6,*) 'HYBENS_LOCALIZATION_SETUP:  error reading file, iostat = ',istat
             call stop2(123)
          endif
-         if ( msig /= grd_ens%nsig ) then 
+         if ( msig /= grd_ens%nsig ) then
             write(6,*) 'HYBENS_LOCALIZATION_SETUP:  ***ERROR*** error in ',trim(fname)
             write(6,*) 'HYBENS_LOCALIZATION_SETUP:  levels do not match,msig[read in],nsig[defined] = ',msig,grd_ens%nsig
             close(lunin)
@@ -4394,7 +4394,7 @@ subroutine grads1(f,nvert,mype,fname)
      write(datdes(next),'("ENDVARS")')
      last=next
      write(ioutdes,'(a112)')(datdes(i),i=1,last)
- 
+
   end if
 
   do k=1,nvert
@@ -4565,7 +4565,7 @@ subroutine grads1_ens(f,nvert,mype,fname)
      write(datdes(next),'("ENDVARS")')
      last=next
      write(ioutdes,'(a112)')(datdes(i),i=1,last)
- 
+
   end if
 
   do k=1,nvert
@@ -4674,7 +4674,7 @@ subroutine general_grads1(f,nvert,mype,fname,grd)
      write(datdes(next),'("ENDVARS")')
      last=next
      write(ioutdes,'(a112)')(datdes(i),i=1,last)
- 
+
   end if
 
   do k=1,nvert
@@ -5146,7 +5146,7 @@ subroutine acceptable_for_essl_fft(nin,nout)
 
 end subroutine acceptable_for_essl_fft
 
-subroutine setup_pwgt 
+subroutine setup_pwgt
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    setup_pwgt
@@ -5219,7 +5219,7 @@ subroutine setup_pwgt
             enddo
          enddo
          deallocate(wgvk_ens,wgvk_anl)
-    
+
       else ! if ( regional )
 
          if ( mype == 0 ) then

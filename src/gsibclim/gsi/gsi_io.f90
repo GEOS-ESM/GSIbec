@@ -46,7 +46,7 @@ contains
   subroutine init_io(mype,iope)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    init_io                initialize quanities related 
+! subprogram:    init_io                initialize quanities related
 !                                       to gsi i/o
 !   prgmmr: treadon          org: np23                date: 2006-05-25
 !

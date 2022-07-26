@@ -78,7 +78,7 @@ module gridmod
 !   2013-10-24 todling  - general interface to strip routine
 !                       - move vars ltosj/i to commvars and corresponding load routines
 !   2012-12-04 s.liu    - added use_reflectivity flag
-!   2014-03-12  Hu     - Code for GSI analysis on Mass grid larger than background mass grid   
+!   2014-03-12  Hu     - Code for GSI analysis on Mass grid larger than background mass grid
 !   08-18-2014 tong      add jcap_gfs, nlon_gfs, nlat_gfs for regional analysis,
 !                        when running with use_gfs_ozone = .true. or use_gfs_stratosphere = .true.,
 !                        to allow spectral to grid transformation to a lower resolution grid
@@ -90,10 +90,10 @@ module gridmod
 !   2019-03-05  martin  - add wgtfactlats for factqmin/factqmax scaling
 !   2019-04-19  martin  - add use_fv3_aero option to distingiush between NGAC and FV3-Chem
 !
-!                        
 !
 !
-! !AUTHOR: 
+!
+! !AUTHOR:
 !   kleist           org: np20                date: 2003-09-25
 !
 !EOP
@@ -149,14 +149,14 @@ module gridmod
   public :: jcap,jcap_b,hires_b,sp_a,grd_a
   public :: jtstart,jtstop,nthreads
   public :: use_gfs_nemsio
-  public :: fv3_full_hydro  
+  public :: fv3_full_hydro
   public :: use_fv3_aero
   public :: sfcnst_comb
   public :: use_readin_anl_sfcmask
   public :: jcap_gfs,nlat_gfs,nlon_gfs
   public :: use_sp_eqspace,jcap_cut
   public :: wrf_mass_hybridcord
- 
+
   interface strip
      module procedure strip_single_rank33_
      module procedure strip_single_rank21_
@@ -182,7 +182,7 @@ module gridmod
   logical regional_ozone    !    .t. to turn on ozone for regional analysis
   logical netcdf            ! .t. for regional netcdf i/o
 
-  logical filled_grid       ! 
+  logical filled_grid       !
   logical half_grid         !
   logical update_regsfc     !
   logical hires_b           ! .t. when jcap_b requires double FFT
@@ -217,7 +217,7 @@ module gridmod
 !                                        1: sigma
 !                                        2: sigma-pressure
 !                                        3: sigma-pressure-theta
-  integer(i_kind) idvm5             
+  integer(i_kind) idvm5
   integer(i_kind) idpsfc5           ! surface pressure identifier
 !                                      0/1: ln(ps)
 !                                        2: ps
@@ -367,7 +367,7 @@ module gridmod
 
   type:: ncepgfs_headv
      real(r_single),allocatable:: vcoord(:,:)
-     real(r_single),allocatable:: cpi(:)    
+     real(r_single),allocatable:: cpi(:)
   end type ncepgfs_headv
 
   type(spec_vars),save:: sp_a
@@ -377,7 +377,7 @@ module gridmod
 
   character(len=*),parameter::myname='gridmod'
 contains
-   
+
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
 !-------------------------------------------------------------------------
@@ -400,7 +400,7 @@ contains
 !   2010-03-06  parrish - add initialization of use_gfs_ozone flag
 !   2010-03-09  parrish - add initialization of check_gfs_ozone_date flag
 !   2010-03-15  parrish - add initialization of regional_ozone flag
-!   2010-08-10  wu      - add initialization of nvege_type          
+!   2010-08-10  wu      - add initialization of nvege_type
 !   2010-10-14  pagowski- add CMAQ
 !   2010-10-18  hcHuang - add flag use_gfs_nemsio to determine whether to use NEMSIO to read global first guess field
 !   2011-09-14  todling - add use_sp_eqspace to better control lat/lon grid case
@@ -444,7 +444,7 @@ contains
     cmaq_regional=.false.
     fv3_regional=.false.
     nems_nmmb_regional = .false.
-    twodvar_regional = .false. 
+    twodvar_regional = .false.
     use_gfs_ozone = .false.
     check_gfs_ozone_date = .false.
     regional_ozone = .false.
@@ -484,7 +484,7 @@ contains
     nthreads = 1  ! initialize the number of threads
 
     use_gfs_nemsio  = .false.
-    fv3_full_hydro  = .false. 
+    fv3_full_hydro  = .false.
     use_fv3_aero  = .false.
     sfcnst_comb = .false.
     use_readin_anl_sfcmask = .false.
@@ -497,7 +497,7 @@ contains
 
     return
   end subroutine init_grid
-  
+
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
 !-------------------------------------------------------------------------
@@ -613,7 +613,7 @@ contains
        if (mype==0) &
             write(6,*) 'INIT_GRID_VARS:  allocate and load sp_a with jcap,imax,jmax=',&
             sp_a%jcap,sp_a%imax,sp_a%jmax
-       
+
     endif
 
 ! Initialize structures for grid(s)
@@ -656,11 +656,11 @@ contains
          regional,vector)
     deallocate(vector)
 
-! Set values from grd_a to pertinent gridmod variables 
-    lat1=grd_a%lat1 
-    lat2=grd_a%lat2 
-    lon1=grd_a%lon1 
-    lon2=grd_a%lon2 
+! Set values from grd_a to pertinent gridmod variables
+    lat1=grd_a%lat1
+    lat2=grd_a%lat2
+    lon1=grd_a%lon1
+    lon2=grd_a%lon2
 
     latlon11 = lat2*lon2
     latlon1n = latlon11*nsig
@@ -817,7 +817,7 @@ contains
     allocate(ak5(nsig+1),bk5(nsig+1),ck5(nsig+1),tref5(nsig))
     return
   end subroutine create_grid_vars
-    
+
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
 !-------------------------------------------------------------------------
@@ -856,12 +856,12 @@ contains
     if (allocated(cp5)) deallocate(cp5)
     if (allocated(dx_gfs)) deallocate(dx_gfs)
     if (allocated(lpl_gfs)) deallocate(lpl_gfs)
-    if (allocated(region_lat)) deallocate(region_lat)    
-    if (allocated(region_lon)) deallocate(region_lon)    
+    if (allocated(region_lat)) deallocate(region_lat)
+    if (allocated(region_lon)) deallocate(region_lon)
     if (allocated(region_dx)) deallocate(region_dx)
     if (allocated(region_dy)) deallocate(region_dy)
     if (allocated(region_dxi)) deallocate(region_dxi)
-    if (allocated(region_dyi)) deallocate(region_dyi)    
+    if (allocated(region_dyi)) deallocate(region_dyi)
     if (allocated(coeffx)) deallocate(coeffx)
     if (allocated(coeffy)) deallocate(coeffy)
 
@@ -931,7 +931,7 @@ contains
 
     return
   end subroutine create_mapping
-  
+
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
 !-------------------------------------------------------------------------
@@ -999,7 +999,7 @@ contains
     integer(i_kind), intent(in   ) :: lendian_in    ! unit number reserved for
                                                     !  little endian input
 
-! !DESCRIPTION: decide if regional run or not, and initialize constants 
+! !DESCRIPTION: decide if regional run or not, and initialize constants
 !           required for rotation transformation
 !
 !
@@ -1007,9 +1007,9 @@ contains
 !
 !   Notes about grid definition:
 !   \begin{enumerate}
-!   \item  The origin of the analysis coordinate system is always $rlon=180.$, $rlat=0.$, 
-!          whether this is a global or regional run.  The point $rlon=180$, $rlat=0$ in 
-!          the rotated coordinate coincides with the point rlon0\_origin, rlat0\_origin 
+!   \item  The origin of the analysis coordinate system is always $rlon=180.$, $rlat=0.$,
+!          whether this is a global or regional run.  The point $rlon=180$, $rlat=0$ in
+!          the rotated coordinate coincides with the point rlon0\_origin, rlat0\_origin
 !          in earth coordinates.  This is why $rlon0_origin=180$. in the global case.
 !
 !   \item  For regional runs, the rotated coordinate origin and extent of the domain are read
@@ -1034,14 +1034,14 @@ contains
 !   2006-04-06  middlecoff - changed inges from 21 to lendian_in so it can be set to little endian.
 !   2009-01-02  todling - remove unused vars
 !   2012-01-24  parrish  - correct bug in definition of region_dx, region_dy.
-!   2014-03-12  Hu     - Code for GSI analysis on Mass grid larger than background mass grid   
+!   2014-03-12  Hu     - Code for GSI analysis on Mass grid larger than background mass grid
 !   2017-10-10  Wu,W   - setup FV3
 !
 ! !REMARKS:
 !   language: f90
 !   machine:  ibm rs/6000 sp; SGI Origin 2000; Compaq/HP
 !
-! !AUTHOR: 
+! !AUTHOR:
 !   parrish          org: np22                date: 2003-08-28
 !
 !EOP
@@ -1122,14 +1122,14 @@ contains
 
        if(diagnostic_reg.and.mype==0) write(6,*)' in init_reg_glob_ll, lendian_in=',lendian_in
        write(filename,'("sigf",i2.2)') ihrmid
-       if(diagnostic_reg.and.mype==0) write(6,*)' in init_reg_glob_ll, filename  =',filename       
+       if(diagnostic_reg.and.mype==0) write(6,*)' in init_reg_glob_ll, filename  =',filename
        open(lendian_in,file=filename,form='unformatted')
        rewind lendian_in
        read(lendian_in) regional_time,nlon_regional,nlat_regional,nsig, &
                    dlmd,dphd,pt,pdtop
        if(mype==0) write(6,*)'GRIDMOD: inunit: FLNAME: regional_time',lendian_in,filename,  &
-              (regional_time (i),i=1,6)       
-       
+              (regional_time (i),i=1,6)
+
        regional_fhr=zero  !  with wrf nmm fcst hr is not currently available.
 
        if(diagnostic_reg.and.mype==0) then
@@ -1139,9 +1139,9 @@ contains
                 nlon_regional
            write(6,'(" in init_reg_glob_ll, nlat_regional=",i6)') &
                 nlat_regional
-           write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig 
+           write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig
        end if
- 
+
 ! Get vertical info for hybrid coordinate and sigma coordinate we will interpolate to
        allocate(aeta1_ll(nsig),eta1_ll(nsig+1),aeta2_ll(nsig),eta2_ll(nsig+1))
        allocate(deta1(nsig),aeta1(nsig),eta1(nsig+1),deta2(nsig),aeta2(nsig),eta2(nsig+1))
@@ -1164,8 +1164,8 @@ contains
           do k=1,nsig
              write(6,'(" k,deta1,deta2=",i3,2f10.4)') k,deta1(k),deta2(k)
           end do
-!         write(6,*)' in init_reg_glob_ll, deta1 deta2 follow:' 
-          write(6,*)' in init_reg_glob_ll,  eta1  eta2 follow:'   
+!         write(6,*)' in init_reg_glob_ll, deta1 deta2 follow:'
+          write(6,*)' in init_reg_glob_ll,  eta1  eta2 follow:'
           do k=1,nsig+1
              write(6,'(" k,eta1,eta2=",i3,2f10.4)') k,eta1(k),eta2(k)
           end do
@@ -1173,7 +1173,7 @@ contains
 
        pdtop_ll=r0_01*real(pdtop,r_kind)            !  check units--this converts to mb
        pt_ll=r0_01*real(pt,r_kind)                  !  same here
- 
+
        if(diagnostic_reg.and.mype==0) write(6,*)' in init_reg_glob_ll, pdtop_ll,pt_ll=',pdtop_ll,pt_ll
        eta1_ll=real(eta1,r_kind)
        aeta1_ll=real(aeta1,r_kind)
@@ -1228,7 +1228,7 @@ contains
 
        allocate(glat_an(nlon,nlat),glon_an(nlon,nlat))
        allocate(dx_an(nlon,nlat),dy_an(nlon,nlat))
- 
+
        if(half_grid) then
           call half_nmm_grid2a(glon,nlon_regional,nlat_regional,glon_an,1)
           call half_nmm_grid2a(glat,nlon_regional,nlat_regional,glat_an,1)
@@ -1308,17 +1308,17 @@ contains
        write(filename,'("sigf",i2.2)') ihrmid
        open(lendian_in,file=filename,form='unformatted')
        rewind lendian_in
-       read(lendian_in) regional_time,nlon_regional,nlat_regional,nsig,pt,nsig_soil 
+       read(lendian_in) regional_time,nlon_regional,nlat_regional,nsig,pt,nsig_soil
        regional_fhr=zero  !  with wrf mass core fcst hr is not currently available.
 
        if(diagnostic_reg.and.mype==0) then
           write(6,'(" in init_reg_glob_ll, yr,mn,dy,h,m,s=",6i6)') regional_time
           write(6,'(" in init_reg_glob_ll, nlon_regional=",i6)') nlon_regional
           write(6,'(" in init_reg_glob_ll, nlat_regional=",i6)') nlat_regional
-          write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig 
-          write(6,'(" in init_reg_glob_ll, nsig_soil=",i6)') nsig_soil 
+          write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig
+          write(6,'(" in init_reg_glob_ll, nsig_soil=",i6)') nsig_soil
        end if
- 
+
        call init_wrfmass_to_a(grid_ratio_wrfmass,nlon_regional,nlat_regional)
        nlon=nxa_wrfmass ; nlat=nya_wrfmass
 
@@ -1331,7 +1331,7 @@ contains
        allocate(dx_mc(nlon_regional,nlat_regional),dy_mc(nlon_regional,nlat_regional))
        read(lendian_in) aeta1,aeta2
        read(lendian_in) eta1,eta2
- 
+
        pt_ll=r0_01*pt                    !  check units--this converts to mb
        if(diagnostic_reg.and.mype==0) then
           write(6,*)' in init_reg_glob_ll, pt=',pt
@@ -1355,7 +1355,7 @@ contains
        read(lendian_in) glat,dx_mc
        read(lendian_in) glon,dy_mc
        close(lendian_in)
- 
+
        rlon_min_ll=one
        rlat_min_ll=one
 !       nlon=nlon_regional
@@ -1366,7 +1366,7 @@ contains
        rlat_max_dd=rlat_max_ll-r1_5/grid_ratio_wrfmass
        rlon_min_dd=rlon_min_ll+r1_5/grid_ratio_wrfmass
        rlon_max_dd=rlon_max_ll-r1_5/grid_ratio_wrfmass
- 
+
        if(diagnostic_reg.and.mype==0) then
           write(6,*)' in init_reg_glob_ll, rlat_min_dd=',rlat_min_dd
           write(6,*)' in init_reg_glob_ll, rlat_max_dd=',rlat_max_dd
@@ -1419,7 +1419,7 @@ contains
        deallocate(aeta1,eta1,glat,glon,glat_an,glon_an)
        deallocate(dx_mc,dy_mc)
        deallocate(glata,glona,dx_mca,dy_mca)
- 
+
     end if   ! end if wrf mass core section
 
     if(nems_nmmb_regional) then     ! begin nems nmmb section
@@ -1450,17 +1450,17 @@ contains
        rewind lendian_in
        read(lendian_in) regional_time,regional_fhr,regional_fmin,nlon_regional,nlat_regional,nsig, &
                    dlmd,dphd,pt,pdtop,nmmb_verttype
- 
+
        if(diagnostic_reg.and.mype==0) then
           write(6,'(" in init_reg_glob_ll, yr,mn,dy,h,m,s=",6i6)') regional_time
           write(6,'(" in init_reg_glob_ll, nlon_regional=",i6)') nlon_regional
           write(6,'(" in init_reg_glob_ll, nlat_regional=",i6)') nlat_regional
           write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig
        end if
- 
+
        call init_nmmb_to_a(nmmb_reference_grid,grid_ratio_nmmb,nlon_regional,nlat_regional)
        nlon=nxa ; nlat=nya
- 
+
        rlon_min_ll=one
        rlat_min_ll=one
        rlon_max_ll=nlon
@@ -1537,7 +1537,7 @@ contains
 
        allocate(glat_an(nlon,nlat),glon_an(nlon,nlat))
        allocate(dx_an(nlat,nlon),dy_an(nlat,nlon))
- 
+
        allocate(gxtemp(nlon_regional,nlat_regional))
        allocate(gytemp(nlon_regional,nlat_regional))
        allocate(gxtemp_an(nlat,nlon))
@@ -1595,9 +1595,9 @@ contains
             write(6,*)' in init_reg_glob_ll, initializing for cmaq regional run'
 
 ! get regional constants
-    
+
        ihr=-999
-  
+
        do i=0,12
           write(filename,'("sigf",i2.2)')i
           inquire(file=filename,exist=fexist)
@@ -1606,7 +1606,7 @@ contains
              ihr=i
           end if
        end do
-    
+
        if(ihr<0) then
           write(6,*)' no input file available for regional cmaq analysis.  program stops'
           call stop2(99)
@@ -1614,17 +1614,17 @@ contains
        ihr2 = ihr
        ihrmid = (ihr1+ihr2)/2
 
-       if(diagnostic_reg.and.mype==0) then    
+       if(diagnostic_reg.and.mype==0) then
           write(6,*)' in read_cmaq_grid lendian_in=',lendian_in
           write(6,*)' in read_cmaq_grid, lendian_in=',lendian_in
        endif
-    
+
        write(filename,'("sigf",i2.2)') ihrmid
        open(lendian_in,file=filename,form='unformatted')
        rewind(lendian_in)
        read(lendian_in) nskip
        read(lendian_in) regional_time,nlon_regional,nlat_regional,nsig,pt,pdtop   !1 to skip
-    
+
        if(diagnostic_reg.and.mype==0) then
           write(6,'(" in read_cmaq_grid, yr,mn,dy,h,m,s=",6i6)') &
                regional_time
@@ -1632,42 +1632,42 @@ contains
                nlon_regional
           write(6,'(" in read_cmaq_grid, nlat_regional=",i6)') &
                nlat_regional
-          write(6,'(" in read_cmaq_grid, nsig=",i6)') nsig 
+          write(6,'(" in read_cmaq_grid, nsig=",i6)') nsig
        endif
 
        allocate(aeta1(nsig),eta1(nsig+1))
-       allocate(aeta1_ll(nsig),eta1_ll(nsig+1))  
+       allocate(aeta1_ll(nsig),eta1_ll(nsig+1))
        allocate(aeta2(nsig),eta2(nsig+1))
-       allocate(aeta2_ll(nsig),eta2_ll(nsig+1))  
+       allocate(aeta2_ll(nsig),eta2_ll(nsig+1))
        allocate(glon(nlon_regional,nlat_regional),&
           dx_mc(nlon_regional,nlat_regional))
        allocate(glat(nlon_regional,nlat_regional),&
           dy_mc(nlon_regional,nlat_regional))
-    
-       regional_fhr=zero !that is not available/nor seems currently necessary 
-     
+
+       regional_fhr=zero !that is not available/nor seems currently necessary
+
        read(lendian_in) aeta1,aeta2 ! 2 to skip
        read(lendian_in) eta1,eta2  ! 3 to skip
-    
+
        pt_ll=r0_01*pt                    !  check units--this converts to mb
        pdtop_ll=r0_01*pdtop
-       
+
        eta1_ll=eta1
        aeta1_ll=aeta1
        eta2_ll=eta2
        aeta2_ll=aeta2
 
 !cmaq input arrays are dimensioned (nlat_regional,nlon_regional)
-    
+
        read(lendian_in) glat  ! 4 to skip
        read(lendian_in) dx_mc ! 5 to skip
        read(lendian_in) glon  ! 6 to skip
        read(lendian_in) dy_mc ! 7 to skip
-       close(lendian_in) 
-    
+       close(lendian_in)
+
        nlon=nlon_regional
        nlat=nlat_regional
-     
+
        rlon_min_ll=one
        rlat_min_ll=one
        rlon_max_ll=nlon
@@ -1676,7 +1676,7 @@ contains
        rlat_max_dd=rlat_max_ll-r1_5
        rlon_min_dd=rlon_min_ll+r1_5
        rlon_max_dd=rlon_max_ll-r1_5
-    
+
        if(diagnostic_reg.and.mype==0) then
           write(6,*)' in read_cmaq_grid, rlat_min_dd=',rlat_min_dd
           write(6,*)' in read_cmaq_grid, rlat_max_dd=',rlat_max_dd
@@ -1688,18 +1688,18 @@ contains
           write(6,*)' in read_cmaq_grid, rlon_max_ll=',rlon_max_ll
           write(6,*)' in read_cmaq_grid, nlon,nlat=',nlon,nlat
        end if
-    
-    
+
+
 !note different allocation for glat_an,glat_an
 !need to flip cmaq input glat,glon
-  
+
 
        allocate(region_lat(nlat,nlon),region_lon(nlat,nlon))
        allocate(region_dy(nlat,nlon),region_dx(nlat,nlon))
        allocate(region_dyi(nlat,nlon),region_dxi(nlat,nlon))
        allocate(coeffy(nlat,nlon),coeffx(nlat,nlon))
        allocate(glat_an(nlon,nlat),glon_an(nlon,nlat))
-    
+
        do k=1,nlon
          do i=1,nlat
             glat_an(k,i)=glat(k,i)*deg2rad
@@ -1725,7 +1725,7 @@ contains
 
 
 !   Begin surface analysis section (regional 2D-var)
-    if(twodvar_regional) then 
+    if(twodvar_regional) then
 
 ! This is a surface analysis regional run.
        if(diagnostic_reg.and.mype==0) &
@@ -1750,20 +1750,20 @@ contains
        rewind lendian_in
        read(lendian_in) regional_time,nlon_regional,nlat_regional,nsig
        regional_fhr=zero  !  with twodvar analysis fcst hr is not currently available.
- 
+
        if(diagnostic_reg.and.mype==0) then
            write(6,'(" in init_reg_glob_ll, yr,mn,dy,h,m,s=",6i6)')regional_time
            write(6,'(" in init_reg_glob_ll, nlon_regional=",i6)') nlon_regional
            write(6,'(" in init_reg_glob_ll, nlat_regional=",i6)') nlat_regional
-           write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig 
+           write(6,'(" in init_reg_glob_ll, nsig=",i6)') nsig
        end if
- 
-! Get vertical info 
+
+! Get vertical info
        allocate(aeta1_ll(nsig),eta1_ll(nsig+1))
        allocate(aeta1(nsig),eta1(nsig+1))
        allocate(glat(nlon_regional,nlat_regional),glon(nlon_regional,nlat_regional))
        allocate(dx_mc(nlon_regional,nlat_regional),dy_mc(nlon_regional,nlat_regional))
- 
+
        aeta1=one                ! set to this value for convenience
        eta1=one                 ! set to this value for convenience
        pt=0._r_single           ! set to this value for convenience
@@ -1771,11 +1771,11 @@ contains
        pt_ll=r0_01*pt
        eta1_ll=eta1
        aeta1_ll=aeta1
- 
+
        read(lendian_in) glat,dx_mc
        read(lendian_in) glon,dy_mc
        close(lendian_in)
- 
+
        rlon_min_ll=one
        rlat_min_ll=one
        nlon=nlon_regional
@@ -2058,7 +2058,7 @@ end subroutine init_general_transform
     logical     ,intent(  out) :: outside     ! .false., then point is inside x-y domain
                                               ! .true.,  then point is outside x-y domain
 
-! !DESCRIPTION: to convert earth lon-lat to x-y grid units of a 
+! !DESCRIPTION: to convert earth lon-lat to x-y grid units of a
 !           general regional rectangular domain.  Also, decide if
 !           point is inside this domain.  As a result, there is
 !           no restriction on type of horizontal coordinate for
@@ -2125,11 +2125,11 @@ end subroutine init_general_transform
     detinv =one/(d1tilde*e2tilde-d2tilde*e1tilde)
     x = i0+detinv*(e2tilde*dtilde-d2tilde*etilde)
     y = j0+detinv*(d1tilde*etilde-e1tilde*dtilde)
-    if (i0 == ip .and. j0 == jp) then ! ob at center of domain. 
-       x = i0; y = j0 
-    else 
-       x = i0+detinv*(e2tilde*dtilde-d2tilde*etilde) 
-       y = j0+detinv*(d1tilde*etilde-e1tilde*dtilde) 
+    if (i0 == ip .and. j0 == jp) then ! ob at center of domain.
+       x = i0; y = j0
+    else
+       x = i0+detinv*(e2tilde*dtilde-d2tilde*etilde)
+       y = j0+detinv*(d1tilde*etilde-e1tilde*dtilde)
     endif
 
     outside=x < rlon_min_dd .or. x > rlon_max_dd .or. &
@@ -2278,7 +2278,7 @@ end subroutine init_general_transform
   integer(i_kind),intent(in   ) :: nx0,ny0
   real(r_kind)   ,intent(in   ) :: x,y
   real(r_kind)   ,intent(in   ) :: x0(nx0,ny0),y0(nx0,ny0)
- 
+
   real(r_kind) dista,distb,dist2,dist2min
   integer(i_kind) i,inext,j,jnext
 
@@ -2335,7 +2335,7 @@ end subroutine init_general_transform
 
   ilast=i0
   jlast=j0
-    
+
  end subroutine nearest_3
 
  subroutine get_xytilde_domain(nx0,ny0,rlons0,rlats0, &
@@ -2395,14 +2395,14 @@ end subroutine init_general_transform
   sign_pole = zero
   if(rlats0min>-r37*deg2rad) sign_pole=-one   !  northern hemisphere xy domain
   if(rlats0max< r37*deg2rad) sign_pole= one   !  southern hemisphere xy domain
-  ! if neither condition satisfied (rlat0max > 37N, rlat0min < 37S), try 
-  ! this... 
-  if (sign_pole == zero) then 
-     if (abs(rlats0max) > abs(rlats0min)) then 
-        sign_pole=-one  ! NH domain 
-     else 
-        sign_pole=one   ! SH 
-     endif 
+  ! if neither condition satisfied (rlat0max > 37N, rlat0min < 37S), try
+  ! this...
+  if (sign_pole == zero) then
+     if (abs(rlats0max) > abs(rlats0min)) then
+        sign_pole=-one  ! NH domain
+     else
+        sign_pole=one   ! SH
+     endif
   endif
 
 
@@ -2489,7 +2489,7 @@ end subroutine init_general_transform
   yminout=yminout-extra
   nx=1+(xmaxout-xminout)/dx
   ny=1+(ymaxout-yminout)/dy
- 
+
  end subroutine get_xytilde_domain
 
  subroutine half_nmm_grid2a(gin,nx,ny,gout,igtype)
@@ -2500,7 +2500,7 @@ end subroutine init_general_transform
 !   prgmmr: parrish         org: w/emc2               date: 2004-06-22
 !
 ! abstract: creates an unstaggered A grid from the staggered E grid used by the wrf nmm.
-!           This is done by keeping every other row of the original E grid.  If this 
+!           This is done by keeping every other row of the original E grid.  If this
 !           is a mass variable (igtype=1), then no interpolation is required.  If this
 !           is a wind variable (igtype=2), then interpolation is necessary.  This procedure
 !           is necessary because the gsi is not yet able to work with anything other than
@@ -2557,7 +2557,7 @@ end subroutine init_general_transform
 !$$$
   use constants, only: quarter
   implicit none
- 
+
   integer(i_kind),intent(in   ) :: nx,ny,igtype
   real(r_single) ,intent(in   ) :: gin(nx,ny)
   real(r_kind)   ,intent(  out) :: gout(nx,*)
@@ -2617,7 +2617,7 @@ end subroutine init_general_transform
   integer(i_kind),intent(in   ) :: nx,ny
   real(r_kind)   ,intent(in   ) :: gin(nx,ny)
   real(r_kind)   ,intent(  out) :: gout(2*nx-1,ny)
- 
+
   integer(i_kind) i,j
   integer(i_kind) i1a(2*nx-1),i2a(2*nx-1)
   integer(i_kind) i3a(2*nx-1),i4a(2*nx-1)
@@ -2824,7 +2824,7 @@ end subroutine init_general_transform
 
     real(r_kind),intent(  out) :: u0,v0       ! earth winds
 
-! !DESCRIPTION: rotate u,v in local x,y coordinate to u0,v0 in earth 
+! !DESCRIPTION: rotate u,v in local x,y coordinate to u0,v0 in earth
 !           lat, lon coordinate
 !
 ! !REVISION HISTORY:
@@ -2849,7 +2849,7 @@ end subroutine init_general_transform
   real(r_kind) sin_beta,cos_beta
   integer(i_kind) ix,iy
 
-!  interpolate departure from longitude part of angle between earth 
+!  interpolate departure from longitude part of angle between earth
 !  positive east and local positive x
 
   ix=x
@@ -2901,7 +2901,7 @@ end subroutine init_general_transform
    integer(i_kind):: jlat,jlon
    real(r_kind):: dx,dy,dx1,dy1
 
-! !DESCRIPTION: This routine returns the sub-domain grid relative 
+! !DESCRIPTION: This routine returns the sub-domain grid relative
 !               i,j index of a given observation (lat,lon).  The
 !               routine also returns weights needed for bilinear
 !               from the four surrounding analysis grid points to
@@ -2931,7 +2931,7 @@ end subroutine init_general_transform
    dx1 = one-dx
    dy1 = one-dy
 
-!  Bound lat and lon indices to fall within analysis grid limits   
+!  Bound lat and lon indices to fall within analysis grid limits
    jlat = min(max(1,jlat),nlat)
    jlon = min(max(0,jlon),nlon)
 
@@ -2987,7 +2987,7 @@ end subroutine init_general_transform
    real(r_kind) :: dx,dy,dx1,dy1,ds,ds1
 
 ! !DESCRIPTION: This routine returns the sub-domain grid relative
-!               i,j,k index of a given observation (lat,lon,sig).  
+!               i,j,k index of a given observation (lat,lon,sig).
 !               The routine also returns weights needed for bilinear
 !               from the eight surrounding analysis grid points to
 !               the observation location
@@ -3026,7 +3026,7 @@ end subroutine init_general_transform
    dy1 = one-dy
    ds1 = one-ds
 
-!  Bound lat and lon indices to fall within analysis grid limits   
+!  Bound lat and lon indices to fall within analysis grid limits
    jlat = min(max(1,jlat),nlat)
    jlon = min(max(0,jlon),nlon)
 
@@ -3104,7 +3104,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3119,7 +3119,7 @@ end subroutine init_general_transform
 !         temp(i,k)=zero
 !      end do
 !   end do
- 
+
 ! Load temp array in desired order
     do k=1,k_use
        iskip=0
@@ -3186,7 +3186,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3242,8 +3242,8 @@ end subroutine init_general_transform
 ! !INPUT PARAMETERS:
 
     integer(i_kind)                       , intent(in   ) :: nz         !  number of levs in subdomain array
-    real(r_single),dimension(lat2,lon2,nz), intent(in   ) :: field_in   ! full subdomain 
-                                                                        !    array containing 
+    real(r_single),dimension(lat2,lon2,nz), intent(in   ) :: field_in   ! full subdomain
+                                                                        !    array containing
                                                                         !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3265,7 +3265,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3304,8 +3304,8 @@ end subroutine init_general_transform
 
 ! !INPUT PARAMETERS:
 
-    real(r_single),dimension(lat2,lon2), intent(in   ) :: field_in   ! full subdomain 
-                                                                     !    array containing 
+    real(r_single),dimension(lat2,lon2), intent(in   ) :: field_in   ! full subdomain
+                                                                     !    array containing
                                                                      !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3327,7 +3327,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3367,8 +3367,8 @@ end subroutine init_general_transform
 ! !INPUT PARAMETERS:
 
     integer(i_kind)                       , intent(in   ) :: nz          !  number of levs in subdomain array
-    real(r_double),dimension(lat2,lon2,nz), intent(in   ) :: field_in    ! full subdomain 
-                                                                         !    array containing 
+    real(r_double),dimension(lat2,lon2,nz), intent(in   ) :: field_in    ! full subdomain
+                                                                         !    array containing
                                                                          !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3391,7 +3391,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3430,8 +3430,8 @@ end subroutine init_general_transform
 
 ! !INPUT PARAMETERS:
 
-    real(r_double),dimension(lat2,lon2), intent(in   ) :: field_in    ! full subdomain 
-                                                                         !    array containing 
+    real(r_double),dimension(lat2,lon2), intent(in   ) :: field_in    ! full subdomain
+                                                                         !    array containing
                                                                          !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3454,7 +3454,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3492,8 +3492,8 @@ end subroutine init_general_transform
 ! !INPUT PARAMETERS:
 
     integer(i_kind)                       , intent(in   ) :: nz          !  number of levs in subdomain array
-    real(r_double),dimension(lat2,lon2,nz), intent(in   ) :: field_in    ! full subdomain 
-                                                                         !    array containing 
+    real(r_double),dimension(lat2,lon2,nz), intent(in   ) :: field_in    ! full subdomain
+                                                                         !    array containing
                                                                          !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3516,7 +3516,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3557,8 +3557,8 @@ end subroutine init_general_transform
 
 ! !INPUT PARAMETERS:
 
-    real(r_double),dimension(lat2,lon2), intent(in   ) :: field_in    ! full subdomain 
-                                                                         !    array containing 
+    real(r_double),dimension(lat2,lon2), intent(in   ) :: field_in    ! full subdomain
+                                                                         !    array containing
                                                                          !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3581,7 +3581,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3620,8 +3620,8 @@ end subroutine init_general_transform
 
 ! !INPUT PARAMETERS:
 
-    real(r_double),dimension(lat2*lon2), intent(in   ) :: field_in    ! full subdomain 
-                                                                         !    array containing 
+    real(r_double),dimension(lat2*lon2), intent(in   ) :: field_in    ! full subdomain
+                                                                         !    array containing
                                                                          !    buffer points
 ! !OUTPUT PARAMETERS:
 
@@ -3645,7 +3645,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !    kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3672,7 +3672,7 @@ end subroutine init_general_transform
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  vectosub --- transform vector array into three dimensional 
+! !IROUTINE:  vectosub --- transform vector array into three dimensional
 !                          subdomain array
 !
 ! !INTERFACE:
@@ -3685,12 +3685,12 @@ end subroutine init_general_transform
 ! !INPUT PARAMETERS:
 
     integer(i_kind)             , intent(in   ) :: npts   ! number of levs in subdomain array
-    real(r_kind),dimension(npts), intent(in   ) :: fld_in ! subdomain array 
+    real(r_kind),dimension(npts), intent(in   ) :: fld_in ! subdomain array
                                                           !   in vector form
 
 ! !OUTPUT PARAMETERS:
 
-    real(r_kind),dimension(npts), intent(  out) :: fld_out ! three dimensional 
+    real(r_kind),dimension(npts), intent(  out) :: fld_out ! three dimensional
                                                            !  subdomain variable array
 
 ! !DESCRIPTION: Transform vector array into three dimensional subdomain
@@ -3706,7 +3706,7 @@ end subroutine init_general_transform
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !   kleist           org: np20                date: 2004-01-25
 !
 !EOP
@@ -3756,7 +3756,7 @@ subroutine reload(work_in,work_out)
 !   language: f90
 !   machine:  ibm rs/6000 sp; sgi origin 2000; compaq/hp
 !
-! !AUTHOR: 
+! !AUTHOR:
 !   treadon          org: np23                date: 2004-05-14
 !
 !EOP
@@ -3854,7 +3854,7 @@ end module gridmod
 !
 ! abstract:  Convert earth latitude and longitude to polar stereographic coordinates where
 !               the reference pole is centered at earth coordinates rlat0,rlon0.
-!               The polar stereographic positive x axis is oriented counterclockwise to 
+!               The polar stereographic positive x axis is oriented counterclockwise to
 !               earth direction south at rlat0,rlon0 by angle rotate3.  The transformed
 !               lat-lon coordinate which is the basis of the polar stereographic coordinate consists
 !               of a sequence of 3 rotations in 3-d x-y-z space with origin at center of earth, where

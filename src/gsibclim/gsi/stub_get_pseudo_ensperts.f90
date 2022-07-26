@@ -5,7 +5,7 @@
 !
 ! abstract: read pseudo ensemble members from TC library, and interpolate to analysis
 !           grid. Calculate pseudo ensemble perturbations and replace global ensemble
-!           perturbations in vortex region (300 km from storm center)   
+!           perturbations in vortex region (300 km from storm center)
 !
 ! program history log:
 !
@@ -34,10 +34,10 @@ contains
     class(get_pseudo_ensperts_class), intent(inout) :: this
     type(gsi_bundle),allocatable, intent(in   ) :: en_perts(:,:)
     integer(i_kind),                   intent(in   ) :: nelen
-  
+
     write(6,*)'get_pseudo_ensperts:  ***WARNING*** dummy call ... does nothing!'
-  
+
     return
-  
+
   end subroutine get_pseudo_ensperts_dummy
 end module get_pseudo_ensperts_mod

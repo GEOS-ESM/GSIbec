@@ -67,7 +67,7 @@ module m_mpimod
 !   2005-01-24  kleist - fix bug in array initialization
 !   2005-02-15  todling - add use m_mpif, only for mpi_integer4,
 !                         mpi_offset_kind, ... (only applies
-!                         to non IBM SP machines)    
+!                         to non IBM SP machines)
 !   2005-07-25  todling - add a couple more exports from m_mpif
 !                         (only applies to non IBM SP machines)
 !   2006-04-06  middlecoff - remove mpi_request_null since not used
@@ -93,8 +93,8 @@ module m_mpimod
 !   language: f90
 !   machine:  ibm RS/6000 SP, SGI Origin 2000; Compaq HP
 !
-! !AUTHOR: 
-!    kleist           org: np20                date: 2003-09-30 
+! !AUTHOR:
+!    kleist           org: np20                date: 2003-09-30
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -138,22 +138,22 @@ module m_mpimod
   integer(i_kind) :: mype        ! number of MPI task
 
 ! Optional ESMF-like layout information: nxPE is the number of
-! processors used to decompose the longitudinal dimensional, while nyPE 
+! processors used to decompose the longitudinal dimensional, while nyPE
 ! the number of processors used to decompose the latitudinal dimension.
 ! By construction, nPE = nxPE * nyPE.
-! 
+!
   integer(i_kind) :: nxpe=-1     ! optional layout information
   integer(i_kind) :: nype=-1     ! optional layout information
 
 
 ! communication arrays...set up in init_mpi_vars  (almost none left)
 
-  integer(i_kind),allocatable,dimension(:):: levs_id ! vert lev id for each level 
+  integer(i_kind),allocatable,dimension(:):: levs_id ! vert lev id for each level
                                              !  of the nsig1o slabs (zero if
                                              !  empty, else can vary between 1-->nsig)
 
 
-  integer(i_kind),allocatable,dimension(:):: nvar_id ! variable id for each level 
+  integer(i_kind),allocatable,dimension(:):: nvar_id ! variable id for each level
                                              !   of the nsig1o slabs:
                                              !    1: streamfunction
                                              !    2: velocity potential

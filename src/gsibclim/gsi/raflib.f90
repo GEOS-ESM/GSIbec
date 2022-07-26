@@ -1348,7 +1348,7 @@ subroutine indexxi4(n,arrin4,indx)
     i=l
     j=l+l
 
-    do while (j<=ir) 
+    do while (j<=ir)
        if(j<ir) then
           if(arrin4(indx(j))<arrin4(indx(j+1)))j=j+1
        end if
@@ -1430,7 +1430,7 @@ subroutine indexxi8(n,arrin8,indx)
      i=l
      j=l+l
 
-     do while (j<=ir) 
+     do while (j<=ir)
         if(j<ir) then
            if(arrin8(indx(j))<arrin8(indx(j+1)))j=j+1
         end if
@@ -1965,7 +1965,7 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
                             filter(icolor)%lnf,filter(icolor)%bnf,igauss,ngauss, &
                             filter(icolor)%istart,npoints_recv(mype),binomial,npass, &
                             ifilt_ord,lenbar,lenmax,lenmin,npoints1,nvars)
- 
+
               end do
            end if
 
@@ -2032,7 +2032,7 @@ SUBROUTINE init_raf4(aspect,triad4,ngauss,rgauss,npass,normal,binom,ifilt_ord,fi
               write(6,'("             jumpymin,max=",2i12)')jumpyminall(ivar,icolor),jumpymaxall(ivar,icolor)
               write(6,'("             jumpzmin,max=",2i12)')jumpzminall(ivar,icolor),jumpzmaxall(ivar,icolor)
            end if
- 
+
         end do
      end do
   end if
@@ -2650,7 +2650,7 @@ SUBROUTINE raf_sm4(g,filter,ngauss,ips,ipe,jps,jpe,kps,kpe,npes)
                      filter(icolor)%nstrings,filter(icolor)%istart,ips,ipe,jps,jpe,kps,kpe,npes)
               end if
            end if
- 
+
         end do
 
      end do
@@ -4045,7 +4045,7 @@ subroutine one_color24_new_factorization(g,filter,ngauss,ipass,ifilt_ord, &
                  work2(i)=filter%fmat0(i,ipass,igauss,iback)*work2(i)
               end do
            end do
- 
+
            do i=1,filter%npoints_recv
               work(ii,igauss,i,1)=work2(i)
            end do
@@ -4574,7 +4574,7 @@ SUBROUTINE EIGEN(A,R,N,MV)
                      if(m==n) exit loop4
                      M=M+1
                   end do loop4
- 
+
 !
 !              TEST FOR L = SECOND FROM LAST COLUMN
 !

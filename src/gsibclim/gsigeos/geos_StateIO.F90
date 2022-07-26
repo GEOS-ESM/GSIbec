@@ -7,10 +7,10 @@ public :: state_put
 
 interface state_get
    module procedure get_1state_
-   module procedure get_Nstate_ 
+   module procedure get_Nstate_
 end interface
 interface state_put
-   module procedure state_put_ 
+   module procedure state_put_
 end interface
 contains
 subroutine get_1state_(xx,sgrid,nymd,nhms,iwhat,tau)

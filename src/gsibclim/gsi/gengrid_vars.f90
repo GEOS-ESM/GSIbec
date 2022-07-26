@@ -2,7 +2,7 @@ subroutine gengrid_vars
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    gengrid_vars
-!   prgmmr: treadon          org: np23                date: 2003-11-24 
+!   prgmmr: treadon          org: np23                date: 2003-11-24
 !
 ! abstract: initialize and define grid related variables
 !
@@ -85,7 +85,7 @@ subroutine gengrid_vars
 
      rlats(1)=-pih
      rlats(nlat)=pih
-   
+
      wgtlats(1)=zero
      wgtlats(nlat)=zero
 

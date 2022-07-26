@@ -70,8 +70,8 @@ interface nc_berror_vars_comp; module procedure    &
   comp_berror_vars_ ; end interface
 interface nc_berror_vars_copy; module procedure    &
   copy_ ; end interface
-interface nc_berror_getpointer 
-  module procedure get_pointer_1d_ 
+interface nc_berror_getpointer
+  module procedure get_pointer_1d_
   module procedure get_pointer_2d_
 end interface
 
@@ -91,14 +91,14 @@ subroutine read_dims_ (fname,nlat,nlon,nlev,rc, myid,root)
 ! Local variables
   character(len=*), parameter :: myname_ = myname//"::dims_"
   logical :: verbose
-   
+
 ! Return code (status)
   rc=0; mype_=0; root_=0
   if(present(myid) .and. present(root) ) then
      mype_ = myid
      root_ = root
   endif
- 
+
 ! Open the file. NF90_NOWRITE tells netCDF we want read-only access to
 ! the file.
 
@@ -140,8 +140,8 @@ subroutine read_berror_ (fname,bvars,rc, myid,root)
   real(4), allocatable :: data_in(:,:,:)
   logical :: verbose
   logical :: init_
-  
-   
+
+
 ! Return code (status)
   rc=0; mype_=0; root_=0
   verbose=.true.
@@ -151,7 +151,7 @@ subroutine read_berror_ (fname,bvars,rc, myid,root)
     mype_ = myid
     root_ = root
   endif
- 
+
 ! Get dimensions
   call read_dims_ (fname,nlat_,nlon_,nlev_,rc, mype_,root_)
 
@@ -256,7 +256,7 @@ subroutine read_berror_ (fname,bvars,rc, myid,root)
 !
   enddo
 
-! Get matrix NLATxNLEVxNLEV that has been written as NLEV 2d-fields 
+! Get matrix NLATxNLEVxNLEV that has been written as NLEV 2d-fields
   do nv = 1, nvmll
      do nl = 1, nlev
         write(cindx,'(i4.4)') nl
@@ -277,7 +277,7 @@ subroutine read_berror_ (fname,bvars,rc, myid,root)
      if(trim(cvars2dx(nv))=="sst"     ) then
         bvars%varsst = transpose(data_in(:,:,1))
      endif
-     if(trim(cvars2dx(nv))=="hsst" ) then 
+     if(trim(cvars2dx(nv))=="hsst" ) then
         bvars%corlsst = transpose(data_in(:,:,1))
      endif
   enddo
@@ -315,7 +315,7 @@ subroutine write_berror_ (fname,bvars,plevs,lats,lons,rc, myid,root)
   integer :: mype_,root_
   integer, allocatable :: varid1d(:), varid2d(:), varid2dx(:), varidMLL(:)
   logical :: verbose
-  
+
 ! This is the data array we will write. It will just be filled with
 ! a progression of integers for this example.
   real(4), allocatable :: data_out(:,:,:)
@@ -344,7 +344,7 @@ subroutine write_berror_ (fname,bvars,plevs,lats,lons,rc, myid,root)
   call check_( nf90_create(fname, NF90_CLOBBER, ncid), rc, mype_, root_ )
   if(rc/=0) return
 
-! Define the dimensions. NetCDF will hand back an ID for each. 
+! Define the dimensions. NetCDF will hand back an ID for each.
   call check_( nf90_def_dim(ncid, "lon", nlon, x_dimid), rc, mype_, root_ )
   call check_( nf90_def_dim(ncid, "lat", nlat, y_dimid), rc, mype_, root_ )
   call check_( nf90_def_dim(ncid, "lev", nlev, z_dimid), rc, mype_, root_ )
@@ -469,7 +469,7 @@ subroutine write_berror_ (fname,bvars,plevs,lats,lons,rc, myid,root)
      if(trim(cvars2dx(nv))=="sst"     ) then
         data_out(:,:,1) = transpose(bvars%varsst)
      endif
-     if(trim(cvars2dx(nv))=="hsst" ) then 
+     if(trim(cvars2dx(nv))=="hsst" ) then
         data_out(:,:,1) = transpose(bvars%corlsst)
      endif
      call check_( nf90_put_var(ncid, varid2dx(nv), data_out(:,:,1)), rc, mype_, root_ )
@@ -496,12 +496,12 @@ subroutine init_berror_vars_(vr,nlon,nlat,nsig)
 
   if(vr%initialized) return
 
-  vr%nlon=nlon 
+  vr%nlon=nlon
   vr%nlat=nlat
   vr%nsig=nsig
 
 ! allocate single precision arrays
-  allocate(vr%sfvar(nlat,nsig),vr%vpvar(nlat,nsig),vr%tvar(nlat,nsig),vr%qvar(nlat,nsig),  &  
+  allocate(vr%sfvar(nlat,nsig),vr%vpvar(nlat,nsig),vr%tvar(nlat,nsig),vr%qvar(nlat,nsig),  &
            vr%qivar(nlat,nsig),vr%qlvar(nlat,nsig),vr%qrvar(nlat,nsig),vr%qsvar(nlat,nsig),&
            vr%cvar(nlat,nsig),vr%nrhvar(nlat,nsig),vr%ozvar(nlat,nsig))
   allocate(vr%sfhln(nlat,nsig),vr%vphln(nlat,nsig),vr%thln(nlat,nsig),vr%qhln(nlat,nsig),  &
@@ -521,7 +521,7 @@ subroutine init_berror_vars_(vr,nlon,nlat,nsig)
   type(nc_berror_vars) vr
 ! deallocate arrays
   if(.not. vr%initialized) return
-  deallocate(vr%sfvar,vr%vpvar,vr%tvar,vr%qvar,  &  
+  deallocate(vr%sfvar,vr%vpvar,vr%tvar,vr%qvar,  &
              vr%qivar,vr%qlvar,vr%qrvar,vr%qsvar,&
              vr%cvar,vr%nrhvar,vr%ozvar)
   deallocate(vr%sfhln,vr%vphln,vr%thln,vr%qhln,  &
@@ -901,10 +901,10 @@ subroutine check_(status,rc, myid, root)
     integer, intent (out) :: rc
     integer, intent ( in) :: myid, root
     rc=0
-    if(status /= nf90_noerr) then 
+    if(status /= nf90_noerr) then
       if(myid==root) print *, trim(nf90_strerror(status))
       rc=999
     end if
-end subroutine check_  
+end subroutine check_
 
 end module m_nc_berror

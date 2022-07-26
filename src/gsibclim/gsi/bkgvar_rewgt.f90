@@ -4,7 +4,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
 ! subprogram:    bkgvar_rewgt   add flow dependence to variances
 !   prgmmr: kleist           org: np22                date: 2007-07-03
 !
-! abstract: perform background error variance reweighting based on 
+! abstract: perform background error variance reweighting based on
 !           flow dependence
 !
 ! program history log:
@@ -106,7 +106,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
 
 ! NOTES:
 ! This subroutine will only work if FGAT (more than one guess time level)
-! is used.  For the current operational GDAS with a 6 hour time window, 
+! is used.  For the current operational GDAS with a 6 hour time window,
 ! the default is to use sigf09-sigf03 to compute the delta variables
 !
 ! Because of the FGAT component and vorticity/divergence issues, this is
@@ -240,7 +240,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   call smooth2d(delpsi,delchi,deltv,delps,nsig,nsmth,mype)
 
 ! Get global maximum and mean of each of the delta fields; while accounting for
-! reproducibility of this kind of calculation 
+! reproducibility of this kind of calculation
   mean_dz =zero_quad ; mean_dd=zero_quad ; mean_dt=zero_quad
   mean_dps=zero_quad
 
@@ -250,7 +250,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
            mean_dz(k) = mean_dz(k) + delpsi(i,j,k)
            mean_dd(k) = mean_dd(k) + delchi(i,j,k)
            mean_dt(k) = mean_dt(k) + deltv (i,j,k)
- 
+
            max_dz(k)=max(max_dz(k),delpsi(i,j,k))
            max_dd(k)=max(max_dd(k),delchi(i,j,k))
            max_dt(k)=max(max_dt(k),deltv (i,j,k))
@@ -287,7 +287,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   call mpi_allreduce(max_dt,max_dt0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
   call mpi_allreduce(max_dps,max_dps0,1,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
 
-! Reintegrate quad precision number and sum over all mpi tasks  
+! Reintegrate quad precision number and sum over all mpi tasks
   mean_dz =zero_quad ; mean_dd=zero_quad ; mean_dt=zero_quad
   mean_dps=zero_quad
   do i=1,npe
@@ -333,18 +333,18 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   do k=1,nsig
      do j=1,lon2
         do i=1,lat2
-           sfvar(i,j,k)=sfvar(i,j,k)* &          
+           sfvar(i,j,k)=sfvar(i,j,k)* &
                 (one + bkgv_rewgtfct*(delpsi(i,j,k)-mean_dzout(k))*rmax_dz0(k))
            vpvar(i,j,k)=vpvar(i,j,k)* &
                 (one + bkgv_rewgtfct*(delchi(i,j,k)-mean_ddout(k))*rmax_dd0(k))
-           tvar(i,j,k)=tvar(i,j,k)*  &         
+           tvar(i,j,k)=tvar(i,j,k)*  &
                 (one + bkgv_rewgtfct*(deltv (i,j,k)-mean_dtout(k))*rmax_dt0(k))
         end do
      end do
   end do
   do j=1,lon2
      do i=1,lat2
-        psvar(i,j)=psvar(i,j)* &          
+        psvar(i,j)=psvar(i,j)* &
              (one + bkgv_rewgtfct*(delps(i,j)-mean_dpsout)*rmax_dps0)
      end do
   end do
@@ -354,7 +354,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
 ! Smooth background error variances and write out grid
   nsmth=8
   call smooth2d(sfvar,vpvar,tvar,psvar,nsig,nsmth,mype)
- 
+
   if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,mype)
   if(mype==0) write(6,*) 'bkgvar_rewgt: Flow-dependent feature on: nt=',nfldsig, ' minus nt= 1'
 
@@ -423,7 +423,7 @@ subroutine getpsichi(vordiv1,vordiv2,dpsichi)
 ! Perform scalar g2s on work array
 !$omp parallel do schedule(dynamic,1) private(k,spc1)
   do k=g3%kbegin_loc,g3%kend_loc
-     spc1=zero 
+     spc1=zero
      call general_g2s0(grd_a,sp_a,spc1,work1(1,:,:,k))
 
 ! Inverse laplacian
@@ -434,7 +434,7 @@ subroutine getpsichi(vordiv1,vordiv2,dpsichi)
      spc1(1)=zero
      spc1(2)=zero
 
-     work1(1,:,:,k)=zero 
+     work1(1,:,:,k)=zero
      call general_s2g0(grd_a,sp_a,spc1,work1(1,:,:,k))
 
   end do
@@ -581,7 +581,7 @@ subroutine smooth2d(subd1,subd2,subd3,subd4,nlevs,nsmooth,mype)
               grd2(nlat,i)=sumn
               grd2(1,i)=sums
            end do
-! Perform smoother on interior 
+! Perform smoother on interior
            do j=1,nlon
               do i=2,nlat-1
                  temp = cent*grd2(i,j) + side*(grd2(i+1,j) + &
@@ -642,7 +642,7 @@ subroutine gather_stuff2(f,g,mype,outpe)
 ! subprogram:    gather_stuff2    gather subdomains onto global slabs
 !   prgmmr: kleist           org: np22                date: 2007-07-03
 !
-! abstract: perform communication necessary to gather subdomains to 
+! abstract: perform communication necessary to gather subdomains to
 !           global slabs
 !
 ! program history log:

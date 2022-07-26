@@ -8,7 +8,7 @@ module gsi_4dvar
 !
 ! program history log:
 !   2007-02-02 tremolet
-!   2007-05-29 todling  - add initialization of GCM TLM/ADM  
+!   2007-05-29 todling  - add initialization of GCM TLM/ADM
 !   2007-07-10 todling  - flag to allow writing of increment
 !   2009-10-09 wu       - replace nhr_offset with min_offset and
 !                         set default 1.5 hr for regional not for 4dvar but for FGAT
@@ -20,9 +20,9 @@ module gsi_4dvar
 !			  and gsi_4dcoupler_final_traj() from gsimain_finalize(),
 !   2011-07-10 guo/zhang- add liauon
 !   2012-02-08 kleist   - add new features for 4dvar with ensemble/hybrid.
-!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS  - introduced ladtest_obs 
+!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS  - introduced ladtest_obs
 !   2015-02-23 Rancic/Thomas - iwinbgn changed from hours to mins, added thin4d
-!                         option to remove thinning in time       
+!                         option to remove thinning in time
 !   2015-10-01 Guo      - trigger for redistribution of obs when applicable
 !   2017-05-06 todling  - add tau_fcst to determine EnVarFSOI-like calculation
 !   2020-02-26 todling  - obsbin time now in minutes
@@ -225,9 +225,9 @@ lwrite4danl = .false.
 thin4d = .false.
 ! if zero, output all times.
 ! if > 0, output specific fcst time given by nhr_anal
-nhr_anal = 0 
+nhr_anal = 0
 
-tau_fcst = -1           ! ensemble of forecast at hour current+tau_fcst 
+tau_fcst = -1           ! ensemble of forecast at hour current+tau_fcst
 evfsoi_order = 1        ! order of appox used in EnVarFSOI-like settings
 evfsoi_afcst = .false.  ! internal EnVarFSOI-like parameter (NEVER to be in namelist)
 evfsoi_ana   = .false.  ! internal EnVarFSOI-like parameter (NEVER to be in namelist)

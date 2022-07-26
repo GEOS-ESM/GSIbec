@@ -1,10 +1,10 @@
 module stub_ensmod
 !----------------------------------------------------------------------------
 !BOP
-!  
+!
 ! !MODULE:  GSI_EnsCouplerMod ---
 !
-! !DESCRIPTION: This stub provides the default interfaces to read an 
+! !DESCRIPTION: This stub provides the default interfaces to read an
 !               ensemble in GSI.
 !
 ! !REVISION HISTORY:
@@ -77,19 +77,19 @@ contains
 !    associate( this => this ) ! eliminates warning for unused dummy argument needed for binding
 !    end associate
      iret = 0
- 
+
      return
 
   end subroutine get_user_ens
-  
+
   subroutine get_user_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
- 
+
      use m_kinds, only: i_kind
      use general_sub2grid_mod, only: sub2grid_info
      use gsi_bundlemod, only: gsi_bundle
- 
+
      implicit none
- 
+
      ! Declare passed variables
      class(ensemble),     intent(inout) :: this
      type(sub2grid_info), intent(in   ) :: grd
@@ -101,16 +101,16 @@ contains
 !!   associate( this => this ) ! eliminates warning for unused dummy argument needed for binding
 !!   end associate
      iret = 0
- 
+
      return
- 
+
   end subroutine get_user_Nens
 
   subroutine create_sub2grid_info(s2gi,nsig,npe,s2gi_ref)
      use m_kinds, only: i_kind
      use general_sub2grid_mod, only: sub2grid_info
      implicit none
- 
+
      ! Declare passed variables
      type(sub2grid_info), intent(out  ) :: s2gi
      integer(i_kind),     intent(in   ) :: nsig
@@ -119,20 +119,20 @@ contains
 
      ! This is a simple copy
      s2gi = s2gi_ref
- 
+
      return
   end subroutine create_sub2grid_info
 
   subroutine destroy_sub2grid_info(s2gi)
      use general_sub2grid_mod, only: sub2grid_info
      implicit none
- 
+
      ! Declare passed variables
      type(sub2grid_info), intent(inout) :: s2gi
 
      ! Reset the variable to a different memory location, so any original target
      ! won't be accessed anymore.
- 
+
      s2gi = sub2grid_info()
      return
   end subroutine destroy_sub2grid_info
@@ -159,7 +159,7 @@ contains
   end subroutine put_user_ens
 
   subroutine non_gaussian_ens_grid(this,elats,elons)
- 
+
      use m_kinds, only: r_kind
      use hybrid_ensemble_parameters, only: sp_ens
      implicit none
@@ -167,12 +167,12 @@ contains
      class(ensemble), intent(inout) :: this
      real(r_kind), intent(out) :: elats(:),elons(:)
 !    real(r_kind), intent(out) :: elats(size(sp_ens%rlats)),elons(size(sp_ens%rlons))
- 
+
      elats=sp_ens%rlats
      elons=sp_ens%rlons
 !!   associate( this => this ) ! eliminates warning for unused dummy argument needed for binding
 !!   end associate
- 
+
      return
   end subroutine non_gaussian_ens_grid
 

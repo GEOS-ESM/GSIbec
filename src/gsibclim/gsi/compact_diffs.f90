@@ -4,7 +4,7 @@ module compact_diffs
 ! module:    compact_diffs   global compact diff derivative stuff
 !   prgmmr: parrish          org: np22                date: 2005-01-21
 !
-! abstract: contains routines to initialize constants and compute 
+! abstract: contains routines to initialize constants and compute
 !             compact difference approximations to derivatives
 !             in latitude and longitude on the sphere.
 !
@@ -144,7 +144,7 @@ contains
 !
 !$$$
     implicit none
-    
+
     noq=3
     return
   end subroutine init_compact_diffs
@@ -156,7 +156,7 @@ contains
 ! subprogram:    create_cdiff_coefs    create arrays for global compact diffs
 !   prgmmr: parrish          org: np22                date: 2005-01-21
 !
-! abstract: create coefs for global compact difference approximations to 
+! abstract: create coefs for global compact difference approximations to
 !            derivatives in lat, lon
 !
 ! program history log:
@@ -243,13 +243,13 @@ contains
 !                         motion
 !
 !   input argument list:
-!     work(1,*  - array containing the streamfunction 
-!     work(2,*  - array containing the velocity potential 
+!     work(1,*  - array containing the streamfunction
+!     work(2,*  - array containing the velocity potential
 !     idim      - initial dimension of work array
 !
 !   output argument list:
-!     work(1,*  - array containing the u velocity 
-!     work(2,*  - array containing the v velocity 
+!     work(1,*  - array containing the u velocity
+!     work(2,*  - array containing the v velocity
 !
 ! attributes:
 !   language: f90
@@ -264,7 +264,7 @@ contains
   integer(i_kind),intent(in) :: idim
   real(r_kind),dimension(idim,nlat,nlon),intent(inout) :: work
 
-! Declare local variables  
+! Declare local variables
   integer(i_kind) ix,iy
   integer(i_kind) ny,i,j
   real(r_kind) polsu,polnu,polnv,polsv
@@ -281,7 +281,7 @@ contains
         b(i-1,j)=work(2,i,j)
      end do
   end do
-  
+
 !$omp parallel sections
 !$omp section
   call xdcirdp(a,grid1,coef(lacox1),coef(lbcox1),coef(lacox2),coef(lbcox2),&
@@ -350,8 +350,8 @@ contains
 ! subprogram:    uv2vordiv compute vor/div from u/v
 !   prgmmr: treadon          org: np23                date: 2005-03-21
 !
-! abstract: computes vorticity and divergence from u and v wind 
-!           components using high-order compact differencing on 
+! abstract: computes vorticity and divergence from u and v wind
+!           components using high-order compact differencing on
 !           a spherical grid.
 !
 ! program history log:
@@ -380,7 +380,7 @@ contains
 ! Declare passed variables
   real(r_kind),dimension(nlat,nlon),intent(inout) :: work1,work2
 
-! Declare local variables  
+! Declare local variables
   integer(i_kind) i,j,ny
   integer(i_kind) iy,ix
   real(r_kind) rnlon,div_n,div_s,vor_n,vor_s
@@ -404,7 +404,7 @@ contains
   end do
 
 
-! Transfer u,v to local work arrays.  
+! Transfer u,v to local work arrays.
   do j=1,nlon
      do i=2,nlat-1
         u(i-1,j)=work1(i,j)   ! work1 contains u on input
@@ -427,7 +427,7 @@ contains
         v(iy,ix)=v(iy,ix)/coef(lcy+iy)
      end do
   end do
-  
+
 ! Compute y derivative of u:  du_dlat = du/dlat
   call ydsphdp(u,du_dlat,coef(lacoy1),coef(lbcoy1),coef(lacoy2),coef(lbcoy2),&
        nlon,ny,noq)
@@ -468,7 +468,7 @@ contains
   div_n = div_n*rnlon
   vor_s = vor_s*rnlon
   vor_n = vor_n*rnlon
-  
+
 ! Transfer to output arrays
   do j=1,nlon
      do i=2,nlat-1
@@ -488,31 +488,31 @@ end subroutine uv2vordiv
   subroutine xdcirdp(p,q,aco1,bco1,aco2,bco2,nx,ny,noq)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    xdcirdp               compute x derivatives on sphere 
+! subprogram:    xdcirdp               compute x derivatives on sphere
 !   prgmmr: purser           org: np20               date:  1994-01-01
 !
-! abstract:  compute the x-derivatives of data with circle topology 
+! abstract:  compute the x-derivatives of data with circle topology
 !            for rows using compact-differencing and add to existing
-!            an field.		       
-!									       
+!            an field.		
+!									
 ! program history log:
 !   1994-05-12  parrish,d. elimanate memory bank conflicts
 !   2004-07-27  treadon - add intent in/out
 !
 !   input argument list:
-!     p      - array of input data					       
-!     aco1   - array containing the "a-coefficients", in the format of    
-!              a banded l-d-u factorization, for the antisymmetric portion of   
-!              the field to be differenced (initialized in cdcoef) 	    
-!     bco1   - corresponding band-matrix of "b-coefficients"	   
-!     aco2   - like aco1, but for the symmetric portion of the data	  
-!     bco2   - like bco1, but for the symmetric portion of the data	 
+!     p      - array of input data					
+!     aco1   - array containing the "a-coefficients", in the format of
+!              a banded l-d-u factorization, for the antisymmetric portion of
+!              the field to be differenced (initialized in cdcoef) 	
+!     bco1   - corresponding band-matrix of "b-coefficients"	
+!     aco2   - like aco1, but for the symmetric portion of the data	
+!     bco2   - like bco1, but for the symmetric portion of the data	
 !     nx     - number of points in a cyclic-row (x-direction) 	
 !     ny     - number of parallel rows				
 !     noq    - quarter of the order of differencing (1 implies 4th-order)
 !
 !   output argument list:
-!     q      - array of derivatives are added		   	       
+!     q      - array of derivatives are added		   	
 !
 ! attributes:
 !   language: f90
@@ -567,8 +567,8 @@ end subroutine uv2vordiv
 ! subprogram:    xmulbv multiplication of a banded matrix times x vectors
 !   prgmmr: purser           org: np20                date: 1994-01-01
 !
-! abstract:  multiplication of a banded matrix times parallel x vectors     
-!									       
+! abstract:  multiplication of a banded matrix times parallel x vectors
+!									
 !
 ! program history log:
 !   1994-05-12  parrish,d. elimanate memory bank conflicts
@@ -633,7 +633,7 @@ end subroutine uv2vordiv
 ! subprogram:    xbacbv back-substitution step of parallel linear inversion
 !   prgmmr: purser           org: np20                date:  1994-01-01
 !
-! abstract:  back-substitution step of parallel linear 
+! abstract:  back-substitution step of parallel linear
 !            inversion involving banded matrix and x-vectors.
 !
 ! program history log:
@@ -701,8 +701,8 @@ end subroutine uv2vordiv
 !   prgmmr: purser           org: np20               date:  1994-01-01
 !
 ! abstract:  adjoint of stvp2uv which computes uv from streamfunction/
-!            velocity potential by calculating gradient of a scalar 
-!            field using high-order compact differencing on a 
+!            velocity potential by calculating gradient of a scalar
+!            field using high-order compact differencing on a
 !            spherical grid.
 !
 ! program history log:
@@ -716,13 +716,13 @@ end subroutine uv2vordiv
 !                         motion
 !
 !   input argument list:
-!     work(1,*  - array containing the adjoint u velocity 
+!     work(1,*  - array containing the adjoint u velocity
 !     work(2,*  - array containing the adjoint v velocity
 !     idim      - initial dimension of work array
 !
 !   output argument list:
-!     work(1,*  - array containing the adjoint streamfunction 
-!     work(2,*  - array containing the adjoint velocity potential 
+!     work(1,*  - array containing the adjoint streamfunction
+!     work(2,*  - array containing the adjoint velocity potential
 !
 ! attributes:
 !   language: f90
@@ -747,7 +747,7 @@ end subroutine uv2vordiv
   if(idim <=1) write(6,*) ' error in call to tstvp2uv ',idim
   if(.not.inisphed_) call die('tstvp2uv','coef not computed')
   ny=nlat-2
-  
+
   do j=1,nlon
      do i=1,nlat
         if(i /= 1 .and. i /= nlat)then
@@ -762,7 +762,7 @@ end subroutine uv2vordiv
         end if
      end do
   end do
-  
+
   polnu=zero
   polsu=zero
   polnv=zero
@@ -777,15 +777,15 @@ end subroutine uv2vordiv
   polsu=polsu/float(nlon)
   polnv=polnv/float(nlon)
   polsv=polsv/float(nlon)
-  
+
   do ix=1,nlon
      grid3(ny,ix)=grid3(ny,ix)+polnu*coslon(ix)+polnv*sinlon(ix)
      grid3(1,ix) =grid3(1,ix) +polsu*coslon(ix)+polsv*sinlon(ix)
      grid1(ny,ix)=grid1(ny,ix)-polnu*sinlon(ix)+polnv*coslon(ix)
      grid1(1,ix) =grid1(1,ix) +polsu*sinlon(ix)-polsv*coslon(ix)
   end do
-  
-  
+
+
 !  make corrections for convergence of meridians:
   do ix=1,nlon
      do iy=1,ny
@@ -826,7 +826,7 @@ end subroutine uv2vordiv
         end if
      end do
   end do
-  
+
   return
   end subroutine tstvp2uv
 
@@ -837,28 +837,28 @@ end subroutine uv2vordiv
 ! subprogram:    ydsphdp               compute y derivatives on sphere
 !   prgmmr: purser           org: np20               date:  1994-01-01
 !
-! abstract:  compute the y-derivatives of data with spherical topology    
-!  using compact-differencing and add to an existing field		    
+! abstract:  compute the y-derivatives of data with spherical topology
+!  using compact-differencing and add to an existing field		
 !
 ! program history log:
 !   1994-05-12  parrish,d. elimanate memory bank conflicts
 !   2004-07-27  treadon - add only on use declarations; add intent in/out
 !
 !   input argument list:
-!     p      - array of input data					  
-!     q      - array to which derivatives are added			   
-!     aco1   - array containing the "a-coefficients", in the format of 
-!              a banded l-d-u factorization, for the antisymmetric portion of 
-!              the field to be differenced (initialized in cdcoef) 	   
-!     bco1   - corresponding band-matrix of "b-coefficients"	  
-!     aco2   - like aco1, but for the symmetric portion of the data	 
+!     p      - array of input data					
+!     q      - array to which derivatives are added			
+!     aco1   - array containing the "a-coefficients", in the format of
+!              a banded l-d-u factorization, for the antisymmetric portion of
+!              the field to be differenced (initialized in cdcoef) 	
+!     bco1   - corresponding band-matrix of "b-coefficients"	
+!     aco2   - like aco1, but for the symmetric portion of the data	
 !     bco2   - like bco1, but for the symmetric portion of the data	
 !     nx     - number of longitudes (x-direction), an even number.	
 !     ny     - number of latitude points (y-direction)	
-!     noq    - quarter of the order of differencing (1 implies 4th-order) 
+!     noq    - quarter of the order of differencing (1 implies 4th-order)
 !
 !   output argument list:
-!     q      - array to which derivatives are added			   
+!     q      - array to which derivatives are added			
 !
 ! attributes:
 !   language: f90
@@ -1041,7 +1041,7 @@ end subroutine uv2vordiv
         enddo
      enddo
   endif
-     
+
   return
   end subroutine ybacbv
 
@@ -1054,26 +1054,26 @@ end subroutine uv2vordiv
 !
 ! abstract:  adjoint of ydsphdp which computes the y-derivatives of
 !            data with spherical topology using compact-differencing
-!            and add to an existing field		    
+!            and add to an existing field		
 !
 ! program history log:
 !   1994-05-12  parrish,d. elimanate memory bank conflicts
 !   2004-07-27  treadon - add intent in/out
 !
 !   input argument list:
-!     q      - array of input adjoint data  
-!     aco1   - array containing the "a-coefficients", in the format of 
-!              a banded l-d-u factorization, for the antisymmetric portion of 
-!              the field to be differenced (initialized in cdcoef) 	   
-!     bco1   - corresponding band-matrix of "b-coefficients"	  
-!     aco2   - like aco1, but for the symmetric portion of the data	 
+!     q      - array of input adjoint data
+!     aco1   - array containing the "a-coefficients", in the format of
+!              a banded l-d-u factorization, for the antisymmetric portion of
+!              the field to be differenced (initialized in cdcoef) 	
+!     bco1   - corresponding band-matrix of "b-coefficients"	
+!     aco2   - like aco1, but for the symmetric portion of the data	
 !     bco2   - like bco1, but for the symmetric portion of the data	
 !     nx     - number of longitudes (x-direction), an even number.	
 !     ny     - number of latitude points (y-direction)	
-!     noq    - quarter of the order of differencing (1 implies 4th-order) 
+!     noq    - quarter of the order of differencing (1 implies 4th-order)
 !
 !   output argument list:
-!     p      - array to which adjoint derivatives are added  
+!     p      - array to which adjoint derivatives are added
 !
 ! attributes:
 !   language: f90
@@ -1100,10 +1100,10 @@ end subroutine uv2vordiv
         v2(iy,ix)=q(iy,ix)-q(iy,ix1)
      enddo
   enddo
-  
+
   call ybacvb(v1(1,nxhp),aco2,ny,noq,noq,nxh,nx,ny)
   call ymulvb(v1(1,nxhp),bco2,v1,ny,ny,noq,noq,nxh,nx,ny,nx)
-  
+
   call ybacvb(v2,aco1,ny,noq,noq,nxh,nx,ny)
   call ymulvb(v2,bco1,v2(1,nxhp),ny,ny,noq,noq,nxh,nx,ny,nx)
   do ix=1,nxh
@@ -1113,7 +1113,7 @@ end subroutine uv2vordiv
         p(iy,ix1)= -v1(iy,ix)+v2(iy,ix1)
      enddo
   enddo
-  
+
   return
   end subroutine tydsphdp
 
@@ -1158,7 +1158,7 @@ end subroutine uv2vordiv
   real(r_kind),dimension(na,-nbh1:nbh2),intent(in   ) :: a
   real(r_kind),dimension(ny,nv)        ,intent(inout) :: v
 
-! Declare local variables  
+! Declare local variables
   logical odd
   integer(i_kind) iy,jy,ix,ix1
 
@@ -1204,10 +1204,10 @@ end subroutine uv2vordiv
   subroutine ymulvb(v1,a,v2,n1y,n2y,nbh1,nbh2,nx,nv1,na,nv2)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    ymulvb multiplication of y-vectors times banded matrix 
+! subprogram:    ymulvb multiplication of y-vectors times banded matrix
 !   prgmmr: purser           org: np20               date:  1994-01-01
 !
-! abstract:  multiplication of y-vectors times banded matrix 
+! abstract:  multiplication of y-vectors times banded matrix
 !
 ! program history log:
 !   1994-05-12  parrish,d. elimanate memory bank conflicts
@@ -1271,7 +1271,7 @@ end subroutine uv2vordiv
 ! subprogram:    inisph          init coefs for compact diff on sphere
 !   prgmmr: purser, r.j.     org: np20                date: 1994-01-01
 !
-! abstract:  This routine initializes coefficients for high-order 
+! abstract:  This routine initializes coefficients for high-order
 !            compact differencing on a spherical grid.
 !
 ! program history log:
@@ -1290,9 +1290,9 @@ end subroutine uv2vordiv
 !   output argument list:
 !     none
 !
-!   Remarks:  
+!   Remarks:
 !     This routine initializes array coef which is in module berror.
-!     coef is an array of size 3*ny+4*(2*noq+1)*(ny+nx/2) containing 
+!     coef is an array of size 3*ny+4*(2*noq+1)*(ny+nx/2) containing
 !     the coefficients for high-order compact differencing
 !
 ! attributes:
@@ -1308,7 +1308,7 @@ end subroutine uv2vordiv
   integer(i_kind)               ,intent(in   ) :: nx,ny
   real(r_kind)                  ,intent(in   ) :: r
   real(r_kind),dimension(nlat-1),intent(in   ) :: tau,yor
-  
+
 ! Declare local variables
   integer(i_kind) i,ix,iy,ltau,ltaui
   real(r_kind) pih,pi2onx,ri
@@ -1332,7 +1332,7 @@ end subroutine uv2vordiv
 
   inisphed_=.true.
 
-! Set parameters for calls to subsequent routines  
+! Set parameters for calls to subsequent routines
   nxh=nx/2
   nbp=2*noq+1
   nya=ny*nbp
@@ -1385,7 +1385,7 @@ end subroutine uv2vordiv
      coef(lbcox1+i)=coef(lbcox1+i)*ri
      coef(lbcox2+i)=coef(lbcox2+i)*ri
   enddo
-  
+
   call cdcoef(ny,noq,-pih,pih,yor,w&
        ,coef(lacoy1),coef(lbcoy1),coef(lacoy2),coef(lbcoy2)&
        ,ny,ny,ny,ny)
@@ -1393,7 +1393,7 @@ end subroutine uv2vordiv
      coef(lbcoy1+i)=coef(lbcoy1+i)*ri
      coef(lbcoy2+i)=coef(lbcoy2+i)*ri
   enddo
-  
+
   do iy=1,ny
      coef(lcy+iy)=one/cos(yor(iy))
      coef(ltau+iy)=tau(iy)
@@ -1409,8 +1409,8 @@ end subroutine uv2vordiv
 ! subprogram:    cdcoef              compute differencing coeffciients
 !   prgmmr: purser, r.j.     org: np20                date: 1994-01-01
 !
-! abstract:  This routine computes the coefficients, in band-matrix 
-!            form, of a compact differencing operator for 
+! abstract:  This routine computes the coefficients, in band-matrix
+!            form, of a compact differencing operator for
 !            symmetrically arranged cyclic data.
 !
 ! program history log:
@@ -1449,7 +1449,7 @@ end subroutine uv2vordiv
   use constants, only: zero,two
   implicit none
 
-! Declare passed variables  
+! Declare passed variables
   integer(i_kind)                     ,intent(in   ) :: nh,noq,na1,nb1,na2,nb2
   real(r_kind)                        ,intent(in   ) :: zlim1,zlim2
   real(r_kind),dimension(*)           ,intent(in   ) :: z
@@ -1462,7 +1462,7 @@ end subroutine uv2vordiv
 ! Declare local variables
   integer(i_kind) kw,kb,js,ir,i,n,j,ka,nohp
 
-! Initialize output arrays to zero  
+! Initialize output arrays to zero
   n=nh*2
   do i=1,nh
      work(i)=z(i)
@@ -1521,8 +1521,8 @@ end subroutine uv2vordiv
 !                            for differencing or quadrature
 !   prgmmr: purser, r.j.     org: np20                date: 1994-01-01
 !
-! abstract:  This routine computes coefficients for compact or 
-!            lagrange schemes for differencing or quadrature.  A 
+! abstract:  This routine computes coefficients for compact or
+!            lagrange schemes for differencing or quadrature.  A
 !            description of the routine functionality for quadrature
 !            and differencing follows in the remarks section.
 !
@@ -1552,7 +1552,7 @@ end subroutine uv2vordiv
 !     A is the vector of NA A-coefficients, A(1), .. A(NA)
 !     B is the vector of NB B-coefficients, B(1), ...B(NB)
 !     (For a Lagrange scheme B(1) = -B(2) = 1/("delta sigma".)
-!   
+!
 !   WORK is an array of work-space used for the intermediate
 !   calculations - it contains nothing of interest on input or output.
 !   It must be given a size of at least 2*(NA+NB)*(NA+NB+1) in the
@@ -1584,10 +1584,10 @@ end subroutine uv2vordiv
   real(r_kind),dimension(*),intent(in   ) :: za,zb
   real(r_kind),dimension(*),intent(  out) :: work,a,b
 
-! Declare local variables  
+! Declare local variables
   integer(i_kind) nc,ncs,ncsp,j,iw,i
   real(r_kind) p,z
-  
+
   nc=na+nb
   ncs=nc*nc
   ncsp=ncs+1
@@ -1622,7 +1622,7 @@ end subroutine uv2vordiv
   do i=2,nc
      work(ncs+i)=zero
   enddo
-  
+
 ! Find the following routine qlinvmv (a linear equation solver) amongst
 ! all the other basic matrix routines (here, the double precision
 ! version is used).
@@ -1643,8 +1643,8 @@ end subroutine uv2vordiv
 ! subprogram:    aldub                               ldu decomposition
 !   prgmmr: purser, r.j.     org: np20                date: 1994-01-01
 !
-! abstract:  This routine computes the (L)*(D**-1)*(U) decomposition 
-!            of asymmetric band-matrix compact differencing on 
+! abstract:  This routine computes the (L)*(D**-1)*(U) decomposition
+!            of asymmetric band-matrix compact differencing on
 !            a spherical grid.
 !
 ! program history log:
@@ -1660,7 +1660,7 @@ end subroutine uv2vordiv
 !      na   - first fortran dimension of A
 !
 !   output argument list:
-!     "a"   - contains the (L)*(D**-1)*(U) factorization of the 
+!     "a"   - contains the (L)*(D**-1)*(U) factorization of the
 !             input matrix, where
 !             (L) is lower triangular with unit main diagonal
 !             (D) is a diagonal matrix
@@ -1745,7 +1745,7 @@ end subroutine uv2vordiv
 ! Declare passed variables
   integer(i_kind)             ,intent(in   ) :: m,mm,na,nb
   real(r_kind),dimension(na,*),intent(inout) :: a
-  real(r_kind),dimension(nb,*),intent(inout) :: b  
+  real(r_kind),dimension(nb,*),intent(inout) :: b
 
 ! Declare local parameters
   integer(i_kind),parameter:: nn = 500
@@ -1882,7 +1882,7 @@ end subroutine uv2vordiv
   real(r_kind),dimension(na,*),intent(in   ) :: a
   real(r_kind),dimension(nb,*),intent(  out) :: b
 
-! Declare local variables  
+! Declare local variables
   integer(i_kind) k,i,l,j
   real(r_kind) s
 
@@ -1954,7 +1954,7 @@ end subroutine uv2vordiv
 
 ! Set parameters for calls to subsequent routines
   ny=nlat-2
-  
+
 
 ! Initialize output arrays to zero
   do j=1,nlon
@@ -2019,7 +2019,7 @@ end subroutine uv2vordiv
         dbdx(i+1,j) = grid3(i,j)
      end do
   end do
-  
+
   return
   end subroutine compact_dlon
 
@@ -2070,12 +2070,12 @@ end subroutine uv2vordiv
   if(.not.inisphed_) call die('tcompact_dlon','coef not computed')
 ! Set parameters for calls to subsequent routines
   ny=nlat-2
-  
+
   do j=1,nlon
      grid3s(j)=dbdx(1,j)
      grid3n(j)=dbdx(nlat,j)
      do i=1,ny
-        grid3(i,j)=dbdx(i+1,j) 
+        grid3(i,j)=dbdx(i+1,j)
      end do
   end do
   if(.not.vector) then
@@ -2124,7 +2124,7 @@ end subroutine uv2vordiv
         b(i+1,j)=b(i+1,j)-work3(i,j)
      end do
   end do
-  
+
   return
   end subroutine tcompact_dlon
 
@@ -2177,7 +2177,7 @@ end subroutine uv2vordiv
 
 ! Set parameters for calls to subsequent routines
   ny=nlat-2
-  
+
 ! Initialize output arrays to zero
   do j=1,nlon
      do i=1,nlat
@@ -2248,7 +2248,7 @@ end subroutine uv2vordiv
         dbdy(i+1,j) = grid4(i,j)
      end do
   end do
-  
+
   return
   end subroutine compact_dlat
 
@@ -2300,12 +2300,12 @@ end subroutine uv2vordiv
   if(.not.inisphed_) call die('tcompact_dlat','coef not computed')
 ! Set parameters for calls to subsequent routines
   ny=nlat-2
-  
+
   do j=1,nlon
      grid4s(j)=dbdy(1,j)
      grid4n(j)=dbdy(nlat,j)
      do i=1,ny
-        grid4(i,j)=dbdy(i+1,j) 
+        grid4(i,j)=dbdy(i+1,j)
      end do
   end do
   if(vector) then
@@ -2361,7 +2361,7 @@ end subroutine uv2vordiv
         b(i+1,j)=b(i+1,j)-work2(i,j)   !????/check this in particular
      end do
   end do
-  
+
   return
   end subroutine tcompact_dlat
 

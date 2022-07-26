@@ -38,9 +38,9 @@ subroutine normal_rh_to_q(rhnorm,t,p,q)
 
   real(r_kind),intent(in   ) :: rhnorm(lat2,lon2,nsig)
   real(r_kind),intent(in   ) :: t(lat2,lon2,nsig)
-  real(r_kind),intent(in   ) :: p(lat2,lon2,nsig+1)  
+  real(r_kind),intent(in   ) :: p(lat2,lon2,nsig+1)
   real(r_kind),intent(  out) :: q(lat2,lon2,nsig)
-  
+
   integer(i_kind) i,j,k
 
 ! Convert normalized rh to q
@@ -106,10 +106,10 @@ subroutine normal_rh_to_q_ad(rhnorm,t,p,q)
   real(r_kind),intent(inout) :: t(lat2,lon2,nsig)
   real(r_kind),intent(inout) :: p(lat2,lon2,nsig+1)
   real(r_kind),intent(inout) :: q(lat2,lon2,nsig)
-  
+
 ! local variables:
   integer(i_kind) i,j,k
-  
+
 ! Adjoint of convert normalized rh to q
    do k=1,nsig
       do j=1,lon2
@@ -126,5 +126,5 @@ subroutine normal_rh_to_q_ad(rhnorm,t,p,q)
    enddo
 
    return
- 
+
 end subroutine normal_rh_to_q_ad

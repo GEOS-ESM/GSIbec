@@ -12,7 +12,7 @@ module general_commvars_mod
 !   2013-10-24 todling - move vars ltosj/i to from gridmod here; same for load and fill routines
 !
 ! Subroutines Included:
-!   sub init_general_commvars - initialize type(sub2grid_info) structure variables 
+!   sub init_general_commvars - initialize type(sub2grid_info) structure variables
 !   sub destroy_general_commvars - deallocate various pointer arrays in type(sub2grid_info) structures
 !
 ! Variable Definitions:
@@ -98,7 +98,7 @@ contains
    character(len=*),intent(in) :: cvars2d_in(:),cvars3d_in(:),cvarsmd_in(:),nrf_var_in(:)
    character(len=*),intent(in) :: dvars2d_in(:),dvars3d_in(:)
    logical,         intent(in) :: drv_set_in
-   
+
    allocate(cvars2d(size(cvars2d_in)))
    allocate(cvars3d(size(cvars3d_in)))
    allocate(nrf_var(size(nrf_var_in)))
@@ -126,7 +126,7 @@ contains
    deallocate(cvars3d)
    deallocate(cvars2d)
    end subroutine final_general_commvars_dims
-  
+
    subroutine init_general_commvars
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -141,7 +141,7 @@ contains
 !   2013-10-28  todling - rename p3d to prse
 !   2018-05-09  mtong - use derivative vector to structure variable s2g_d
 !   2018-05-09  eliu - construct variable s2g_d for derivatives when derivative variables
-!                      are set (drv_set = .true.)   
+!                      are set (drv_set = .true.)
 !
 !   input argument list:
 !
@@ -257,7 +257,7 @@ contains
 
 !  create general_sub2grid structure variable s2g_d, which is used in get_derivatives.f90
 
-      if (drv_set) then 
+      if (drv_set) then
 
          inner_vars=1
          num_fields=size(dvars2d)+nsig*size(dvars3d)
@@ -395,11 +395,11 @@ contains
 !   machine:  ibm rs/6000 sp
 !
 !$$$ end documentation block
- 
+
        use general_sub2grid_mod, only: general_sub2grid_destroy_info
        use m_mpimod, only: levs_id,nvar_id,nvar_pe
        implicit none
- 
+
        deallocate(ltosi,ltosj,ltosi_s,ltosj_s)
        deallocate(levs_id,nvar_id,nvar_pe)
        call general_sub2grid_destroy_info(s2g_cv,s_ref=s2g_raf)
@@ -411,7 +411,7 @@ contains
        call general_sub2grid_destroy_info(g3,s_ref=s2g_raf)
        call general_sub2grid_destroy_info(g33p1,s_ref=s2g_raf)
        call general_sub2grid_destroy_info(s2g_raf)
- 
+
     end subroutine destroy_general_commvars
 
 !-------------------------------------------------------------------------
@@ -439,7 +439,7 @@ contains
 !               grid to spectral tranforms.  This preparation
 !               entails to two steps
 !                  1) reorder indexing of the latitude direction.
-!                     The GSI ordering is south to north.  The 
+!                     The GSI ordering is south to north.  The
 !                     ordering assumed in splib routines is north
 !                     to south.
 !                  2) The global GSI adds two latitude rows, one
@@ -474,7 +474,7 @@ contains
          grid_out(j,i)=grid_in(k)
       end if
    end do
-   
+
    return
  end subroutine load_grid
 !-------------------------------------------------------------------------
@@ -504,30 +504,30 @@ contains
 !               the longitudinal mean of the adjacent latitude row.
 !               The northern row contains the longitudinal mean of
 !               the adjacent northern row.
-!               
+!
 !               The added rows correpsond to the south and north poles.
 !
 !               In addition to adding latitude rows corresponding to the
-!               south and north poles, the routine reorder the output 
+!               south and north poles, the routine reorder the output
 !               array so that it is a one-dimensional array read in
 !               an order consisten with that assumed for total domain
 !               gsi grids.
 !
 !               The assumed order for the input grid is longitude as
-!               the first dimension with array index increasing from 
+!               the first dimension with array index increasing from
 !               east to west.  The second dimension is latitude with
 !               the index increasing from north to south.  This ordering
-!               differs from that used in the GSI.  
+!               differs from that used in the GSI.
 !
-!               The GSI ordering is latitude first with the index 
+!               The GSI ordering is latitude first with the index
 !               increasing from south to north.  The second dimension is
 !               longitude with the index increasing from east to west.
 !
 !               Thus, the code below also rearranges the indexing and
-!               order of the dimensions to make the output grid 
+!               order of the dimensions to make the output grid
 !               consistent with that which is expected in the rest of
 !               gsi.
-!               
+!
 !
 ! !REVISION HISTORY:
 !   2004-08-27  treadon
@@ -555,7 +555,7 @@ contains
          grid(i,j)=grid_in(i,jj)
       end do
    end do
-   
+
 !  Compute mean along southern and northern latitudes
    sumn=zero
    sums=zero
@@ -573,14 +573,14 @@ contains
       grid(i,1)   =sums
       grid(i,nlat)=sumn
    end do
-   
+
 !  Transfer local work array to output grid
    do k=1,itotsub
       i=ltosi_s(k)
       j=ltosj_s(k)
       grid_out(k)=grid(j,i)
    end do
-   
+
    return
  end subroutine fill_ns
 !-------------------------------------------------------------------------
@@ -610,29 +610,29 @@ contains
 !               the longitudinal mean of the adjacent latitude row.
 !               The northern row contains the longitudinal mean of
 !               the adjacent northern row.
-!               
+!
 !               The added rows correpsond to the south and north poles.
 !
 !               In addition to adding latitude rows corresponding to the
-!               south and north poles, the routine reorder the output 
+!               south and north poles, the routine reorder the output
 !               array so that it is consistent with that assumed for total domain
 !               gsi grids.
 !
 !               The assumed order for the input grid is longitude as
-!               the first dimension with array index increasing from 
+!               the first dimension with array index increasing from
 !               east to west.  The second dimension is latitude with
 !               the index increasing from north to south.  This ordering
-!               differs from that used in the GSI.  
+!               differs from that used in the GSI.
 !
-!               The GSI ordering is latitude first with the index 
+!               The GSI ordering is latitude first with the index
 !               increasing from south to north.  The second dimension is
 !               longitude with the index increasing from east to west.
 !
 !               Thus, the code below also rearranges the indexing and
-!               order of the dimensions to make the output grid 
+!               order of the dimensions to make the output grid
 !               consistent with that which is expected in the rest of
 !               gsi.
-!               
+!
 !
 ! !REVISION HISTORY:
 !   2004-08-27  treadon
@@ -660,7 +660,7 @@ contains
          grid(i,j)=grid_in(i,jj)
       end do
    end do
-   
+
 !  Compute mean along southern and northern latitudes
    sumn=zero
    sums=zero
@@ -678,14 +678,14 @@ contains
       grid(i,1)   =sums
       grid(i,nlat)=sumn
    end do
-   
+
 !  Transfer local work array to output grid
    do j=1,nlon
       do i=1,nlat
         grid_out(i,j)=grid(j,i)
       end do
    end do
-   
+
    return
  end subroutine fill2_ns
 
@@ -717,30 +717,30 @@ contains
 !               the longitudinal mean of the adjacent latitude row.
 !               The northern row contains the longitudinal mean of
 !               the adjacent northern row.
-!               
+!
 !               The added rows correpsond to the south and north poles.
 !
 !               In addition to adding latitude rows corresponding to the
-!               south and north poles, the routine reorder the output 
+!               south and north poles, the routine reorder the output
 !               array so that it is a one-dimensional array read in
 !               an order consisten with that assumed for total domain
 !               gsi grids.
 !
 !               The assumed order for the input grid is longitude as
-!               the first dimension with array index increasing from 
+!               the first dimension with array index increasing from
 !               east to west.  The second dimension is latitude with
 !               the index increasing from north to south.  This ordering
-!               differs from that used in the GSI.  
+!               differs from that used in the GSI.
 !
-!               The GSI ordering is latitude first with the index 
+!               The GSI ordering is latitude first with the index
 !               increasing from south to north.  The second dimension is
 !               longitude with the index increasing from east to west.
 !
 !               Thus, the code below also rearranges the indexing and
-!               order of the dimensions to make the output grid 
+!               order of the dimensions to make the output grid
 !               consistent with that which is expected in the rest of
 !               gsi.
-!               
+!
 !
 ! !REVISION HISTORY:
 !   2004-08-27  treadon
@@ -769,7 +769,7 @@ contains
          grid2(i,j)=gridv_in(i,jj)
       end do
    end do
-   
+
 !  Compute mean along southern and northern latitudes
    polnu=zero
    polnv=zero
@@ -799,7 +799,7 @@ contains
       gridu_out(k)=grid(j,i)
       gridv_out(k)=grid2(j,i)
    end do
-   
+
    return
  end subroutine filluv_ns
 !-------------------------------------------------------------------------
@@ -830,30 +830,30 @@ contains
 !               the longitudinal mean of the adjacent latitude row.
 !               The northern row contains the longitudinal mean of
 !               the adjacent northern row.
-!               
+!
 !               The added rows correpsond to the south and north poles.
 !
 !               In addition to adding latitude rows corresponding to the
-!               south and north poles, the routine reorder the output 
+!               south and north poles, the routine reorder the output
 !               array so that it is in
 !               an order consistent with that assumed for total domain
 !               gsi grids.
 !
 !               The assumed order for the input grid is longitude as
-!               the first dimension with array index increasing from 
+!               the first dimension with array index increasing from
 !               east to west.  The second dimension is latitude with
 !               the index increasing from north to south.  This ordering
-!               differs from that used in the GSI.  
+!               differs from that used in the GSI.
 !
-!               The GSI ordering is latitude first with the index 
+!               The GSI ordering is latitude first with the index
 !               increasing from south to north.  The second dimension is
 !               longitude with the index increasing from east to west.
 !
 !               Thus, the code below also rearranges the indexing and
-!               order of the dimensions to make the output grid 
+!               order of the dimensions to make the output grid
 !               consistent with that which is expected in the rest of
 !               gsi.
-!               
+!
 !
 ! !REVISION HISTORY:
 !   2004-08-27  treadon
@@ -882,7 +882,7 @@ contains
          grid2(i,j)=gridv_in(i,jj)
       end do
    end do
-   
+
 !  Compute mean along southern and northern latitudes
    polnu=zero
    polnv=zero
@@ -912,7 +912,7 @@ contains
          gridv_out(i,j)=grid2(j,i)
       end do
    end do
-   
+
    return
  end subroutine filluv2_ns
 end module general_commvars_mod

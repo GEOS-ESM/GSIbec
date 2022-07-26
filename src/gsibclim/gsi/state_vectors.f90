@@ -68,14 +68,14 @@ use mpeu_util, only: gettable
 implicit none
 
 save
-private 
+private
   public  allocate_state
   public  deallocate_state
   public  prt_state_norms
   public  setup_state_vectors
   public  dot_product
   public  dot_product_red
-  public  set_random 
+  public  set_random
   public  inquire_state
   public  init_anasv
   public  final_anasv
@@ -290,7 +290,7 @@ subroutine allocate_state(yst)
   call GSI_GridCreate(grid,lat2,lon2,nsig)
   write(bname,'(a)') 'State Vector'
   call GSI_BundleCreate(yst,grid,bname,ierror, &
-                        names2d=svars2d,names3d=svars3d,levels=levels,bundle_kind=r_kind)  
+                        names2d=svars2d,names3d=svars3d,levels=levels,bundle_kind=r_kind)
 
   if (yst%ndim/=nval_len) then
      write(6,*)'allocate_state: error length'
@@ -367,7 +367,7 @@ subroutine norms_vars(xst,pmin,pmax,psum,pnum)
 !   language: f90
 !   machine:
 !
-!$$$ end documentation block 
+!$$$ end documentation block
   use m_mpimod, only: ierror,gsi_mpi_comm_world,mpi_rtype,npe
   implicit none
   type(gsi_bundle), intent(in   ) :: xst
@@ -501,7 +501,7 @@ subroutine prt_norms1(xst,sgrep)
 
   character(len=8) :: bindx,bform
   character(len=len(sgrep)+len(bindx)+2) :: bgrep
-  
+
   integer(i_kind) :: nx,ix
 
   nx=size(xst)
@@ -576,9 +576,9 @@ real(r_quad) function dot_prod_st(xst,yst,which)
 !   2009-08-12  lueken - added subprogram doc block
 !   2010-05-13  todling - update to use gsi_bundle
 !   2011-04-28  guo     - bug fix: .not.which was doing (x,x) instead of (x,y)
-!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS - bug fix: for 
+!   2012-09-14  Syed RH Rizvi, NCAR/NESL/MMM/DAS - bug fix: for
 !                                    if(xst%r3(i)%mykind==r_single .and. yst%r3(i)%mykind==r_single)
-!                                    if( present (which)), ipntx and ipnty indexes should be used and not i 
+!                                    if( present (which)), ipntx and ipnty indexes should be used and not i
 !   2020-05-08  Todling - a litte more check on dims
 !
 !   input argument list:
@@ -695,7 +695,7 @@ function dot_prod_st_r0(xst,yst,which) result(dotprod_red)
 
   nz=1
   zz(1)=0._r_quad
- 
+
   zz(1)=dot_prod_st(xst,yst,which=which)
   call mpl_allreduce(1,qpvals=zz)
   dotprod_red=zz(1)
@@ -721,7 +721,7 @@ function dot_prod_st_r1(xst,yst,which) result(dotprod_red)
   endif
 
   zz(1)=0._r_quad
- 
+
   do i=1,size(xst)
     zz(1)=zz(1)+dot_prod_st(xst(i),yst(i),which=which)
   enddo
@@ -774,7 +774,7 @@ function dot_prod_red_st_r1(xst,yst,iroot,which) result(dotprod_red)
   endif
 
   zz(1)=0._r_quad
- 
+
   do i=1,size(xst)
     zz(1)=zz(1)+dot_prod_st(xst(i),yst(i),which=which)
   enddo

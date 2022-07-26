@@ -1,7 +1,7 @@
 subroutine bkgcov(cstate)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    bkgcov    perform hor & vert of background error 
+! subprogram:    bkgcov    perform hor & vert of background error
 !   prgmmr: kleist         org: np22                date: 2004-07-22
 !
 ! abstract: perform horizontal and vertical parts of background error
@@ -9,12 +9,12 @@ subroutine bkgcov(cstate)
 ! program history log:
 !   2004-07-22  kleist
 !   2004-10-26  kleist - remove u,v
-!   2004-11-03  treadon - move definition of horizontal scale weighting 
+!   2004-11-03  treadon - move definition of horizontal scale weighting
 !                         factors to namelist
 !   2004-11-22  derber - add openMP
 !   2008-06-05  safford - rm unused vars
 !   2010-03-01  zhu     - make changes for generalizing control vectors
-!                       - replace explicit use of each control variable 
+!                       - replace explicit use of each control variable
 !                         by a control_state 'cstate'
 !                       - use nrf* for generalized control variables
 !                       - make changes to interfaces of sub2grid and grid2sub
@@ -101,7 +101,7 @@ subroutine ckgcov(z,cstate,nval_lenz)
 !
 ! program history log:
 !   2007-04-24  parrish
-!   2008-12-04  todling - turn sst,slndt,sicet to locals per GSI May08 
+!   2008-12-04  todling - turn sst,slndt,sicet to locals per GSI May08
 !                         update to bkgcov above.
 !   2010-03-15  zhu - use nrf* and cstate for generalized control variable
 !                   - make changes to interface of grid2sub
@@ -186,10 +186,10 @@ subroutine ckgcov_ad(z,cstate,nval_lenz)
 !
 ! program history log:
 !   2007-04-24  parrish
-!   2008-12-04  todling - turn sst,slndt,sicet to locals per GSI May08 
+!   2008-12-04  todling - turn sst,slndt,sicet to locals per GSI May08
 !                         update to bkgcov above.
 !   2010-03-15  zhu - use nrf* and cstate for generalized control variable
-!                   - make changes to interface of sub2grid 
+!                   - make changes to interface of sub2grid
 !   2010-04-15  treadon - add %values to cstate in bkgvar call
 !   2010-04-28  todling - update to use gsi_bundle
 !   2011-06-29  todling - no explict reference to internal bundle arrays

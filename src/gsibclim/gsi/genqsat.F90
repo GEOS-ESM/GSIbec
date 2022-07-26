@@ -31,9 +31,9 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
 !   input argument list:
 !     tsen      - input sensibile temperature field (lat2,lon2,nsig)
 !     prsl      - input layer mean pressure field (lat2,lon2,nsig)
-!     lat2      - number of latitudes                              
-!     lon2      - number of longitudes                             
-!     nsig      - number of levels                              
+!     lat2      - number of latitudes
+!     lon2      - number of longitudes
+!     nsig      - number of levels
 !     ice       - logical flag:  T=include ice and ice-water effects,
 !                 depending on t, in qsat calcuations.
 !                 otherwise, compute qsat with respect to water surface
@@ -149,8 +149,8 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
            elseif (tdry < tmix) then
               es = psat * (tr**xai) * exp(xbi*(one-tr))
            else
-              esw = psat * (tr**xa) * exp(xb*(one-tr)) 
-              esi = psat * (tr**xai) * exp(xbi*(one-tr)) 
+              esw = psat * (tr**xa) * exp(xb*(one-tr))
+              esi = psat * (tr**xai) * exp(xbi*(one-tr))
               w  = (tdry - tmix) / (ttp - tmix)
 !             es =  w * esw + (one-w) * esi
               es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
@@ -191,12 +191,12 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
                   if(k >= kpres)idpupdate = .false.
                   if(k >= k150 )idtupdate = .false.
                 end if
-             
+
               else
 #endif /* USE_ALL_ORIGINAL */
 !                Decouple Q from T above the tropopause for global
                 if(prsl(i,j,k) < (one_tenth*tropprs(i,j)))then
-                   idpupdate=.false.  
+                   idpupdate=.false.
                    idtupdate=.false.
                 end if
 #ifdef USE_ALL_ORIGINAL

@@ -206,7 +206,7 @@ subroutine lset(opt,value)
    if ( .not. found ) then
       write(6,*) myname_,'(PREBAL):  ***ERROR*** cannot find:', trim(opt)
       call stop2(999)
-   endif 
+   endif
 
    return
 end subroutine lset
@@ -240,7 +240,7 @@ subroutine read_bal(agvin,bvin,wgvin,pputin,fut2ps,mype,lunit)
 !       30Jul08 - Jing Guo <guo@gmao.gsfc.nasa.gov>
 !               - the main body of code for input is extracted from
 !                 prebal() in balmod.f90.
-!       25Feb10 - Zhu 
+!       25Feb10 - Zhu
 !               - change the structure of background error file
 !               - read in agvin,wgvin,bvin only
 !      09Oct12 - Gu  add fut2ps to project unbalanced temp to surface pressure in static B modeling
@@ -347,8 +347,8 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
 
    implicit none
 
-   real(r_single),dimension(:,:,:),    intent(inout) :: corz 
-   real(r_single),dimension(:,:)  ,    intent(inout) :: corp  
+   real(r_single),dimension(:,:,:),    intent(inout) :: corz
+   real(r_single),dimension(:,:)  ,    intent(inout) :: corp
 
    real(r_single),dimension(:,:,:),    intent(inout) :: hwll
    real(r_single),dimension(:,:)  ,    intent(inout) :: hwllp
@@ -364,12 +364,12 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    integer(i_kind)                    ,intent(in   ) :: cwoption
    integer(i_kind)                    ,intent(in   ) :: mype  ! "my" processor ID
 
-   integer(i_kind)                    ,intent(in   ) :: ntguessig 
+   integer(i_kind)                    ,intent(in   ) :: ntguessig
    real(r_kind)   ,dimension(:,:,:,:) ,intent(in   ) :: ges_prsi
 
 !  Optionals
    integer(i_kind),optional           ,intent(in   ) :: lunit ! an alternative unit
-   integer(i_kind), optional          ,intent(in   ) :: n_clouds_fwd 
+   integer(i_kind), optional          ,intent(in   ) :: n_clouds_fwd
    character(len=*),optional          ,intent(in   ) :: cloud_names_fwd(:)
 
 ! !REVISION HISTORY:
@@ -379,15 +379,15 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
 !       25Feb10 - Zhu - change the structure of background error file
 !                     - make changes for generalizing control variables
 !                     - move varq here from prewgt
-!       28May10 - Todling - Obtain variable id's on the fly (add getindex) 
+!       28May10 - Todling - Obtain variable id's on the fly (add getindex)
 !                         - simpler logics to associate cv w/ berrors
-!       14Jun10 - Todling - Allow any 3d berror not in file to be templated 
+!       14Jun10 - Todling - Allow any 3d berror not in file to be templated
 !       15Dec12 - Zhu - Add varcw and cwoption
 !       03Feb14 - Todling - varq & qoption in arg list (remove dep on jfunc)
 !       05Feb14 - Todling - Allow for overwrite of cw with q cov
-!       07Jun14 - Zhu - set up new error variance and corr. lengths 
+!       07Jun14 - Zhu - set up new error variance and corr. lengths
 !                       of cw for allsky radiance
-!       09Sept15 - Zhu - use centralized cloud_names_fwd and n_clouds_fwd to add 
+!       09Sept15 - Zhu - use centralized cloud_names_fwd and n_clouds_fwd to add
 !                        flexibility for all-sky radiance assimilation
 !EOP ___________________________________________________________________
 
@@ -459,7 +459,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
          end do
          hwll(:,:,icw)=0.5_r_kind*hwll(:,:,iq)
          vz  (:,:,icw)=0.5_r_kind*vz  (:,:,iq)
-      end if 
+      end if
 
       if (present(n_clouds_fwd) .and. present(cloud_names_fwd)) then
        if (n_clouds_fwd>0 .and. icw<=0) then
@@ -475,7 +475,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
                   hwll(:,:,ivar)=0.5_r_kind*hwll(:,:,iq)
                   vz  (:,:,ivar)=0.5_r_kind*vz  (:,:,iq)
                   exit
-               end if   
+               end if
             end do
          end do
        end if
@@ -487,7 +487,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    deallocate(found3d,found2d)
 
   return
- 
+
   contains
 
   subroutine bin_
@@ -610,7 +610,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
       deallocate(corzin,hwllin)
       if ( isig>1 ) deallocate(vscalesin)
       if ( var=='q' .or. var=='cw' ) deallocate(corq2)
-   enddo readloop 
+   enddo readloop
    close(inerr)
 
 
@@ -621,7 +621,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    type(nc_berror_vars) bvars
    real(r_single), pointer :: ptr1d(:)
    real(r_single), pointer :: ptr2d(:,:)
-   integer :: nv 
+   integer :: nv
    call nc_berror_read (berror_stats,bvars,ier, myid=mype,root=0)
    if (nlat/=bvars%nlat .or. nlon/=bvars%nlon .or.  nsig/=bvars%nsig ) then
       call die(myname_," inconsistent dims in "//trim(berror_stats), 99)
@@ -744,7 +744,7 @@ subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
 ! !REVISION HISTORY:
 !       31Jul08 - Jing Guo <guo@gmao.gsfc.nasa.gov>
 !               - adopted from PREWGT of previous version
-!       2013-10-19 oz guess field in metguess now 
+!       2013-10-19 oz guess field in metguess now
 !EOP ___________________________________________________________________
 
    character(len=*),parameter :: myname_=myname//'::setcoroz_'
@@ -842,7 +842,7 @@ subroutine sethwlloz_(hwlloz,mype)
    use m_mpimod,   only: levs_id
    use gridmod,  only: nnnn1o,nsig,nlon,nlat
    use constants,only: two,three,pi,rearth_equator
-   
+
    implicit none
 
    real(r_single),dimension(nlat,nsig),intent(  out) :: hwlloz
@@ -862,7 +862,7 @@ subroutine sethwlloz_(hwlloz,mype)
    integer(i_kind) :: k,k1
    real(r_kind) :: fact
    real(r_kind) :: s2u
-    
+
    if ( mype==0 ) write(6,*) myname_,'(PREWGT): mype = ',mype
 
    s2u=(two*pi*rearth_equator)/nlon
@@ -984,7 +984,7 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
        call gsi_bundlegetpointer(gsi_chemguess_bundle(1),cname,iptr,ierror)
       if ( ierror/=0 ) then
          rc=-2  ! field not found
-         return 
+         return
       endif
    else
       rc=-1     ! chem not allocated
@@ -1018,7 +1018,7 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
       enddo
    enddo
    work_chem(nsig+1,mm1)=float(lon1*lat1)
-  
+
    call mpi_allreduce(work_chem,work_chem1,(nsig+1)*npe,mpi_rtype,mpi_sum,&
         gsi_mpi_comm_world,ierror)
    if ( ierror/=0 ) then
@@ -1093,7 +1093,7 @@ end subroutine setcorchem_
       integer(i_kind) :: k, k1
       real(r_kind)    :: fact
       real(r_kind)    :: s2u
-    
+
       if (mype == 0) then
          write(6,*) myname_, '(PREWGT): mype = ', mype
       end if

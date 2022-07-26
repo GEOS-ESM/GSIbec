@@ -1,5 +1,5 @@
 #ifdef ibm_sp
- 
+
 subroutine rsearch(km1,z1,km2,z2,l2)
 
 !$$$  subprogram documentation block
@@ -25,7 +25,7 @@ subroutine rsearch(km1,z1,km2,z2,l2)
 !     km2    integer number of points to search for
 !     z2     real (km2) set of values to search for
 !            (z2 need not be monotonic)
-!     
+!
 !   output argument list:
 !     l2     integer (km2) interval locations from 0 to km1
 !            (z2 will be between z1(l2) and z1(l2+1))
@@ -68,7 +68,7 @@ subroutine rsearch(km1,z1,km2,z2,l2)
   real(r_double) oned
   integer(i_long) incx,n,incy,m,indx(km2),rc(km2),iopt
   integer(i_kind) k2
-  
+
   oned=1._r_double
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !  Find the surrounding input interval for each output point.
@@ -149,7 +149,7 @@ subroutine rsearch(im,km1,ixz1,kxz1,z1,km2,ixz2,kxz2,z2,ixl2,kxl2,l2)
 !                  (z2 need not be monotonic)
 !     ixl2         integer sequence skip number for l2
 !     kxl2         integer point skip number for l2
-!     
+!
 !   output argument list:
 !     l2           real (1+(im-1)*ixl2+(km2-1)*kxl2)
 !                  interval locations of the set of values
@@ -190,7 +190,7 @@ subroutine rsearch(im,km1,ixz1,kxz1,z1,km2,ixz2,kxz2,z2,ixl2,kxl2,l2)
 
   use m_kinds, only: r_kind,i_kind
   implicit none
- 
+
   integer(i_kind),intent(in   ) :: im,km1,ixz1,kxz1,km2,ixz2,kxz2,ixl2,kxl2
   real(r_kind)   ,intent(in   ) :: z1(1+(im-1)*ixz1+(km1-1)*kxz1)
   real(r_kind)   ,intent(in   ) :: z2(1+(im-1)*ixz2+(km2-1)*kxz2)

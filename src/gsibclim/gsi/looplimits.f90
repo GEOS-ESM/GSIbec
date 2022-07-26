@@ -28,7 +28,7 @@
       use m_kinds, only: i_kind
 
       implicit none
- 
+
       integer(i_kind),intent(in   ) :: taskid, ntasks, lb, ub
       integer(i_kind),intent(  out) :: i1, i2
 
@@ -43,12 +43,12 @@
       netdisp = lb
       do itask = 1, nt1
          counts(itask) = chunk + 1
-         displacements(itask) = netdisp  
+         displacements(itask) = netdisp
          netdisp = min(ub,netdisp+chunk+1)
       end do
       do itask = nt1 + 1 , ntasks
          counts(itask) = chunk
-         displacements(itask) = netdisp  
+         displacements(itask) = netdisp
          netdisp = min(ub,netdisp+chunk)
       end do
 

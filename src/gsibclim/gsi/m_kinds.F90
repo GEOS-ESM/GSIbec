@@ -5,7 +5,7 @@ module m_kinds
 !   prgmmr: treadon          org: np23                date: 2004-08-15
 !
 ! abstract:  Module to hold specification kinds for variable declaration.
-!            This module is based on (copied from) Paul vanDelst's 
+!            This module is based on (copied from) Paul vanDelst's
 !            type_kinds module found in the community radiative transfer
 !            model
 !
@@ -57,16 +57,16 @@ module m_kinds
 ! Define arrays for default definition
   integer, parameter, private :: num_i_kinds = 4
   integer, parameter, dimension( num_i_kinds ), private :: integer_types = (/ &
-       i_byte, i_short, i_long,  i_llong  /) 
+       i_byte, i_short, i_long,  i_llong  /)
   integer, parameter, dimension( num_i_kinds ), private :: integer_byte_sizes = (/ &
        num_bytes_for_i_byte, num_bytes_for_i_short, &
        num_bytes_for_i_long, num_bytes_for_i_llong  /)
 
 ! Default values
 ! **** CHANGE THE FOLLOWING TO CHANGE THE DEFAULT INTEGER TYPE KIND ***
-  integer, parameter, private :: default_integer = 3  ! 1=byte, 
-                                                      ! 2=short, 
-                                                      ! 3=long, 
+  integer, parameter, private :: default_integer = 3  ! 1=byte,
+                                                      ! 2=short,
+                                                      ! 3=long,
                                                       ! 4=llong
   integer, parameter, public  :: i_kind = integer_types( default_integer )
   integer, parameter, public  :: num_bytes_for_i_kind = &
@@ -89,7 +89,7 @@ module m_kinds
 ! Define arrays for default definition
   integer, parameter, private :: num_r_kinds = 3
   integer, parameter, dimension( num_r_kinds ), private :: real_kinds = (/ &
-       r_single, r_double, r_quad    /) 
+       r_single, r_double, r_quad    /)
   integer, parameter, dimension( num_r_kinds ), private :: real_byte_sizes = (/ &
        num_bytes_for_r_single, num_bytes_for_r_double, &
        num_bytes_for_r_quad    /)
@@ -97,10 +97,10 @@ module m_kinds
 ! Default values
 ! **** CHANGE THE FOLLOWING TO CHANGE THE DEFAULT REAL TYPE KIND ***
 #ifdef _REAL4_
-  integer, parameter, private :: default_real = 1  ! 1=single, 
+  integer, parameter, private :: default_real = 1  ! 1=single,
 #endif
 #ifdef _REAL8_
-  integer, parameter, private :: default_real = 2  ! 2=double, 
+  integer, parameter, private :: default_real = 2  ! 2=double,
 #endif
 #ifdef _REAL16_
   integer, parameter, private :: default_real = 3  ! 3=quad

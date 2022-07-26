@@ -2,7 +2,7 @@
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION 
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
 1. Definitions.
 
@@ -82,7 +82,7 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
    for that Work shall terminate as of the date such litigation is filed.
 
 4. Redistribution.
- 
+
    You may reproduce and distribute copies of the Work or Derivative Works
    thereof in any medium, with or without modifications, and in Source or Object
    form, provided that You meet the following conditions:
@@ -112,7 +112,7 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
       alongside or as an addendum to the NOTICE text from the Work, provided
       that such additional attribution notices cannot be construed as modifying
       the License.
-   
+
    You may add Your own copyright statement to Your modifications and may
    provide additional or different license terms and conditions for use,
    reproduction, or distribution of Your modifications, or for any such
@@ -184,16 +184,16 @@ the same "printed page" as the copyright notice for easier identification within
 third-party archives.
 
    NASA Docket No. GSC-15,354-1, and identified as "GEOS-5 GCM Modeling Software”
-   
+
    “Copyright © 2008 United States Government as represented by the Administrator
    of the National Aeronautics and Space Administration. All Rights Reserved.”
-   
+
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
    this file except in compliance with the License. You may obtain a copy of the
    License at
-   
+
    http://www.apache.org/licenses/LICENSE-2.0
-   
+
    Unless required by applicable law or agreed to in writing, software distributed
    under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied. See the License for the

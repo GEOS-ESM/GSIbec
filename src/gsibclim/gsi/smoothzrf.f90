@@ -18,9 +18,9 @@ subroutine frfhvo(p1,iv)
 !     iv       - location in alv for smoothing coefficients
 !              - iv = 1 streamfunction
 !              - iv = 2 velocity potential
-!              - iv = 3 temperature        
-!              - iv = 4 specific humidity  
-!              - iv = 5 ozone           
+!              - iv = 3 temperature
+!              - iv = 4 specific humidity
+!              - iv = 5 ozone
 !              - iv = 6 cloud condensate
 !
 !   output argument list
@@ -41,7 +41,7 @@ subroutine frfhvo(p1,iv)
 
 ! lat2 = number of latitudes (lat2)
 ! lon2 = number of longitudes (lon2)
-! nsig  = number of model levels 
+! nsig  = number of model levels
 ! ndeg  = degree of smoothing (ndeg=4)
 
   integer(i_kind)                       ,intent(in   ) :: iv
@@ -76,7 +76,7 @@ subroutine frfhvo(p1,iv)
   end do
 
   if (regional)then
-     
+
      do j=1,lon2
         do k=1,lat2
            l=int(rllat1(k,j))
@@ -119,7 +119,7 @@ subroutine frfhvo(p1,iv)
               enddo
            enddo
         enddo
- 
+
 !       backing filter:
         do i=nsig,1,-1
            do j=1,lon2
@@ -151,7 +151,7 @@ subroutine frfhvo(p1,iv)
               enddo
            enddo
         enddo
- 
+
 ! Regional mode, even degree
      else
 
@@ -177,7 +177,7 @@ subroutine frfhvo(p1,iv)
               enddo
            enddo
         enddo
- 
+
         !    backing filter:
         do i=nsig,1,-1
            !       treat remaining complex roots:
@@ -257,7 +257,7 @@ subroutine frfhvo(p1,iv)
            enddo
         enddo
 
-! Global branch, even degree     
+! Global branch, even degree
      else
 
         ! advancing filter:
@@ -279,7 +279,7 @@ subroutine frfhvo(p1,iv)
               enddo
            enddo
         enddo
-     
+
         !    backing filter:
         do i=nsig,1,-1
            !       treat remaining complex roots:
@@ -321,8 +321,8 @@ subroutine smoothzo(vx,samp,rate,iv,jx,dsv)
 !
 !   input argument list:
 !     vx       - vertical smoothing scales
-!     samp     - parameter for smoothing        
-!     rate     - parameter for smoothing       
+!     samp     - parameter for smoothing
+!     rate     - parameter for smoothing
 !     iv       - location in alv and dssv for smoothing coefficients
 !     jx       - latitude index
 !
@@ -338,13 +338,13 @@ subroutine smoothzo(vx,samp,rate,iv,jx,dsv)
   use gridmod, only: nsig,lon2
   use berror, only: alv,ndeg
   implicit none
- 
+
   integer(i_kind)             ,intent(in   ) :: jx,iv
   real(r_kind),dimension(nsig),intent(in   ) :: vx
   real(r_kind)                ,intent(in   ) :: samp
   real(r_kind),dimension(ndeg),intent(in   ) :: rate
   real(r_kind),dimension(lon2,nsig),intent(out):: dsv
- 
+
   integer(i_kind) i,k,m
   real(r_kind),dimension(nsig):: dss
   real(r_kind),dimension(nsig,nsig):: p1
@@ -363,7 +363,7 @@ subroutine smoothzo(vx,samp,rate,iv,jx,dsv)
   end do
 
   call rfhvo(p1,nsig,nsig,al)
-  
+
   call rfhvo(p1,nsig,nsig,al)
 
   do k=1,nsig
@@ -381,7 +381,7 @@ subroutine rfhvo(p1,nc,n,al)
 ! subprogram:    rfhvo   performs vertical smoothing for renormalization
 !   prgmmr: derber           org: np22                date: 2004-05-13
 !
-! abstract: performs vertical smoothing of identity matrix for use with 
+! abstract: performs vertical smoothing of identity matrix for use with
 !           renormalization
 !
 ! program history log:
@@ -406,11 +406,11 @@ subroutine rfhvo(p1,nc,n,al)
   use constants, only: zero
   use berror, only: be,ndeg
   implicit none
- 
+
   integer(i_kind)               ,intent(in   ) :: n,nc
   real(r_kind),dimension(n,ndeg),intent(in   ) :: al
   real(r_kind),dimension(nc,n)  ,intent(inout) :: p1
- 
+
   integer(i_kind) i,j,kr,ki
   real(r_kind) gaki,dekr,deki,gakr
   real(r_kind),dimension(nc,n):: p2
@@ -470,7 +470,7 @@ subroutine rfhvo(p1,nc,n,al)
            enddo
         enddo
      enddo
-     
+
   else
 ! advancing filter:
      do i=1,n
@@ -501,7 +501,7 @@ subroutine rfhvo(p1,nc,n,al)
            enddo
         enddo
      enddo
-     
+
   endif
   return
 end subroutine rfhvo

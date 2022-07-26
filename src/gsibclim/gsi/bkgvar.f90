@@ -162,7 +162,7 @@ subroutine bkgvar(cvec,iflg)
            end if
         end if
      end if
-     
+
   end do
 
   if(iflg==0) then
@@ -173,7 +173,7 @@ subroutine bkgvar(cvec,iflg)
      if(i_sst>0) ptrsst=sst
 !        ignore contents of ptrstl,ptrsti
   end if
-  
+
   return
 end subroutine bkgvar
 
@@ -183,7 +183,7 @@ subroutine bkg_stddev(cvec,svec)
 ! subprogram:    bkg_variances      apply background error variances
 !   prgmmr: el akkraoui          org: gmao              date: 2010-06-05
 !
-! abstract: retrieve background error standard deviations including 
+! abstract: retrieve background error standard deviations including
 !           flow dependent part
 !
 ! program history log:
@@ -216,8 +216,8 @@ subroutine bkg_stddev(cvec,svec)
   use gsi_bundlemod, only: assignment(=)
 
   implicit none
-  
-! Declare passed variables  
+
+! Declare passed variables
   type(gsi_bundle), intent(inout) :: cvec
   type(gsi_bundle), intent(inout) :: svec
 
@@ -292,7 +292,7 @@ subroutine bkg_stddev(cvec,svec)
 
 !  Convert input normalized RH to q
    if(do_normal_rh_to_q) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
-   
+
 !  Calculate sensible temperature
    if(do_tv_to_tsen) call tv_to_tsen(cv_t,sv_q,sv_tsen)
 

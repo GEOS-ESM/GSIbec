@@ -1,6 +1,6 @@
 !----------------------------------------------------------------------------
 !BOP
-!  
+!
 ! !MODULE:  GSI_EnsCouplerMod ---
 !
 ! !INTERFACE:
@@ -165,9 +165,9 @@ end function typename_
 
    if(allocated(this_ensemble_)) then
      if(same_type_as(typemold_,this_ensemble_)) return      ! Everything seems good.
- 
+
        ! Otherwise, this_ensemble_ must be re-intentiated with a different type.
- 
+
      deallocate(this_ensemble_)
    endif
    allocate(this_ensemble_,mold=typemold_)

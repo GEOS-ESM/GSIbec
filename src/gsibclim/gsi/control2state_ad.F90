@@ -85,7 +85,7 @@ type(control_vector), intent(inout) :: grad
 character(len=*),parameter::myname='control2state_ad'
 character(len=max_varname_length),allocatable,dimension(:) :: gases
 character(len=max_varname_length),allocatable,dimension(:) :: clouds
-integer(i_kind) :: ii,jj,ic,id,ngases,nclouds,istatus,istatus_oz 
+integer(i_kind) :: ii,jj,ic,id,ngases,nclouds,istatus,istatus_oz
 type(gsi_bundle) :: wbundle ! work bundle
 
 ! Note: The following does not aim to get all variables in
@@ -151,7 +151,7 @@ if (nclouds>0) then
    allocate(clouds(nclouds))
    call gsi_metguess_get ('clouds::3d',clouds,istatus)
 endif
-#endif /* USE_ALL_ORIGINAL */ 
+#endif /* USE_ALL_ORIGINAL */
 
 ! Inquire about chemistry
 call gsi_chemguess_get('dim',ngases,istatus)
@@ -263,7 +263,7 @@ do jj=1,nsubwin
       do ii=1,npclen
         grad%predp(ii)=bval%predp(ii)
       enddo
-      if (ntclen>0) then 
+      if (ntclen>0) then
          do ii=1,ntclen
            grad%predt(ii)=bval%predt(ii)
          enddo
@@ -328,13 +328,13 @@ do jj=1,nsubwin
    call gsi_bundlegetpointer (rval(jj),'sst' ,rv_sst, istatus)
    call gsi_bundleputvar ( wbundle, 'sst', rv_sst, istatus )
 
-!  call gsi_bundlegetpointer (rval(jj),'oz'  ,rv_oz , istatus)     
-   call gsi_bundlegetpointer (rval(jj),'oz'  ,rv_oz , istatus_oz) 
+!  call gsi_bundlegetpointer (rval(jj),'oz'  ,rv_oz , istatus)
+   call gsi_bundlegetpointer (rval(jj),'oz'  ,rv_oz , istatus_oz)
 
    if (icoz>0) then
       call gsi_bundleputvar ( wbundle, 'oz',  rv_oz,  istatus )
    else
-      if(istatus_oz==0) rv_oz=zero 
+      if(istatus_oz==0) rv_oz=zero
    end if
 
 !  Same one-to-one map for chemistry-vars; take care of them together
@@ -395,7 +395,7 @@ do jj=1,nsubwin
          call gsi_bundlegetpointer (rval(jj),'dw' ,rv_dw, istatus)
          call gsi_bundleputvar ( wbundle, 'dw', rv_dw, istatus )
        end if
-#endif /* USE_ALL_ORIGINAL */ 
+#endif /* USE_ALL_ORIGINAL */
    end if
    if (ictcamt>0) then
       call gsi_bundlegetpointer (rval(jj),'tcamt',rv_tcamt, istatus)
@@ -409,7 +409,7 @@ do jj=1,nsubwin
       !  Adjoint of convert loglcbas to lcbas
       call loglcbas_to_lcbas_ad(cv_lcbas,rv_lcbas)
    end if
-#endif /* USE_ALL_ORIGINAL */ 
+#endif /* USE_ALL_ORIGINAL */
    if (iccldch >0) then
       call gsi_bundlegetpointer (rval(jj),'cldch' ,rv_cldch , istatus)
       call gsi_bundleputvar ( wbundle, 'cldch' , rv_cldch  , istatus )

@@ -50,33 +50,33 @@ subroutine polcasl(sl,sl1,sl2,mf,nf,mrr,nrr,nor,rs,df,nxe,nxg,nlat,nlon) !  RT_I
 
   call setwtt(wtaxt,wtbat,inaxt,inbat,rs(mrr),df,qr(0,mrr)&
        ,nxe,nxg,mrr,nrr,mf,nf,nor)
-  
+
   nxp=nlon+1
   j1=nlat
-  do i=1,nlon   
+  do i=1,nlon
      do j=mrr,nrr
         axr(i-1,j)=sl(j1-j,i)
      enddo
   enddo
-  
+
   do ir=mrr,nrr
      axr(nlon,ir)=axr(0,ir)
   enddo
   call polca(axr(0,mrr),sl2&
        ,wtaxt,wtbat,inaxt,inbat,mf,nf,mrr,nrr,nxe,nxg,nor,nxp)
-  do i=1,nlon   
+  do i=1,nlon
      do j=mrr,nrr
         axr(i-1,j)=sl(j+1,i)
      enddo
   enddo
-  
+
   do ir=mrr,nrr
      axr(nlon,ir)=axr(0,ir)
   enddo
-  
+
   call polca(axr(0,mrr),sl1&
        ,wtaxt,wtbat,inaxt,inbat,mf,nf,mrr,nrr,nxe,nxg,nor,nxp)
-  
+
   return
 end subroutine polcasl
 
@@ -87,7 +87,7 @@ subroutine polca(axr,afg,wtaxt,wtbat,inaxt,inbat, &
 ! subprogram:    polca  interpolate to polar patches
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: apply polar-cascade interpolation from polar grid to 
+! abstract: apply polar-cascade interpolation from polar grid to
 !      outer portion of a square cartesian patch.
 !
 ! program history log:
@@ -139,10 +139,10 @@ subroutine polca(axr,afg,wtaxt,wtbat,inaxt,inbat, &
   integer(i_kind) nxq,nxqm,nx,nxm,nxgm,norm
   integer(i_kind) ix,ia,i,ici,ic0,ix5,idi,jdi,id0,ib,ix1,ix6,ix4,ix7,ix3,ix2
   integer(i_kind) jx0,ix0
-  
+
   real(r_kind) wt
   real(r_kind),dimension(mf:nf,-nxg:nxg-1):: aq0,aq2,aq4,aq6
-  
+
   nxq=nxe*2
   nxqm=nxq-1
   nx=nxq*4
@@ -187,7 +187,7 @@ subroutine polca(axr,afg,wtaxt,wtbat,inaxt,inbat, &
         afg(ia,ib)=zero
      enddo
   enddo
-  
+
   do ia=mf,nf
      do ib=0,ia
         id0=inbat(ib,ia)
@@ -267,7 +267,7 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
 
   integer(i_kind) irp,nra,mra,iy,ir,ia,ixp,i,ic0,ib
   integer(i_kind) norm,norh,ix,nxgm
-  
+
   real(r_kind) secx,fsai,xf,x,dx,piq,dfi,dxi,ry,r,y
   real(r_kind),dimension(0:nxg):: c
   real(r_kind),dimension(20):: dw
@@ -292,7 +292,7 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
      ys(iy)=iy+one-norh
   enddo
   call setq(qy,ys,nor)  ! denominators for unit-spaced grid
-  
+
   ix=0
   secx=df/c(ix)
   ia=mf
@@ -315,7 +315,7 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
   ia=nf
   r=ia*secx
   irp=ir+1
-  do while(rs(irp)<=r)        
+  do while(rs(irp)<=r)
     if(irp>nrr)then
        write(6,'(" irp,r,rs(nrr)=",i5,2(1x,e13.6))') irp,r,rs(nrr)
        write(6,*)'nrr must be increased for interpolations required in polca'
@@ -332,13 +332,13 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
   do ir=mra,nra-norm
      call setq(qr(0,ir),rs(ir),nor) ! lagrange denomimators for radial grid.
   enddo
-  
+
   do ix=0,nxgm
      secx=df/c(ix)
      irp=mra+norh-1
      do ia=mf,nf
         r=ia*secx
-        do while (rs(irp) <= r)           
+        do while (rs(irp) <= r)
            irp=irp+1
         end do
         ic0=irp-norh
@@ -346,7 +346,7 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
         call lagw(rs(ic0),r,qr(0,ic0),wtaxt(0,ia,ix),dw,nor)
      enddo
   enddo
-  
+
   if(mf<=0)then
     write(6,*)'mf must exceed 0 for interpolations of polca'
     return
@@ -369,9 +369,9 @@ subroutine setwtt(wtaxt,wtbat,inaxt,inbat,rs,df,qr,nxe,nxg,mrr,nrr,mf,nf,nor)
         wtbat(i,0,ia) =half*wtbat(i,0,ia)
         wtbat(i,ia,ia)=half*wtbat(i,ia,ia)
      enddo
-     
+
   enddo
-  
+
   return
 end subroutine setwtt
 
@@ -410,7 +410,7 @@ subroutine setwts(wtaxs,wtxrs,inaxs,inxrs,rs,df,nor,nxe,nf,mr,nr)
   use m_kinds, only: r_kind,i_kind
   use constants, only: one,quarter,pi,half
   implicit none
- 
+
   integer(i_kind)                                       ,intent(in   ) :: nf,mr,nxe,nor,nr
   real(r_kind)                                          ,intent(in   ) :: df
   real(r_kind)   ,dimension(mr:*)                       ,intent(in   ) :: rs
@@ -419,15 +419,15 @@ subroutine setwts(wtaxs,wtxrs,inaxs,inxrs,rs,df,nor,nxe,nf,mr,nr)
   integer(i_kind),dimension(0:nxe-1,mr:nr)           ,intent(  out) :: inxrs
   real(r_kind)   ,dimension(0:nor-1,nf,0:nxe-1)   ,intent(  out) :: wtaxs
   real(r_kind)   ,dimension(0:nor-1,0:nxe-1,mr:nr),intent(  out) :: wtxrs
- 
+
   integer(i_kind) iy,ix,if1min,ia,ir,ig,nxem
   integer(i_kind) norm,norhm,norh
-  
+
   real(r_kind) x,dfi,cx,ry,y,piq,dx
   real(r_kind),dimension(0:nxe+nor/2):: t,c
   real(r_kind),dimension(20):: dw
   real(r_kind),dimension(0:20):: ys,qy
-  
+
   piq=quarter*pi
   dx=piq/nxe
   norh=nor/2
@@ -445,7 +445,7 @@ subroutine setwts(wtaxs,wtxrs,inaxs,inxrs,rs,df,nor,nxe,nf,mr,nr)
      ys(iy)=iy-norhm
   enddo
   call setq(qy,ys,nor)  ! denominators for unit-spaced grid
-  
+
   do ix=0,nxem
      do ia=1,nf
         y=ia*t(ix)
@@ -455,7 +455,7 @@ subroutine setwts(wtaxs,wtxrs,inaxs,inxrs,rs,df,nor,nxe,nf,mr,nr)
         call lagw(ys,ry,qy,wtaxs(0,ia,ix),dw,nor)
      enddo
   enddo
-  
+
   do ix=0,nxem
      cx=c(ix)*dfi
      do ir=mr,nr
@@ -472,10 +472,10 @@ end subroutine setwts
 subroutine polcas(afg,axr,nxem,norm,naxr,wtaxs,wtxrs,inaxs,inxrs,nf,mr,nr)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    polcas interpolate from polar patch to square grid 
+! subprogram:    polcas interpolate from polar patch to square grid
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: interpolate a field from a "polar patch" with 
+! abstract: interpolate a field from a "polar patch" with
 !  square grid, nf*2 spaces
 ! (ie., nf*2+1 points) on each side, to a polar grid having a total of
 ! nx=nxe*8 longitudes. the orientation of the axes of the patch are staggered
@@ -528,11 +528,11 @@ subroutine polcas(afg,axr,nxem,norm,naxr,wtaxs,wtxrs,inaxs,inxrs,nf,mr,nr)
 
   integer(i_kind) ix2,ix4,ir,ibi,ix7,ia0,iai,ix5,ix6,ix1,ix3,i
   integer(i_kind) nxq,ix,ia,ib0,nx,nxm
-  
+
   real(r_kind) wt,afg0,valp
   real(r_kind),dimension(-nf:nf):: afxp,afxn,agxp,agxn
   real(r_kind),dimension(8)::sx
-  
+
   nxq=(nxem+1)*2
   nx=nxq*4
   nxm=nx-1
@@ -629,10 +629,10 @@ end subroutine polcas
 subroutine polcasa(afg,axr,nxem,norm,naxr,wtaxs,wtxrs,inaxs,inxrs,nf,mr,nr)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    polcasa adjoint of polcas 
+! subprogram:    polcasa adjoint of polcas
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: adjoint of polcas 
+! abstract: adjoint of polcas
 !
 ! program history log:
 !   2000-03-15  wu
@@ -658,11 +658,11 @@ subroutine polcasa(afg,axr,nxem,norm,naxr,wtaxs,wtxrs,inaxs,inxrs,nf,mr,nr)
 !   language: f90
 !   machine:  ibm rs/6000 sp
 !$$$
-  
+
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero
   implicit none
- 
+
   integer(i_kind)                               ,intent(in   ) :: naxr
   integer(i_kind)                               ,intent(in   ) :: nxem,norm,nf,mr,nr
   integer(i_kind),dimension(nf,0:nxem)          ,intent(in   ) :: inaxs
@@ -673,13 +673,13 @@ subroutine polcasa(afg,axr,nxem,norm,naxr,wtaxs,wtxrs,inaxs,inxrs,nf,mr,nr)
   real(r_kind)   ,dimension(0:naxr,mr:nr)       ,intent(inout) :: axr
 
   real(r_kind)   ,dimension(-nf:nf,-nf:nf)      ,intent(  out) :: afg
- 
+
   integer(i_kind) nxq,ir,ia0,i,ix7,ix1,ix3,ix5,iai,if,ib0,ibi,ig,ix
   integer(i_kind) nx,ix2,ix4,ix6,ia,nxm
-  
+
   real(r_kind) wt,afg0,valp
   real(r_kind),dimension(-nf:nf):: afxp,afxn,agxp,agxn
-  
+
   nxq=(nxem+1)*2
   nx=nxq*4
   nxm=nx-1
@@ -754,10 +754,10 @@ end subroutine polcasa
 subroutine setq(q,x,n)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    setq Precompute constants for lagrange interpolation 
+! subprogram:    setq Precompute constants for lagrange interpolation
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: precompute the n constant denominator factors of the n-point 
+! abstract: precompute the n constant denominator factors of the n-point
 !   lagrange polynomial interpolation formula.
 !
 ! program history log:
@@ -799,10 +799,10 @@ end subroutine setq
 subroutine lagw(x,xt,q,w,dw,n)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    lagw construct lagrange weights 
+! subprogram:    lagw construct lagrange weights
 !   prgmmr: wu               org: np22                date: 2000-03-15
 !
-! abstract: construct the lagrange weights and their derivatives when 
+! abstract: construct the lagrange weights and their derivatives when
 !   target abscissa is known and denominators q have already been precomputed
 !
 ! program history log:
@@ -823,7 +823,7 @@ subroutine lagw(x,xt,q,w,dw,n)
 !   language: f90
 !   machine:  ibm rs/6000 sp
 !$$$
-  
+
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero, one
   implicit none
@@ -834,13 +834,13 @@ subroutine lagw(x,xt,q,w,dw,n)
 
   real(r_kind),dimension(*),intent(inout) :: q,w
 
-  real(r_kind),dimension(*),intent(  out) :: dw 
-  
+  real(r_kind),dimension(*),intent(  out) :: dw
+
   integer(i_kind) i,j
-  
+
   real(r_kind) p,sdil,sdir,s
   real(r_kind),dimension(12):: sdit(12),d(12),di(12)
-  
+
   p=one       ! will become product of all the d(i)=xt-x(i)
   do i=1,n
      d(i)=xt-x(i)

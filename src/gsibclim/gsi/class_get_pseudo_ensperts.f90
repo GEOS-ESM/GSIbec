@@ -4,7 +4,7 @@ module abstract_get_pseudo_ensperts_mod
   contains
     procedure(get_pseudo_ensperts), deferred, pass(this) :: get_pseudo_ensperts
   end type abstract_get_pseudo_ensperts_class
- 
+
   abstract interface
   subroutine get_pseudo_ensperts(this,en_perts,nelen)
     use gsi_bundlemod, only: gsi_bundle

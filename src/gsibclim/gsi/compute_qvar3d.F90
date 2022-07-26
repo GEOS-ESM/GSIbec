@@ -11,17 +11,17 @@ subroutine compute_qvar3d
 ! 2010-03-15 zhu - extracted out from compute_derived
 ! 2010-04-10 parrish - make rhgues local, since removed from jfunc by derber (no longer used)
 ! 2010-05-28 todling - obtain variable id''s on the fly (add getindex)
-! 2011-08-17 zhu  - add handling of dssv(:,:,:,nrf3_cw) for regional when total condensate is control variable 
-! 2011-11-01 eliu - add qmin 
+! 2011-08-17 zhu  - add handling of dssv(:,:,:,nrf3_cw) for regional when total condensate is control variable
+! 2011-11-01 eliu - add qmin
 ! 2012-02-08 kleist  - add computation of ges_qsat over nfldsig bins
 ! 2013-10-19 todling - metguess now holds background
 ! 2013-10-25 todling - reposition ltosi and others to commvars
 ! 2013-10-30 jung - check and clip supersaturation
 ! 2012-12-15 zhu  - add two cwoption options for both global and regional
-! 2014-06-15 zhu  - new background error variance of cw in the regional applications 
+! 2014-06-15 zhu  - new background error variance of cw in the regional applications
 !                   for all-sky radiance assimilation (cwoption3)
 ! 2015-01-04 zhu  - apply the background error variance of cw cwoption3 to the global
-! 2015-09-10 zhu  - use centralized cloud_names_fwd and n_clouds_fwd in the assignments of cloud 
+! 2015-09-10 zhu  - use centralized cloud_names_fwd and n_clouds_fwd in the assignments of cloud
 !                   variances (either cw or individual hydrometerors) for all-sky radiance assimilation
 !                 - remove cwoption1
 !
@@ -160,7 +160,7 @@ subroutine compute_qvar3d
 
 #ifdef USE_ALL_ORIGINAL
   if (.not. icloud_cv) return
-  if (nrf3_cw>0) then 
+  if (nrf3_cw>0) then
 
      call gsi_bundlegetpointer (gsi_metguess_bundle(ntguessig),'ql',ges_ql,istatus);ier=istatus
      call gsi_bundlegetpointer (gsi_metguess_bundle(ntguessig),'qi',ges_qi,istatus);ier=ier+istatus
@@ -217,7 +217,7 @@ subroutine compute_qvar3d
      end if ! end of cw
 
 ! for individual hydrometeors
-  else 
+  else
      if (cwoption/=3) return
      do n=1,size(cvars3d)
         do ic=1,n_clouds_fwd
@@ -243,7 +243,7 @@ subroutine compute_qvar3d
               end do
 
            end if
-        end do 
+        end do
      end do
   end if ! end of nrf3_cw
 #endif /* USE_ALL_ORIGINAL */

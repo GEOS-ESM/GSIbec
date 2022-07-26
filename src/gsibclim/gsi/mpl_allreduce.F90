@@ -7,7 +7,7 @@ module mpl_allreducemod
 ! abstract: module for reproducible sums
 !
 ! program history log:
-!   2008-12-09 todling 
+!   2008-12-09 todling
 !   2009-01-17 todling - add allgather (quad)
 !   2011-07-04  todling  - fixes to run either single or double precision
 !
@@ -238,8 +238,8 @@ subroutine qmpl_allreduce2d(ilen,klen,pvals,pvnew)
                         pval2,ilen*klen,mpi_real16, gsi_mpi_comm_world,ierror)
   endif
 #endif
-  
-    
+
+
   if (present(pvnew)) then
 
      do kk=1,klen
@@ -270,7 +270,7 @@ subroutine qmpl_allreduce2d(ilen,klen,pvals,pvnew)
         end do
      end do
 
-  endif 
+  endif
 
 ! ----------------------------------------------------------
 return
@@ -541,8 +541,8 @@ subroutine qmpl_reduce2d(ilen,klen,iroot,pvals,pvnew)
                         pval2,ilen*klen,mpi_real16, iroot,gsi_mpi_comm_world,ierror)
   endif
 #endif
-  
-    
+
+
   pvals=0._r_kind
   if(present(pvnew)) then
      pvnew=0._r_kind
@@ -578,7 +578,7 @@ subroutine qmpl_reduce2d(ilen,klen,iroot,pvals,pvnew)
            end do
         end do
 
-     endif 
+     endif
   end if
 
 ! ----------------------------------------------------------

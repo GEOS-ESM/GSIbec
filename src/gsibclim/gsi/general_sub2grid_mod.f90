@@ -42,7 +42,7 @@ module general_sub2grid_mod
 !                           and full 2-d field on one processor (defined as additional user argument).
 !                           The usual single-double prec and rank interfaces are provided.
 !   2012-06-06  parrish  - add additional variables to type sub2grid_info.
-!                             nlevs_loc: number of active local full 2d fields 
+!                             nlevs_loc: number of active local full 2d fields
 !                             nlevs_alloc:  number of allocated 2d fields.
 !                             lnames:    optional level index for each variable (assigned as user desires)
 !                             names:     optional names for each variable (assigned as desired)
@@ -198,7 +198,7 @@ module general_sub2grid_mod
       integer(i_kind),pointer :: lnames(:,:)    => null()    !  optional level index for each variable
       character(64),pointer   :: names(:,:)     => null()    !  optional variable names
       logical:: lallocated = .false.
-    
+
 
    end type sub2grid_info
 
@@ -215,28 +215,28 @@ module general_sub2grid_mod
 ! subprogram:    general_sub2grid_create_info populate info variable s
 !   prgmmr: parrish          org: np22                date: 2010-02-12
 !
-! abstract: given dimensions of horizontal domain and various other 
+! abstract: given dimensions of horizontal domain and various other
 !              information, obtain all required constants to allow
 !              use of general_sub2grid_ and general_grid2sub_ and store them
 !              in structure variable s.
 !
 ! program history log:
 !   2010-02-11  parrish, initial documentation
-!   2010-03-02  parrish - add regional flag to input.  if regional=.true., 
+!   2010-03-02  parrish - add regional flag to input.  if regional=.true.,
 !                           then periodic, periodic_s=.false. always.  this corrects a bug
 !                           in existing code.  (never a problem, except when npe=1).
 !   2011-04-07  todling - call general_deter_subdomain
 !   2012-06-06  parrish - add optional arrays names, lnames (see description below)
 !   2012-08-14  parrish - add optional parameter nskip to replicate Jim Taft's hardwired optimization changes
 !                          to specific mpi_all2allv calls.
-!   2012-10-29  parrish - add optional type(sub2grid_info) variable s_ref, which contains sub2grid 
+!   2012-10-29  parrish - add optional type(sub2grid_info) variable s_ref, which contains sub2grid
 !                            information for same horizontal grid layout as will be in new
 !                            type(sub2grid_info) variable s, which is the output of this subroutine.
 !
 !   input argument list:
 !     s          - structure variable, waiting for all necessary information for
 !                    use with general_sub2grid and general_grid2sub.
-!     inner_vars - inner index, reserved for eventually putting all ensemble members 
+!     inner_vars - inner index, reserved for eventually putting all ensemble members
 !                    on 1st (most rapidly varying) array index.
 !     nlat       - number of horizontal grid points in "latitude" direction
 !     nlon       - number of horizontal grid points in "longitude"
@@ -271,7 +271,7 @@ module general_sub2grid_mod
 
       type(sub2grid_info),     intent(inout) :: s
       integer(i_kind),         intent(in   ) :: inner_vars,nlat,nlon,nsig,num_fields
-      logical,                 intent(in   ) :: regional 
+      logical,                 intent(in   ) :: regional
       logical,optional,        intent(in   ) :: vector(num_fields)
       character(64),optional,  intent(in   ) :: names(inner_vars,num_fields)
       integer(i_kind),optional,intent(in   ) :: lnames(inner_vars,num_fields)
@@ -327,7 +327,7 @@ module general_sub2grid_mod
 
       allocate(s%isc_g(s%npe),s%isd_g(s%npe),s%displs_g(s%npe),s%displs_s(s%npe))
       allocate(s%ird_s(s%npe),s%irc_s(s%npe))
- 
+
       s%ijn=s%ilat1*s%jlon1
       s%ijn_s=(s%ilat1+2)*(s%jlon1+2)
       mm1=s%mype+1
@@ -520,13 +520,13 @@ subroutine get_iuse_pe(npe,nz,iuse_pe)
      iuse_pe=1
      if(npe <= nz) then
         write(6,*)' nz,npe=',nz,npe,' ---- no iskip found, all processors used'
-     else                    
+     else
         nskip=npe-nz
         if(nskip > 0)then
           skip2=float(npe)/float(nskip)
           point=zero
           do i=1,nskip
-            ipoint=min(max(0,nint(point)),npe) 
+            ipoint=min(max(0,nint(point)),npe)
             iuse_pe(ipoint)=0
             point=point+skip2
           end do
@@ -540,10 +540,10 @@ subroutine get_iuse_pe(npe,nz,iuse_pe)
            call stop2(999)
         end if
         if(mype == 0 .and. print_verbose)write(6,*) ' in get_pe2 ',nz,icount,npe,skip2
-   
+
      end if
      return
-     
+
 end subroutine get_iuse_pe
 
    subroutine general_sub2grid_destroy_info(s,s_ref)
@@ -601,7 +601,7 @@ end subroutine get_iuse_pe
 !   prgmmr: da silva       org: np20                date: 2006-06-28
 !
 ! abstract: The nxPE and nyPE defines the layout, that is, nxPE is the number of
-!           processors used to decompose the longitudinal dimensional, while nyPE 
+!           processors used to decompose the longitudinal dimensional, while nyPE
 !           the number of processors used to decompose the latitudinal dimension.
 !           By construction, nPE = nxPE * nyPE. If a layout is not specified in
 !           the namelist, it defaults to nxPE=nyPE=-1 and we revert back to
@@ -724,7 +724,7 @@ end subroutine get_iuse_pe
   periodic=.false.
   periodic_s=.false.
   im=nlon; jm=nlat
- 
+
   call get_local_dims_ ( im,imxy,nxpe )
   call get_local_dims_ ( jm,jmxy,nype )
 
@@ -769,8 +769,8 @@ end subroutine get_iuse_pe
   end if
 
 100 format('general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=',5(i6,1x))
-  
-        
+
+
 ! Set number of latitude and longitude for given subdomain
   mm1=mype+1
   lat1=ilat1(mm1)
@@ -831,7 +831,7 @@ end subroutine get_iuse_pe
 !   prgmmr: weiyu yang       org: np20                date: 1998-05-14
 !
 ! abstract: Given an array of the observation computation load and
-!           the number of available mpi tasks (npe), this routine 
+!           the number of available mpi tasks (npe), this routine
 !           decomposes the total analysis grid into npe subdomains
 !
 ! program history log:
@@ -844,7 +844,7 @@ end subroutine get_iuse_pe
 !   2008-06-04  safford - rm unused vars
 !   2008-09-05  lueken - merged ed's changes into q1fy09 code
 !   2010-02-12  parrish - make copy for use in general_sub2grid_mod
-!   2010-03-02  parrish - add regional flag to input.  if regional=.true., 
+!   2010-03-02  parrish - add regional flag to input.  if regional=.true.,
 !                           then periodic, periodic_s=.false. always.  this corrects a bug
 !                           in existing code.  (never a problem, except when npe=1).
 !
@@ -929,7 +929,7 @@ end subroutine get_iuse_pe
       lon1=jlon1(mm1)
       lat2=lat1+2
       lon2=lon1+2
-  
+
       return
 
    end subroutine general_deter_subdomain_nolayout
@@ -1066,7 +1066,7 @@ end subroutine get_iuse_pe
       real(r_single),     intent(  out) :: grid_vars(s%inner_vars,s%nlat,s%nlon,s%kbegin_loc:s%kend_alloc)
 
       real(r_single) :: sub_vars0(s%inner_vars,s%lat1,s%lon1,s%num_fields)
-      real(r_single) :: work(s%inner_vars,s%itotsub*(s%kend_alloc-s%kbegin_loc+1)) 
+      real(r_single) :: work(s%inner_vars,s%itotsub*(s%kend_alloc-s%kbegin_loc+1))
       integer(i_kind) iloc,iskip,i,i0,ii,j,j0,k,n,k_in,ilat,jlon,ierror,ioffset
       integer(i_long) mpi_string
 
@@ -1216,7 +1216,7 @@ end subroutine get_iuse_pe
 !              full horizontal grid for horizontal operations.
 !              The structure variable is specified by subroutine general_sub2grid_setup.
 !              This version works with single precision (4-byte) real variables.
-!              Output sub_vars, the desired arrays on horizontal subdomains, has one 
+!              Output sub_vars, the desired arrays on horizontal subdomains, has one
 !              halo row, for now, which is filled with zero, since for ensemble use,
 !              there is no need for a halo, but is easiest for now to keep it.
 !              A later version will have variable number of halo rows, filled with proper values.
@@ -1416,7 +1416,7 @@ end subroutine get_iuse_pe
       real(r_double),    intent(  out)  :: grid_vars(s%inner_vars,s%nlat,s%nlon,s%kbegin_loc:s%kend_alloc)
 
       real(r_double) :: sub_vars0(s%inner_vars,s%lat1,s%lon1,s%num_fields)
-      real(r_double) :: work(s%inner_vars,s%itotsub*(s%kend_alloc-s%kbegin_loc+1)) 
+      real(r_double) :: work(s%inner_vars,s%itotsub*(s%kend_alloc-s%kbegin_loc+1))
       integer(i_kind) iloc,iskip,i,i0,ii,j,j0,k,n,k_in,ilat,jlon,ierror,ioffset
       integer(i_long) mpi_string
 
@@ -1566,7 +1566,7 @@ end subroutine get_iuse_pe
 !              full horizontal grid for horizontal operations.
 !              The structure variable is specified by subroutine general_sub2grid_setup.
 !              This version works with double precision (8-byte) real variables.
-!              Output sub_vars, the desired arrays on horizontal subdomains, has one 
+!              Output sub_vars, the desired arrays on horizontal subdomains, has one
 !              halo row, for now, which is filled with zero, since for ensemble use,
 !              there is no need for a halo, but is easiest for now to keep it.
 !              A later version will have variable number of halo rows, filled with proper values.
@@ -1733,9 +1733,9 @@ end subroutine get_iuse_pe
 ! subprogram:    general_gather2grid_r_single_rank3  gather subdomains to full horizontal grid
 !   prgmmr: parrish          org: np22                date: 2012-06-06
 !
-! abstract: generalization of subroutine gather_stuff2 that used to be located in bkgvar_rewgt.f90.  
+! abstract: generalization of subroutine gather_stuff2 that used to be located in bkgvar_rewgt.f90.
 !              Similar to general_sub2grid, but the difference is that it only works on a single 2d field and
-!              gathers together the subdomains from all processors to a single full 2-d grid on 
+!              gathers together the subdomains from all processors to a single full 2-d grid on
 !              user specified processor pe.  All vertical/variable related parts of the structure
 !              variable s are ignored.  This routine is also intended to be a straightforward
 !              replacement for the current messy mpi_allgatherv and associated code used for gathering
@@ -1768,7 +1768,7 @@ end subroutine get_iuse_pe
       integer(i_kind),    intent(in   ) :: gridpe
 
       real(r_single) :: sub_vars0(s%inner_vars,s%lat1,s%lon1)
-      real(r_single) :: work(s%inner_vars,s%itotsub) 
+      real(r_single) :: work(s%inner_vars,s%itotsub)
       integer(i_kind) iloc,iskip,i,i0,ii,j,j0,n,ilat,jlon,ierror,ioffset
       integer(i_long) mpi_string
 
@@ -1910,9 +1910,9 @@ end subroutine get_iuse_pe
 ! subprogram:    general_gather2grid_r_double_rank3  gather subdomains to full horizontal grid
 !   prgmmr: parrish          org: np22                date: 2012-06-06
 !
-! abstract: generalization of subroutine gather_stuff2 that used to be located in bkgvar_rewgt.f90.  
+! abstract: generalization of subroutine gather_stuff2 that used to be located in bkgvar_rewgt.f90.
 !              Similar to general_sub2grid, but the difference is that it only works on a single 2d field and
-!              gathers together the subdomains from all processors to a single full 2-d grid on 
+!              gathers together the subdomains from all processors to a single full 2-d grid on
 !              user specified processor pe.  All vertical/variable related parts of the structure
 !              variable s are ignored.  This routine is also intended to be a straightforward
 !              replacement for the current messy mpi_allgatherv and associated code used for gathering
@@ -1945,8 +1945,8 @@ end subroutine get_iuse_pe
       integer(i_kind),    intent(in   ) :: gridpe
 
       real(r_double) :: sub_vars0(s%inner_vars,s%lat1,s%lon1)
-      real(r_double) :: work(s%inner_vars,max(s%iglobal,s%itotsub)) 
-      real(r_double) :: temp(s%inner_vars,max(s%iglobal,s%itotsub)) 
+      real(r_double) :: work(s%inner_vars,max(s%iglobal,s%itotsub))
+      real(r_double) :: temp(s%inner_vars,max(s%iglobal,s%itotsub))
       integer(i_kind) iloc,iskip,i,i0,ii,j,j0,n,ilat,jlon,ierror
       integer(i_long) mpi_string
 
@@ -2044,9 +2044,9 @@ end subroutine get_iuse_pe
 
    end subroutine general_scatter2sub_r_single_rank11
 
-   subroutine general_scatter2sub_r_single_rank31(s,grid_vars,sub_vars,gridpe) 
-!$$$  subprogram documentation block 
-!                .      .    .                                       .  
+   subroutine general_scatter2sub_r_single_rank31(s,grid_vars,sub_vars,gridpe)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
 ! subprogram:    general_scatter2sub_r_single_rank31  rank 3x1 interface to general_scatter2sub
 !   prgmmr: parrish          org: np22                date: 2012-06-06
 !
@@ -2093,7 +2093,7 @@ end subroutine get_iuse_pe
 ! subprogram:    general_scatter2sub_r_single_rank3  scatter one full horizontal grid to subdomains.
 !   prgmmr: parrish          org: np22                date: 2012-06-06
 !
-! abstract: generalization of subroutine scatter_stuff2 that used to be located in bkgvar_rewgt.f90.  
+! abstract: generalization of subroutine scatter_stuff2 that used to be located in bkgvar_rewgt.f90.
 !              Similar to general_grid2sub, but the difference is that it only works on a single 2d field and
 !              scatters it to the subdomains on all processors from the user specified processor where the
 !              2d field resides.  All vertical/variable related parts of the structure
@@ -2248,7 +2248,7 @@ end subroutine get_iuse_pe
 ! subprogram:    general_scatter2sub_r_double_rank3  scatter one full horizontal grid to subdomains.
 !   prgmmr: parrish          org: np22                date: 2012-06-06
 !
-! abstract: generalization of subroutine scatter_stuff2 that used to be located in bkgvar_rewgt.f90.  
+! abstract: generalization of subroutine scatter_stuff2 that used to be located in bkgvar_rewgt.f90.
 !              Similar to general_grid2sub, but the difference is that it only works on a single 2d field and
 !              scatters it to the subdomains on all processors from the user specified processor where the
 !              2d field resides.  All vertical/variable related parts of the structure

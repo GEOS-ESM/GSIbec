@@ -23,7 +23,7 @@
 
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
-     cvarsmd,nrf_var,lcalc_gfdl_cfrac 
+     cvarsmd,nrf_var,lcalc_gfdl_cfrac
   use berror, only: norh,ndeg,vs,bw,init_berror,hzscl,hswgt,pert_berr,pert_berr_fct,&
      bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,nhscrf,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
      bkgv_write_cv,bkgv_write_sv
@@ -94,8 +94,8 @@
 !  In non-ESMF mode (see below) a main program is assembled by calling these 3
 !  routines in
 !  sequence.
-                                                                                                                         
-                    
+
+
 !  This file can be compiled in 2 different modes: an ESMF and a non-ESMF mode.
 !  When HAVE_ESMF
 !  is defined (ESMF mode), a few I/O related statements are skipped during
@@ -116,7 +116,7 @@
 !  03Oct2007  Tremolet  Add DFI and lanczos-save
 !  04Jan2008  Tremolet  Add forecast sensitivity to observations options
 !  10Sep2008  Guo       Add CRTM files directory path
-!  02Dec2008  Todling   Remove reference to old TLM of analysis  
+!  02Dec2008  Todling   Remove reference to old TLM of analysis
 !  20Nov2008  Todling   Add lferrscale to scale OMF w/ Rinv (actual fcst not guess)
 !  08Dec2008  Todling   Placed switch_on_derivatives,tendsflag in jcopts namelist
 !  28Jan2009  Todling   Remove original GMAO interface
@@ -126,7 +126,7 @@
 !  08-31-2009 Parrish   Add changes for version 3 regional tangent linear normal mode constraint
 !  09-22-2009 Parrish   Add read of namelist/hybrid_ensemble/.  contains parameters used for hybrid
 !                        ensemble option.
-!  02-17-2010 Parrish   add nlon_ens, nlat_ens, jcap_ens to namelist/hybrid_ensemble/, in preparation for 
+!  02-17-2010 Parrish   add nlon_ens, nlat_ens, jcap_ens to namelist/hybrid_ensemble/, in preparation for
 !                         dual resolution capability when running gsi in hybrid ensemble mode.
 !  02-20-2010 Zhu       Add init_anacv,nrf,nvars,nrf_3d for control variables;
 !  02-21-2010 Parrish   add jcap_ens_test to namelist/hybrid_ensemble/ so can simulate lower resolution
@@ -135,7 +135,7 @@
 !  02-25-2010 Zhu       Remove berror_nvars
 !  03-06-2010 Parrish   add flag use_gfs_ozone to namelist SETUP--allows read of gfs ozone for regional runs
 !  03-09-2010 Parrish   add flag check_gfs_ozone_date to namelist SETUP--if true, date check gfs ozone
-!  03-15-2010 Parrish   add flag regional_ozone to namelist SETUP--if true, then turn on ozone in 
+!  03-15-2010 Parrish   add flag regional_ozone to namelist SETUP--if true, then turn on ozone in
 !                         regional analysis
 !  03-17-2010 todling   add knob for analysis error estimate (jsiga)
 !  03-17-2010 Zhu       Add nc3d and nvars in init_grid_vars interface
@@ -157,7 +157,7 @@
 !  05-30-2010 Todling   reposition init of control and state vectors; add init_anasv; update chem
 !  06-04-2010 Todling   update interface to init_grid_vars
 !  06-05-2010 Todling   remove as,tsfc_sdv,an_amp0 from bkgerr namelist (now in anavinfo table)
-!  08-10-2010 Wu        add nvege_type to gridopts namelist 
+!  08-10-2010 Wu        add nvege_type to gridopts namelist
 !  08-24-2010 hcHuang   add diag_aero and init_aero for aerosol observations
 !  08-26-2010 Cucurull  add use_compress to setup namelist, add a call to gps_constants
 !  09-06-2010 Todling   add Errico-Ehrendorfer parameter for E-norm used in DFI
@@ -194,11 +194,11 @@
 !                       4 options
 !  02-08-2012 kleist    add parameters to control new 4d-ensemble-var features.
 !  02-17-2012 tong      add parameter merge_two_grid_ensperts to merge ensemble perturbations
-!                       from two forecast domains to analysis domain  
+!                       from two forecast domains to analysis domain
 !  05-25-2012 li/wang   add TDR fore/aft sweep separation for thinning,xuguang.wang@ou.edu
 !  06-12-2012 parrish   remove calls to subroutines init_mpi_vars, destroy_mpi_vars.
 !                       add calls to init_general_commvars, destroy_general_commvars.
-!  10-11-2012 eliu      add wrf_nmm_regional in determining logic for use_gfs_stratosphere                
+!  10-11-2012 eliu      add wrf_nmm_regional in determining logic for use_gfs_stratosphere
 !  05-14-2012 wargan    add adjustozvar to adjust ozone in stratosphere
 !  05-14-2012 todling   defense to set nstinfo only when nst_gsi>0
 !  05-23-2012 todling   add lnested_loops option
@@ -214,7 +214,7 @@
 !                       tdrgross_fact for tdr gross error adjustment
 !  05-31-2013 wu        write ext_sonde output to standard out
 !  07-02-2013 parrish   change tlnmc_type to reg_tlnmc_type.  tlnmc_type no
-!                         longer used for global analysis.  
+!                         longer used for global analysis.
 !                         for regional analysis, reg_tlnmc_type=1 or 2 for two
 !                         different regional balance methods.
 !  07-10-2013 zhu       add upd_pred as bias update indicator for radiance bias correction
@@ -254,7 +254,7 @@
 !  01-13-2015 Ladwig    added option l_numconc
 !  09-01-2015 Hu        added option l_closeobs
 !  10-01-2015 guo       option to redistribute observations in 4d observer mode
-!  07-20-2015 zhu       re-structure codes for enabling all-sky/aerosol radiance assimilation, 
+!  07-20-2015 zhu       re-structure codes for enabling all-sky/aerosol radiance assimilation,
 !                       add radiance_mode_init, radiance_mode_destroy & radiance_obstype_destroy
 !  01-28-2016 mccarty   add netcdf_diag capability
 !  03-02-2016 s.liu/carley - remove use_reflectivity and use i_gsdcldanal_type
@@ -285,10 +285,10 @@
 !                              from GSD (for RAP/HRRR application)
 !  02-15-2016 Y. Wang, Johnson, X. Wang - added additional options if_vterminal, if_model_dbz,
 !                                         for radar DA, POC: xuguang.wang@ou.edu
-!  08-31-2017 Li        add sfcnst_comb for option to read sfc & nst combined file 
+!  08-31-2017 Li        add sfcnst_comb for option to read sfc & nst combined file
 !  10-10-2017 Wu,W      added option fv3_regional and rid_ratio_fv3_regional, setup FV3, earthuv
 !  01-11-2018 Yang      add namelist variables required by the nonlinear transform to vis and cldch
-!                      (Jim Purser 2018). Add estvisoe and estcldchoe to replace the hardwired 
+!                      (Jim Purser 2018). Add estvisoe and estcldchoe to replace the hardwired
 !                       prescribed vis/cldch obs. errort in read_prepbufr. (tentatively?)
 !  03-22-2018 Yang      remove "logical closest_obs", previously applied to the analysis of vis and cldch.
 !                       The option to use only the closest ob to the analysis time is now handled
@@ -302,7 +302,7 @@
 !  03-11-2019 Collard   Introduce ec_amv_qc as temporary control of GOES-16/17 AMVS
 !  03-14-2019 eliu      add logic to turn on using full set of hydrometeors in
 !                       obs operator and analysis
-!  03-14-2019 eliu      add precipitation component 
+!  03-14-2019 eliu      add precipitation component
 !  05-09-2019 mtong     move initializing derivative vector here
 !  06-19-2019 Hu        Add option reset_bad_radbc for reseting radiance bias correction when it is bad
 !  06-25-2019 Hu        Add option print_obs_para to turn on OBS_PARA list
@@ -311,7 +311,7 @@
 !  08-14-2019 W. Gu     add lupdqc to replace the obs errors from satinfo with diag of est(R)
 !  08-14-2019 W. Gu     add lqcoef to combine the inflation coefficients generated by qc with est(R)
 !  10-15-2019 Wei/Martin   added option lread_ext_aerosol to read in aerfXX file for NEMS aerosols;
-!                          added option use_fv3_aero to choose between NGAC and FV3GFS-GSDChem 
+!                          added option use_fv3_aero to choose between NGAC and FV3GFS-GSDChem
 !  07-14-2020 todling   add adjustozhscl to scale ozone hscales (>0 will scale by this number)
 !
 !EOP
@@ -403,8 +403,8 @@
 !                              0 <= beta_s0 <= 1,  tuned for optimal performance
 !                             =1, then ensemble information turned off
 !                             =0, then static background turned off
-!                            the weights are applied per vertical level such that : 
-!                                        beta_s(:) = beta_s0     , vertically varying weights given to static B ; 
+!                            the weights are applied per vertical level such that :
+!                                        beta_s(:) = beta_s0     , vertically varying weights given to static B ;
 !                                        beta_e(:) = 1 - beta_s0 , vertically varying weights given ensemble derived covariance.
 !                            If (readin_beta) then beta_s and beta_e are read from a file and beta_s0 is not used.
 !     s_ens_h             - homogeneous isotropic horizontal ensemble localization scale (km)
@@ -434,7 +434,7 @@
 !                            default value = 1  (dual resolution off)
 !     i_en_perts_io - flag to read in ensemble perturbations in ensemble grid.
 !                         This is to speed up RAP/HRRR hybrid runs because the
-!                         same ensemble perturbations are used in 6 cycles    
+!                         same ensemble perturbations are used in 6 cycles
 !                           =0:  No ensemble perturbations IO (default)
 !                           =2:  skip get_gefs_for_regional and read in ensemble
 !                                 perturbations from saved files.
@@ -448,10 +448,10 @@
 !     ens_fast_read - read ensemble in parallel; default '.false.'
 !     sst_staticB - use only static background error covariance for SST statistic
 !     bens_recenter - center Bens around background/guess
-!     upd_ens_spread - update ens spread with recentering around guess 
+!     upd_ens_spread - update ens spread with recentering around guess
 !     upd_ens_localization - update ens localizations (goes together w/ upd_ens_spread)
-!              
-!                         
+!
+!
   namelist/hybrid_ensemble/l_hyb_ens,uv_hyb_ens,q_hyb_ens,aniso_a_en,generate_ens,n_ens,nlon_ens,nlat_ens,jcap_ens,&
                 pseudo_hybens,merge_two_grid_ensperts,regional_ensemble_option,full_ensemble,pwgtflg,&
                 jcap_ens_test,beta_s0,s_ens_h,s_ens_v,readin_localization,eqspace_ensgrid,readin_beta,&
@@ -514,14 +514,14 @@
 ! call set_fgrid2agrid
 
 
-! Read user input from namelists.  All processor elements 
+! Read user input from namelists.  All processor elements
 ! read the namelist input.  SGI MPI FORTRAN does not allow
 ! all tasks to read from standard in (unit 5).  Hence, open
-! namelist to different unit number and have each task read 
+! namelist to different unit number and have each task read
 ! namelist file.
   open(11,file=thisrc)
   read(11,setup,iostat=ios)
-  if(ios/=0) call die(myname_,'read(setup)',ios)  
+  if(ios/=0) call die(myname_,'read(setup)',ios)
   close(11)
 
   open(11,file=thisrc)
@@ -574,7 +574,7 @@
                                    dvars2d,dvars3d,drv_set )
   call init_general_commvars
 
-  
+
   end subroutine gsimain_initialize_
 
 !-------------------------------------------------------------------------
@@ -608,7 +608,7 @@
   if (closempi) then
      call mpi_finalize(ierror)
   endif
- 
+
  end subroutine gsimain_finalize_
 
  end module gsimod

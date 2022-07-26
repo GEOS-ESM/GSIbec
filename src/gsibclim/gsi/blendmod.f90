@@ -38,7 +38,7 @@ module blendmod
 
    integer(i_kind) mm,iblend(0:40)
    real(r_kind) x0,dxx,dnorm
-  
+
    contains
 
    subroutine init_blend(xbegin,xend,iord,ierror)
@@ -49,7 +49,7 @@ module blendmod
 !
 ! abstract: initialize private module variables so routines blend_f and blend_df generate the
 !            appropriate blend function and 1st derivative for blend function order iord
-!            and transition range xbegin to xend.  Note that xbegin can be greater 
+!            and transition range xbegin to xend.  Note that xbegin can be greater
 !            than xend, but xbegin==xend is not allowed.
 !
 ! program history log:
@@ -223,11 +223,11 @@ subroutine blend(n,iblend)
 !
 ! remarks: put the coefficients for powers n+1,..,2n+1, into iblend(0),
 !          ..iblend(n),for the "blending polynomial" of continuity-
-!          degree n in the interval [0,1].  For example, with n=1, the 
-!          blending polynomial has up to 1st derivatives continuous 
-!          with y(0)=0, y(1)=1, y'(0)=y'(1)=0, when y(x)=3x^2-2x^3. 
+!          degree n in the interval [0,1].  For example, with n=1, the
+!          blending polynomial has up to 1st derivatives continuous
+!          with y(0)=0, y(1)=1, y'(0)=y'(1)=0, when y(x)=3x^2-2x^3.
 !          Hence iblend={3,-2}
-! 
+!
 ! attributes:
 !   language: f90
 !   machine:  ibm rs/6000 sp

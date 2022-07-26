@@ -3,10 +3,10 @@ subroutine bkerror(gradx,grady, &
 
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    bkerror  apply background error covariance            
+! subprogram:    bkerror  apply background error covariance
 !   prgmmr: wu               org: np22                date: 1999-12-07
 !
-! abstract: grid transform, apply recursive filters on conformal/Cartesian 
+! abstract: grid transform, apply recursive filters on conformal/Cartesian
 !            grids back to Gaussian grid.
 !
 ! program history log:
@@ -42,10 +42,10 @@ subroutine bkerror(gradx,grady, &
 !                         this is a hybrid ensemble run.
 !
 !   input argument list:
-!     gradx    - input field  
+!     gradx    - input field
 !
 !   output
-!     grady    - background structure * gradx 
+!     grady    - background structure * gradx
 !
 ! attributes:
 !   language: f90
@@ -135,7 +135,7 @@ subroutine bkerror(gradx,grady, &
      if(mvars>0) then
         call gsi_bundlemerge(mbundle,grady%step(ii),grady%motley(ii),' add motley to step',istatus)
      else
-        call gsi_bundledup(grady%step(ii),mbundle,' copy of step ',istatus) 
+        call gsi_bundledup(grady%step(ii),mbundle,' copy of step ',istatus)
      end if
 
 !    Transpose of balance equation

@@ -1,7 +1,7 @@
 module abstract_ensmod
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    abstract_ensmod    handles abstract ensemble 
+! subprogram:    abstract_ensmod    handles abstract ensemble
 !   prgmmr: mpotts          org: emc/ncep            date: 2016-06-30
 !
 ! abstract: Handle abstract ensemble (full fields and perturbations)

@@ -110,7 +110,7 @@ contains
   subroutine init_smooth_polcas
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    init_smooth_polcas  
+! subprogram:    init_smooth_polcas
 !   prgmmr:
 !
 ! abstract:

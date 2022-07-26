@@ -26,7 +26,7 @@ module constants
 !   2010-12-20 pagowski  - add max_varname_length=12
 !   2010-04-01 li        - add maximum diurnal thermocline thickness
 !   2011-10-27 Huang     - add i_missing and r_missing to detect missing values
-!   2011-11-01 eliu      - add minimum value for cloud water mixing ratio 
+!   2011-11-01 eliu      - add minimum value for cloud water mixing ratio
 !   2012-03-07 todling   - define lower bound for trace-gases (arbitrary unit as long as small)
 !   2016-02-15 Johnson, Y. Wang, X. Wang - define additional constant values for
 !                                          radar DA, POC: xuguang.wang@ou.edu
@@ -136,7 +136,7 @@ module constants
   real(r_kind),parameter::  five      = 5.0_r_kind
   real(r_kind),parameter::  ten       = 10.0_r_kind
   real(r_kind),parameter::  r10       = 10.0_r_kind
-  real(r_kind),parameter::  r18       = 18.0_r_kind 
+  real(r_kind),parameter::  r18       = 18.0_r_kind
   real(r_kind),parameter::  r60       = 60._r_kind
   real(r_kind),parameter::  r61       = 61._r_kind
   real(r_kind),parameter::  r63       = 63._r_kind
@@ -181,7 +181,7 @@ module constants
   real(r_kind),parameter::  semi_major_axis = 6378.1370e3_r_kind     !                     (m)
   real(r_kind),parameter::  semi_minor_axis = 6356.7523142e3_r_kind  !                     (m)
   real(r_kind),parameter::  grav_polar      = 9.8321849378_r_kind    !                     (m/s2)
-  real(r_kind),parameter::  grav_equator    = 9.7803253359_r_kind    !                     (m/s2) 
+  real(r_kind),parameter::  grav_equator    = 9.7803253359_r_kind    !                     (m/s2)
   real(r_kind),parameter::  earth_omega     = 7.292115e-5_r_kind     !                     (rad/s)
   real(r_kind),parameter::  grav_constant   = 3.986004418e14_r_kind  !                     (m3/s2)
 
@@ -190,7 +190,7 @@ module constants
   real(r_kind),parameter::  somigliana = &
        (semi_minor_axis/semi_major_axis) * (grav_polar/grav_equator) - one
   real(r_kind),parameter::  grav_ratio = (earth_omega*earth_omega * &
-       semi_major_axis*semi_major_axis * semi_minor_axis) / grav_constant 
+       semi_major_axis*semi_major_axis * semi_minor_axis) / grav_constant
 
 ! Derived thermodynamic constants
   real(r_kind),parameter::  dldti = cvap-csol
@@ -200,15 +200,15 @@ module constants
   real(r_kind),parameter::  elocp = hvap/cp
   real(r_kind),parameter::  rcp  = one/cp
 
-  real(r_kind),parameter::  tice   = t0c               ! temperature at 0 deg C [K]   
-  real(r_kind),parameter::  t_wfr  = t0c - 40.0_r_kind ! homogeneous freezing temperature  
+  real(r_kind),parameter::  tice   = t0c               ! temperature at 0 deg C [K]
+  real(r_kind),parameter::  t_wfr  = t0c - 40.0_r_kind ! homogeneous freezing temperature
   real(r_kind),parameter::  e00    = psat              ! saturation vapor pressure at 0 deg C (611.21 Pa)
-  real(r_kind),parameter::  hlv    = hvap              ! latent heat of evaporation     
-  real(r_kind),parameter::  hlf    = hfus              ! latent heat of fusion     
-  real(r_kind),parameter::  cp_vap = cvap              ! heat capacity of water vapor at const. pressure     
-  real(r_kind),parameter::  rvgas  = 4.6150e+2_r_kind  ! gas constant for waver vapor     
-  real(r_kind),parameter::  rdgas  = 2.8705e+2_r_kind  ! gas constant for dry air 
-  real(r_kind),parameter::  c_liq  = 4.1855e+3_r_kind  ! heat capacity of water at 15 deg C     
+  real(r_kind),parameter::  hlv    = hvap              ! latent heat of evaporation
+  real(r_kind),parameter::  hlf    = hfus              ! latent heat of fusion
+  real(r_kind),parameter::  cp_vap = cvap              ! heat capacity of water vapor at const. pressure
+  real(r_kind),parameter::  rvgas  = 4.6150e+2_r_kind  ! gas constant for waver vapor
+  real(r_kind),parameter::  rdgas  = 2.8705e+2_r_kind  ! gas constant for dry air
+  real(r_kind),parameter::  c_liq  = 4.1855e+3_r_kind  ! heat capacity of water at 15 deg C
   real(r_kind),parameter::  c_ice  = 1972.0_r_kind     ! heat capacity of ice at -15 deg C  (csol)
   real(r_kind),parameter::  cp_air = 1.0046e+3_r_kind  ! heat capacity of dry air at constant pressure (hydrostatic)
   real(r_kind),parameter::  cv_air = cp_air - rdgas    ! heat capacity of dry air at constant volume (non-hydrostatic)
@@ -279,7 +279,7 @@ module constants
   real(r_kind),parameter:: log10qsmin  = -9_r_single
   real(r_kind),parameter:: r10log10qsmin  = 1.0e-9_r_single
 
-! Minimum values for soil adjustment 
+! Minimum values for soil adjustment
   real(r_single),parameter:: soilmoistmin = 0.002_r_single   ! minimum soil
                                                              ! moisture (sand)
   real(r_kind), parameter :: partialSnowThreshold = 32._r_kind ! mm
@@ -412,7 +412,7 @@ contains
     tpwcon = 100.0_r_kind/grav
 
 !   Derived atmospheric constants
-    fv         = rv/rd-one    ! used in virtual temperature equation 
+    fv         = rv/rd-one    ! used in virtual temperature equation
     dldt       = cvap-cliq
     xa         = -(dldt/rv)
     xai        = -(dldti/rv)
@@ -438,8 +438,8 @@ contains
 ! subprogram:    gps_constants     set Bevis or Rueger refractive index coeff
 !     prgmmr:    cucurull          org: np23           date: 2010-08-25
 !
-! abstract:  This routine sets constants for the refractivity equation. GSI uses Bevis 
-!            coefficients when the compressibility factors option is turned off 
+! abstract:  This routine sets constants for the refractivity equation. GSI uses Bevis
+!            coefficients when the compressibility factors option is turned off
 !            and uses Rueger coefficients otherwise.
 !
 ! program history log:

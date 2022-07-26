@@ -6,7 +6,7 @@ subroutine tpause(mype,method)
 !
 ! abstract: locate tropopause using one of two methods.  The default
 !           method uses the temperature lapse rate to identify the
-!           tropopause.  Method 'pvoz' uses a combination of the 
+!           tropopause.  Method 'pvoz' uses a combination of the
 !           potential voriticy and ozone mixing ration to locate
 !           the tropopause.
 !
@@ -133,7 +133,7 @@ subroutine tpause(mype,method)
      end do
 
 
-! Locate tropopause using combination of potential vorticity (pv) and ozone.  
+! Locate tropopause using combination of potential vorticity (pv) and ozone.
   else
 
 !    Compute latitudes on subdomain
@@ -150,8 +150,8 @@ subroutine tpause(mype,method)
            do k=1,nsig
               prs(k) = r1000*ges_prsl(i,j,k,ntguessig)
            end do
-        
-!          Compute pv         
+
+!          Compute pv
            do k = 2,nsig-1
               pm1 = prs(k-1)
               pp1 = prs(k+1)
@@ -162,7 +162,7 @@ subroutine tpause(mype,method)
            end do
            pvort(1) = pvort(2)
            pvort(nsig) = pvort(nsig-1)
-           
+
 !          Locate tropopause
            ifound_pv=0; ifound_oz=0
            itrp_pv=nsig; itrp_oz=nsig
@@ -175,7 +175,7 @@ subroutine tpause(mype,method)
                     ifound_pv=1
                     itrp_pv = k
                  endif
-               
+
 !                Trop at level where ozone greater than 3e-7
                  if (ges_oz_nt(i,j,k)>r3em7 .and. ifound_oz==0) then
                     ifound_oz=1
@@ -183,7 +183,7 @@ subroutine tpause(mype,method)
                  endif
               endif
            end do
-           
+
 !          Merge pv and ozone tropopause levels between 20 and 40 deg latitude
            if (slatd(i) >= r40 ) then
               itrop_k = itrp_pv
@@ -199,7 +199,7 @@ subroutine tpause(mype,method)
            trop_pvoz(i,j) = prs(itrop_k)*r0_01 !hPa
         end do
      end do
-  
+
 !    Load tropopause pressure (hPa) into output array
      do j=1,lon2
         do i=1,lat2
@@ -207,7 +207,7 @@ subroutine tpause(mype,method)
         end do
      end do
 
-! End of tropopause location method blocks     
+! End of tropopause location method blocks
   endif
 
 !  *** NOTE ***

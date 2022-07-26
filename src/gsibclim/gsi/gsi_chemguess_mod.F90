@@ -13,18 +13,18 @@
 
 This module defines to so-called GSI\_ChemGuess\_Bundle. Its main purpose is to
 allow GSI to ingest guess fields related to trace gases, aerosols, and chemistry
-in general. 
+in general.
 
 \begin{center}
 \fbox{Chem Bundle is a way to ingest Chemistry-related backgrounds into GSI}
 \end{center}
 
-Before the introduction of this module, all guess fields entered GSI through the 
-arrays ges\_x, with x standing for particular fields, defined in the guess\_grids module, 
+Before the introduction of this module, all guess fields entered GSI through the
+arrays ges\_x, with x standing for particular fields, defined in the guess\_grids module,
 e.g., ges\_u, ges\_tv, and so on. Extending this approach to handle chemistry-related fields
 could become rather complex, particularly, because it is in principle not known which fields are
-needed for given application. The GSI\_ChemGuess\_Bundle aims at allowing GSI to ingest 
-a general set of fields without a given order or particular specification. 
+needed for given application. The GSI\_ChemGuess\_Bundle aims at allowing GSI to ingest
+a general set of fields without a given order or particular specification.
 
 \underline{Caution}: An important exception is ozone. Since guess\_grids already handles ozone, this
 is the only chemistry field that should still be dealt through guess\_gridsi, as ges\_oz.
@@ -33,12 +33,12 @@ is the only chemistry field that should still be dealt through guess\_gridsi, as
 \fbox{Chem Bundle is a GSI\_Bundle}
 \end{center}
 
-The GSI\_ChemGuess\_Bundle uses the GSI\_Bundle. But while the state and control vectors 
+The GSI\_ChemGuess\_Bundle uses the GSI\_Bundle. But while the state and control vectors
 use the GSI\_Bundle to associate fields used by the observation operator and
 those used in the cost function, respectively, the GSI\_ChemGuess\_Bundle
 is simply aimed at allowing ingestion of Chemistry Guess fields into GSI. The translation
 of these guess fields into state and control vectors is still done via the state and
-control vectors defining mechanism. 
+control vectors defining mechanism.
 
 As guess\_grids does, this module still treats the Chemistry Guess fields via a
 common-block-like structure. That is, the GSI\_Bundle defined here to hold the
@@ -53,8 +53,8 @@ the object}
 
 One of the ideas behind this module is that it defines an opaque-like object.
 That is, functions related to contents of the Chem Bundle should can only be
-extracted via inquires through a ``get-like'' procedures. This is why, only ``methods'' are 
-made public to this module, that is, 
+extracted via inquires through a ``get-like'' procedures. This is why, only ``methods'' are
+made public to this module, that is,
 
 \begin{verbatim}
 public :: gsi_chemguess_create_grids
@@ -64,9 +64,9 @@ public :: gsi_chemguess_get
 public :: gsi_chemguess_final
 \end{verbatim}
 
-and never the variables themselves; the only exception being the GSI\_ChemGuess\_Bundle itself 
-(until it is no longer treated as a common-block).  Some of the above public methods are 
-overloaded and all  have internal interfaces (name of which appears in the index of this protex 
+and never the variables themselves; the only exception being the GSI\_ChemGuess\_Bundle itself
+(until it is no longer treated as a common-block).  Some of the above public methods are
+overloaded and all  have internal interfaces (name of which appears in the index of this protex
 document. It should be a rule here that any new routine to be make public should
 have a declared interface procedure.
 
@@ -74,7 +74,7 @@ have a declared interface procedure.
 \fbox{Chem Bundle is defined via the {\it chem\_guess} table in a resource file}
 \end{center}
 
-\underline{Defining the Chem Bundle} is done via the table {\it chem\_guess}, usually 
+\underline{Defining the Chem Bundle} is done via the table {\it chem\_guess}, usually
 embedded in the {\it anavinfo} file. An example of such table follows:
 \begin{verbatim}
 chem_guess::
@@ -82,7 +82,7 @@ chem_guess::
   co       72      1        -1       n/a                co
   co2      72      1         0       n/a                co2
 !#      GOCART Aerosols
-!#    ------ Dust ------  
+!#    ------ Dust ------
   du001     72      1         10      dust               DU001
   du002     72      1         10      dust               DU002
   du003     72      1         10      dust               DU003
@@ -103,7 +103,7 @@ chem_guess::
   ocphilic  72      1         10      wet_organic_carbon OCphilic
 ::
 \end{verbatim}
-This is what GMAO plans to use in the near future. 
+This is what GMAO plans to use in the near future.
 
 As usual, this table follows INPAK/ESMF convention, begining with a name
 (chem\_guess), followed by double colons (::), and ending with double colons.
@@ -115,11 +115,11 @@ The current {\it chem\_guess} table has six columns defined as follows:
 Column 1: variable name - refers to internally known GSI variable name
 Column 2: indicates number of levels (used to distinguish between 2d and 3d fields)
 Column 3: likely to be redefined sometime soon
-Column 4: indicates whether variable is to be passed to CRTM or not according to 
+Column 4: indicates whether variable is to be passed to CRTM or not according to
           the following scheme:
-          if<0    general chem variable; not used in CRTM 
+          if<0    general chem variable; not used in CRTM
           if=0    general chem variable; use prescribed global mean data to affect CRTM
-          if=1    general chem variable; use variable in guess field to affect CRTM 
+          if=1    general chem variable; use variable in guess field to affect CRTM
           if>10   aerosol variable
 Column 5: type of chemical/aerosol
 Column 6: original name in file where species is read from
@@ -131,13 +131,13 @@ Column 6: original name in file where species is read from
 
 \underline{Examples} of accessing information related to fields in the Chem Bundle.
 \begin{enumerate}
-\item Say a routine wants to know how $CO_2$ is to be used in CRTM. 
+\item Say a routine wants to know how $CO_2$ is to be used in CRTM.
       This is done via the {\it i4crtm::} tag, as in:
       \begin{verbatim}
       call gsi_chemguess_get ( 'i4crtm::co2', igfsco2, ier )
       \end{verbatim}
-       where the value returned {\it igfsco2} is an integer following the 
-       scheme laid out for entries in column 4 of the resource file (anavinfo). 
+       where the value returned {\it igfsco2} is an integer following the
+       scheme laid out for entries in column 4 of the resource file (anavinfo).
 
 \item Say a routine wants to get the number of all 3d aerosols available in the
       Chem Bundle, this can use the tag {\it aerosols::3d}, as in:
@@ -149,16 +149,16 @@ Column 6: original name in file where species is read from
 
 \item Say a routine wants the name of all 3d aerosols
       \begin{verbatim}
-      call gsi_chemguess_get ('aerosols::3d',aero_names,ier)     
+      call gsi_chemguess_get ('aerosols::3d',aero_names,ier)
       \end{verbatim}
-      now the returned variable {\it aero\_names} is a character array with the 
+      now the returned variable {\it aero\_names} is a character array with the
       names of all 3d-aerosols. Notice it is important to inquire before hand
       about the number of  3d-aerosols available and to properly allocate space
       for the character arrays {\it aero\_names}, and only then make the call above.
 
 \end{enumerate}
 
-More on the other possible mnemonics known by this package can be found in the 
+More on the other possible mnemonics known by this package can be found in the
 prologue description of the {it get} routines.
 
 \begin{center}
@@ -172,9 +172,9 @@ prologue description of the {it get} routines.
   \item Only methods should be made public from this module.
   \item New routines should be defined via interface procedure.
 \end{itemize}
- 
+
 A general remark about the correct {\it chem\_guess} table: it is recognized that
-the format for general specification related to specific entries in the table is 
+the format for general specification related to specific entries in the table is
 not general enough. A better approach is the one used by the Registry used in
 GEOS-5 GOCART where a table exists to control a particular functionality
 applicable to a certain set of constituents. For example, use of a variable in
@@ -182,13 +182,13 @@ CRTM could be control instead by a specific table listing constituents to be
 used in the CRTM and at what extent, for example, a table of the form:
 \begin{verbatim}
 use_in_crtm::
- !var     use  
+ !var     use
   co2      1
   co       0
 ::
 \end{verbatim}
-Something of this form should eventually replace some of the columns in the 
-{\it chem\_guess} table. 
+Something of this form should eventually replace some of the columns in the
+{\it chem\_guess} table.
 
 #endif
 !EOI
@@ -198,7 +198,7 @@ Something of this form should eventually replace some of the columns in the
 !  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.1, GMAO  !
 !-------------------------------------------------------------------------
 !BOP
-!  
+!
 ! !MODULE: ChemguessMod -- Implements Chem Guess capability for GSI
 !
 ! !INTERFACE:
@@ -215,9 +215,9 @@ module gsi_chemguess_mod
 !                      Each object must be opaque with a get and
 !                      a put method associated with it.
 !   2. This is still functioning as a common-block when it comes
-!      to the chem type itself - needs some work to make it into 
+!      to the chem type itself - needs some work to make it into
 !      a self-contained type
-! 
+!
 ! !USES:
 
 use m_kinds, only: i_kind,r_kind
@@ -251,7 +251,7 @@ public :: gsi_chemguess_init
 public :: gsi_chemguess_get
 public :: gsi_chemguess_final
 
-public :: GSI_ChemGuess_Bundle   ! still a common for now, ultimately should 
+public :: GSI_ChemGuess_Bundle   ! still a common for now, ultimately should
                                  ! be a dynamic "type", passed around in arg list
 
 ! !INTERFACE:
@@ -260,7 +260,7 @@ interface gsi_chemguess_init
           module procedure init_
 end interface
 interface gsi_chemguess_final
-          module procedure final_ 
+          module procedure final_
 end interface
 interface gsi_chemguess_create_grids
           module procedure create_
@@ -340,8 +340,8 @@ subroutine init_ (iamroot,rcname)
 ! USES:
 implicit none
 ! !INPUT PARAMETER:
-   logical,optional,intent(in) :: iamroot 
-   character(len=*),optional,intent(in) :: rcname 
+   logical,optional,intent(in) :: iamroot
+   character(len=*),optional,intent(in) :: rcname
 ! !DESCRIPTION: Define contents of Chem Bundle through rc file (typilcally
 !               embedded in anavinfo text file.
 !
@@ -373,7 +373,7 @@ logical iamroot_
 if(chem_initialized_) return
 
 iamroot_=mype==0
-if(present(iamroot)) iamroot_=iamroot 
+if(present(iamroot)) iamroot_=iamroot
 
 ! load file
 luin=get_lun()
@@ -695,20 +695,20 @@ end subroutine final_
 ! \begin{verbatim}
 !      Known mnemonics        retrieve
 !      ---------------        --------
-!      dim                    total number of gases 
+!      dim                    total number of gases
 !      aerosols               number of aerosols
 !      aerosols::3d           number of 3d aerosols
 !      aerosols::2d           number of 2d aerosols
 !      i4crtm::XXX            information related to CRTM usage of gas XXX
 !      var::XXX               index of gas XXX in chem-bundle
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
 !   2011-05-17  todling  protect against use of unavailable label
-!   2015-09-05  zhu      change "i4crtm3d(ii)==11" to "i4crtm3d(ii)>=11" 
+!   2015-09-05  zhu      change "i4crtm3d(ii)==11" to "i4crtm3d(ii)>=11"
 !                        for "aerosols_4crtm::3d"
 !
 ! !REMARKS:
@@ -780,7 +780,7 @@ end subroutine final_
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  get_char0d_ --- inquire rank-0 character 
+! !IROUTINE:  get_char0d_ --- inquire rank-0 character
 !
 ! !INTERFACE:
   subroutine get_char0d_ ( desc, ivar, istatus )
@@ -794,9 +794,9 @@ end subroutine final_
 !      list                   list of all gases
 !      list::aerolols         list of aerosols only
 !      list::tracers          list of trace gases (non-aerosols) only
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
@@ -896,7 +896,7 @@ end subroutine final_
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  get_char1d_ --- inquire rank-1 character 
+! !IROUTINE:  get_char1d_ --- inquire rank-1 character
 !
 ! !INTERFACE:
   subroutine get_char1d_ ( desc, cvar, istatus )
@@ -914,9 +914,9 @@ end subroutine final_
 !      aerosols::2d           list of 2d aerosols
 !      aerosols_4crtm::3d     list of 3d aerosols to be passed to CRTM
 !      aerosols_4crtm_jac::3d list of 3d aerosols to participate in CRTM-Jac calc
-! 
+!
 ! \end{verbatim}
-!  where XXX represents the name of the gas of interest. 
+!  where XXX represents the name of the gas of interest.
 !
 ! !REVISION HISTORY:
 !   2010-04-10  todling  initial code
@@ -970,7 +970,7 @@ end subroutine final_
         do i=1,ntgases
            if(abs(i4crtm(i))<10) then
               ii=ii+1
-              cvar(ii)=tgases(ii) 
+              cvar(ii)=tgases(ii)
            endif
         enddo
         if(ii>0) istatus=0
@@ -983,7 +983,7 @@ end subroutine final_
         do i=1,ntgases
            if(abs(i4crtm(i))>=10.and.abs(i4crtm(i))<20) then
               ii=ii+1
-              cvar(ii)=tgases(ii) 
+              cvar(ii)=tgases(ii)
            endif
         enddo
         if(ii>0) istatus=0
@@ -1034,7 +1034,7 @@ end subroutine final_
                  ii=-1 ! user did not allocate enough space
                  exit  ! exit in error
               endif
-              cvar(ii)=tgases3d(i) 
+              cvar(ii)=tgases3d(i)
            endif
         enddo
         if(ii>0) istatus=0
@@ -1051,7 +1051,7 @@ end subroutine final_
                  ii=-1 ! user did not allocate enough space
                  exit  ! exit in error
               endif
-              cvar(ii)=tgases2d(i) 
+              cvar(ii)=tgases2d(i)
            endif
         enddo
         if(ii>0) istatus=0

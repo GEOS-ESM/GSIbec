@@ -2,7 +2,7 @@ module get_gfs_ensmod_mod
 
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    get_gfs_ensmod_mod    handles gfs ensemble 
+! subprogram:    get_gfs_ensmod_mod    handles gfs ensemble
 !   prgmmr: mahajan          org: emc/ncep            date: 2016-06-30
 !
 ! abstract: Handle GFS ensemble (full fields and perturbations)
@@ -158,7 +158,7 @@ subroutine get_user_ens_gfs_fastread_(ntindex,en_loc3,m_cvars2d,m_cvars3d, &
 ! program history log:
 !   2016-06-30  mahajan  - initial code
 !   2016-10-11  parrish  - create fast parallel code
-!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take 
+!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take
 !                          advantage of this this routine needs to be mildly
 !                          changed (remove divide by 60) and scripts adjusted
 !                          accordingly.
@@ -339,7 +339,7 @@ subroutine move2bundle_(grd,en_loc3,atm_bundle,m_cvars2d,m_cvars3d,iret,clons,sl
 ! program history log:
 !   2016-06-30  parrish -- copy and adapt get_user_ens_member_ to transfer 1
 !                            ensemble member
-!   2019-03-13  eliu    -- add precipitation components 
+!   2019-03-13  eliu    -- add precipitation components
 !
 !   input argument list:
 !     grd        - grd info for ensemble
@@ -365,7 +365,7 @@ subroutine move2bundle_(grd,en_loc3,atm_bundle,m_cvars2d,m_cvars3d,iret,clons,sl
     use gsi_bundlemod, only: gsi_bundlegetpointer,gsi_bundleputvar
     use gsi_bundlemod, only : assignment(=)
     use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
-    use mpeu_util, only: getindex  
+    use mpeu_util, only: getindex
 
     implicit none
 
@@ -383,11 +383,11 @@ subroutine move2bundle_(grd,en_loc3,atm_bundle,m_cvars2d,m_cvars3d,iret,clons,sl
 
     integer(i_kind) :: ierr
     integer(i_kind) :: im,jm,km,m,k
-    integer(i_kind) :: icw,iql,iqi,iqr,iqs,iqg  
+    integer(i_kind) :: icw,iql,iqi,iqr,iqs,iqg
     real(r_kind),pointer,dimension(:,:) :: ps
     !real(r_kind),pointer,dimension(:,:) :: sst
     real(r_kind),pointer,dimension(:,:,:) :: u,v,tv,q,oz,cwmr
-    real(r_kind),pointer,dimension(:,:,:) :: qlmr,qimr,qrmr,qsmr,qgmr   
+    real(r_kind),pointer,dimension(:,:,:) :: qlmr,qimr,qrmr,qsmr,qgmr
     real(r_single),allocatable,dimension(:,:)  :: scr2
     real(r_single),allocatable,dimension(:,:,:) :: scr3
     type(sub2grid_info) :: grd2d,grd3d
@@ -400,7 +400,7 @@ subroutine move2bundle_(grd,en_loc3,atm_bundle,m_cvars2d,m_cvars3d,iret,clons,sl
     allocate(scr2(im,jm))
     allocate(scr3(im,jm,km))
 
-    ! Check hydrometeors in control variables 
+    ! Check hydrometeors in control variables
     icw=getindex(cvars3d,'cw')
     iql=getindex(cvars3d,'ql')
     iqi=getindex(cvars3d,'qi')
@@ -765,7 +765,7 @@ subroutine parallel_read_nemsio_state_(en_full,m_cvars2d,m_cvars3d,nlon,nlat,nsi
    ! Declare local variables
    integer(i_kind) i,ii,j,jj,k,lonb,latb,levs
    integer(i_kind) k2,k3,k3u,k3v,k3t,k3q,k3cw,k3oz,kf
-   integer(i_kind) k3ql,k3qi,k3qr,k3qs,k3qg       
+   integer(i_kind) k3ql,k3qi,k3qr,k3qs,k3qg
    integer(i_kind) iret
    integer(i_kind) :: istop = 101
    integer(i_kind),dimension(7):: idate
@@ -840,7 +840,7 @@ subroutine parallel_read_nemsio_state_(en_full,m_cvars2d,m_cvars3d,nlon,nlat,nsi
    allocate(temp3(nlat,nlon,nsig,nc3d))
    allocate(temp2(nlat,nlon,nc2d))
    k3u=0 ; k3v=0 ; k3t=0 ; k3q=0 ; k3cw=0 ; k3oz=0
-   k3ql=0; k3qi=0; k3qr=0; k3qs=0; k3qg=0 
+   k3ql=0; k3qi=0; k3qr=0; k3qs=0; k3qg=0
    do k3=1,nc3d
       if(cvars3d(k3)=='sf') k3u=k3
       if(cvars3d(k3)=='vp') k3v=k3
@@ -909,8 +909,8 @@ subroutine parallel_read_nemsio_state_(en_full,m_cvars2d,m_cvars3d,nlon,nlat,nsi
          endif
       enddo
    enddo
-!  if (k3u==0.or.k3v==0.or.k3t==0.or.k3q==0.or.k3cw==0.or.k3oz==0) & 
-   if (k3u==0.or.k3v==0.or.k3t==0.or.k3q==0.or.k3oz==0) &  
+!  if (k3u==0.or.k3v==0.or.k3t==0.or.k3q==0.or.k3cw==0.or.k3oz==0) &
+   if (k3u==0.or.k3v==0.or.k3t==0.or.k3q==0.or.k3oz==0) &
       write(6,'(" WARNING, problem with one of k3-")')
 
 !   convert T to Tv:    postpone this calculation
@@ -1147,8 +1147,8 @@ end subroutine move1_
 !
 ! program history log:
 !   2016-06-30  mahajan  - initial code
-!   2019-03-13  eliu     - add precipitation component 
-!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take 
+!   2019-03-13  eliu     - add precipitation component
+!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take
 !                          advantage of this this routine needs to be mildly
 !                          changed (remove divide by 60) and scripts adjusted
 !                          accordingly.
@@ -1176,7 +1176,7 @@ end subroutine move1_
     use hybrid_ensemble_parameters, only: uv_hyb_ens
     use hybrid_ensemble_parameters, only: sp_ens
     use gsi_bundlemod, only: gsi_bundle
-    use gridmod, only: fv3_full_hydro   
+    use gridmod, only: fv3_full_hydro
 
     implicit none
 
@@ -1248,7 +1248,7 @@ subroutine put_gfs_ens(this,grd,member,ntindex,pert,iret)
 ! program history log:
 !   2016-06-30  mahajan  - initial code
 !   2016-07-20  mpotts   - refactored into class/module
-!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take 
+!   2020-02-26  todling  - ensemble freq can now be up to 1 min; to take
 !                          advantage of this this routine needs to be mildly
 !                          changed (remove divide by 60) and scripts adjusted
 !                          accordingly.
@@ -1362,7 +1362,7 @@ subroutine create_sub2grid_info(s2gi,nsig,npe,s2gi_ref)
    use general_sub2grid_mod, only: sub2grid_info
    use general_sub2grid_mod, only: general_sub2grid_create_info
    implicit none
- 
+
    ! Declare passed variables
    type(sub2grid_info), intent(out  ) :: s2gi
    integer(i_kind),     intent(in   ) :: nsig
@@ -1380,7 +1380,7 @@ subroutine destroy_sub2grid_info(s2gi)
    use general_sub2grid_mod, only: sub2grid_info
    use general_sub2grid_mod, only: general_sub2grid_destroy_info
    implicit none
- 
+
    ! Declare passed variables
    type(sub2grid_info), intent(inout) :: s2gi
 

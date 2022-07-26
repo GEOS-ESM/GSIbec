@@ -127,7 +127,7 @@ module egrid2agrid_mod
       module procedure egrid2agrid_r8_ad
       module procedure egrid2agrid_r4_rank4_ad
       module procedure egrid2agrid_r8_rank4_ad
-   end interface 
+   end interface
 
    interface agrid2egrid
       module procedure agrid2egrid_r4
@@ -148,7 +148,7 @@ module egrid2agrid_mod
       module procedure g_egrid2agrid_r8_ad
       module procedure g_egrid2agrid_r4_rank4_ad
       module procedure g_egrid2agrid_r8_rank4_ad
-   end interface 
+   end interface
 
    interface g_agrid2egrid
       module procedure g_agrid2egrid_r4
@@ -167,7 +167,7 @@ module egrid2agrid_mod
 !   prgmmr: parrish          org: np22                date: 2010-01-05
 !
 ! abstract: given coordinates and dimensions of analysis and ensemble grids, obtain
-!             interpolation weights and indices for ensemble to analysis, 
+!             interpolation weights and indices for ensemble to analysis,
 !             adjoint of ensemble to analysis,
 !             and smoothing interpolation analysis to ensemble.  all information is
 !             output in structure variable p.
@@ -196,13 +196,13 @@ module egrid2agrid_mod
       implicit none
 
       integer(i_kind),intent(in) :: nlata,nlona,nlate,nlone,nord_e2a
-      real(r_kind),intent(in) :: rlata(nlata),rlona(nlona),rlate(nlate),rlone(nlone) 
+      real(r_kind),intent(in) :: rlata(nlata),rlona(nlona),rlate(nlate),rlone(nlone)
       type(egrid2agrid_parm),intent(inout) :: p
 
       integer(i_kind) i
       real(r_kind) diffmax,range_lat,range_lon
       logical e2a_only
- 
+
       p%nlata=nlata
       p%nlona=nlona
       p%nlate=nlate
@@ -246,7 +246,7 @@ module egrid2agrid_mod
 !
 ! program history log:
 !   2010-02-06  parrish, initial documentation
-!   2010-03-09  parrish - add optional logical variable e2a_only, which if true, only compute 
+!   2010-03-09  parrish - add optional logical variable e2a_only, which if true, only compute
 !                          egrid to agrid interpolation operator.
 !   2010-04-06  parrish - correct for possible divide by zero when obtaining normalized adjoint
 !                          interpolation weights, used for smoothing interpolation from fine to coarse grid.
@@ -344,7 +344,7 @@ module egrid2agrid_mod
             return
          end if
       end if
-            
+
 
 !--------------------------------------------------------
 !   next get adjoint weights and addresses by brute force
@@ -1453,11 +1453,11 @@ module egrid2agrid_mod
          fail_tests=.true.
       end if
       if(abs(rlata(nlata)-half_pi) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlata(nlata) not within tolerance for north pole value',rlata(nlata) 
+         write(6,*)' in g_create_egrid2agrid, rlata(nlata) not within tolerance for north pole value',rlata(nlata)
          fail_tests=.true.
       end if
       if(abs(rlona(1)) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlona(1) not within tolerance for 0 meridian',rlona(1) 
+         write(6,*)' in g_create_egrid2agrid, rlona(1) not within tolerance for 0 meridian',rlona(1)
          fail_tests=.true.
       end if
       dlona=rlona(2)-rlona(1)
@@ -1474,21 +1474,21 @@ module egrid2agrid_mod
          fail_tests=.true.
       end if
       if(mod(nlona,2) /= 0) then
-         write(6,*)' in g_create_egrid2agrid, nlona not even' 
+         write(6,*)' in g_create_egrid2agrid, nlona not even'
          fail_tests=.true.
       end if
 
 !       ensemble grid tests:
       if(abs(rlate(1)+half_pi) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlate(1) not within tolerance for south pole value' 
+         write(6,*)' in g_create_egrid2agrid, rlate(1) not within tolerance for south pole value'
          fail_tests=.true.
       end if
       if(abs(rlate(nlate)-half_pi) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlate(nlate) not within tolerance for north pole value' 
+         write(6,*)' in g_create_egrid2agrid, rlate(nlate) not within tolerance for north pole value'
          fail_tests=.true.
       end if
       if(abs(rlone(1)) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlone(1) not within tolerance for 0 meridian' 
+         write(6,*)' in g_create_egrid2agrid, rlone(1) not within tolerance for 0 meridian'
          fail_tests=.true.
       end if
       dlone=rlone(2)-rlone(1)
@@ -1501,20 +1501,20 @@ module egrid2agrid_mod
       end do
       if(ilone > 0) write(6,*)' in g_create_egrid2agrid, dlone not constant to within tolerance'
       if(abs(rlone(nlone)+dlone-two_pi) > errtest) then
-         write(6,*)' in g_create_egrid2agrid, rlone(nlone) + dlone not within tolerance for 0 meridian' 
+         write(6,*)' in g_create_egrid2agrid, rlone(nlone) + dlone not within tolerance for 0 meridian'
          fail_tests=.true.
       end if
       if(mod(nlone,2) /= 0) then
-         write(6,*)' in g_create_egrid2agrid, nlone not even' 
+         write(6,*)' in g_create_egrid2agrid, nlone not even'
          fail_tests=.true.
       end if
- 
+
       if(fail_tests) then
          write(6,*)' incorrect input grid coordinates in subroutine g_create_egrid2agrid, program stops'
          call stop2(999)
       end if
 
-!      construct extended ensemble grid used for actual interpolation 
+!      construct extended ensemble grid used for actual interpolation
 !               (note that analysis grid needs no extension)
 
       nextend=1+(nord_e2a+2)/2
@@ -2499,7 +2499,7 @@ module egrid2agrid_mod
 !
 !   input argument list:
 !     na:     number of points to interpolate to
-!     rlata:  latitudes of points in radians within range from -pi/2 to pi/2 
+!     rlata:  latitudes of points in radians within range from -pi/2 to pi/2
 !     rlona:  longitudes of points in radians from 0 to 2*pi (values are transferred
 !               and then internally adjusted to be in this range modulo 2*pi)
 !     nlate:  number of ensemble latitudes
@@ -2556,15 +2556,15 @@ module egrid2agrid_mod
 
 !       ensemble grid tests:
       if(abs(rlate(1)+half_pi) > errtest) then
-         write(6,*)' in g_create_egrid2points, rlate(1) not within tolerance for south pole value' 
+         write(6,*)' in g_create_egrid2points, rlate(1) not within tolerance for south pole value'
          fail_tests=.true.
       end if
       if(abs(rlate(nlate)-half_pi) > errtest) then
-         write(6,*)' in g_create_egrid2points, rlate(nlate) not within tolerance for north pole value' 
+         write(6,*)' in g_create_egrid2points, rlate(nlate) not within tolerance for north pole value'
          fail_tests=.true.
       end if
       if(abs(rlone(1)) > errtest) then
-         write(6,*)' in g_create_egrid2points, rlone(1) not within tolerance for 0 meridian' 
+         write(6,*)' in g_create_egrid2points, rlone(1) not within tolerance for 0 meridian'
          fail_tests=.true.
       end if
       dlone=rlone(2)-rlone(1)
@@ -2577,14 +2577,14 @@ module egrid2agrid_mod
       end do
       if(ilone > 0) write(6,*)' in g_create_egrid2points, dlone not constant to within tolerance'
       if(abs(rlone(nlone)+dlone-two_pi) > errtest) then
-         write(6,*)' in g_create_egrid2points, rlone(nlone) + dlone not within tolerance for 0 meridian' 
+         write(6,*)' in g_create_egrid2points, rlone(nlone) + dlone not within tolerance for 0 meridian'
          fail_tests=.true.
       end if
       if(mod(nlone,2) /= 0) then
-         write(6,*)' in g_create_egrid2points, nlone not even' 
+         write(6,*)' in g_create_egrid2points, nlone not even'
          fail_tests=.true.
       end if
- 
+
       if(fail_tests) then
          write(6,*)' incorrect input grid coordinates in subroutine g_create_egrid2points, program stops'
          call stop2(999)
@@ -2605,9 +2605,9 @@ module egrid2agrid_mod
             if(rlona0(j) >= two_pi) rlona0(j)=rlona0(j)-two_pi
          end do
       end do
-      
 
-!      construct extended ensemble grid used for actual interpolation 
+
+!      construct extended ensemble grid used for actual interpolation
 !               (note that analysis grid needs no extension)
 
       nextend=1+(nord_e2a+2)/2
@@ -2680,7 +2680,7 @@ module egrid2agrid_mod
                                                     !   which is why this is the slow version.
       integer(i_kind) i,j,j1,je,jr,k
       real(r_kind) w1,factor
-!               
+!
 !           construct e_ex from input array e
 
       factor=one

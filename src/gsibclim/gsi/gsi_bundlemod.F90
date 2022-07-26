@@ -1,6 +1,6 @@
 !----------------------------------------------------------------------------
 !BOP
-!  
+!
 ! !MODULE:  GSI_BundleMod --- GSI Bundle
 !
 ! !INTERFACE:
@@ -11,7 +11,7 @@
 !
 
 module GSI_BundleMod
-   
+
 ! !USES:
 
    use m_kinds, only: i_kind,r_single,r_kind,r_double,r_quad
@@ -106,7 +106,7 @@ module GSI_BundleMod
           module procedure putvar3dp1r8_ !  write to real*8 rank-3+1 content
    end interface
    interface GSI_BundleGetPointer    ! get pointer to field(s) in bundle
-          module procedure get1_     !   single-field 
+          module procedure get1_     !   single-field
           module procedure get2_     !   many-field
           module procedure get31r4_  !   real*4 rank-1 explict pointer (real*4)
           module procedure get31r8_  !   real*8 rank-1 explict pointer (real*8)
@@ -177,7 +177,7 @@ module GSI_BundleMod
 !!    integer(i_kind) :: khalo  ! halo of 3nd dim (usually not needed)
 !!    real(r_kind), pointer :: lat(:,:)   ! field of latitudes
 !!    real(r_kind), pointer :: lon(:,:)   ! field of longitudes
-!!    real(r_kind), pointer :: pm (:,:,:) ! field of mid-layer pressures 
+!!    real(r_kind), pointer :: pm (:,:,:) ! field of mid-layer pressures
 !!    real(r_kind), pointer :: pe (:,:,:) ! field of edge pressures
    end type GSI_Grid
 
@@ -226,7 +226,7 @@ module GSI_BundleMod
       integer(i_kind) :: NumVars=-1 ! total number of variables (n1d+n2d+n3d)
       integer(i_kind) :: ndim=-1    ! size of pointer values
       integer(i_kind) :: AllKinds=-1! overall bundle kind (see Remark 9)
-      type(GSI_Grid)  :: grid 
+      type(GSI_Grid)  :: grid
       type(GSI_1D),    pointer :: r1(:) => null()
       type(GSI_2D),    pointer :: r2(:) => null()
       type(GSI_3D),    pointer :: r3(:) => null()
@@ -255,15 +255,15 @@ module GSI_BundleMod
    end interface
 
 !
-! !DESCRIPTION: This module implements the bundle structure for GSI. 
-!  It is meant to be general enough to allow its use in GSI within 
-!  both the control and the state vectors. Ultimately, the guess-vector of 
-!  GSI could also aim at using the GSI\_Bundle as a general approach to 
+! !DESCRIPTION: This module implements the bundle structure for GSI.
+!  It is meant to be general enough to allow its use in GSI within
+!  both the control and the state vectors. Ultimately, the guess-vector of
+!  GSI could also aim at using the GSI\_Bundle as a general approach to
 !  gathering various fields needed to define the guess.
 !
-!  A first example of the use of GSI\_Bundle is used in the module 
-!  gsi\_chemguess\_mod.F90 that allows adding an arbitrary number of 
-!  chemical constituents and species into GSI  --- with a note that 
+!  A first example of the use of GSI\_Bundle is used in the module
+!  gsi\_chemguess\_mod.F90 that allows adding an arbitrary number of
+!  chemical constituents and species into GSI  --- with a note that
 !  only CO and CO2 are currently known by the internal GSI guess module.
 !
 !  The GSI\_Bundle is a collection of fields defined on a grid. By definition,
@@ -278,7 +278,7 @@ module GSI_BundleMod
 !
 ! !REVISION HISTORY:
 !
-!  22Apr2010 Todling - initial code, based on discussion w/ Arlindo da Silva 
+!  22Apr2010 Todling - initial code, based on discussion w/ Arlindo da Silva
 !                      and his f90/ESMF''s SimpleBundle.
 !  18Aug2010      Hu - declared GSI_1D, GSI_2D, and GSI_3D as public.
 !  28Apr2011 Todling - complete overload to support REAL*4 and REAL*8
@@ -286,20 +286,20 @@ module GSI_BundleMod
 !  27Jun2012 Parrish - set verbose_ to .false. to turn off diagnostic print in subroutine merge_.
 !  05Oct2014 Todling - add 4d-like interfaces to getvars
 !  26Aug2017   G. Ge - change names(nd) to names(:) to make the passing of assumed size character
-!                      array consistent between nested calls                   
+!                      array consistent between nested calls
 !
-! !SEE ALSO:  
+! !SEE ALSO:
 !           gsi_metguess_mod.F90
 !           gsi_chemguess_mod.F90
 !
-! !REMARKS: 
+! !REMARKS:
 !
 !  1. This module should never depend on more than the following GSI modules:
 !      kinds
 !      constants
 !      m_rerank
 !
-!  2. Currently the Bundle uses a very simple (im,jm,km) grid. The grid could 
+!  2. Currently the Bundle uses a very simple (im,jm,km) grid. The grid could
 !     be generalized. In doing so, it should not be a part of the Bundle, but
 !     rather an outside entity that can them be used by the Bundle; instead
 !     of passing im,jm,km the routines would pass the Grid type.
@@ -307,7 +307,7 @@ module GSI_BundleMod
 !  3. Bundle does not accept redundancy in variable names.
 !
 !  4. Routines and interfaces are only written if they are needed and can
-!     be tested in GSI. There is no need to create code that is not being 
+!     be tested in GSI. There is no need to create code that is not being
 !     used.
 !
 !  5. Not all prologues will show in "protex -s" since I have purposefully
@@ -320,15 +320,15 @@ module GSI_BundleMod
 !
 !       6.b) all public procedures must be declared via an interface
 !            declaration.
-! 
-!       6.c) name of internal procedures end with an underscore; the 
-!            corresponding public names are created via an interface with a 
-!            similar name without the underscore, e.g., internal procedure 
+!
+!       6.c) name of internal procedures end with an underscore; the
+!            corresponding public names are created via an interface with a
+!            similar name without the underscore, e.g., internal procedure
 !            print_ is made public with the name GSI_BundlePrint
 !
-!  7. For the time being the GSI stop2 routine is being used to kill 
+!  7. For the time being the GSI stop2 routine is being used to kill
 !     certain error conditions. Ultimately, this module should never
-!     call stop2 or be killed. All procedures should return an error 
+!     call stop2 or be killed. All procedures should return an error
 !     code. It is up to the calling program to check on the error code
 !     and abort in case of error.
 !
@@ -339,7 +339,7 @@ module GSI_BundleMod
 !  9. In principle the bundle should be able to handle mix-kind variables,
 !     however, because of the need to link the fields in the bundle to
 !     a long array-like entity (values), it turns out that all fields
-!     in a given bundle must be created with the same kind, therefore 
+!     in a given bundle must be created with the same kind, therefore
 !     the existence of AllKinds.
 !
 !EOP
@@ -355,7 +355,7 @@ CONTAINS
 !noEOC
 !............................................................................................
 !_BOP
-!  
+!
 ! !IROUTINE:  Init1d_ --- Initialze rank-1 meta-data
 !
 ! !INTERFACE:
@@ -388,9 +388,9 @@ CONTAINS
 !_EOP
 !-------------------------------------------------------------------------
 !noBOC
- 
+
  integer(i_kind) i
- 
+
  do i=1,nd
     flds(i)%myKind = thisKind
     flds(i)%shortname = trim(names(i))
@@ -409,9 +409,9 @@ CONTAINS
  integer(i_kind),intent(in)   :: nd
  type(GSI_1D),   intent(inout):: flds(nd)
  integer(i_kind),intent(out)  :: istatus
- 
+
  integer(i_kind) i
-    
+
  do i=1,nd
     flds(i)%myKind    = -1
     flds(i)%shortname = ""
@@ -430,9 +430,9 @@ CONTAINS
  character(len=*),OPTIONAL,intent(in):: longnames(nd)
  character(len=*),OPTIONAL,intent(in):: units(nd)
  integer(i_kind), OPTIONAL,intent(in):: thisKind
- 
+
  integer(i_kind) i
-   
+
  do i=1,nd
     flds(i)%myKind = thisKind
     flds(i)%shortname = trim(names(i))
@@ -451,9 +451,9 @@ CONTAINS
  integer(i_kind),intent(in) :: nd
  type(GSI_2D),   intent(inout):: flds(nd)
  integer(i_kind),intent(out):: istatus
- 
+
  integer(i_kind) i
-    
+
  do i=1,nd
     flds(i)%myKind    = -1
     flds(i)%shortname = ""
@@ -472,9 +472,9 @@ CONTAINS
  character(len=*),OPTIONAL,intent(in):: longnames(nd)
  character(len=*),OPTIONAL,intent(in):: units(nd)
  integer(i_kind), OPTIONAL,intent(in):: thisKind
- 
+
  integer(i_kind) i
-    
+
  do i=1,nd
     flds(i)%myKind = thisKind
     flds(i)%shortname = trim(names(i))
@@ -493,9 +493,9 @@ CONTAINS
  integer(i_kind),intent(in) :: nd
  type(GSI_3D),   intent(inout):: flds(nd)
  integer(i_kind),intent(out):: istatus
- 
+
  integer(i_kind) i
-    
+
  do i=1,nd
     flds(i)%myKind    = -1
     flds(i)%shortname = ""
@@ -539,7 +539,7 @@ CONTAINS
 #endif
     else
         istatus=1
-        return 
+        return
     endif
  enddo
  end subroutine copy_item1d_
@@ -575,7 +575,7 @@ CONTAINS
 #endif
     else
         istatus=1
-        return 
+        return
     endif
  enddo
  end subroutine copy_item2d_
@@ -611,7 +611,7 @@ CONTAINS
 #endif
     else
         istatus=1
-        return 
+        return
     endif
  enddo
  end subroutine copy_item3d_
@@ -649,12 +649,12 @@ CONTAINS
     integer(i_kind), intent(out) :: istatus  ! return error code
 
 ! !DESCRIPTION: Set pointers to bundle (all-variable interface).
-! 
-! 
-! !SEE ALSO: 
+!
+!
+! !SEE ALSO:
 !           set1_
 !
-! !REMARKS: 
+! !REMARKS:
 !  1. This does not allocate dimension for vectors (only set pointers).
 !
 ! !REVISION HISTORY:
@@ -701,7 +701,7 @@ CONTAINS
         nd=size(names1d)
         if (nd>0) then
             n1d=nd
-            allocate(Bundle%r1(n1d), stat=istatus) 
+            allocate(Bundle%r1(n1d), stat=istatus)
             call init_ (Bundle%r1(:),n1d,names1d,istatus,thisKind=Bundle%AllKinds)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(init1), ', istatus
@@ -715,7 +715,7 @@ CONTAINS
         nd=size(names2d)
         if (nd>0) then
             n2d=nd
-            allocate(Bundle%r2(n2d), stat=istatus) 
+            allocate(Bundle%r2(n2d), stat=istatus)
             call init_ (Bundle%r2(:),n2d,names2d,istatus,thisKind=Bundle%AllKinds)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(init2), ', istatus
@@ -729,7 +729,7 @@ CONTAINS
         nd=size(names3d)
         if (nd>0) then
             n3d=nd
-            allocate(Bundle%r3(n3d), stat=istatus) 
+            allocate(Bundle%r3(n3d), stat=istatus)
             call init_ (Bundle%r3(:),n3d,names3d,istatus,thisKind=Bundle%AllKinds)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(init3), ', istatus
@@ -885,7 +885,7 @@ CONTAINS
 ! !DESCRIPTION: Set pointers to bundle (1d-variable interface).
 !
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           set0_
 !
 ! !REMARKS:
@@ -920,7 +920,7 @@ CONTAINS
         nd=size(names1d)
         if (nd>0) then
             n1d=nd
-            allocate(Bundle%r1(n1d), stat=istatus) 
+            allocate(Bundle%r1(n1d), stat=istatus)
             call init_ (Bundle%r1(:),n1d,names1d,istatus,thisKind=Bundle%AllKinds)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(init1), ', istatus
@@ -1009,12 +1009,12 @@ CONTAINS
 
     integer(i_kind), intent(out) :: istatus  ! return error code
 
-! !DESCRIPTION: 
+! !DESCRIPTION:
 !               Create bundle from grid specification and user-defined
 !               variable names; allocation of memory performed here.
 !
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create2_, create3_
 !
 ! !REVISION HISTORY:
@@ -1061,7 +1061,7 @@ CONTAINS
         nd=size(names1d)
         if (nd>0) then
             n1d=nd
-            allocate(Bundle%r1(n1d), stat=istatus) 
+            allocate(Bundle%r1(n1d), stat=istatus)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(r1), ', istatus
                call stop2(999)
@@ -1074,7 +1074,7 @@ CONTAINS
         nd=size(names2d)
         if (nd>0) then
             n2d=nd
-            allocate(Bundle%r2(n2d), stat=istatus) 
+            allocate(Bundle%r2(n2d), stat=istatus)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(r2), ', istatus
                call stop2(999)
@@ -1087,7 +1087,7 @@ CONTAINS
         nd=size(names3d)
         if (nd>0) then
             n3d=nd
-            allocate(Bundle%r3(n3d), stat=istatus) 
+            allocate(Bundle%r3(n3d), stat=istatus)
             if(istatus/=0)then
                write(6,*) myname_, ':trouble allocating ',trim(name),'(r3), ', istatus
                call stop2(999)
@@ -1300,7 +1300,7 @@ CONTAINS
 ! !DESCRIPTION: Create new bundle from another existing bundle.
 !
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create1_, create3_
 !
 ! !REVISION HISTORY:
@@ -1377,7 +1377,7 @@ CONTAINS
 !               bundles.
 !
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create1_, create2_
 !
 ! !REVISION HISTORY:
@@ -1399,7 +1399,7 @@ CONTAINS
     istatus=0
 
 !   Defining the grid the following way is dangerous ...
-    im = max(Bundle1%grid%im,Bundle2%grid%im) 
+    im = max(Bundle1%grid%im,Bundle2%grid%im)
     jm = max(Bundle1%grid%jm,Bundle2%grid%jm)
     km = max(Bundle1%grid%km,Bundle2%grid%km)
     call GSI_GridCreate(grid,im,jm,km)
@@ -1494,7 +1494,7 @@ CONTAINS
 !   and a call to copy_(), with an optional attribute to arguments name
 !   and istatus, to simplify its user interface.
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create2_, copy_
 !
 ! !REVISION HISTORY:
@@ -1551,7 +1551,7 @@ CONTAINS
 !   and a call to copy_(), with an optional attribute to arguments name
 !   and istatus, to simplify its user interface.
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create2_, copy_
 !
 ! !REVISION HISTORY:
@@ -1609,7 +1609,7 @@ CONTAINS
 !   and a call to copy_(), with an optional attribute to arguments name
 !   and istatus, to simplify its user interface.
 !
-! !SEE ALSO: 
+! !SEE ALSO:
 !           create2_, copy_
 !
 ! !REVISION HISTORY:
@@ -1653,7 +1653,7 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine get0_ ( Bundle, fldname, ipnt, istatus, irank, ival )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle
@@ -1678,7 +1678,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: i, n1d, n2d, n3d
 
     istatus=0
@@ -1722,7 +1722,7 @@ CONTAINS
 ! !INTERFACE:
 !
   subroutine get1_ ( Bundle, fldname, ipnt, istatus, irank, ival )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle
@@ -1746,7 +1746,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank_
     integer(i_kind) :: ival_
 
@@ -1768,7 +1768,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get2_ ( Bundle, fldnames, ipnts, istatus, iranks, ivals )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -1792,7 +1792,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: i,nflds
     integer(i_kind),allocatable,dimension(:) :: iranks_
     integer(i_kind),allocatable,dimension(:) :: ivals_
@@ -1820,7 +1820,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get31r8_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),target,intent(in) :: Bundle   ! the Bundle
@@ -1843,7 +1843,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt,ival,nsz
 
     istatus=0
@@ -1863,7 +1863,7 @@ CONTAINS
           case default
              istatus=1
           end select
-    else 
+    else
         istatus=1
     endif
 
@@ -1876,7 +1876,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get31r4_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),target,intent(in) :: Bundle   ! the Bundle
@@ -1899,7 +1899,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt,ival,nsz
 
     istatus=0
@@ -1917,7 +1917,7 @@ CONTAINS
           case default
              istatus=1
           end select
-    else 
+    else
         istatus=1
     endif
 
@@ -1930,7 +1930,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get32r8_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -1951,7 +1951,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -1971,7 +1971,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get32r4_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -1992,7 +1992,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2011,7 +2011,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get33r8_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -2032,7 +2032,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2051,7 +2051,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine get33r4_ ( Bundle, fldname, pntr, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -2072,7 +2072,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2093,7 +2093,7 @@ CONTAINS
 ! !INTERFACE:
 
   subroutine putvar0dr8_ ( Bundle, fldname, cnst, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     character(len=*),     intent(in) :: fldname          ! name of field
@@ -2107,7 +2107,7 @@ CONTAINS
 
     integer(i_kind),intent(out) :: istatus          ! status error code
 
-! !DESCRIPTION: Set user-specified field in bundle to a constant value. 
+! !DESCRIPTION: Set user-specified field in bundle to a constant value.
 !
 !
 ! !REVISION HISTORY:
@@ -2117,7 +2117,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2145,7 +2145,7 @@ CONTAINS
 ! !INTERFACE:
 
   subroutine putvar0dr4_ ( Bundle, fldname, cnst, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     character(len=*),intent(in) :: fldname          ! name of field
@@ -2159,7 +2159,7 @@ CONTAINS
 
     integer(i_kind),intent(out) :: istatus          ! status error code
 
-! !DESCRIPTION: Set user-specified field in bundle to a constant value. 
+! !DESCRIPTION: Set user-specified field in bundle to a constant value.
 !
 !
 ! !REVISION HISTORY:
@@ -2169,7 +2169,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2211,12 +2211,12 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
 
     integer(i_kind),intent(out) :: istatus          ! status error code
-     
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               rank-1 input to rank-N output.
 !
 !
-! !REMARKS: 
+! !REMARKS:
 !   1. This routine also allows overwritting a 2d-/3d-array in bundle
 !      with user-specified field.
 !
@@ -2272,12 +2272,12 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
 
     integer(i_kind),intent(out) :: istatus          ! status error code
-     
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               rank-1 input to rank-N output.
 !
 !
-! !REMARKS: 
+! !REMARKS:
 !   1. This routine also allows overwritting a 2d-/3d-array in bundle
 !      with user-specified field.
 !
@@ -2320,7 +2320,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine putvar2dr8_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
     character(len=*),intent(in) :: fldname
     real(r_double),  intent(in) :: fld(:,:)
@@ -2331,7 +2331,7 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
     integer(i_kind),intent(out) :: istatus
 
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               2d-input to 2d output.
 !
 !
@@ -2342,7 +2342,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2364,7 +2364,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine putvar2dr4_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(in) :: fld(:,:)
@@ -2375,7 +2375,7 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
     integer(i_kind),intent(out) :: istatus
 
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               2d-input to 2d output.
 !
 !
@@ -2386,7 +2386,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2408,7 +2408,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine putvar2dp1r8_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
     character(len=*),intent(in) :: fldname
     real(r_double),  intent(in) :: fld(:,:,:)
@@ -2419,7 +2419,7 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
     integer(i_kind),intent(out) :: istatus
 
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               2d-input to 2d output, for each instance of Bundle.
 !
 !
@@ -2430,7 +2430,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2458,7 +2458,7 @@ CONTAINS
 !
 ! !INTERFACE:
   subroutine putvar2dp1r4_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(in) :: fld(:,:,:)
@@ -2469,7 +2469,7 @@ CONTAINS
 ! !OUTPUT PARAMETERS:
     integer(i_kind),intent(out) :: istatus
 
-! !DESCRIPTION: Set user-specified field in bundle the given input field. 
+! !DESCRIPTION: Set user-specified field in bundle the given input field.
 !               2d-input to 2d output, for each instance of Bundle.
 !
 !
@@ -2480,7 +2480,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2503,12 +2503,12 @@ CONTAINS
   end subroutine putvar2dp1r4_
   subroutine putvar3dr8_ ( Bundle, fldname, fld, istatus )
 ! This routine also allows putting a 1d-array into a 2d-/3d-array
-    
+
     type(GSI_Bundle),intent(inout) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_double),  intent(in) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2525,12 +2525,12 @@ CONTAINS
   end subroutine putvar3dr8_
   subroutine putvar3dr4_ ( Bundle, fldname, fld, istatus )
 ! This routine also allows putting a 1d-array into a 2d-/3d-array
-    
+
     type(GSI_Bundle),intent(inout) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(in) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2547,12 +2547,12 @@ CONTAINS
   end subroutine putvar3dr4_
   subroutine putvar3dp1r8_ ( Bundle, fldname, fld, istatus )
 ! This routine also allows putting a 1d-array into a 2d-/3d-array+1
-    
+
     type(GSI_Bundle),intent(inout) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_double),  intent(in) :: fld(:,:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2575,12 +2575,12 @@ CONTAINS
   end subroutine putvar3dp1r8_
   subroutine putvar3dp1r4_ ( Bundle, fldname, fld, istatus )
 ! This routine also allows putting a 1d-array into a 2d-/3d-array+1
-    
+
     type(GSI_Bundle),intent(inout) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(in) :: fld(:,:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2610,7 +2610,7 @@ CONTAINS
 ! !INTERFACE:
 
   subroutine getvar1dr8_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -2626,7 +2626,7 @@ CONTAINS
 !               Nd-input to 1d output.
 !
 !
-! !REMARKS: 
+! !REMARKS:
 !   1. This routine also allows retrieving a 2d-/3d-array in bundle
 !      into the 1d output array.
 !
@@ -2637,7 +2637,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: n,irank,ipnt
 
     istatus=0
@@ -2669,7 +2669,7 @@ CONTAINS
 ! !INTERFACE:
 
   subroutine getvar1dr4_ ( Bundle, fldname, fld, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in) :: Bundle   ! the Bundle
@@ -2685,7 +2685,7 @@ CONTAINS
 !               Nd-input to 1d output.
 !
 !
-! !REMARKS: 
+! !REMARKS:
 !   1. This routine also allows retrieving a 2d-/3d-array in bundle
 !      into the 1d output array.
 !
@@ -2696,7 +2696,7 @@ CONTAINS
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    
+
     integer(i_kind) :: n,irank,ipnt
 
     istatus=0
@@ -2721,12 +2721,12 @@ CONTAINS
 
   end subroutine getvar1dr4_
   subroutine getvar2dr8_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_double),intent(inout) :: fld(:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2740,12 +2740,12 @@ CONTAINS
 
   end subroutine getvar2dr8_
   subroutine getvar2dr4_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(inout) :: fld(:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2759,12 +2759,12 @@ CONTAINS
 
   end subroutine getvar2dr4_
   subroutine getvar2dp1r8_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_double),intent(inout) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2784,12 +2784,12 @@ CONTAINS
 
   end subroutine getvar2dp1r8_
   subroutine getvar2dp1r4_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(inout) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-    
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2808,12 +2808,12 @@ CONTAINS
 
   end subroutine getvar2dp1r4_
   subroutine getvar3dr8_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_double),intent(inout) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-   
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2827,12 +2827,12 @@ CONTAINS
 
   end subroutine getvar3dr8_
   subroutine getvar3dr4_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(inout) :: fld(:,:,:)
     integer(i_kind),intent(out) :: istatus
-   
+
     integer(i_kind) :: irank,ipnt
 
     istatus=0
@@ -2846,12 +2846,12 @@ CONTAINS
 
   end subroutine getvar3dr4_
   subroutine getvar3dp1r8_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_double),intent(inout) :: fld(:,:,:,:)
     integer(i_kind),intent(out) :: istatus
-   
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
@@ -2871,17 +2871,17 @@ CONTAINS
 
   end subroutine getvar3dp1r8_
   subroutine getvar3dp1r4_ ( Bundle, fldname, fld, istatus )
-    
+
     type(GSI_Bundle),intent(in) :: Bundle(:)
     character(len=*),intent(in) :: fldname
     real(r_single),  intent(inout) :: fld(:,:,:,:)
     integer(i_kind),intent(out) :: istatus
-   
+
     integer(i_kind) :: irank,ipnt,ii,nt
 
     istatus=0
     nt=size(Bundle)
- 
+
 !   loop over bundle instances
     do ii=1,nt
 
@@ -2904,7 +2904,7 @@ CONTAINS
 ! !INTERFACE:
 
   subroutine inquire_char_ ( Bundle, what, vars, istatus )
-    
+
 ! !INPUT PARAMETERS:
 
     type(GSI_Bundle),intent(in)  :: Bundle    ! the Bundle
@@ -2914,7 +2914,7 @@ CONTAINS
 
     character(len=*),intent(inout) :: vars(:) ! variable names/units
     integer(i_kind), intent(out)   :: istatus
-    
+
 ! !DESCRIPTION: Inquire about (character-type) meta-data-like variables
 !               in bundle.
 !
@@ -3136,7 +3136,7 @@ CONTAINS
 !............................................................................................
 !BOP
 !
-! !IROUTINE: Copy_ --- Copy one Bundle into another 
+! !IROUTINE: Copy_ --- Copy one Bundle into another
 !
 ! !INTERFACE:
 
@@ -3548,8 +3548,8 @@ subroutine self_add_R8scal(yst,pa,xst)
      call stop2(999)
   endif
 
-  if(xst%AllKinds==r_double ) then 
-     if(yst%AllKinds==r_double )then 
+  if(xst%AllKinds==r_double ) then
+     if(yst%AllKinds==r_double )then
         DO ii=1,yst%ndim
            yst%valuesR8(ii)=yst%valuesR8(ii)+pa*xst%valuesR8(ii)
         ENDDO
@@ -3614,8 +3614,8 @@ subroutine self_add_R4scal(yst,pa,xst)
      call stop2(999)
   endif
 
-  if(xst%AllKinds==r_double ) then 
-     if(yst%AllKinds==r_double )then 
+  if(xst%AllKinds==r_double ) then
+     if(yst%AllKinds==r_double )then
         DO ii=1,yst%ndim
            yst%valuesR8(ii)=yst%valuesR8(ii)+pa*xst%valuesR8(ii)
         ENDDO
@@ -3809,7 +3809,7 @@ real(r_double) function sum2dR8_(field,ihalo)
 ! local variables
   real(r_double) :: sum_mask
   integer(i_kind) :: im,jm,i,j,ihalo_
- 
+
   im=size(field,1)
   jm=size(field,2)
   ihalo_=0
@@ -3834,7 +3834,7 @@ real(r_single) function sum2dR4_(field,ihalo)
 ! local variables
   real(r_double) :: sum_mask
   integer(i_kind) :: im,jm,i,j,ihalo_
- 
+
   im=size(field,1)
   jm=size(field,2)
   ihalo_=0
@@ -3860,7 +3860,7 @@ real(r_double) function sum3dR8_(field,ihalo)
 ! local variables
   real(r_double) :: sum_mask
   integer(i_kind) :: im,jm,km,i,j,k,ihalo_
- 
+
   im=size(field,1)
   jm=size(field,2)
   km=size(field,3)
@@ -3888,7 +3888,7 @@ real(r_single) function sum3dR4_(field,ihalo)
 ! local variables
   real(r_double) :: sum_mask
   integer(i_kind) :: im,jm,km,i,j,k,ihalo_
- 
+
   im=size(field,1)
   jm=size(field,2)
   km=size(field,3)
@@ -3915,7 +3915,7 @@ end function sum3dR4_
 !
 ! !INTERFACE:
   subroutine unset_ ( Bundle, istatus )
-    
+
     type(GSI_Bundle),intent(inout) :: Bundle
     integer(i_kind),intent(out) :: istatus
 
@@ -4006,7 +4006,7 @@ end function sum3dR4_
 ! !INTERFACE:
 
   subroutine destroy_ ( Bundle, istatus )
-    
+
 ! !INPUT/OUTPUT PARAMETERS:
 
     type(GSI_Bundle),intent(inout) :: Bundle
@@ -4147,7 +4147,7 @@ end function sum3dR4_
 
     type(GSI_Bundle) :: Bundle
     integer(i_kind),optional,intent(in) :: thispe
-    
+
 ! !DESCRIPTION: Summarize contents of bundle by echoing max/min values.
 !
 !
@@ -4163,7 +4163,7 @@ end function sum3dR4_
 !EOP
 !-------------------------------------------------------------------------
 !noBOC
-    integer(i_kind) :: i 
+    integer(i_kind) :: i
     character(len=*),parameter::myname_='print_'
     logical showthis
     if (Bundle%AllKinds<0 ) then
@@ -4211,7 +4211,7 @@ end function sum3dR4_
                        maxval(Bundle%r3(i)%qr8)
        endif
     end do
-                             
+
   end subroutine print_
 !noEOC
 
@@ -4239,7 +4239,7 @@ end function sum3dR4_
          do i = j,nvars
             if(trim(fnames(i))==trim(fnames(j))) ic=ic+1 ! this is stupid
          enddo
-         if(ic/=1) then 
+         if(ic/=1) then
             redundant_=.true.
             deallocate(fnames)
             return

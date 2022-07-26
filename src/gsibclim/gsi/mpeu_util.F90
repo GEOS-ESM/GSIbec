@@ -10,7 +10,7 @@ module mpeu_util
 !
 ! program history log:
 !   2010-03-17  j guo   - added this document block
-!   2010-05-30  todling - add some real dirty mimic of i90''s table read 
+!   2010-05-30  todling - add some real dirty mimic of i90''s table read
 !   2010-87-19  todling - remove reference to abor1
 !   2013-05-14  guo     - added getarec(), for not-commented text buffer.
 !   2014-02-03  guo     - added mprefix for easy messaging, but commented
@@ -66,7 +66,7 @@ module mpeu_util
 !
 !   (2) Indentation is a way of adding visual "encapsulation" effects,
 !       for indenting most program constructs.
-!       
+!
 !       With this rule in mind, I indent comments as well, corresponding
 !       to their code construct levels, since these comments are there
 !       for the reasons of their code contructs only.  So they should be
@@ -105,7 +105,7 @@ module mpeu_util
 !         idy=i
 !
 !       Also, for a similar consideration, sometime comments are pushed
-!       to the right, serving the purpose of "marginal notes".  
+!       to the right, serving the purpose of "marginal notes".
 !
 !       So when there is an indentation, please believe there may be a
 !       reason for being the way it is.  In particular, there is really
@@ -2068,7 +2068,7 @@ done_read: do
               ! ignore
            else
               if(i>nact) then
-                 write(6,*) 'error reading table'  
+                 write(6,*) 'error reading table'
                 stop
               endif
               i=i+1

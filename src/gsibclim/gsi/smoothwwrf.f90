@@ -48,7 +48,7 @@ subroutine smoothww(nx,ny,p,wl,nitr,mx)
   hwl=hwl2
 
 
-! Big loop over number of smoother passes       
+! Big loop over number of smoother passes
   do n=1,nitr
 
 
@@ -79,9 +79,9 @@ subroutine smoothww(nx,ny,p,wl,nitr,mx)
            p(i,j)=(one-hwlx)*p(i,j)
         enddo
      enddo
-     do i=nx1,nx2   
+     do i=nx1,nx2
         im=i-1
-        do j=ny1,ny2 
+        do j=ny1,ny2
            p(i,j)=p(i,j)+hwlx*p(im,j)
         enddo
      enddo
@@ -134,9 +134,9 @@ subroutine smoothww(nx,ny,p,wl,nitr,mx)
            p(i,j)=(one-hwl)*p(i,j)
         enddo
      enddo
-     do j=ny1,ny2 
+     do j=ny1,ny2
         jm=j-1
-        do i=nx1,nx2   
+        do i=nx1,nx2
            p(i,j)=p(i,j)+hwl*p(i,jm)
         enddo
      enddo

@@ -93,7 +93,7 @@ subroutine write_bkgvars_grid(a,b,c,d,mype)
      call ba_close(22,iret)
 #endif /* HAVE_BACIO */
   end if
-   
+
   return
 end subroutine write_bkgvars_grid
 
@@ -237,7 +237,7 @@ subroutine write_bkgvars2_grid
      close(lu)
 
   end if ! mype=0
-   
+
   return
 end subroutine write_bkgvars2_grid
 
@@ -398,7 +398,7 @@ subroutine write_bundle(bundle,fname)
      close(lu)
 
   end if ! mype=0
-   
+
   if (n3d>0) then
     deallocate(a4)
     deallocate(ag)

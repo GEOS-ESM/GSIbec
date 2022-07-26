@@ -43,7 +43,7 @@ subroutine get_geos_ens(this,grd,member,ntindex,tau,atm_bundle,iret)
 !
 ! abstract: Read in GEOS ensemble members in to GSI ensemble.
 !
-! program history log: 
+! program history log:
 !   2011-09-13  todling  - created for testing purposes
 !   2011-10-15  el akkraoui - add vor/div calculation call
 !   2011-11-13  todling  - add vor/div calculation for dual-res case
@@ -98,7 +98,7 @@ implicit none
    integer(i_kind)                       ,intent(in   ) :: ntindex
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
-   type(gsi_bundle)                      ,intent(inout) :: atm_bundle                      
+   type(gsi_bundle)                      ,intent(inout) :: atm_bundle
 
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_ens_'
@@ -217,7 +217,7 @@ subroutine get_geos_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
 !
 ! abstract: Read in GEOS ensemble members in to GSI ensemble.
 !
-! program history log: 
+! program history log:
 !   2011-09-13  todling  - created for testing purposes
 !   2011-10-15  el akkraoui - add vor/div calculation call
 !   2011-11-13  todling  - add vor/div calculation for dual-res case
@@ -273,7 +273,7 @@ implicit none
    integer(i_kind)                       ,intent(in   ) :: ntindex
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
-   type(gsi_bundle)                      ,intent(inout) :: atm_bundle(:)                      
+   type(gsi_bundle)                      ,intent(inout) :: atm_bundle(:)
 
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_Nens_'
@@ -403,7 +403,7 @@ subroutine put_geos_ens(this,grd,member,ntindex,pert,iret)
 !
 ! abstract: Write out GSI ensemble to file.
 !
-! program history log: 
+! program history log:
 !   2011-10-01  todling  - created for testing purposes
 !   2012-05-15  el akkraoui/todling  - overload for r4/r8; pass time index
 !   2015-10-19  todling  - add qi/ql/qr/qs and should work for all cases of CV/SV
