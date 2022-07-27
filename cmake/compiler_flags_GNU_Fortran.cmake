@@ -1,38 +1,23 @@
-# (C) Copyright 2019 UCAR
-#
-# This software is licensed under the terms of the Apache Licence Version 2.0
-# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# Definitions
+# -----------
+add_definitions(-D__GFORTRAN__)
 
-####################################################################
-# FLAGS COMMON TO ALL BUILD TYPES
-####################################################################
 
-####################################################################
-# RELEASE FLAGS
-####################################################################
+# Common flags
+# ------------
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-real-8")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-double-8")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -falign-commons")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffixed-line-length-132")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fcray-pointer")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -frecord-marker=4")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fno-range-check")
 
-#set( CMAKE_Fortran_FLAGS_RELEASE "-r8 -O3 -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
 
-####################################################################
-# DEBUG FLAGS
-####################################################################
-
-#set( CMAKE_Fortran_FLAGS_DEBUG "-r8 -O0 -g -qopt-report0 -ftz -align all -fno-alias -traceback -assume realloc_lhs     -convert big_endian -assume byterecl -fPIC -fp-model strict -align dcommons " )
-
-####################################################################
-# BIT REPRODUCIBLE FLAGS
-####################################################################
-
-#set( CMAKE_Fortran_FLAGS_BIT     "-O2 -ip -ipo -unroll -inline -no-heap-arrays" )
-
-####################################################################
-# LINK FLAGS
-####################################################################
-
-#set( CMAKE_Fortran_LINK_FLAGS    "" )
-
-####################################################################
-
-# Meaning of flags
-# ----------------
-# todo
+# GNU version 10 or greater
+# -------------------------
+if (CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-invalid-boz")
+endif ()
