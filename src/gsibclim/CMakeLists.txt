@@ -10,7 +10,6 @@ include(GNUInstallDirs)
 ecbuild_add_library( TARGET ${PROJECT_NAME}
                      SOURCES ${${PROJECT_NAME}_src_files}
                      INSTALL_HEADERS LISTED
-                     HEADER_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
                      LINKER_LANGUAGE ${${PROJECT_NAME}_LINKER_LANGUAGE})
 
 #if(OPENMP)
@@ -35,3 +34,4 @@ install( DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR}/ DESTINATION ${MODULE_DIR} 
 target_include_directories( ${PROJECT_NAME} INTERFACE
                             $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${MODULE_DIR}>
                             $<INSTALL_INTERFACE:${MODULE_DIR}> )
+
