@@ -363,11 +363,14 @@ contains
 !$$$
     implicit none
     if(allocated(table)) deallocate(table)
-    deallocate(wtaxs)
-    deallocate(wtxrs)
-    deallocate(be,bl,bl2)
-!_RT    if(allocated(qvar3d)) deallocate(qvar3d) ! _RTod somehow this makes GSI crash!when only single var in CV/SV
-    deallocate(inaxs,inxrs)
+    if(allocated(wtaxs)) deallocate(wtaxs)
+    if(allocated(wtxrs)) deallocate(wtxrs)
+    if(allocated(be)) deallocate(be)
+    if(allocated(bl)) deallocate(bl)
+    if(allocated(bl2)) deallocate(bl2)
+    if(allocated(qvar3d)) deallocate(qvar3d) ! _RTod somehow this makes GSI crash!when only single var in CV/SV
+    if(allocated(inaxs)) deallocate(inaxs)
+    if(allocated(inxrs)) deallocate(inxrs)
     if(allocated(alv))   deallocate(alv)
     if(allocated(dssv))  deallocate(dssv)
     if(allocated(dssvs)) deallocate(dssvs)
@@ -375,8 +378,15 @@ contains
     deallocate(varprd)
     if(diag_precon)deallocate(vprecond)
 #endif /* USE_ALL_ORIGINAL */
-    deallocate(slw,slw1,slw2)
-    deallocate(ii,jj,ii1,jj1,ii2,jj2)
+    if(allocated(slw)) deallocate(slw)
+    if(allocated(slw1)) deallocate(slw1)
+    if(allocated(slw2)) deallocate(slw2)
+    if(allocated(ii)) deallocate(ii)
+    if(allocated(jj)) deallocate(jj)
+    if(allocated(ii1)) deallocate(ii1)
+    if(allocated(jj1)) deallocate(jj1)
+    if(allocated(ii2)) deallocate(ii2)
+    if(allocated(jj2)) deallocate(jj2)
 
     balmod_initialized_ = .false.
 

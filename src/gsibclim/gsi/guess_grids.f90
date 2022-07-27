@@ -122,7 +122,6 @@ end subroutine init_
 subroutine other_set_
   implicit none
   integer ier
-  if(iamset_) return
   call load_vert_coord_
   call load_prsges_
   call load_geop_hgt_
@@ -131,7 +130,6 @@ subroutine other_set_
 end subroutine other_set_
 !--------------------------------------------------------
 subroutine bkgcov_init_
-  if(initialized_) return
   call other_set_()  ! a little out of place, but ...
   call rf_set(mype)
   initialized_ = .true.
@@ -141,7 +139,7 @@ subroutine bkgcov_final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  call rf_unset
+  call rf_unset()
   initialized_ = .false.
   iamset_ = .false.
 end subroutine bkgcov_final_
@@ -155,6 +153,7 @@ subroutine final_
   deallocate(isli2)
   deallocate(geop_hgti)
   deallocate(geop_hgtl)
+  deallocate(ges_z)
   deallocate(ges_qsat)
   deallocate(ges_prsl)
   deallocate(ges_prsi)
