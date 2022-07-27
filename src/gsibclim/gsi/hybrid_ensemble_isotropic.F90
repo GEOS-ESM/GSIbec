@@ -3222,7 +3222,7 @@ subroutine init_sf_xy(jcap_in)
         enddo
      enddo
      write(mapname,'("out_",i4.4)')1+mod(grd_loc%kbegin_loc-1,grd_ens%nsig)
-     !call outgrads1(out1,grd_ens%nlon,grd_ens%nlat,mapname)
+     call outgrads1(out1,grd_ens%nlon,grd_ens%nlat,mapname)
    end if
   end if
   deallocate(rkm,f,f0)
@@ -4889,25 +4889,25 @@ subroutine get_region_lat_lon_ens(region_lat_ens,region_lon_ens,rlat_e,rlon_e,nl
            out1e(j,i)=region_lon_ens(i,j)
         enddo
      enddo
-     !call outgrads1(out1e,nlon_e,nlat_e,'region_lon_e')
+     call outgrads1(out1e,nlon_e,nlat_e,'region_lon_e')
      do j=1,nlon
         do i=1,nlat
            out1(j,i)=region_lon(i,j)
         enddo
      enddo
-     !call outgrads1(out1,nlon,nlat,'region_lon')
+     call outgrads1(out1,nlon,nlat,'region_lon')
      do j=1,nlon_e
         do i=1,nlat_e
            out1e(j,i)=region_lat_ens(i,j)
         enddo
      enddo
-     !call outgrads1(out1e,nlon_e,nlat_e,'region_lat_e')
+     call outgrads1(out1e,nlon_e,nlat_e,'region_lat_e')
      do j=1,nlon
         do i=1,nlat
            out1(j,i)=region_lat(i,j)
         enddo
      enddo
-     !call outgrads1(out1,nlon,nlat,'region_lat')
+     call outgrads1(out1,nlon,nlat,'region_lat')
      deallocate(out1e,out1)
   end if
   return
@@ -4973,25 +4973,25 @@ subroutine get_region_dx_dy_ens(region_dx_ens,region_dy_ens)
            out1ens(j,i)=region_dx_ens(i,j)
         enddo
      enddo
-     !call outgrads1(out1ens,nlon_ens,nlat_ens,'region_dx_ens')
+     call outgrads1(out1ens,nlon_ens,nlat_ens,'region_dx_ens')
      do j=1,nlon
         do i=1,nlat
            out1(j,i)=region_dx(i,j)
         enddo
      enddo
-     !call outgrads1(out1,nlon,nlat,'region_dx')
+     call outgrads1(out1,nlon,nlat,'region_dx')
      do j=1,nlon_ens
         do i=1,nlat_ens
            out1ens(j,i)=region_dy_ens(i,j)
         enddo
      enddo
-     !call outgrads1(out1ens,nlon_ens,nlat_ens,'region_dy_ens')
+     call outgrads1(out1ens,nlon_ens,nlat_ens,'region_dy_ens')
      do j=1,nlon
         do i=1,nlat
            out1(j,i)=region_dy(i,j)
         enddo
      enddo
-     !call outgrads1(out1,nlon,nlat,'region_dy')
+     call outgrads1(out1,nlon,nlat,'region_dy')
      deallocate(out1ens,out1)
   end if
   return
