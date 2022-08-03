@@ -17,9 +17,12 @@ constants.f90
 control2state_ad.F90
 control2state.F90
 control_vectors.f90
+gsi_convert_cv_mod.f90
 derivsmod.f90
 egrid2agrid_mod.f90
 en_perts_io.f90
+ensctl2state.F90
+ensctl2state_ad.F90
 general_commvars_mod.f90
 general_specmod.f90
 general_spectral_transforms.f90

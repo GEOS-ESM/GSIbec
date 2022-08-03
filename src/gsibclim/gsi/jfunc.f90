@@ -3,6 +3,8 @@ use m_kinds, only: i_kind
 implicit none
 public :: jfunc_init
 
+public :: mockbkg
+
 public :: jiter
 public :: nsclen
 public :: npclen
@@ -22,12 +24,14 @@ integer(i_kind) :: ntclen
 integer(i_kind) :: nval_lenz
 integer(i_kind) :: qoption
 integer(i_kind) :: cwoption
+logical :: mockbkg
 logical :: pseudo_q2
 logical :: clip_supersaturation
 logical :: ljc4tlevs
 contains
 subroutine jfunc_init
- jiter=1  ! used as index for output spread - wired for now
+ mockbkg=.true. ! fake background state (internally generated)
+ jiter=1        ! used as index for output spread - wired for now
  nsclen=0
  npclen=0
  ntclen=0

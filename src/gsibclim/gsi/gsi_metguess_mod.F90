@@ -718,6 +718,12 @@ end subroutine final_
   if(trim(desc)=='dim') then
      ivar = nmguess
      istatus=0
+  else if(trim(desc)=='dim::2d') then
+     ivar = ng2d
+     istatus=0
+  else if(trim(desc)=='dim::3d') then
+     ivar = ng3d
+     istatus=0
   else if(trim(desc)=='clouds') then
      ivar = ncloud
      istatus=0
@@ -997,11 +1003,47 @@ end subroutine final_
         endif
      endif
   endif
+  if(trim(desc)=='gsinames::2d') then
+     labfound=.true.
+     if(size(ivar)>=size(mguess2d)) then
+        if(allocated(mguess2d))then
+           ivar = mguess2d
+           istatus=0
+        endif
+     endif
+  endif
+  if(trim(desc)=='gsinames::3d') then
+     labfound=.true.
+     if(size(ivar)>=size(mguess3d)) then
+        if(allocated(mguess3d))then
+           ivar = mguess3d
+           istatus=0
+        endif
+     endif
+  endif
   if(trim(desc)=='usrnames') then
      labfound=.true.
      if(size(ivar)>=size(usrname)) then
         if(allocated(usrname))then
            ivar = usrname
+           istatus=0
+        endif
+     endif
+  endif
+  if(trim(desc)=='usrnames::2d') then
+     labfound=.true.
+     if(size(ivar)>=size(usrname2d)) then
+        if(allocated(usrname2d))then
+           ivar = usrname2d
+           istatus=0
+        endif
+     endif
+  endif
+  if(trim(desc)=='usrnames::3d') then
+     labfound=.true.
+     if(size(ivar)>=size(usrname3d)) then
+        if(allocated(usrname3d))then
+           ivar = usrname3d
            istatus=0
         endif
      endif

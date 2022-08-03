@@ -17,7 +17,7 @@
   use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mype
   use balmod, only: init_balmod,fstat,lnobalance
 
-  use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2
+  use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2,mockbkg
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
@@ -330,9 +330,11 @@
 !
 ! SETUP (general control namelist) :
 !
-!     qoption  - option of analysis variable; 1:q/qsatg-bkg 2:norm RH
+!     qoption  - option of analysis variable: 1:q/qsatg-bkg 2:norm RH
+!     cwoption  - option of could-water analysis variable
 !     pseudo_q2- breed between q1/q2 options, that is, (q1/sig(q))
 !     tendsflag - if true, compute time tendencies
+!     mockbgk - if .true., use internally defined (fake) background fields
 !
 
   namelist/setup/&
@@ -340,6 +342,7 @@
        pseudo_q2,&
        cwoption,&
        verbose,&
+       mockbkg,&
        qoption
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):

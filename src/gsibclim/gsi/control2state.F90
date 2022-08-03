@@ -61,12 +61,12 @@ use control_vectors, only: cvars3d,cvars2d
 use bias_predictors, only: predictors
 use gridmod, only: regional,lat2,lon2,nsig, nlat, nlon, twodvar_regional            
 use jfunc, only: nsclen,npclen,ntclen
-#ifdef USE_ALL_ORIGINAL
 use gsi_4dvar, only: nsubwin, l4dvar, lsqrtb, ladtest_obs
+#ifdef USE_ALL_ORIGINAL
 use cwhydromod, only: cw2hydro_tl
 use cwhydromod, only: cw2hydro_tl_hwrf
-use gridmod, only: nems_nmmb_regional
 #endif /* USE_ALL_ORIGINAL */
+use gridmod, only: nems_nmmb_regional
 use gsi_bundlemod, only: gsi_bundlecreate
 use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -99,9 +99,6 @@ type(gsi_bundle):: wbundle ! work bundle
 !       the state and control vectors, but rather the ones
 !       this routines knows how to handle.
 ! Declare required local control variables
-#ifndef USE_ALL_ORIGINAL
-integer(i_kind), parameter :: nsubwin = 1
-#endif /* USE_ALL_ORIGINAL */
 integer(i_kind), parameter :: ncvars = 9
 integer(i_kind) :: icps(ncvars)
 integer(i_kind) :: icpblh,icgust,icvis,icoz,icwspd10m,icw
@@ -149,7 +146,6 @@ logical :: do_cw_to_hydro_hwrf
 
 !******************************************************************************
 
-#ifdef USE_ALL_ORIGINAL
 if (lsqrtb) then
    write(6,*)trim(myname),': not for sqrt(B)'
    call stop2(106)
@@ -158,7 +154,6 @@ if (nsubwin/=1 .and. .not.l4dvar) then
    write(6,*)trim(myname),': error 3dvar',nsubwin,l4dvar
    call stop2(107)
 end if
-#endif /* USE_ALL_ORIGINAL */
 
 ! Inquire about cloud-vars 
 call gsi_metguess_get('clouds::3d',nclouds,istatus)
@@ -237,14 +232,12 @@ do jj=1,nsubwin
 
 !  Get pointers to required control variables
 
-#ifdef USE_ALL_ORIGINAL
    if(ladtest_obs) then
 ! Convert from subdomain to full horizontal field distributed among processors
       call general_sub2grid(s2g_cv,wbundle%values,hwork)
 ! Put back onto subdomains
       call general_grid2sub(s2g_cv,hwork,wbundle%values)
    end if
-#endif /* USE_ALL_ORIGINAL */
 
 !$omp parallel sections private(istatus,ii,ic,id,sv_u,sv_v,sv_prse,sv_q,sv_tsen,uland,vland,uwter,vwter) 
 
@@ -256,7 +249,6 @@ do jj=1,nsubwin
    call gsi_bundlegetpointer (sval(jj),'v' ,sv_v ,istatus)
 !  Convert streamfunction and velocity potential to u,v
    if(do_getuv) then
-#ifdef USE_ALL_ORIGINAL
       if (twodvar_regional .and. icsfwter>0 .and. icvpwter>0) then
          call gsi_bundlegetpointer (wbundle,'sfwter',cv_sfwter,istatus)
          call gsi_bundlegetpointer (wbundle,'vpwter',cv_vpwter,istatus)
@@ -265,14 +257,13 @@ do jj=1,nsubwin
          call getuv(uland,vland,cv_sf,cv_vp,0)
          call getuv(uwter,vwter,cv_sfwter,cv_vpwter,0)
 
+#ifdef USE_ALL_ORIGINAL
          call landlake_uvmerge(sv_u,sv_v,uland,vland,uwter,vwter,1)
+#endif /* USE_ALL_ORIGINAL */
          deallocate(uland,vland,uwter,vwter)
       else
-#endif /* USE_ALL_ORIGINAL */
          call getuv(sv_u,sv_v,cv_sf,cv_vp,0)
-#ifdef USE_ALL_ORIGINAL
       end if
-#endif /* USE_ALL_ORIGINAL */
    end if
 
    if(jj == 1)then
@@ -391,25 +382,23 @@ do jj=1,nsubwin
    if (icw>0) then 
       call gsi_bundlegetpointer (sval(jj),'w' ,sv_w, istatus)
       call gsi_bundlegetvar ( wbundle, 'w', sv_w, istatus )
-#ifdef USE_ALL_ORIGINAL
       if(nems_nmmb_regional)then
          call gsi_bundlegetpointer (sval(jj),'dw'  ,sv_dw,  istatus)
          call gsi_bundlegetvar ( wbundle, 'dw' , sv_dw,  istatus )
       end if
-#endif /* USE_ALL_ORIGINAL */
    end if
    if (ictcamt>0) then 
       call gsi_bundlegetpointer (sval(jj),'tcamt' ,sv_tcamt, istatus)
       call gsi_bundlegetvar ( wbundle, 'tcamt', sv_tcamt, istatus )
    end if
-#ifdef USE_ALL_ORIGINAL
    if (iclcbas >0) then 
       call gsi_bundlegetpointer (wbundle,'lcbas',cv_lcbas,istatus)
       call gsi_bundlegetpointer (sval(jj),'lcbas' ,sv_lcbas, istatus)
       ! Convert log(lcbas) to lcbas
+#ifdef USE_ALL_ORIGINAL
       call loglcbas_to_lcbas(cv_lcbas,sv_lcbas)
-   end if
 #endif /* USE_ALL_ORIGINAL */
+   end if
    if (iccldch >0) then
       call gsi_bundlegetpointer (sval(jj),'cldch'  ,sv_cldch , istatus)
       call gsi_bundlegetvar (wbundle,'cldch',sv_cldch,istatus)

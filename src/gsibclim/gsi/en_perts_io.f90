@@ -32,7 +32,7 @@ subroutine en_perts_get_from_save_fulldomain
   use mpeu_util, only: die
   use general_sub2grid_mod, only: sub2grid_info,general_sub2grid_create_info
   use general_sub2grid_mod, only: general_grid2sub
-  use m_mpimod, only: mpi_comm_world,ierror,mype,mpi_rtype,mpi_mode_rdonly
+  use m_mpimod, only: gsi_mpi_comm_world,ierror,mype,mpi_rtype,mpi_mode_rdonly
   use m_mpimod, only: mpi_rtype,mpi_info_null,mpi_offset_kind
 
   implicit none
@@ -82,7 +82,7 @@ subroutine en_perts_get_from_save_fulldomain
      if(mype==0) write(*,*) 'read in perturbation from member ',trim(filename)
 !
 
-     call mpi_file_open(mpi_comm_world,trim(filename), &
+     call mpi_file_open(gsi_mpi_comm_world,trim(filename), &
                       mpi_mode_rdonly,mpi_info_null,iunit,ierror)
      if ( ierror /= 0 ) then
         write(6,'(a,i5,a,i5,a)') '***ERROR***  MPI_FILE_OPEN failed on task = ', &
