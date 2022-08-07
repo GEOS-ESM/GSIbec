@@ -3,7 +3,9 @@ use m_kinds, only: i_kind, r_kind
 use m_mpimod, only: mype
 use mpeu_util, only: tell,die
 use constants, only: fv,zero,one,max_varname_length
-use constants, only: kPa_per_Pa
+use constants, only: kPa_per_Pa,Pa_per_kPa
+use constants, only: PPMV2GpG
+use constants, only: grav
 use gridmod, only: nlon,nlat,lon2,lat2,nsig,idsl5
 use gridmod, only: ak5,bk5
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -133,9 +135,11 @@ subroutine other_set_(need)
   tropprs=zero
   fact_tv=one
   call load_vert_coord_
-  call load_prsges_
-  call load_geop_hgt_
+  ! better fix units here?
   if (present(need)) then
+    if(mype==0) then
+       print *, 'vars still needing to be filled ', need
+    endif
     if (size(need)<1) then
         iamset_ = .true.
         return
@@ -156,6 +160,8 @@ subroutine other_set_(need)
         need='filled-'//need
      endwhere
   endif
+  call load_prsges_
+  call load_geop_hgt_
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
@@ -194,10 +200,11 @@ end subroutine final_
 !--------------------------------------------------------
 subroutine load_vert_coord_
 use m_set_eta, only: set_eta
+! ideally, these coordinates should be passed from JEDI
 implicit none
 integer ks
 real(r_kind) :: ptop,pint
-call set_eta (nsig, ks, ptop, pint, ak5, bk5)
+call set_eta (nsig, ks, ptop, pint, ak5, bk5) ! GEOS/FV3 levels/orientation/units
 ak5=kPa_per_Pa*ak5
 ak5=ak5(nsig:1:-1)
 bk5=bk5(nsig:1:-1)
@@ -839,7 +846,7 @@ end subroutine load_vert_coord_
 !--------------------------------------------------------
   subroutine guess_basics2_(vname,var)
   character(len=*),intent(in) :: vname
-  real(r_kind),dimension(:,:) ::var
+  real(r_kind),dimension(:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics2_'
   real(r_kind),dimension(:,:),pointer::ptr
   integer jj,ier
@@ -849,16 +856,14 @@ end subroutine load_vert_coord_
        call die(myname_,'pointer to '//trim(vname)//" not found",ier)
      endif
      ptr=var
-     if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! should this really be done here?
-     if ( trim(vname) == 'ps' ) then ! test  DEBUG
-         print *, 'ps sum:' ,maxval(ptr), minval(ptr), sum(ptr)/(size(ptr,1)*size(ptr,2))
-     endif
+     if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
+     if ( trim(vname) == 'z'  ) ptr=ptr/grav       ! RT_TBD: is this the best place for this?
   enddo
   end subroutine guess_basics2_
 !--------------------------------------------------------
   subroutine guess_basics3_(vname,var)
-  character(len=*),intent(in) :: vname
-  real(r_kind),dimension(:,:,:) ::var
+  character(len=*),intent(in)   :: vname
+  real(r_kind),dimension(:,:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
   integer jj,ier
@@ -869,6 +874,7 @@ end subroutine load_vert_coord_
      endif
      ptr=var
   enddo
+  if ( trim(vname) == 'oz' ) ptr=ptr*PPMV2GpG   ! RT_TBD: is this the best place for this?
   end subroutine guess_basics3_
 !--------------------------------------------------------
 end module guess_grids

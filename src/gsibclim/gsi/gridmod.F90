@@ -428,7 +428,7 @@ contains
     nsig1o = 7
     nlat = 96
     nlon = 384
-    idvc5 = 1
+    idvc5 = 2  ! RTodling: change default from 1 to 2
     idvm5 = 0
     idpsfc5 = 1
     idthrm5 = 1

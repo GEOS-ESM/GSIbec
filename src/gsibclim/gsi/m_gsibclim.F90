@@ -3,6 +3,8 @@ module m_gsibclim
 !use mpi
 
 use constants, only: zero,one
+use constants, only: kPa_per_Pa
+use constants, only: Pa_per_kPa
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
@@ -354,7 +356,6 @@ contains
   subroutine set_silly_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
-  use constants, only: kPa_per_Pa
   implicit none
   type(gsi_bundle) bundle
   character(len=*), parameter :: myname_ = myname//'*set_silly_'
@@ -419,8 +420,8 @@ contains
   if (var == 'ps') then
      call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
      if(ier==0) then
-        ptr2(10,10) = 100. / kPa_per_Pa
-        if (mype==0) print *, myname_, ': var= ', 'ps'
+        ptr2(10,10) = 100.
+        if (mype==0) print *, myname_, ': var= ', 'ps(Pa)'
         return
      endif
   endif
@@ -439,6 +440,7 @@ contains
   grady=zero
 
   call set_silly_(gradx%step(1))
+  call model2gsi_units_(gradx%step(1))
 
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
@@ -448,6 +450,8 @@ contains
 
   if(bkgv_write_cv) &
   call write_bundle(grady%step(1),'cvbundle')
+
+  call gsi2model_units_(grady%step(1))
 
 ! clean up
   call deallocate_cv(gradx)
@@ -473,9 +477,10 @@ contains
 ! apply B to vector: all in control space
   if (present(internalcv)) then
      if(internalcv) call set_silly_(gradx%step(1))
-  else
-!    call jedi2gsi_units_(gradx%step(1))
   endif
+
+! convert model units to gsi
+  call model2gsi_units_(gradx%step(1))
 
 ! allocate vectors
   call allocate_cv(grady)
@@ -497,9 +502,8 @@ contains
 ! return result in input vector
   gradx=grady
 
-  if (.not. present(internalcv)) then
-!    call gsi2jedi_units_(gradx%step(1))
-  endif
+! convert units back to model units
+  call gsi2model_units_(gradx%step(1))
 
 ! clean up
   call deallocate_cv(grady)
@@ -530,6 +534,7 @@ contains
 ! call get_state_perts_ (fcgrad(1))
 !
   call set_silly_(fcgrad(1))
+  call model2gsi_units_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -541,8 +546,13 @@ contains
   endif
 
   call control2state(grady,fcgrad,sbias)
+
+! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
+
+! convert back to model units (just for consistency here)
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -586,9 +596,10 @@ contains
 ! call get_state_perts_ (fcgrad(1))
   if (present(internalsv)) then
      if (internalsv) call set_silly_(fcgrad(1))
-  else
-!    call jedi2gsi_units(fcgrad(1))
   endif
+
+! convert from model to gsi units
+  call model2gsi_units_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -605,12 +616,12 @@ contains
 
   call control2state(grady,fcgrad,sbias)
 
-  if (.not.present(internalsv)) then
-     call gsi2jedi_units(fcgrad(1))
-  endif
-
+! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
+
+! convert from gsi to model units
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -660,29 +671,31 @@ contains
   call mpi_bcast(berror_stats,clen,mpi_character,root,gsi_mpi_comm_world,ier)
   end subroutine befname_
 !--------------------------------------------------------
-  subroutine jedi2gsi_units(bundle)
+  subroutine model2gsi_units_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
-  use constants, only: kPa_per_Pa
   implicit none
   type(gsi_bundle) bundle
   real(r_kind),pointer :: ptr2(:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
-  ptr2 = ptr2 * kPa_per_Pa
-  end subroutine jedi2gsi_units
+  if(ier==0) then
+     ptr2 = ptr2 * kPa_per_Pa
+  endif
+  end subroutine model2gsi_units_
 !--------------------------------------------------------
-  subroutine gsi2jedi_units(bundle)
+  subroutine gsi2model_units_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
-  use constants, only: kPa_per_Pa
   implicit none
   type(gsi_bundle) bundle
   real(r_kind),pointer :: ptr2(:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
-  ptr2 = ptr2 / kPa_per_Pa
-  end subroutine gsi2jedi_units
+  if(ier==0) then
+     ptr2 = ptr2 * Pa_per_kPa
+  endif
+  end subroutine gsi2model_units_
 !--------------------------------------------------------
   subroutine final_guess_
   end subroutine final_guess_
