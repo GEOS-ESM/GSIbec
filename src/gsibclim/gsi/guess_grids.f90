@@ -4,7 +4,7 @@ use m_mpimod, only: mype
 use mpeu_util, only: tell,die
 use constants, only: fv,zero,one,max_varname_length
 use constants, only: kPa_per_Pa,Pa_per_kPa
-use constants, only: PPMV2GpG
+use constants, only: constoz
 use constants, only: grav
 use gridmod, only: nlon,nlat,lon2,lat2,nsig,idsl5
 use gridmod, only: ak5,bk5
@@ -814,32 +814,37 @@ end subroutine load_vert_coord_
   real(r_kind),dimension(:,:,:),pointer::u =>NULL()
   real(r_kind),dimension(:,:,:),pointer::v =>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
+  real(r_kind),dimension(:,:,:),pointer::oz=>NULL()
   real(r_kind),dimension(:,:  ),pointer::ps=>NULL()
   integer jj,ier
   do jj=1,nfldsig
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'u',u,ier)
      if (ier==0) then
-        u = 20.
+        u = 20. ! m/s
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'v',v,ier)
      if (ier==0) then
-        v = 20.
+        v = 20. ! m/s
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier)
      if (ier==0) then
-        tv = 300.
+        tv = 300. ! K
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
      if (ier==0) then
-        tsen = 300.
+        tsen = 300. ! K
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier)
      if (ier==0) then
-        q = 10-6
+        q = 10e-6 ! kg/kg
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' ,oz,ier)
+     if (ier==0) then
+        oz = 0.25 ! ppmv
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ps',ps,ier)
      if (ier==0) then
-        ps = 100000. * kPa_per_Pa
+        ps = 100000. * kPa_per_Pa ! cbar(=kPa)
      endif
   enddo
   end subroutine guess_basics0_
@@ -874,7 +879,10 @@ end subroutine load_vert_coord_
      endif
      ptr=var
   enddo
-  if ( trim(vname) == 'oz' ) ptr=ptr*PPMV2GpG   ! RT_TBD: is this the best place for this?
+  if ( trim(vname) == 'oz' ) ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
+! if ( trim(vname) == 'oz' ) then
+!    print *, myname_, ': oz guess scaling needs attention'
+! endif
   end subroutine guess_basics3_
 !--------------------------------------------------------
 end module guess_grids

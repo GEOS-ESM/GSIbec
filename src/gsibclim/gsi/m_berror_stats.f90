@@ -424,7 +424,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    do n=1,size(cvars3d)
       if ( .not.found3d(n) ) then
          if ( n>0 ) then
-            if ( cvars3d(n)=='oz' ) then
+            if ( trim(cvars3d(n))=='oz' ) then
                call setcoroz_(corz(:,:,n),ntguessig,ges_prsi,mype)
                call sethwlloz_(hwll(:,:,n),mype)
             else
@@ -673,6 +673,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
+             cycle
           endif
           if (trim(cvars3d(nv))=='q' .and. qoption==2) then
              allocate(corq2(bvars%nlat,bvars%nsig))
@@ -690,18 +691,8 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
+             cycle
           endif
-          cycle
-      endif
-      if (trim(cvars3d(nv))=='q') then
-          n = getindex(cvars3d,'q')
-          found3d(n)=.true.
-          corz(:,:,n)=bvars%qvar
-          if (qoption == 2) then
-          endif
-          hwll(:,:,n)=bvars%qhln
-          vz(:,:,n)=transpose(bvars%qvln)
-          cycle
       endif
    enddo
    call nc_berror_vars_final(bvars)

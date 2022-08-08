@@ -5,6 +5,7 @@ module m_gsibclim
 use constants, only: zero,one
 use constants, only: kPa_per_Pa
 use constants, only: Pa_per_kPa
+use constants, only: constoz
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
@@ -676,11 +677,16 @@ contains
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
   type(gsi_bundle) bundle
-  real(r_kind),pointer :: ptr2(:,:)=>NULL()
+  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
+  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
      ptr2 = ptr2 * kPa_per_Pa
+  endif
+  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
+  if(ier==0) then
+     ptr3 = ptr3 / constoz
   endif
   end subroutine model2gsi_units_
 !--------------------------------------------------------
@@ -689,11 +695,16 @@ contains
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
   type(gsi_bundle) bundle
-  real(r_kind),pointer :: ptr2(:,:)=>NULL()
+  real(r_kind),pointer :: ptr2  (:,:)=>NULL()
+  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
      ptr2 = ptr2 * Pa_per_kPa
+  endif
+  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
+  if(ier==0) then
+     ptr3 = ptr3 * constoz
   endif
   end subroutine gsi2model_units_
 !--------------------------------------------------------

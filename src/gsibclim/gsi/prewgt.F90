@@ -114,6 +114,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   use blendmod, only: blend
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use gsi_metguess_mod, only: gsi_metguess_bundle
+  use mpeu_util, only: die
 
   implicit none
 
@@ -124,6 +125,7 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   integer(i_kind),intent(in   ) :: mype
 
 ! Declare local variables
+  character(len=*), parameter :: myname = 'prewgt'
   integer(i_kind) n,nrr,iii,jjj,nxg,i2,im,jm,j2
   integer(i_kind) i,j,k,ii,nn,nbuf,nmix,nxe,nor,ndx,ndy
   integer(i_kind) nlathh,mm1,nolp,mm,ir,k1
@@ -484,6 +486,8 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
                     dssv(j,i,k,n)=dsv(i,k)*my_corz*as3d(n)   ! ozone
                  end do
               end do
+           else
+              call die(myname,': ges-oz pointer not assigned',istatus)
            endif
         else
            do k=1,nsig
