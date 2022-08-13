@@ -64,7 +64,7 @@ contains
   integer(i_kind) msig,mlat,mlon
   logical good
 ! Load background error arrays used by recursive filters
-  call berror_get_dims(msig,mlat,mlon)
+  call berror_get_dims(mype,msig,mlat,mlon)
   good=nlat==mlat.and.nlon==mlon.and.nsig==msig
   if (.not. good) then
     print *, nlat, mlat, nlon, mlon, nsig, msig
@@ -74,7 +74,7 @@ contains
   call create_balance_vars
   call create_berror_vars
   call prebal(fut2ps,cwcoveqqcov)
-  call prewgt(cwoption,qoption,mype)
+  call prewgt(mype)
   end subroutine set_
   subroutine unset_
   call destroy_smooth_polcas ! the set is called in prewgt - gsi typically has inconsistent set/unset
