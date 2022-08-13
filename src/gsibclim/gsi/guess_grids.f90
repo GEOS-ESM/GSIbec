@@ -144,24 +144,26 @@ subroutine other_set_(need)
         iamset_ = .true.
         return
     endif
+  endif
+  if (present(need)) then
+    if (any(need=='tsen')) then
+       call load_guess_tsen_
+       where(need=='tsen')
+          need='filled-'//need
+       endwhere
+    endif
+    if (any(need=='tv')) then
+       call load_guess_tv_
+       where(need=='tv')
+          need='filled-'//need
+       endwhere
+    endif
   else
-    iamset_ = .true.
-    return
-  endif
-  if (any(need=='tsen')) then
-     call load_guess_tsen_
-     where(need=='tsen')
-        need='filled-'//need
-     endwhere
-  endif
-  if (any(need=='tv')) then
-     call load_guess_tv_
-     where(need=='tv')
-        need='filled-'//need
-     endwhere
+    call load_guess_tsen_(mock=.true.)
   endif
   call load_prsges_
   call load_geop_hgt_
+  call tpause(mype,'pvoz')  ! _RT: this needs attention
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
@@ -408,7 +410,9 @@ end subroutine load_vert_coord_
           ier=ier+istatus
           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
           ier=ier+istatus
-          if(ier/=0) exit
+!         if(ier/=0) exit
+          if (ier/=0) call die (myname_, ': failed to get pointer ', ier)
+          print *, myname_ , 'debug: ', maxval(ges_tv), maxval(ges_zz)
           do j=1,lon2
              do i=1,lat2
                 k  = 1
@@ -654,24 +658,38 @@ end subroutine load_vert_coord_
   enddo
   end subroutine get_ref_gesprs_
 
-  subroutine load_guess_tsen_
+  subroutine load_guess_tsen_(mock)
   implicit none
+  logical,optional,intent(in) :: mock
   character(len=*), parameter :: myname_ = myname//'*get_guess_tsen_'
   real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
+  logical mock_
+  mock_=.false. 
+  if (present(mock)) then
+     if(mock) mock_=.true.
+  endif
   do jj=1,nfldsig
      istatus=0
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
-     if(ier==0) then
-        ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
-        cycle
+     if (mock_) then
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
+        if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
+        ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+     else
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
+        if(ier==0) then
+           ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
+           cycle
+        else
+           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
+           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
+           if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
+           ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+        endif
      endif
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-     if (istatus/=0) cycle ! call die(myname_,'cannot retrieve pointers',istatus)
-     ges_tsen(:,:,:,jj) = tv/(one+fv*q)
   enddo
   end subroutine load_guess_tsen_
 
@@ -686,13 +704,15 @@ end subroutine load_vert_coord_
      istatus=0
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-     if (istatus/=0) cycle ! call die(myname_,'cannot retrieve pointers',istatus)
+     if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
      if (ier==0) then
+        if(allocated(ges_tsen)) ges_tsen(:,:,:,jj) = tsen  ! make sure this is local array
         tv=tsen*(one+fv*q)
      else
-        tv=ges_tsen(:,:,:,jj)*(one+fv*q)
+          print *, 'do not have tsen ptr ', minval(ges_tsen), maxval(ges_tsen)
      endif
+     tv=ges_tsen(:,:,:,jj)*(one+fv*q)
   enddo
   end subroutine load_guess_tv_
 
@@ -816,6 +836,7 @@ end subroutine load_vert_coord_
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   real(r_kind),dimension(:,:,:),pointer::oz=>NULL()
   real(r_kind),dimension(:,:  ),pointer::ps=>NULL()
+  real(r_kind),dimension(:,:  ),pointer::z =>NULL()
   integer jj,ier
   do jj=1,nfldsig
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'u',u,ier)
@@ -836,15 +857,19 @@ end subroutine load_vert_coord_
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier)
      if (ier==0) then
-        q = 10e-6 ! kg/kg
+        q = 1.e-6 ! kg/kg
      endif
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' ,oz,ier)
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'oz',oz,ier)
      if (ier==0) then
-        oz = 0.25 ! ppmv
+        oz = 0.25/constoz ! mol/mol
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ps',ps,ier)
      if (ier==0) then
         ps = 100000. * kPa_per_Pa ! cbar(=kPa)
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'phis',z,ier)
+     if (ier==0) then
+        z = 100. 
      endif
   enddo
   end subroutine guess_basics0_
@@ -880,9 +905,6 @@ end subroutine load_vert_coord_
      ptr=var
   enddo
   if ( trim(vname) == 'oz' ) ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
-! if ( trim(vname) == 'oz' ) then
-!    print *, myname_, ': oz guess scaling needs attention'
-! endif
   end subroutine guess_basics3_
 !--------------------------------------------------------
 end module guess_grids

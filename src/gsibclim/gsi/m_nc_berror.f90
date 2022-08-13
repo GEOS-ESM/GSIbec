@@ -90,7 +90,6 @@ subroutine read_dims_ (fname,nlat,nlon,nlev,rc, myid,root)
 
 ! Local variables
   character(len=*), parameter :: myname_ = myname//"::dims_"
-  logical :: verbose
    
 ! Return code (status)
   rc=0; mype_=0; root_=0
@@ -483,7 +482,7 @@ subroutine write_berror_ (fname,bvars,plevs,lats,lons,rc, myid,root)
   deallocate(varid2d)
   deallocate(varid1d)
 
-  print *, "*** Finish writing file ", fname
+  if(verbose) print *,"*** Finish writing file: ", trim(fname)
 
   return
 

@@ -1,4 +1,4 @@
-subroutine prewgt( varcw,cwoption,varq,qoption, mype)
+subroutine prewgt(mype)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    prewgt
@@ -94,8 +94,8 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   use m_berror_stats,only : berror_read_wgt
   use m_mpimod, only: nvar_id,levs_id
   use m_mpimod, only: gsi_mpi_comm_world,ierror,mpi_rtype
-! use jfunc, only: varcw,cwoption
-! use jfunc, only: varq,qoption
+  use m_rf, only: varcw,cwoption
+  use m_rf, only: varq,qoption
   use control_vectors, only: cvars2d,cvars3d
   use control_vectors, only: cvars => nrf_var
   use control_vectors, only: as2d,as3d,atsfc_sdv
@@ -119,9 +119,6 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   implicit none
 
 ! Declare passed variables
-  integer(i_kind), intent(in) :: qoption,cwoption
-  real(r_kind),intent(inout),dimension(nlat,nsig):: varq
-  real(r_kind),intent(inout),dimension(nlat,nsig):: varcw
   integer(i_kind),intent(in   ) :: mype
 
 ! Declare local variables

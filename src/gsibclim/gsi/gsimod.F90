@@ -17,7 +17,8 @@
   use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mype
   use balmod, only: init_balmod,fstat,lnobalance
 
-  use jfunc, only: jfunc_init,cwoption,qoption,pseudo_q2,mockbkg
+  use jfunc, only: jfunc_init,mockbkg
+  use m_rf, only: cwoption,qoption,pseudo_q2,rf_set_default
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
@@ -341,9 +342,9 @@
 !      tendsflag,&
        pseudo_q2,&
        cwoption,&
+       qoption,&
        verbose,&
-       mockbkg,&
-       qoption
+       mockbkg
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
 !     jcap     - spectral resolution
@@ -507,6 +508,7 @@
 
   call init_io(mype,npe-1)
   call jfunc_init
+  call rf_set_default
   call init_constants_derived
   call init_constants(.false.)
   call init_balmod

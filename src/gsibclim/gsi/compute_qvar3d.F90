@@ -46,7 +46,7 @@ subroutine compute_qvar3d
   use gsi_metguess_mod,  only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
-  use jfunc, only: qoption,clip_supersaturation
+  use m_rf, only: qoption,clip_supersaturation
 #ifdef USE_ALL_ORIGINAL
   use jfunc, only: varq,varcw,cwoption
   use radiance_mod, only: icloud_cv,n_clouds_fwd,cloud_names_fwd
