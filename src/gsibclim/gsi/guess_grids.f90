@@ -115,13 +115,14 @@ end subroutine init_
 subroutine other_set_(need)
   implicit none
   character(len=*), optional, intent(inout) :: need(:)
+  character(len=*), parameter :: myname_ = myname//'*other_set_'
   integer ier
   allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
-  allocate(ges_prsl(lat2,lon2,nsig+1,nfldsig))
+  allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
   allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
   allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
-  allocate(geop_hgti(lat2,lon2,nsig,nfldsig))
+  allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
   allocate(isli2(lat2,lon2))
   allocate(fact_tv(lat2,lon2,nsig))
   allocate(tropprs(lat2,lon2))
@@ -160,6 +161,14 @@ subroutine other_set_(need)
     endif
   else
     call load_guess_tsen_(mock=.true.)
+  endif
+  if (present(need)) then
+    if (any(need(1:8)=='unfilled')) then
+      if(mype==0) then
+         print *, 'some vars still not filled: ', need
+      endif
+      call die (myname_,': not all needed GSI guess fields present',99)
+    endif
   endif
   call load_prsges_
   call load_geop_hgt_
@@ -412,7 +421,7 @@ end subroutine load_vert_coord_
           ier=ier+istatus
 !         if(ier/=0) exit
           if (ier/=0) call die (myname_, ': failed to get pointer ', ier)
-          print *, myname_ , 'debug: ', maxval(ges_tv), maxval(ges_zz)
+          where(ges_zz<zero) ges_zz=zero ! debug (RTod: odd to find <0)
           do j=1,lon2
              do i=1,lat2
                 k  = 1
@@ -433,7 +442,7 @@ end subroutine load_vert_coord_
           end do
        end do
        if(ier/=0) return
-
+       
 !      Compute geopotential height at interface between layers
        do jj=1,nfldsig
           ier=0
@@ -710,7 +719,7 @@ end subroutine load_vert_coord_
         if(allocated(ges_tsen)) ges_tsen(:,:,:,jj) = tsen  ! make sure this is local array
         tv=tsen*(one+fv*q)
      else
-          print *, 'do not have tsen ptr ', minval(ges_tsen), maxval(ges_tsen)
+        call die(myname_,': cannot define ges_tsen',99)
      endif
      tv=ges_tsen(:,:,:,jj)*(one+fv*q)
   enddo
