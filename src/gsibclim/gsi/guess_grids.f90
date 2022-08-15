@@ -419,8 +419,7 @@ end subroutine load_vert_coord_
           ier=ier+istatus
           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
           ier=ier+istatus
-!         if(ier/=0) exit
-          if (ier/=0) call die (myname_, ': failed to get pointer ', ier)
+          if(ier/=0) exit
           where(ges_zz<zero) ges_zz=zero ! debug (RTod: odd to find <0)
           do j=1,lon2
              do i=1,lat2
@@ -450,7 +449,7 @@ end subroutine load_vert_coord_
           ier=ier+istatus
           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
           ier=ier+istatus
-          if(ier/=0) call die(myname_,'not all fields available, ier=',ier)
+          if(ier/=0) exit
           do j=1,lon2
              do i=1,lat2
                 k=1
@@ -675,8 +674,9 @@ end subroutine load_vert_coord_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
-  logical mock_
+  logical iamset,mock_
   mock_=.false. 
+  iamset=.true.
   if (present(mock)) then
      if(mock) mock_=.true.
   endif
@@ -685,8 +685,13 @@ end subroutine load_vert_coord_
      if (mock_) then
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-        if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
-        ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+        if (istatus/=0) then
+           ! call die(myname_,'cannot retrieve pointers',istatus)
+           iamset=.false.
+           exit
+        else
+           ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+        endif
      else
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
         if(ier==0) then
@@ -695,11 +700,19 @@ end subroutine load_vert_coord_
         else
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-           if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
-           ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+           if (istatus/=0) then
+              ! call die(myname_,'cannot retrieve pointers',istatus)
+              iamset=.false.
+              exit
+           else
+              ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+           endif
         endif
      endif
   enddo
+  if(.not.iamset) then
+    if (mype==0) call tell (myname_, ': warning, tsen pointer not set, could be an issue')
+  endif
   end subroutine load_guess_tsen_
 
   subroutine load_guess_tv_
@@ -709,20 +722,34 @@ end subroutine load_vert_coord_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
+  logical iamset
+  iamset=.true.
   do jj=1,nfldsig
      istatus=0
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-     if (istatus/=0) call die(myname_,'cannot retrieve pointers',istatus)
+     if (istatus/=0) then
+        iamset=.false.
+        cycle
+        !call die(myname_,'cannot retrieve pointers',istatus)
+     endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
      if (ier==0) then
         if(allocated(ges_tsen)) ges_tsen(:,:,:,jj) = tsen  ! make sure this is local array
         tv=tsen*(one+fv*q)
      else
-        call die(myname_,': cannot define ges_tsen',99)
+        if(allocated(ges_tsen)) then
+           tv=ges_tsen(:,:,:,jj)*(one+fv*q)
+        else
+           iamset=.false.
+           cycle
+           !call die(myname_,': cannot define ges_tsen',99)
+        endif
      endif
-     tv=ges_tsen(:,:,:,jj)*(one+fv*q)
   enddo
+  if(.not.iamset) then
+    if(mype==0) call tell (myname_, ': warning, tv pointer not set, could be an issue')
+  endif
   end subroutine load_guess_tv_
 
 !-------------------------------------------------------------------------
