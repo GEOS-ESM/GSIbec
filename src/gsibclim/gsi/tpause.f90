@@ -103,7 +103,7 @@ subroutine tpause(mype,method)
      if(.not.pvoz_capable) then
        if (mype==0) then
          write(6,*) trim(myname), ': Warning, user request pv-based method to',&
-              'identify tropaupose,'
+              ' identify tropaupose,'
          write(6,*) 'but not all fields needed are available, resetting',&
                'method to temperature-based one'
        endif
