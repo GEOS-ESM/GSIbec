@@ -52,11 +52,13 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
 !
 !$$$
   use m_kinds, only: r_kind,i_kind
+  use mpeu_util, only: die
   use constants, only: xai,tmix,xb,omeps,eps,xbi,one,zero,&
        xa,psat,ttp,half,one_tenth
   use derivsmod, only:  qgues,dqdt,dqdrh,dqdp
-  use jfunc, only:  pseudo_q2
+  use m_rf, only:  pseudo_q2
   use guess_grids, only: tropprs
+  use gridmod, only: regional
 #ifdef USE_ALL_ORIGINAL
   use guess_grids, only: ges_prslavg,ges_psfcavg
   use gridmod, only:  wrf_nmm_regional,wrf_mass_regional,nems_nmmb_regional,aeta2_ll,regional,cmaq_regional
@@ -172,9 +174,9 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
               idpupdate=.true.
               idtupdate=.true.
 
-#ifdef USE_ALL_ORIGINAL
               if(regional)then
-
+                call die('gsi:genqsat',': regional opt not supported',99)
+#ifdef USE_ALL_ORIGINAL
 !    Special block to decouple temperature and pressure from moisture
 !    above specified levels.  For mass core decouple T and p above
 !    same level (approximately 150 hPa).  For nmm core decouple T
@@ -192,16 +194,14 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
                   if(k >= k150 )idtupdate = .false.
                 end if
              
-              else
 #endif /* USE_ALL_ORIGINAL */
+              else
 !                Decouple Q from T above the tropopause for global
                 if(prsl(i,j,k) < (one_tenth*tropprs(i,j)))then
                    idpupdate=.false.  
                    idtupdate=.false.
                 end if
-#ifdef USE_ALL_ORIGINAL
               end if
-#endif /* USE_ALL_ORIGINAL */
 
               if(idtupdate)then
                 if (tdry >= ttp .or. .not. ice) then

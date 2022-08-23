@@ -55,7 +55,7 @@ subroutine get_gefs_ensperts_dualres (tau)
   use hybrid_ensemble_parameters, only: bens_recenter
   use hybrid_ensemble_parameters, only: en_perts,ps_bar,nelen
   use constants,only: zero,zero_single,half,fv,rd_over_cp,one,qcmin
-  use m_mpimod, only: mpi_comm_world,mype,npe
+  use m_mpimod, only: gsi_mpi_comm_world,mype,npe
   use m_kinds, only: r_kind,i_kind,r_single
   use hybrid_ensemble_parameters, only: grd_ens,q_hyb_ens
   use hybrid_ensemble_parameters, only: beta_s0,beta_s,beta_e
@@ -431,7 +431,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 !         dum,sst_full,dum, &
 !         dum,dum,dum,dum,dum,idum,dum,dum)
 !
-!    call mpi_barrier(mpi_comm_world,ierror)
+!    call mpi_barrier(gsi_mpi_comm_world,ierror)
 !
 !! mpi barrier here?
 !    do j=1,jm
@@ -657,7 +657,7 @@ subroutine write_spread_dualres(ibin,bundle)
 !$$$ end documentation block
   use m_mpimod, only: mype
   use mpeu_util, only: die
-  use m_mpimod, only: mpi_rtype,mpi_itype,mpi_comm_world
+  use m_mpimod, only: mpi_rtype,mpi_itype,gsi_mpi_comm_world
   use m_kinds, only: r_kind,i_kind,r_single
   use guess_grids, only: gsiguess_get_ref_gesprs 
   use gridmod, only: rlats
@@ -754,9 +754,9 @@ subroutine write_spread_dualres(ibin,bundle)
       write(6,*)'WRITE_SPREAD_DUALRES FOR VARIABLE ',trim(cvars3d(n))
     endif
   end do
-  call mpi_bcast(ifailed,1,mpi_itype,0,mpi_comm_world,istat)
+  call mpi_bcast(ifailed,1,mpi_itype,0,gsi_mpi_comm_world,istat)
 #ifdef USE_ALL_ORIGINAL
-  call mpi_bcast(spread3d(1,1,ibin,jiter),grd_anl%nsig*nc3d,mpi_rtype,0,mpi_comm_world,istat)
+  call mpi_bcast(spread3d(1,1,ibin,jiter),grd_anl%nsig*nc3d,mpi_rtype,0,gsi_mpi_comm_world,istat)
 #endif /* USE_ALL_ORIGINAL */
   if(ifailed/=0) then
      call die(myname,': fishy cos(lat), aborting',ifailed)
@@ -788,7 +788,7 @@ subroutine write_spread_dualres(ibin,bundle)
     endif
   end do
 #ifdef USE_ALL_ORIGINAL
-  call mpi_bcast(spread2d(1,ibin,jiter),nc2d,mpi_rtype,0,mpi_comm_world,istat)
+  call mpi_bcast(spread2d(1,ibin,jiter),nc2d,mpi_rtype,0,gsi_mpi_comm_world,istat)
 #endif /* USE_ALL_ORIGINAL */
 
   if(mype==0) deallocate(cosrlats2d)

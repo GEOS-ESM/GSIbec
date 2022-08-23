@@ -22,7 +22,7 @@ subroutine outgrads1(f,nx,ny,label)
 !   machine:
 !
 !$$$ end documentation block
-  use kinds, only: i_kind,r_single
+  use m_kinds, only: i_kind,r_single
   implicit none
 
   character(*)   ,intent(in   ) :: label

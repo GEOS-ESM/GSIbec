@@ -81,6 +81,7 @@ module constants
   public :: tice,t_wfr,e00,rvgas,rdgas,hlv,hlf,cp_vap,c_liq,c_ice,cp_air,cv_air
 
   public :: kPa_per_Pa
+  public :: Pa_per_kPa
 
   public :: izero, qimin, qsmin, qgmin,qrmin
   public :: partialSnowThreshold
@@ -112,7 +113,8 @@ module constants
   real(r_kind),parameter::  ttp    = 2.7316e+2_r_kind            !  temperature at h2o triple point (K)
   real(r_kind),parameter::  jcal   = 4.1855e+0_r_kind            !  joules per calorie              ()
   real(r_kind),parameter::  stndrd_atmos_ps = 1013.25e2_r_kind   ! 1976 US standard atmosphere ps   (Pa)
-  real(r_kind),parameter::  kPa_per_Pa = 0.001                   ! convert from Pa to cb
+  real(r_kind),parameter::  kPa_per_Pa = 0.001_r_kind            ! convert from Pa to cb
+  real(r_kind),parameter::  Pa_per_kPa = 1000._r_kind            ! convert from cb to Pa
 
 ! Numeric constants
 

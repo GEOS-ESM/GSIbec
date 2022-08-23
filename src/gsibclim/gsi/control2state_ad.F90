@@ -56,12 +56,12 @@ use control_vectors, only: cvars3d,cvars2d
 use bias_predictors, only: predictors
 use gridmod, only: regional,lat2,lon2,nsig,twodvar_regional
 use jfunc, only: nsclen,npclen,ntclen
-#ifdef USE_ALL_ORIGINAL
 use gsi_4dvar, only: nsubwin, lsqrtb
+#ifdef USE_ALL_ORIGINAL
 use cwhydromod, only: cw2hydro_ad
 use cwhydromod, only: cw2hydro_ad_hwrf
-use gridmod, only: nems_nmmb_regional
 #endif /* USE_ALL_ORIGINAL */
+use gridmod, only: nems_nmmb_regional
 use gsi_bundlemod, only: gsi_bundlecreate
 use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -91,9 +91,6 @@ type(gsi_bundle) :: wbundle ! work bundle
 ! Note: The following does not aim to get all variables in
 !       the state and control vectors, but rather the ones
 !       this routines knows how to handle.
-#ifndef USE_ALL_ORIGINAL
-integer(i_kind), parameter :: nsubwin = 1
-#endif /* USE_ALL_ORIGINAL */
 integer(i_kind), parameter :: ncvars = 9
 integer(i_kind) :: icps(ncvars)
 integer(i_kind) :: icpblh,icgust,icvis,icoz,icwspd10m,icw
@@ -139,7 +136,6 @@ logical :: do_cw_to_hydro_ad_hwrf
 
 !******************************************************************************
 
-#ifdef USE_ALL_ORIGINAL
 if (lsqrtb) then
    write(6,*)trim(myname),': not for sqrt(B)'
    call stop2(311)
@@ -151,7 +147,6 @@ if (nclouds>0) then
    allocate(clouds(nclouds))
    call gsi_metguess_get ('clouds::3d',clouds,istatus)
 endif
-#endif /* USE_ALL_ORIGINAL */ 
 
 ! Inquire about chemistry
 call gsi_chemguess_get('dim',ngases,istatus)
@@ -233,7 +228,6 @@ do jj=1,nsubwin
 !  Convert RHS calculations for u,v to st/vp for application of
 !  background error
    if (do_getuv) then
-#ifdef USE_ALL_ORIGINAL
        if (twodvar_regional .and. icsfwter>0 .and. icvpwter>0) then
            call gsi_bundlegetpointer (wbundle,'sfwter', cv_sfwter,istatus)
            call gsi_bundlegetpointer (wbundle,'vpwter', cv_vpwter,istatus)
@@ -243,17 +237,16 @@ do jj=1,nsubwin
            uland=zero ; uwter=zero
            vland=zero ; vwter=zero
 
+#ifdef USE_ALL_ORIGINAL
            call landlake_uvmerge(rv_u,rv_v,uland,vland,uwter,vwter,0)
+#endif /* USE_ALL_ORIGINAL */
 
            call getuv(uwter,vwter,cv_sfwter,cv_vpwter,1)
            call getuv(uland,vland,cv_sf,cv_vp,1)
            deallocate(uland,vland,uwter,vwter)
          else
-#endif /* USE_ALL_ORIGINAL */
            call getuv(rv_u,rv_v,cv_sf,cv_vp,1)
-#ifdef USE_ALL_ORIGINAL
        endif
-#endif /* USE_ALL_ORIGINAL */
    endif
 
    if(jj == 1)then
@@ -390,26 +383,24 @@ do jj=1,nsubwin
    if (icw>0) then
       call gsi_bundlegetpointer (rval(jj),'w' ,rv_w, istatus)
       call gsi_bundleputvar ( wbundle, 'w', rv_w, istatus )
-#ifdef USE_ALL_ORIGINAL
       if(nems_nmmb_regional)then
          call gsi_bundlegetpointer (rval(jj),'dw' ,rv_dw, istatus)
          call gsi_bundleputvar ( wbundle, 'dw', rv_dw, istatus )
        end if
-#endif /* USE_ALL_ORIGINAL */ 
    end if
    if (ictcamt>0) then
       call gsi_bundlegetpointer (rval(jj),'tcamt',rv_tcamt, istatus)
       call gsi_bundleputvar ( wbundle, 'tcamt', rv_tcamt, istatus )
    end if
-#ifdef USE_ALL_ORIGINAL
    if (iclcbas>0) then
       call gsi_bundlegetpointer (wbundle,'lcbas',cv_lcbas,istatus)
       call gsi_bundlegetpointer (rval(jj),'lcbas',rv_lcbas, istatus)
       call gsi_bundleputvar ( wbundle, 'lcbas', zero, istatus )
       !  Adjoint of convert loglcbas to lcbas
+#ifdef USE_ALL_ORIGINAL
       call loglcbas_to_lcbas_ad(cv_lcbas,rv_lcbas)
-   end if
 #endif /* USE_ALL_ORIGINAL */ 
+   end if
    if (iccldch >0) then
       call gsi_bundlegetpointer (rval(jj),'cldch' ,rv_cldch , istatus)
       call gsi_bundleputvar ( wbundle, 'cldch' , rv_cldch  , istatus )

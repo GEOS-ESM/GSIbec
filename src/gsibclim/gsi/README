@@ -48,3 +48,11 @@ balmod
   o set pressures as those from JEDI seen guess_grids: guess_grids_get_ref_gesprs
   o properly fill in required guess fields; see guess_grids guess_basics
 
+
+Other TO DOs
+------------
+- revise items above
+- fill in halo for var comming from saber
+- var units fixes must be moved to center-specific dir
+- eta levels should come from JEDI
+

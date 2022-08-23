@@ -102,11 +102,11 @@ contains
 !
 ! !INTERFACE:
 
-subroutine get_dims(msig,mlat,mlon,lunit)
+subroutine get_dims(mype,msig,mlat,mlon,lunit)
 
-   use m_mpimod, only: mype
    implicit none
 
+   integer(i_kind)         ,intent(   in) :: mype  ! proc identifier
    integer(i_kind)         ,intent(  out) :: msig  ! dimension of levels
    integer(i_kind)         ,intent(  out) :: mlat  ! dimension of latitudes
    integer(i_kind),optional,intent(  out) :: mlon  ! dimension of longitudes
@@ -255,7 +255,7 @@ subroutine read_bal(agvin,bvin,wgvin,pputin,fut2ps,mype,lunit)
    if (bin_berror) then
       call bin_
    else
-      call nc_()
+      call nc_(mype)
    endif
 
    return
@@ -309,12 +309,13 @@ subroutine read_bal(agvin,bvin,wgvin,pputin,fut2ps,mype,lunit)
 
    end subroutine bin_
 
-   subroutine nc_
+   subroutine nc_(myid)
+   integer, intent(in) :: myid
    type(nc_berror_vars) bvars
    if ( fut2ps ) then
       call die(myname_," fut2ps not available in this form "//trim(berror_stats), 99)
    endif
-   call nc_berror_read (berror_stats,bvars,ier, myid=mype,root=0)
+   call nc_berror_read (berror_stats,bvars,ier, myid=myid,root=0)
    if (nlat/=bvars%nlat .or. nsig/=bvars%nsig ) then
       call die(myname_," inconsistent dims in "//trim(berror_stats), 99)
    endif
@@ -417,14 +418,14 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    if ( bin_berror ) then
      call bin_()
    else
-     call nc_()
+     call nc_(mype)
    endif
 
    ! corz, hwll & vz for undefined 3d variables
    do n=1,size(cvars3d)
       if ( .not.found3d(n) ) then
          if ( n>0 ) then
-            if ( cvars3d(n)=='oz' ) then
+            if ( trim(cvars3d(n))=='oz' ) then
                call setcoroz_(corz(:,:,n),ntguessig,ges_prsi,mype)
                call sethwlloz_(hwll(:,:,n),mype)
             else
@@ -616,13 +617,14 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
 
   end subroutine bin_
 
-  subroutine nc_
+  subroutine nc_(myid)
 
+   integer,intent(in) :: myid
    type(nc_berror_vars) bvars
    real(r_single), pointer :: ptr1d(:)
    real(r_single), pointer :: ptr2d(:,:)
    integer :: nv 
-   call nc_berror_read (berror_stats,bvars,ier, myid=mype,root=0)
+   call nc_berror_read (berror_stats,bvars,ier, myid=myid,root=0)
    if (nlat/=bvars%nlat .or. nlon/=bvars%nlon .or.  nsig/=bvars%nsig ) then
       call die(myname_," inconsistent dims in "//trim(berror_stats), 99)
    endif
@@ -673,6 +675,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
+             cycle
           endif
           if (trim(cvars3d(nv))=='q' .and. qoption==2) then
              allocate(corq2(bvars%nlat,bvars%nsig))
@@ -690,18 +693,8 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
+             cycle
           endif
-          cycle
-      endif
-      if (trim(cvars3d(nv))=='q') then
-          n = getindex(cvars3d,'q')
-          found3d(n)=.true.
-          corz(:,:,n)=bvars%qvar
-          if (qoption == 2) then
-          endif
-          hwll(:,:,n)=bvars%qhln
-          vz(:,:,n)=transpose(bvars%qvln)
-          cycle
       endif
    enddo
    call nc_berror_vars_final(bvars)

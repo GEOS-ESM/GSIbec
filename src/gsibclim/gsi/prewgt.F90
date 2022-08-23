@@ -1,4 +1,4 @@
-subroutine prewgt( varcw,cwoption,varq,qoption, mype)
+subroutine prewgt(mype)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    prewgt
@@ -94,8 +94,8 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   use m_berror_stats,only : berror_read_wgt
   use m_mpimod, only: nvar_id,levs_id
   use m_mpimod, only: gsi_mpi_comm_world,ierror,mpi_rtype
-! use jfunc, only: varcw,cwoption
-! use jfunc, only: varq,qoption
+  use m_rf, only: varcw,cwoption
+  use m_rf, only: varq,qoption
   use control_vectors, only: cvars2d,cvars3d
   use control_vectors, only: cvars => nrf_var
   use control_vectors, only: as2d,as3d,atsfc_sdv
@@ -114,16 +114,15 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
   use blendmod, only: blend
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use gsi_metguess_mod, only: gsi_metguess_bundle
+  use mpeu_util, only: die
 
   implicit none
 
 ! Declare passed variables
-  integer(i_kind), intent(in) :: qoption,cwoption
-  real(r_kind),intent(inout),dimension(nlat,nsig):: varq
-  real(r_kind),intent(inout),dimension(nlat,nsig):: varcw
   integer(i_kind),intent(in   ) :: mype
 
 ! Declare local variables
+  character(len=*), parameter :: myname = 'prewgt'
   integer(i_kind) n,nrr,iii,jjj,nxg,i2,im,jm,j2
   integer(i_kind) i,j,k,ii,nn,nbuf,nmix,nxe,nor,ndx,ndy
   integer(i_kind) nlathh,mm1,nolp,mm,ir,k1
@@ -484,6 +483,8 @@ subroutine prewgt( varcw,cwoption,varq,qoption, mype)
                     dssv(j,i,k,n)=dsv(i,k)*my_corz*as3d(n)   ! ozone
                  end do
               end do
+           else
+              call die(myname,': ges-oz pointer not assigned',istatus)
            endif
         else
            do k=1,nsig

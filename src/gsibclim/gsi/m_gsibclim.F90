@@ -3,16 +3,27 @@ module m_gsibclim
 !use mpi
 
 use constants, only: zero,one
+use constants, only: kPa_per_Pa
+use constants, only: Pa_per_kPa
+use constants, only: constoz
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
+
+use gsi_4dvar, only: nsubwin
+use jfunc, only: nsclen,npclen,ntclen
+use jfunc, only: mockbkg
 use gridmod, only: nlon,nlat,lon2,lat2,lat1,lon1,nsig
+
 use guess_grids, only: nfldsig
-use guess_grids, only: guess_grids_init
-use guess_grids, only: guess_grids_final
-!use guess_grids, only: gsiguess_bkgcov_init
+use guess_grids, only: gsiguess_init
+use guess_grids, only: gsiguess_final
+use guess_grids, only: gsiguess_set
 use guess_grids, only: gsiguess_bkgcov_final
+!use guess_grids, only: gsiguess_bkgcov_init
+
 use state_vectors, only: allocate_state,deallocate_state
+
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
 use control_vectors, only: assignment(=)
@@ -20,35 +31,57 @@ use control_vectors, only: cvars3d
 use control_vectors, only: prt_control_norms
 use control_vectors, only: inquire_cv
 use control_vectors, only: cvars2d, cvars3d
+
 use bias_predictors, only: predictors,allocate_preds,deallocate_preds,assignment(=)
+
 use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: gsi_bundlegetpointer
 use gsi_bundlemod, only: gsi_bundleprint
 use gsi_bundlemod, only: assignment(=)
-use mpeu_util, only: die
-use m_mpimod, only: nxpe,nype
+
 use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
-use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
+
 use m_berror_stats,only : berror_stats
-use gsi_4dvar, only: nsubwin
-use jfunc, only: nsclen,npclen,ntclen
+use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
+use hybrid_ensemble_parameters,only : l_hyb_ens
+use hybrid_ensemble_isotropic, only: bkerror_a_en
+
 use general_sub2grid_mod, only: sub2grid_info
 use general_sub2grid_mod, only: general_sub2grid_create_info
 use general_sub2grid_mod, only: general_sub2grid_destroy_info
 
+use mpeu_util, only: die
+use m_mpimod, only: nxpe,nype
 implicit none
 
 private
 public gsibclim_init
+public gsibclim_init_guess
+public gsibclim_set_guess
+!public gsibclim_set_guess_aux
 public gsibclim_cv_space
 public gsibclim_sv_space
 public gsibclim_befname
+public gsibclim_final_guess
 public gsibclim_final
 
 interface gsibclim_init
   module procedure init_
 end interface gsibclim_init
+
+interface gsibclim_init_guess
+  module procedure init_guess_
+end interface gsibclim_init_guess
+
+interface gsibclim_set_guess
+  module procedure set_guess2_
+  module procedure set_guess3_
+end interface gsibclim_set_guess
+
+!interface gsibclim_set_guess_aux
+!  module procedure set_guess_aux_
+!end interface gsibclim_set_guess_aux
 
 interface gsibclim_cv_space
   module procedure be_cv_space0_
@@ -64,6 +97,10 @@ interface gsibclim_befname
   module procedure befname_
 end interface gsibclim_befname
 
+interface gsibclim_final_guess
+  module procedure final_guess_
+end interface gsibclim_final_guess
+
 interface gsibclim_final
   module procedure final_
 end interface gsibclim_final
@@ -73,11 +110,11 @@ logical :: iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibclim"
 contains
-  subroutine init_(cv,lat2out,lon2out,mockbkg,nmlfile,befile,layout,comm)
+  subroutine init_(cv,lat2out,lon2out,bkgmock,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
   integer, intent(out) :: lat2out,lon2out
-  logical, intent(in)  :: mockbkg
+  logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
@@ -113,7 +150,6 @@ contains
   call gsimain_initialize(nmlfile=nmlfile)
   call set_()
   call set_pointer_()
-  call guess_grids_init(mockbkg=mockbkg)
 
 ! create subdomain/grid indexes 
 ! call general_sub2grid_create_info(sg,0,nlat,nlon,nsig,1,.false.)
@@ -124,15 +160,35 @@ contains
   lon2out=lon2
 
   cv = simcv
+  if (present(bkgmock) ) then
+    bkgmock = mockbkg
+  endif
   initialized_=.true.
   end subroutine init_
+!--------------------------------------------------------
+  subroutine init_guess_
+  call gsiguess_init(mockbkg=mockbkg)
+! call gsiguess_bkgcov_init()  ! not where I want for this to be
+  end subroutine init_guess_
+!--------------------------------------------------------
+  subroutine set_guess2_(varname,var)
+  character(len=*),intent(in) :: varname
+  real(r_kind),intent(in) :: var(:,:)
+  call gsiguess_set(varname,var) 
+  end subroutine set_guess2_
+!--------------------------------------------------------
+  subroutine set_guess3_(varname,var)
+  character(len=*),intent(in) :: varname
+  real(r_kind),intent(in) :: var(:,:,:)
+  call gsiguess_set(varname,var) 
+  end subroutine set_guess3_
 !--------------------------------------------------------
   subroutine final_(closempi)
 
   logical, intent(in) :: closempi
 
   call gsiguess_bkgcov_final()
-  call guess_grids_final()
+  call gsiguess_final()
   call unset_()
   call gsimain_finalize(closempi)
   initialized_=.false.
@@ -366,7 +422,7 @@ contains
      call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
      if(ier==0) then
         ptr2(10,10) = 100.
-        if (mype==0) print *, myname_, ': var= ', 'ps'
+        if (mype==0) print *, myname_, ': var= ', 'ps(Pa)'
         return
      endif
   endif
@@ -385,12 +441,18 @@ contains
   grady=zero
 
   call set_silly_(gradx%step(1))
+  call model2gsi_units_(gradx%step(1))
 
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
+  if (l_hyb_ens) then
+     call bkerror_a_en(gradx,grady)
+  endif
 
   if(bkgv_write_cv) &
   call write_bundle(grady%step(1),'cvbundle')
+
+  call gsi2model_units_(grady%step(1))
 
 ! clean up
   call deallocate_cv(gradx)
@@ -418,6 +480,9 @@ contains
      if(internalcv) call set_silly_(gradx%step(1))
   endif
 
+! convert model units to gsi
+  call model2gsi_units_(gradx%step(1))
+
 ! allocate vectors
   call allocate_cv(grady)
 
@@ -427,6 +492,9 @@ contains
      grady=zero
      call bkerror(gradx,grady, &
                   1,nsclen,npclen,ntclen)
+     if (l_hyb_ens) then
+        call bkerror_a_en(gradx,grady)
+     endif
   endif
 
   if(bkgv_write_cv) &
@@ -434,6 +502,9 @@ contains
 
 ! return result in input vector
   gradx=grady
+
+! convert units back to model units
+  call gsi2model_units_(gradx%step(1))
 
 ! clean up
   call deallocate_cv(grady)
@@ -464,16 +535,25 @@ contains
 ! call get_state_perts_ (fcgrad(1))
 !
   call set_silly_(fcgrad(1))
+  call model2gsi_units_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
 ! apply B to input (transformed) vector
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
+  if (l_hyb_ens) then
+     call bkerror_a_en(gradx,grady)
+  endif
 
   call control2state(grady,fcgrad,sbias)
+
+! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
+
+! convert back to model units (just for consistency here)
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -519,6 +599,9 @@ contains
      if (internalsv) call set_silly_(fcgrad(1))
   endif
 
+! convert from model to gsi units
+  call model2gsi_units_(fcgrad(1))
+
   call control2state_ad(fcgrad,sbias,gradx)
 
 ! apply B to input (transformed) vector
@@ -527,11 +610,19 @@ contains
   else
     call bkerror(gradx,grady, &
                  1,nsclen,npclen,ntclen)
+    if (l_hyb_ens) then
+       call bkerror_a_en(gradx,grady)
+    endif
   endif
 
   call control2state(grady,fcgrad,sbias)
+
+! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv) &
   call write_bundle(fcgrad(1),'svbundle')
+
+! convert from gsi to model units
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -580,5 +671,43 @@ contains
   clen=len(berror_stats)
   call mpi_bcast(berror_stats,clen,mpi_character,root,gsi_mpi_comm_world,ier)
   end subroutine befname_
-
+!--------------------------------------------------------
+  subroutine model2gsi_units_(bundle)
+  use gsi_bundlemod, only: gsi_bundle
+  use gsi_bundlemod, only: gsi_bundlegetpointer
+  implicit none
+  type(gsi_bundle) bundle
+  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
+  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
+  integer ier
+  call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
+  if(ier==0) then
+     ptr2 = ptr2 * kPa_per_Pa
+  endif
+  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
+  if(ier==0) then
+     ptr3 = ptr3 / constoz
+  endif
+  end subroutine model2gsi_units_
+!--------------------------------------------------------
+  subroutine gsi2model_units_(bundle)
+  use gsi_bundlemod, only: gsi_bundle
+  use gsi_bundlemod, only: gsi_bundlegetpointer
+  implicit none
+  type(gsi_bundle) bundle
+  real(r_kind),pointer :: ptr2  (:,:)=>NULL()
+  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
+  integer ier
+  call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
+  if(ier==0) then
+     ptr2 = ptr2 * Pa_per_kPa
+  endif
+  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
+  if(ier==0) then
+     ptr3 = ptr3 * constoz
+  endif
+  end subroutine gsi2model_units_
+!--------------------------------------------------------
+  subroutine final_guess_
+  end subroutine final_guess_
 end module m_gsibclim

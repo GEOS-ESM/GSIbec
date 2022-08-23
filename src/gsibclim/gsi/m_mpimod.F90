@@ -105,7 +105,7 @@ module m_mpimod
   public :: setworld
   public :: setcomm
 ! set passed variables to public
-  public :: ierror,mpi_comm_world,npe,mpi_rtype,mpi_sum,mype,mpi_max,mpi_itype
+  public :: ierror,npe,mpi_rtype,mpi_sum,mype,mpi_max,mpi_itype
   public :: mpi_real4,mpi_integer4,levs_id,mpi_min,mpi_real8,mpi_real16,mpi_integer8
   public :: mpi_integer,mpi_integer1,mpi_integer2,nvar_id
   public :: mpi_status_size,mpi_rtype4,nvar_pe,nype,nxpe

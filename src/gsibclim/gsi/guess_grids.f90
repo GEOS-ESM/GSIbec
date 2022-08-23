@@ -2,8 +2,10 @@ module guess_grids
 use m_kinds, only: i_kind, r_kind
 use m_mpimod, only: mype
 use mpeu_util, only: tell,die
-use constants, only: fv,one,max_varname_length
-use constants, only: kPa_per_Pa
+use constants, only: fv,zero,one,max_varname_length
+use constants, only: kPa_per_Pa,Pa_per_kPa
+use constants, only: constoz
+use constants, only: grav
 use gridmod, only: nlon,nlat,lon2,lat2,nsig,idsl5
 use gridmod, only: ak5,bk5
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -19,17 +21,16 @@ public :: ges_prsi
 public :: ges_prsl
 public :: ges_tsen
 public :: ges_qsat
-public :: ges_z
 
 public :: geop_hgtl
 public :: isli2
 public :: fact_tv
 public :: tropprs
 
-public :: guess_grids_init
-public :: guess_grids_final
+public :: gsiguess_init
+public :: gsiguess_final
 public :: gsiguess_get_ref_gesprs
-public :: gsiguess_basics
+public :: gsiguess_set
 public :: gsiguess_bkgcov_init
 public :: gsiguess_bkgcov_final
 
@@ -56,7 +57,6 @@ real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_tsen
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_qsat
-real(r_kind),allocatable,dimension(:,:,:  ):: ges_z
 
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgtl
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgti
@@ -64,15 +64,18 @@ real(r_kind),allocatable,dimension(:,:,:):: fact_tv
 real(r_kind),allocatable,dimension(:,:):: tropprs
 integer(i_kind),allocatable,dimension(:,:):: isli2
 
-interface guess_grids_init; module procedure init_; end interface
-interface guess_grids_final; module procedure final_; end interface
+interface gsiguess_init; module procedure init_; end interface
+interface gsiguess_final; module procedure final_; end interface
 interface gsiguess_get_ref_gesprs; module procedure get_ref_gesprs_; end interface
 
-interface gsiguess_basics
-  module procedure guess_basics0_
+interface gsiguess_set
   module procedure guess_basics2_
   module procedure guess_basics3_
-end interface gsiguess_basics
+end interface gsiguess_set
+
+!interface gsiguess_set_aux
+!  module procedure other_set_
+!end interface gsiguess_set_aux
 
 interface gsiguess_bkgcov_init
   module procedure bkgcov_init_
@@ -104,33 +107,79 @@ subroutine init_(mockbkg)
    endif
   else
     if (mype==0) then
-       print *, "User expected to provide guess-fields"
+       print *, "User expected to provide guess-fields (viz. gsiguess_set)"
     endif
   endif
+end subroutine init_
+!--------------------------------------------------------
+subroutine other_set_(need)
+  implicit none
+  character(len=*), optional, intent(inout) :: need(:)
+  character(len=*), parameter :: myname_ = myname//'*other_set_'
+  integer ier
   allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
-  allocate(ges_prsl(lat2,lon2,nsig+1,nfldsig))
+  allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
   allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
-  allocate(ges_z(lat2,lon2,nfldsig))
   allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
-  allocate(geop_hgti(lat2,lon2,nsig,nfldsig))
+  allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
   allocate(isli2(lat2,lon2))
   allocate(fact_tv(lat2,lon2,nsig))
   allocate(tropprs(lat2,lon2))
-end subroutine init_
-!--------------------------------------------------------
-subroutine other_set_
-  implicit none
-  integer ier
+  ges_tsen=zero
+  ges_prsl=zero
+  ges_qsat=zero
+  geop_hgtl=zero
+  geop_hgti=zero
+  ges_prsi=zero
+  isli2=zero
+  tropprs=zero
+  fact_tv=one
   call load_vert_coord_
+  ! better fix units here?
+  if (present(need)) then
+    if(mype==0) then
+       print *, 'vars still needing to be filled ', need
+    endif
+    if (size(need)<1) then
+        iamset_ = .true.
+        return
+    endif
+  endif
+  if (present(need)) then
+    if (any(need=='tsen')) then
+       call load_guess_tsen_
+       where(need=='tsen')
+          need='filled-'//need
+       endwhere
+    endif
+    if (any(need=='tv')) then
+       call load_guess_tv_
+       where(need=='tv')
+          need='filled-'//need
+       endwhere
+    endif
+  else
+    call load_guess_tsen_(mock=.true.)
+  endif
+  if (present(need)) then
+    if (any(need(1:8)=='unfilled')) then
+      if(mype==0) then
+         print *, 'some vars still not filled: ', need
+      endif
+      call die (myname_,': not all needed GSI guess fields present',99)
+    endif
+  endif
   call load_prsges_
   call load_geop_hgt_
-  call load_guess_tsen_
+  call tpause(mype,'pvoz')  ! _RT: this needs attention
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
-subroutine bkgcov_init_
-  call other_set_()  ! a little out of place, but ...
+subroutine bkgcov_init_(need)
+  implicit none
+  character(len=*), optional, intent(inout) :: need(:)
+  call other_set_(need=need)  ! a little out of place, but ...
   call rf_set(mype)
   initialized_ = .true.
 end subroutine bkgcov_init_
@@ -153,7 +202,6 @@ subroutine final_
   deallocate(isli2)
   deallocate(geop_hgti)
   deallocate(geop_hgtl)
-  deallocate(ges_z)
   deallocate(ges_qsat)
   deallocate(ges_prsl)
   deallocate(ges_prsi)
@@ -163,10 +211,11 @@ end subroutine final_
 !--------------------------------------------------------
 subroutine load_vert_coord_
 use m_set_eta, only: set_eta
+! ideally, these coordinates should be passed from JEDI
 implicit none
 integer ks
 real(r_kind) :: ptop,pint
-call set_eta (nsig, ks, ptop, pint, ak5, bk5)
+call set_eta (nsig, ks, ptop, pint, ak5, bk5) ! GEOS/FV3 levels/orientation/units
 ak5=kPa_per_Pa*ak5
 ak5=ak5(nsig:1:-1)
 bk5=bk5(nsig:1:-1)
@@ -371,6 +420,7 @@ end subroutine load_vert_coord_
           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
           ier=ier+istatus
           if(ier/=0) exit
+          where(ges_zz<zero) ges_zz=zero ! debug (RTod: odd to find <0)
           do j=1,lon2
              do i=1,lat2
                 k  = 1
@@ -391,7 +441,7 @@ end subroutine load_vert_coord_
           end do
        end do
        if(ier/=0) return
-
+       
 !      Compute geopotential height at interface between layers
        do jj=1,nfldsig
           ier=0
@@ -399,7 +449,7 @@ end subroutine load_vert_coord_
           ier=ier+istatus
           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv' ,ges_tv ,istatus)
           ier=ier+istatus
-          if(ier/=0) call die(myname_,'not all fields available, ier=',ier)
+          if(ier/=0) exit
           do j=1,lon2
              do i=1,lat2
                 k=1
@@ -616,20 +666,91 @@ end subroutine load_vert_coord_
   enddo
   end subroutine get_ref_gesprs_
 
-  subroutine load_guess_tsen_
+  subroutine load_guess_tsen_(mock)
   implicit none
+  logical,optional,intent(in) :: mock
   character(len=*), parameter :: myname_ = myname//'*get_guess_tsen_'
+  real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
+  logical iamset,mock_
+  mock_=.false. 
+  iamset=.true.
+  if (present(mock)) then
+     if(mock) mock_=.true.
+  endif
+  do jj=1,nfldsig
+     istatus=0
+     if (mock_) then
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
+        if (istatus/=0) then
+           ! call die(myname_,'cannot retrieve pointers',istatus)
+           iamset=.false.
+           exit
+        else
+           ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+        endif
+     else
+        call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
+        if(ier==0) then
+           ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
+           cycle
+        else
+           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
+           call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
+           if (istatus/=0) then
+              ! call die(myname_,'cannot retrieve pointers',istatus)
+              iamset=.false.
+              exit
+           else
+              ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+           endif
+        endif
+     endif
+  enddo
+  if(.not.iamset) then
+    if (mype==0) call tell (myname_, ': warning, tsen pointer not set, could be an issue')
+  endif
+  end subroutine load_guess_tsen_
+
+  subroutine load_guess_tv_
+  implicit none
+  character(len=*), parameter :: myname_ = myname//'*get_guess_tv_'
+  real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
+  real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
+  real(r_kind),dimension(:,:,:),pointer::q =>NULL()
+  integer jj,ier,istatus
+  logical iamset
+  iamset=.true.
   do jj=1,nfldsig
      istatus=0
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
-     if (istatus/=0) cycle ! call die(myname_,'cannot retrieve pointers',istatus)
-     ges_tsen(:,:,:,jj) = tv/(one+fv*q)
+     if (istatus/=0) then
+        iamset=.false.
+        cycle
+        !call die(myname_,'cannot retrieve pointers',istatus)
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
+     if (ier==0) then
+        if(allocated(ges_tsen)) ges_tsen(:,:,:,jj) = tsen  ! make sure this is local array
+        tv=tsen*(one+fv*q)
+     else
+        if(allocated(ges_tsen)) then
+           tv=ges_tsen(:,:,:,jj)*(one+fv*q)
+        else
+           iamset=.false.
+           cycle
+           !call die(myname_,': cannot define ges_tsen',99)
+        endif
+     endif
   enddo
-  end subroutine load_guess_tsen_
+  if(.not.iamset) then
+    if(mype==0) call tell (myname_, ': warning, tv pointer not set, could be an issue')
+  endif
+  end subroutine load_guess_tv_
 
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
@@ -745,57 +866,81 @@ end subroutine load_vert_coord_
 
   subroutine guess_basics0_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
+  real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::u =>NULL()
   real(r_kind),dimension(:,:,:),pointer::v =>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
+  real(r_kind),dimension(:,:,:),pointer::oz=>NULL()
   real(r_kind),dimension(:,:  ),pointer::ps=>NULL()
+  real(r_kind),dimension(:,:  ),pointer::z =>NULL()
   integer jj,ier
   do jj=1,nfldsig
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'u',u,ier)
      if (ier==0) then
-        u = 20.
+        u = 20. ! m/s
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'v',v,ier)
      if (ier==0) then
-        v = 20.
+        v = 20. ! m/s
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier)
      if (ier==0) then
-        tv = 300.
+        tv = 300. ! K
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
+     if (ier==0) then
+        tsen = 300. ! K
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier)
      if (ier==0) then
-        q = 10-6
+        q = 1.e-6 ! kg/kg
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'oz',oz,ier)
+     if (ier==0) then
+        oz = 0.25/constoz ! mol/mol
      endif
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ps',ps,ier)
      if (ier==0) then
-        ps = 100000. * kPa_per_Pa
+        ps = 100000. * kPa_per_Pa ! cbar(=kPa)
+     endif
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'phis',z,ier)
+     if (ier==0) then
+        z = 100. 
      endif
   enddo
   end subroutine guess_basics0_
 !--------------------------------------------------------
   subroutine guess_basics2_(vname,var)
   character(len=*),intent(in) :: vname
-  real(r_kind),dimension(:,:),pointer::var
+  real(r_kind),dimension(:,:) :: var
+  character(len=*), parameter :: myname_ = myname//'*guess_basics2_'
+  real(r_kind),dimension(:,:),pointer::ptr
   integer jj,ier
   do jj=1,nfldsig
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),var,ier)
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
      if (ier/=0) then
-       call die(myname,'pointer to '//trim(vname)//" not found",ier)
+       call die(myname_,'pointer to '//trim(vname)//" not found",ier)
      endif
+     ptr=var
+     if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
+     if ( trim(vname) == 'z'  ) ptr=ptr/grav       ! RT_TBD: is this the best place for this?
   enddo
   end subroutine guess_basics2_
 !--------------------------------------------------------
   subroutine guess_basics3_(vname,var)
-  character(len=*),intent(in) :: vname
-  real(r_kind),dimension(:,:,:),pointer::var
+  character(len=*),intent(in)   :: vname
+  real(r_kind),dimension(:,:,:) :: var
+  character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
+  real(r_kind),dimension(:,:,:),pointer::ptr
   integer jj,ier
   do jj=1,nfldsig
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),var,ier)
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
      if (ier/=0) then
-       call die(myname,'pointer to '//trim(vname)//" not found",ier)
+       call die(myname_,'pointer to '//trim(vname)//" not found",ier)
      endif
+     ptr=var
   enddo
+  if ( trim(vname) == 'oz' ) ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
   end subroutine guess_basics3_
 !--------------------------------------------------------
 end module guess_grids
