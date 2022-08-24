@@ -1,4 +1,4 @@
-module m_gsibclim
+module m_gsibec
 
 !use mpi
 
@@ -56,59 +56,59 @@ use m_mpimod, only: nxpe,nype
 implicit none
 
 private
-public gsibclim_init
-public gsibclim_init_guess
-public gsibclim_set_guess
-!public gsibclim_set_guess_aux
-public gsibclim_cv_space
-public gsibclim_sv_space
-public gsibclim_befname
-public gsibclim_final_guess
-public gsibclim_final
+public gsibec_init
+public gsibec_init_guess
+public gsibec_set_guess
+!public gsibec_set_guess_aux
+public gsibec_cv_space
+public gsibec_sv_space
+public gsibec_befname
+public gsibec_final_guess
+public gsibec_final
 
-interface gsibclim_init
+interface gsibec_init
   module procedure init_
-end interface gsibclim_init
+end interface gsibec_init
 
-interface gsibclim_init_guess
+interface gsibec_init_guess
   module procedure init_guess_
-end interface gsibclim_init_guess
+end interface gsibec_init_guess
 
-interface gsibclim_set_guess
+interface gsibec_set_guess
   module procedure set_guess2_
   module procedure set_guess3_
-end interface gsibclim_set_guess
+end interface gsibec_set_guess
 
-!interface gsibclim_set_guess_aux
+!interface gsibec_set_guess_aux
 !  module procedure set_guess_aux_
-!end interface gsibclim_set_guess_aux
+!end interface gsibec_set_guess_aux
 
-interface gsibclim_cv_space
+interface gsibec_cv_space
   module procedure be_cv_space0_
   module procedure be_cv_space1_
-end interface gsibclim_cv_space
+end interface gsibec_cv_space
 
-interface gsibclim_sv_space
+interface gsibec_sv_space
   module procedure be_sv_space0_
   module procedure be_sv_space1_
-end interface gsibclim_sv_space
+end interface gsibec_sv_space
 
-interface gsibclim_befname
+interface gsibec_befname
   module procedure befname_
-end interface gsibclim_befname
+end interface gsibec_befname
 
-interface gsibclim_final_guess
+interface gsibec_final_guess
   module procedure final_guess_
-end interface gsibclim_final_guess
+end interface gsibec_final_guess
 
-interface gsibclim_final
+interface gsibec_final
   module procedure final_
-end interface gsibclim_final
+end interface gsibec_final
 
 logical :: initialized_ = .false.
 logical :: iamset_ = .false.
 
-character(len=*), parameter :: myname ="m_gsibclim"
+character(len=*), parameter :: myname ="m_gsibec"
 contains
   subroutine init_(cv,lat2out,lon2out,bkgmock,nmlfile,befile,layout,comm)
 
@@ -710,4 +710,4 @@ contains
 !--------------------------------------------------------
   subroutine final_guess_
   end subroutine final_guess_
-end module m_gsibclim
+end module m_gsibec
