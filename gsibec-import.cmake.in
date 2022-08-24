@@ -1,5 +1,5 @@
-# gsibclim-import.cmake
-# find_dependency calls for gsibclim target dependencies
+# gsibec-import.cmake
+# find_dependency calls for gsibec target dependencies
 
 include(CMakeFindDependencyMacro)
 
