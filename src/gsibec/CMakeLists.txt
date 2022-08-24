@@ -21,7 +21,7 @@ target_link_libraries( ${PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} )
 
 # NCEP spectral library
 if( sp_FOUND )
-    target_link_libraries( gsibec PUBLIC sp::sp_d)
+    target_link_libraries( GSIbec PUBLIC sp::sp_d)
 endif()
 
 # Enable including of local header Fortran file templates
