@@ -21,8 +21,8 @@ ecbuild_add_resources( TARGET gsibec_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 
-ecbuild_add_executable( TARGET  test_bkerror_clim.x
-                        SOURCES mains/test_bkerror_clim.F90
+ecbuild_add_executable( TARGET  test_gsi_bkerror.x
+                        SOURCES mains/test_gsi_bkerror.F90
                         LIBS    gsibec
                        )
 
@@ -31,16 +31,16 @@ ecbuild_add_executable( TARGET  test_geos_getens.x
                         LIBS    gsibec
                        )
 
-# Test GMAO and NCEP B-CLIM:
+# Test GMAO and NCEP B-Error-Cov:
 
 ecbuild_add_test( TARGET  test_gsibec_gmao
-                  SOURCES mains/test_bkerror_clim.F90
+                  SOURCES mains/test_gsi_bkerror.F90
                   ARGS    "testinput/gmao_saberror.nml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    gsibec )
 
 #ecbuild_add_test( TARGET  test_gsibec_ncep
-#                  SOURCES mains/test_bkerror_clim.F90
+#                  SOURCES mains/test_gsi_bkerror.F90
 #                  ARGS    "testinput/ncep_saberror.nml"
 #                  ENVIRONMENT OOPS_TRAPFPE=1
 #                  LIBS    gsibec )
