@@ -33,11 +33,11 @@ ecbuild_add_executable( TARGET  test_geos_getens.x
 
 # Test GMAO and NCEP B-Error-Cov:
 
-ecbuild_add_test( TARGET  test_gsibec_gmao
-                  SOURCES mains/test_gsi_bkerror.F90
-                  ARGS    "testinput/gmao_saberror.nml"
-                  ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    gsibec )
+#ecbuild_add_test( TARGET  test_gsibec_gmao
+#                  SOURCES mains/test_gsi_bkerror.F90
+#                  ARGS    "testinput/gmao_saberror.nml"
+#                  ENVIRONMENT OOPS_TRAPFPE=1
+#                  LIBS    gsibec )
 
 #ecbuild_add_test( TARGET  test_gsibec_ncep
 #                  SOURCES mains/test_gsi_bkerror.F90
