@@ -3,7 +3,7 @@
 ################################################################################
 
 cmake_minimum_required( VERSION 3.12 )
-project( gsibec VERSION 1.0.0 LANGUAGES Fortran )
+project( gsibec VERSION 1.0.1 LANGUAGES Fortran )
 
 ## Ecbuild integration
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
