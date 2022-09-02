@@ -28,26 +28,26 @@ subroutine coefrf(sig,nu,n,m,bnf,lnf)
 
 use m_plib8mat2
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants, only: zero,half,one
 implicit none
 
 integer(i_kind),              intent(IN   ) :: n,m
-real(r_kind), dimension(n),   intent(IN   ) :: sig,nu
-real(r_kind), dimension(n),   intent(  OUT) :: bnf
-real(r_kind), dimension(m,n), intent(  OUT) :: lnf
+real(my_kind), dimension(n),   intent(IN   ) :: sig,nu
+real(my_kind), dimension(n),   intent(  OUT) :: bnf
+real(my_kind), dimension(m,n), intent(  OUT) :: lnf
 !-------------------------------------------------------------------------- 
 integer(i_kind), parameter                  :: irmax=6
-real(r_kind), dimension(n,-m:m)             :: s
-real(r_kind), dimension(n,-m:0)             :: sl
-real(r_kind), dimension(n,-m:m,m)           :: k,l
-real(r_kind), dimension(n)                  :: eta
-real(r_kind), dimension(irmax)              :: bcofi,bcofh
+real(my_kind), dimension(n,-m:m)             :: s
+real(my_kind), dimension(n,-m:0)             :: sl
+real(my_kind), dimension(n,-m:m,m)           :: k,l
+real(my_kind), dimension(n)                  :: eta
+real(my_kind), dimension(irmax)              :: bcofi,bcofh
 integer(i_kind)                             :: i,i1,il,ir,ik
 !--------------------------------------------------------------------------
 ! The coefficients bcofi are the reciprocals of the i=1 entries of TABLE 1
 ! of NCEP O.N. 431:
-data bcofi/one, 12._r_kind, 90._r_kind, 560._r_kind, 3150._r_kind, 16632._r_kind/
+data bcofi/one, 12._my_kind, 90._my_kind, 560._my_kind, 3150._my_kind, 16632._my_kind/
 !=============================================================================
 bcofh=half/bcofi
 do i=1,n
@@ -148,20 +148,20 @@ subroutine ldlb1i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime
   INTEGER(i_kind), INTENT(IN   ) :: its,ite
 
-  REAL(r_kind), DIMENSION(ims:ime),                       &
+  REAL(my_kind), DIMENSION(ims:ime),                       &
                    INTENT(INOUT) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime),                  &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,l,m,nola
-  real(r_kind)                   :: s
+  real(my_kind)                   :: s
 !============================================================================
 do i=its,ite
    nola=min(nol,i-its)
@@ -214,20 +214,20 @@ subroutine ldlb2i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,l,m,nola
-  real(r_kind)                   :: s
+  real(my_kind)                   :: s
 !============================================================================
 do j=jts,jte
    do i=its,ite
@@ -282,20 +282,20 @@ subroutine ldlb2j(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,l,m,nola
-  real(r_kind)                   :: s
+  real(my_kind)                   :: s
 !============================================================================
 do j=jts,jte
    nola=min(nol,j-jts)
@@ -350,20 +350,20 @@ subroutine ldlb3i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k,l,m,nola
-  real(r_kind)                   :: s
+  real(my_kind)                   :: s
 !============================================================================
 do j=jts,jte
    do k=kts,kte
@@ -420,20 +420,20 @@ subroutine ldlb3j(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k,l,m,nola
-  real(r_kind)                   :: s
+  real(my_kind)                   :: s
 !============================================================================
 do j=jts,jte
    nola=min(nol,j-jts)
@@ -492,18 +492,18 @@ SUBROUTINE hbnrf1i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime
   INTEGER(i_kind), INTENT(IN   ) :: its,ite
 
-  REAL(r_kind), DIMENSION(ims:ime),                       &
+  REAL(my_kind), DIMENSION(ims:ime),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime),                       &
+  REAL(my_kind), DIMENSION(ims:ime),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,l,nola
@@ -561,18 +561,18 @@ SUBROUTINE hbnrf2i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,l,nola
@@ -632,18 +632,18 @@ SUBROUTINE hbnrf2j(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,l,nola
@@ -707,18 +707,18 @@ SUBROUTINE hbnrf3i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k,l,nola
@@ -780,18 +780,18 @@ SUBROUTINE hbnrf3j(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k,l,nola
@@ -861,18 +861,18 @@ SUBROUTINE vbnrf1k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: kts,kte
 
-  REAL(r_kind), DIMENSION(kms:kme),                       &
+  REAL(my_kind), DIMENSION(kms:kme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(kms:kme),                       &
+  REAL(my_kind), DIMENSION(kms:kme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, kms:kme),                  &
+  REAL(my_kind), DIMENSION(nol, kms:kme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: k,l,nola
@@ -930,18 +930,18 @@ SUBROUTINE vbnrf2k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,k,l,nola
@@ -1005,18 +1005,18 @@ SUBROUTINE vbnrf3k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(IN   ) :: bnf
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(IN   ) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k,l,nola
@@ -1079,18 +1079,18 @@ SUBROUTINE hbncij(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(IN   ) :: hamp,bnfi,bnfj
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(IN   ) :: lnfi,lnfj
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j
@@ -1144,18 +1144,18 @@ SUBROUTINE hbncji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte
 
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, jms:jme),                       &
                    INTENT(IN   ) :: hamp,bnfi,bnfj
-  REAL(r_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, jms:jme),                  &
                    INTENT(IN   ) :: lnfi,lnfj
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j
@@ -1209,18 +1209,18 @@ SUBROUTINE hbncijk(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(IN   ) :: hamp,bnfi,bnfj,bnfk
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(IN   ) :: lnfi,lnfj,lnfk
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k
@@ -1279,18 +1279,18 @@ SUBROUTINE hbnckji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: my_kind => r_double
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
   INTEGER(i_kind), INTENT(IN   ) :: ims,ime, jms,jme, kms,kme
   INTEGER(i_kind), INTENT(IN   ) :: its,ite, jts,jte, kts,kte
 
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(INOUT) :: a
-  REAL(r_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
+  REAL(my_kind), DIMENSION(ims:ime, kms:kme, jms:jme),                       &
                    INTENT(IN   ) :: hamp,bnfi,bnfj,bnfk
-  REAL(r_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
+  REAL(my_kind), DIMENSION(nol, ims:ime, kms:kme, jms:jme),                  &
                    INTENT(IN   ) :: lnfi,lnfj,lnfk
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,k
@@ -1351,23 +1351,23 @@ subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants, only: zero,one
 use m_fitcons
 implicit none
 
 integer(i_kind),                  intent(IN   ) :: ng
-real(r_kind)   , dimension(ng),   intent(IN   ) :: sig,nu
+real(my_kind)   , dimension(ng),   intent(IN   ) :: sig,nu
 integer(i_kind),                  intent(  OUT) :: ns,nw
-real(r_kind)   , dimension(ng),   intent(  OUT) :: ssig,snu
+real(my_kind)   , dimension(ng),   intent(  OUT) :: ssig,snu
 integer(i_kind), dimension(ng),   intent(INOUT) :: ins1
-real(r_kind)   , dimension(no,ng),intent(INOUT) :: wts
+real(my_kind)   , dimension(no,ng),intent(INOUT) :: wts
 !----------------------------------------------------------------------------
 integer(i_kind)                                :: i,i1,im,k,l,is
-real(r_kind)                                   :: t
-real(r_kind)   , dimension(-nohm:ng+noh)       :: dcdg
-real(r_kind)   , dimension(-noh:ng+noh)        :: cofg,cofs
-real(r_kind)   , dimension(ng)                 :: dsdg,dhdg
+real(my_kind)                                   :: t
+real(my_kind)   , dimension(-nohm:ng+noh)       :: dcdg
+real(my_kind)   , dimension(-noh:ng+noh)        :: cofg,cofs
+real(my_kind)   , dimension(ng)                 :: dsdg,dhdg
 !============================================================================
 nw=0
 do i=1,ng
@@ -1539,21 +1539,21 @@ subroutine jfit(ng,ig1,igm,ns,iw,cofg,dsdg,dhdg,cofs,ins1,wts)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants, only: zero,half,one,two
 use m_fitcons
 implicit none
 
 integer(i_kind),                         intent(IN   ) :: ng,ig1,igm
 integer(i_kind),                         intent(INOUT) :: ns,iw
-real(r_kind)   , dimension(ng),          intent(IN   ) :: dsdg,dhdg
-real(r_kind)   , dimension(-noh:ng+noh), intent(IN   ) :: cofg
-real(r_kind)   , dimension(-noh:ng+noh), intent(INOUT) :: cofs
+real(my_kind)   , dimension(ng),          intent(IN   ) :: dsdg,dhdg
+real(my_kind)   , dimension(-noh:ng+noh), intent(IN   ) :: cofg
+real(my_kind)   , dimension(-noh:ng+noh), intent(INOUT) :: cofs
 integer(i_kind), dimension(ng),          intent(INOUT) :: ins1
-real(r_kind)   , dimension(no,ng),       intent(INOUT) :: wts
+real(my_kind)   , dimension(no,ng),       intent(INOUT) :: wts
 !----------------------------------------------------------------------------
-real(r_kind)   , dimension(-noh:ng+noh)               :: sofg,dsdgt
-real(r_kind)                                          :: et,estar,destar,r,dr,sm
+real(my_kind)   , dimension(-noh:ng+noh)               :: sofg,dsdgt
+real(my_kind)                                          :: et,estar,destar,r,dr,sm
 integer(i_kind)                                       :: i,l,ie,iep,ie1,ien,ig0,is0,ism,init
 !============================================================================
 
@@ -1741,16 +1741,16 @@ subroutine stog(ns,ng,ins1,wts, as,ag)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants, only: zero
 implicit none
 
 integer(i_kind), parameter                      :: noh=3,no=noh*2,nom=no-1
 integer(i_kind),                  intent(IN   ) :: ns,ng
 integer(i_kind), dimension(ng),   intent(IN   ) :: ins1
-real(r_kind)   , dimension(no,ng),intent(IN   ) :: wts
-real(r_kind)   , dimension(ns),   intent(IN   ) :: as
-real(r_kind)   , dimension(ng),   intent(  OUT) :: ag
+real(my_kind)   , dimension(no,ng),intent(IN   ) :: wts
+real(my_kind)   , dimension(ns),   intent(IN   ) :: as
+real(my_kind)   , dimension(ng),   intent(  OUT) :: ag
 !----------------------------------------------------------------------------
 integer(i_kind)                                 :: i,is,iw
 !============================================================================
@@ -1798,16 +1798,16 @@ subroutine stogt(ns,ng,ins1,wts, as,ag)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants, only: zero
 implicit none
 
 integer(i_kind), parameter                      :: noh=3,no=noh*2,nom=no-1
 integer(i_kind),                  intent(IN   ) :: ns,ng
 integer(i_kind), dimension(ng),   intent(IN   ) :: ins1
-real(r_kind)   , dimension(no,ng),intent(IN   ) :: wts
-real(r_kind)   , dimension(ns),   intent(  OUT) :: as
-real(r_kind)   , dimension(ng),   intent(IN   ) :: ag
+real(my_kind)   , dimension(no,ng),intent(IN   ) :: wts
+real(my_kind)   , dimension(ns),   intent(  OUT) :: as
+real(my_kind)   , dimension(ng),   intent(IN   ) :: ag
 !----------------------------------------------------------------------------
 integer(i_kind)                                 :: i,is,iw
 !============================================================================
