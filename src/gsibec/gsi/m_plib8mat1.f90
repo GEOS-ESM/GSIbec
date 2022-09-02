@@ -157,7 +157,7 @@ MODULE m_plib8mat1
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: my_kind => r_double
 use constants,only: zero,one
 IMPLICIT NONE
 
@@ -365,10 +365,10 @@ FUNCTION pro333(d,e,f) RESULT(pro_res)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(IN   ) :: d(3), e(3), f(3)
+REAL(my_kind),    INTENT(IN   ) :: d(3), e(3), f(3)
 
-REAL(r_kind)                :: pro_res
-REAL(r_kind)                :: g(3)
+REAL(my_kind)                :: pro_res
+REAL(my_kind)                :: g(3)
 
 CALL CRO33(E,F,G)
 pro_res=DOT_PRODUCT(d,g)
@@ -399,10 +399,10 @@ FUNCTION dpro333(d,e,f) RESULT(pro_res)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: d(3), e(3), f(3)
+REAL(my_kind), INTENT(IN   ) :: d(3), e(3), f(3)
 
-REAL(r_kind)             :: pro_res
-REAL(r_kind)             :: g(3)
+REAL(my_kind)             :: pro_res
+REAL(my_kind)             :: g(3)
 CALL CRO33_d(E,F,G)
 pro_res=DOT_PRODUCT(d,g)
 END FUNCTION dpro333
@@ -433,8 +433,8 @@ SUBROUTINE cro33(a,b,c)
 !$$$ end documentation block$
 implicit none
 
-REAL(r_kind),    INTENT(IN   ) :: a(3), b(3)
-REAL(r_kind),    INTENT(  OUT) :: c(3)
+REAL(my_kind),    INTENT(IN   ) :: a(3), b(3)
+REAL(my_kind),    INTENT(  OUT) :: c(3)
 
 c(1)=a(2)*b(3)-a(3)*b(2)
 c(2)=a(3)*b(1)-a(1)*b(3)
@@ -467,8 +467,8 @@ SUBROUTINE dcro33(a,b,c)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(3), b(3)
-REAL(r_kind), INTENT(  OUT) :: c(3)
+REAL(my_kind), INTENT(IN   ) :: a(3), b(3)
+REAL(my_kind), INTENT(  OUT) :: c(3)
 
 c(1)=a(2)*b(3)-a(3)*b(2)
 c(2)=a(3)*b(1)-a(1)*b(3)
@@ -500,9 +500,9 @@ FUNCTION norv(d) RESULT(norv_res)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(IN   ) :: d(:)
+REAL(my_kind),    INTENT(IN   ) :: d(:)
 
-REAL(r_kind)                :: norv_res
+REAL(my_kind)                :: norv_res
 
 norv_res=SQRT(DOT_PRODUCT(D,D))
 END FUNCTION norv
@@ -532,9 +532,9 @@ FUNCTION dnorv(d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(IN   ) :: d(:)
+REAL(my_kind),    INTENT(IN   ) :: d(:)
 
-REAL(r_kind):: dnorv
+REAL(my_kind):: dnorv
 
 dnorv=SQRT(DOT_PRODUCT(d,d))
 END FUNCTION dnorv
@@ -564,9 +564,9 @@ FUNCTION norq(d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN   ) :: d(:,:)
+REAL(my_kind),INTENT(IN   ) :: d(:,:)
 
-REAL(r_kind):: norq
+REAL(my_kind):: norq
 INTEGER(i_kind) m2,i2
 
 m2=SIZE(d,2)
@@ -599,9 +599,9 @@ FUNCTION dnorq(d) ! norm of a matrix
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN   ) :: d(:,:)
+REAL(my_kind),INTENT(IN   ) :: d(:,:)
 
-REAL(r_kind):: dnorq
+REAL(my_kind):: dnorq
 INTEGER(i_kind) m2,i2
 
 m2=SIZE(d,2)
@@ -635,9 +635,9 @@ SUBROUTINE swpvv(d,e)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: d(:), e(:)
+REAL(my_kind), INTENT(INOUT) :: d(:), e(:)
 
-REAL(r_kind) :: t(SIZE(d))
+REAL(my_kind) :: t(SIZE(d))
 
 t = d; d = e; e = t
 END SUBROUTINE swpvv
@@ -668,9 +668,9 @@ SUBROUTINE dswpvv(d,e)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: d(:), e(:)
+REAL(my_kind), INTENT(INOUT) :: d(:), e(:)
 
-REAL(r_kind) :: t(SIZE(d))
+REAL(my_kind) :: t(SIZE(d))
 
 t = d; d = e; e = t
 END SUBROUTINE dswpvv
@@ -701,8 +701,8 @@ SUBROUTINE mulmd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
 
@@ -737,8 +737,8 @@ SUBROUTINE dmulmd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:)
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:)
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
 
@@ -773,8 +773,8 @@ SUBROUTINE multd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
 
@@ -809,8 +809,8 @@ SUBROUTINE dmultd(a,d,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m2,j
 
@@ -845,8 +845,8 @@ SUBROUTINE muldm(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)                :: m1,i
 
@@ -881,8 +881,8 @@ SUBROUTINE dmuldm(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)             :: m1,i
 
@@ -917,8 +917,8 @@ SUBROUTINE muldt(d,a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind)                :: m1,i
 
@@ -952,8 +952,8 @@ SUBROUTINE dmuldt(d,a,b)
 !
 !$$$ end documentation block
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
-REAL(r_kind), INTENT(IN   ) :: d(*)
+REAL(my_kind), INTENT(INOUT) :: a(:,:),b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: d(*)
 
 INTEGER(i_kind):: m1,i
 
@@ -988,11 +988,11 @@ SUBROUTINE mulpp(a,b,c)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(IN   ) :: a(0:), b(0:)
-REAL(r_kind),    INTENT(INOUT) :: c(0:)
+REAL(my_kind),    INTENT(IN   ) :: a(0:), b(0:)
+REAL(my_kind),    INTENT(INOUT) :: c(0:)
 
 INTEGER(i_kind)                :: m,mcp, j
-REAL(r_kind)                   :: s
+REAL(my_kind)                   :: s
 
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
@@ -1044,7 +1044,7 @@ FUNCTION mcmax(a,b,m) RESULT(mmx_res) ! This fn can be contained in mulpp().
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m
-REAL(r_kind),    INTENT(IN   ) :: a(0:m), b(0:m)
+REAL(my_kind),    INTENT(IN   ) :: a(0:m), b(0:m)
 
 INTEGER(i_kind)             :: mmx_res
 INTEGER(i_kind)             :: ma, mb
@@ -1090,11 +1090,11 @@ SUBROUTINE difp(a,b) ! Symbolically differentiate polynomial
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(0:)
-REAL(r_kind), INTENT(  OUT) :: b(0:)
+REAL(my_kind), INTENT(IN   ) :: a(0:)
+REAL(my_kind), INTENT(  OUT) :: b(0:)
 
 INTEGER(i_kind)           :: m, i
-REAL(r_kind)              :: s, b0
+REAL(my_kind)              :: s, b0
 
 m=SIZE(a)-1
 DO i=1,m        ! possibly with coincident storage for a and b
@@ -1146,11 +1146,11 @@ SUBROUTINE dmulpp(a,b,c) !  multiply polynomials, possibly in place
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(0:), b(0:)
-REAL(r_kind), INTENT(INOUT) :: c(0:)
+REAL(my_kind), INTENT(IN   ) :: a(0:), b(0:)
+REAL(my_kind), INTENT(INOUT) :: c(0:)
 
 INTEGER(i_kind)            :: m,mcp, j
-REAL(r_kind)               :: s
+REAL(my_kind)               :: s
 
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
@@ -1203,7 +1203,7 @@ FUNCTION mcmax(a,b,m) RESULT(mmx_res)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m
-REAL(r_kind)   ,  INTENT(IN   ) :: a(0:m), b(0:m)
+REAL(my_kind)   ,  INTENT(IN   ) :: a(0:m), b(0:m)
 
 INTEGER(i_kind)              :: mmx_res
 INTEGER(i_kind)              :: ma, mb
@@ -1252,11 +1252,11 @@ SUBROUTINE ddifp(a,b) ! Symbolically differentiate polynomial
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(0:)
-REAL(r_kind), INTENT(INOUT) :: b(0:)
+REAL(my_kind), INTENT(IN   ) :: a(0:)
+REAL(my_kind), INTENT(INOUT) :: b(0:)
 
 INTEGER(i_kind)            :: m, i
-REAL(r_kind)               :: s, b0
+REAL(my_kind)               :: s, b0
 
 m=SIZE(a)-1
 DO i=1,m         ! possibly with coincident storage for a and b
@@ -1307,9 +1307,9 @@ SUBROUTINE prgv(d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: d(:)
+REAL(my_kind), INTENT(INOUT) :: d(:)
 
-REAL(r_kind), PARAMETER        :: crit=1.E-30_r_kind
+REAL(my_kind), PARAMETER        :: crit=1.E-30_my_kind
 INTEGER(i_kind)                :: i,m
 
 m=SIZE(d)
@@ -1342,9 +1342,9 @@ SUBROUTINE dprgv(d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: d(:)
+REAL(my_kind), INTENT(INOUT) :: d(:)
 
-REAL(r_kind), PARAMETER     :: crit=1.E-30_r_kind
+REAL(my_kind), PARAMETER     :: crit=1.E-30_my_kind
 INTEGER(i_kind)             :: i,m
 
 m=SIZE(d)
@@ -1379,7 +1379,7 @@ SUBROUTINE mulcc(a,b,c,m)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m
-REAL(r_kind)   , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+REAL(my_kind)   , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
 
 INTEGER(i_kind)                :: mm, j
 
@@ -1427,7 +1427,7 @@ SUBROUTINE dmulcc(a,b,c,m)  ! Multiply circulant matrices of period M
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m
-REAL(r_kind)   , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+REAL(my_kind)   , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
 
 INTEGER(i_kind)                :: mm, j
 
@@ -1473,7 +1473,7 @@ SUBROUTINE zerl(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(INOUT) :: a(:,:)
+REAL(my_kind),INTENT(INOUT) :: a(:,:)
 
 INTEGER(i_kind)           :: m,j
 
@@ -1509,7 +1509,7 @@ SUBROUTINE dzerl(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(INOUT) :: a(:,:)
+REAL(my_kind),INTENT(INOUT) :: a(:,:)
 
 INTEGER(i_kind)           :: m,j
 
@@ -1547,12 +1547,12 @@ SUBROUTINE ldum(a,ipiv,d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),    INTENT(INOUT) :: a(:,:) 
-REAL(r_kind),    INTENT(OUT  ) :: d
+REAL(my_kind),    INTENT(INOUT) :: a(:,:) 
+REAL(my_kind),    INTENT(OUT  ) :: d
 INTEGER(i_kind), INTENT(OUT  ) :: ipiv(:)
 
 INTEGER(i_kind)                :: m,i, j, jp, ibig, jm
-REAL(r_kind)                   :: s(SIZE(a,1)),  aam, aa, abig,  ajj, ajji, aij
+REAL(my_kind)                   :: s(SIZE(a,1)),  aam, aa, abig,  ajj, ajji, aij
 
 m=SIZE(a,1)
 DO i=1,m
@@ -1630,12 +1630,12 @@ SUBROUTINE DLDUM(A,IPIV,D)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind)   , INTENT(INOUT) :: a(:,:) 
-REAL(r_kind)   , INTENT(  OUT) :: d
+REAL(my_kind)   , INTENT(INOUT) :: a(:,:) 
+REAL(my_kind)   , INTENT(  OUT) :: d
 INTEGER(i_kind), INTENT(  OUT) :: ipiv(:)
 
 INTEGER(i_kind)                :: m,i, j, jp, ibig, jm
-REAL(r_kind)                   :: s(SIZE(a,1)),  aam, aa, abig,  ajj, ajji, aij
+REAL(my_kind)                   :: s(SIZE(a,1)),  aam, aa, abig,  ajj, ajji, aij
 
 m=SIZE(a,1)
 DO i=1,m
@@ -1718,11 +1718,11 @@ SUBROUTINE udlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind),    INTENT(IN   ) :: a(:,:) 
-REAL(r_kind),    INTENT(INOUT) :: b(:,:) 
+REAL(my_kind),    INTENT(IN   ) :: a(:,:) 
+REAL(my_kind),    INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
-REAL(r_kind)                   :: s,aiii
+REAL(my_kind)                   :: s,aiii
 
 m=SIZE(a,1); mm=SIZE(b,2)
 DO k=1,mm !loop over columns of b
@@ -1775,11 +1775,11 @@ SUBROUTINE dudlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind)   , INTENT(IN   ) :: a(:,:) 
-REAL(r_kind)   , INTENT(INOUT) :: b(:,:) 
+REAL(my_kind)   , INTENT(IN   ) :: a(:,:) 
+REAL(my_kind)   , INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
-REAL(r_kind)                   :: s,aiii
+REAL(my_kind)                   :: s,aiii
 
 m=SIZE(a,1); mm=SIZE(b,2)
 DO k=1,mm !loop over columns of b
@@ -1832,11 +1832,11 @@ SUBROUTINE udlmv(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind),    INTENT(IN   ) :: a(:,:) 
-REAL(r_kind),    INTENT(INOUT) :: b(:) 
+REAL(my_kind),    INTENT(IN   ) :: a(:,:) 
+REAL(my_kind),    INTENT(INOUT) :: b(:) 
 
 INTEGER(i_kind)                :: m,i, l
-REAL(r_kind)                   :: s,aiii
+REAL(my_kind)                   :: s,aiii
 
 m=SIZE(a,1)
 DO i=1,m
@@ -1887,11 +1887,11 @@ SUBROUTINE dudlmv(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: ipiv(:) 
-REAL(r_kind)   ,  INTENT(IN   ) :: a(:,:) 
-REAL(r_kind)   ,  INTENT(INOUT) :: b(:) 
+REAL(my_kind)   ,  INTENT(IN   ) :: a(:,:) 
+REAL(my_kind)   ,  INTENT(INOUT) :: b(:) 
 
 INTEGER(i_kind)                 :: m,i, l
-REAL(r_kind)                    :: s,aiii
+REAL(my_kind)                    :: s,aiii
 
 m=SIZE(a,1)
 DO i=1,m
@@ -1945,14 +1945,14 @@ SUBROUTINE linvan(w,ab)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: w(:,:), ab(:)
+REAL(my_kind), INTENT(INOUT) :: w(:,:), ab(:)
 
 INTEGER(i_kind), PARAMETER  :: nit=20
-REAL(r_kind)                :: d1(SIZE(w,1)), d2(SIZE(w,1)), &
+REAL(my_kind)                :: d1(SIZE(w,1)), d2(SIZE(w,1)), &
                                w2(SIZE(w,1),SIZE(w,1)),v(SIZE(w,1))
 INTEGER(i_kind)             :: i, j, it, jt, ipiv(SIZE(w,1)), nc
-REAL(r_kind)                :: p, e, dw, c, d, d2j
-REAL(r_kind),ALLOCATABLE    :: wv(:,:) ! work variable for ab(nc) and v(nn)
+REAL(my_kind)                :: p, e, dw, c, d, d2j
+REAL(my_kind),ALLOCATABLE    :: wv(:,:) ! work variable for ab(nc) and v(nn)
 
 nc = SIZE(w,DIM=1)
 ALLOCATE(wv(nc,1))
@@ -1963,7 +1963,7 @@ v = ab(1:nc)        ! in later "clean-up" operation.
 d1 = one            ! Row scaling factors set to default
 d2 = one            ! Column scaling factors set to default
 
-C=1.E-16_r_kind	    ! Set initial criterion for "negligible" elements of W
+C=1.E-16_my_kind	    ! Set initial criterion for "negligible" elements of W
 
 ! In first attempt to estimate row and column scalings, use logarithms
 ! to avoid the risk of under- or over-flows of the line products of W:
@@ -1997,7 +1997,7 @@ DO j=1,nc
 ENDDO
 CALL mulmd(w,d2,w)
 
-c=1.e-8_r_kind  ! reset the criterion for "negligible" elements
+c=1.e-8_my_kind  ! reset the criterion for "negligible" elements
 
 ! revert to iterations of the more efficient method without logarithms:
 DO jt=1,2
@@ -2032,7 +2032,7 @@ DO jt=1,2
          d2(j)=d2(j)*p       ! ..and update d2 consistently
       ENDDO
    ENDDO
-   c=1.e-3_r_kind    ! final setting for criterion for "negligible" elements
+   c=1.e-3_my_kind    ! final setting for criterion for "negligible" elements
 ENDDO
 ab(1:nc) = d1(1:nc) * ab(1:nc) ! rescale r.h.s vector by d1
 p=one     ! p becomes product of row-lengths:
@@ -2103,14 +2103,14 @@ SUBROUTINE dlinvan(w,ab)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: w(:,:), ab(:)
+REAL(my_kind), INTENT(INOUT) :: w(:,:), ab(:)
 
 INTEGER(i_kind), PARAMETER     :: nit=20
-REAL(r_kind)                   :: d1(SIZE(w,1)), d2(SIZE(w,1)), &
+REAL(my_kind)                   :: d1(SIZE(w,1)), d2(SIZE(w,1)), &
                                   w2(SIZE(w,1),SIZE(w,1)),v(SIZE(w,1))
 INTEGER(i_kind)                :: i, j, it, jt, ipiv(SIZE(w,1)), nc
-REAL(r_kind)                   :: p, e, dw, c, d, d2j
-REAL(r_kind),ALLOCATABLE       :: wv(:,:) ! work variable for ab(nc) and v(nn)
+REAL(my_kind)                   :: p, e, dw, c, d, d2j
+REAL(my_kind),ALLOCATABLE       :: wv(:,:) ! work variable for ab(nc) and v(nn)
 
 nc = SIZE(w,DIM=1)
 ALLOCATE(wv(nc,1))
@@ -2121,7 +2121,7 @@ v = ab(1:nc)        ! in later "clean-up" operation.
 d1 = one            ! Row scaling factors set to default
 d2 = one            ! Column scaling factors set to default
 
-C=1.E-16_r_kind     ! Set initial criterion for "negligible" elements of W
+C=1.E-16_my_kind     ! Set initial criterion for "negligible" elements of W
 
 ! In first attempt to estimate row and column scalings, use logarithms
 ! to avoid the risk of under- or over-flows of the line products of W:
@@ -2155,7 +2155,7 @@ DO j=1,nc
 ENDDO
 CALL mulmd_d(w,d2,w)
  
-c=1.e-8_r_kind  ! reset the criterion for "negligible" elements
+c=1.e-8_my_kind  ! reset the criterion for "negligible" elements
 
 ! revert to iterations of the more efficient method without logarithms:
 DO jt=1,2
@@ -2190,7 +2190,7 @@ DO jt=1,2
       d2(j)=d2(j)*p       ! ..and update d2 consistently
     ENDDO
   ENDDO
-  c=1.e-3_r_kind    ! final setting for criterion for "negligible" elements
+  c=1.e-3_my_kind    ! final setting for criterion for "negligible" elements
 ENDDO
 ab(1:nc) = d1(1:nc) * ab(1:nc) ! rescale r.h.s vector by d1
 p=one     ! p becomes product of row-lengths:
@@ -2251,7 +2251,7 @@ SUBROUTINE copdm(d,a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:),INTENT(IN)::d; REAL(r_kind),DIMENSION(:,:),INTENT(OUT)::a; INTEGER(i_kind) i
+REAL(my_kind),DIMENSION(:),INTENT(IN)::d; REAL(my_kind),DIMENSION(:,:),INTENT(OUT)::a; INTEGER(i_kind) i
                   a=zero; DO i=1,SIZE(a,1); a(i,i)= d(i); ENDDO; RETURN
 ENTRY condm(d,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
 END SUBROUTINE copdm
@@ -2282,7 +2282,7 @@ SUBROUTINE dcopdm(d,a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:),INTENT(IN)::d; REAL(r_kind),DIMENSION(:,:),INTENT(OUT)::a
+REAL(my_kind),DIMENSION(:),INTENT(IN)::d; REAL(my_kind),DIMENSION(:,:),INTENT(OUT)::a
 INTEGER(i_kind) i
                    a=zero; DO i=1,SIZE(a,1); a(i,i)= d(i); ENDDO; RETURN
 ENTRY dcondm(d,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
@@ -2314,7 +2314,7 @@ SUBROUTINE copsm(s,a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN) :: s; REAL(r_kind),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
+REAL(my_kind),INTENT(IN) :: s; REAL(my_kind),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
                   a=zero; DO i=1,SIZE(a,1); a(i,i)= s; ENDDO; RETURN
 ENTRY consm(s,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
 END SUBROUTINE copsm
@@ -2345,7 +2345,7 @@ SUBROUTINE dcopsm(s,a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN) :: s; REAL(r_kind),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
+REAL(my_kind),INTENT(IN) :: s; REAL(my_kind),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
                    a=zero; DO i=1,SIZE(a,1); a(i,i)= s; ENDDO; RETURN
 ENTRY dconsm(s,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
 END SUBROUTINE dcopsm
@@ -2377,8 +2377,8 @@ SUBROUTINE addmd(a,b,d)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT):: a,b; REAL(r_kind),DIMENSION(:),INTENT(IN):: d
-REAL(r_kind) s;  INTEGER(i_kind) i
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT):: a,b; REAL(my_kind),DIMENSION(:),INTENT(IN):: d
+REAL(my_kind) s;  INTEGER(i_kind) i
                    b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+d(i); ENDDO; RETURN
 ENTRY submd(a,b,d);b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
 ENTRY addms(a,b,s);b=a; DO I=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
@@ -2411,8 +2411,8 @@ SUBROUTINE daddmd(a,b,d)
 !
 !$$$ end documentation block
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT)::A,B;REAL(r_kind),DIMENSION(:),INTENT(IN)::D
-REAL(r_kind) s; INTEGER(i_kind) i
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT)::A,B;REAL(my_kind),DIMENSION(:),INTENT(IN)::D
+REAL(my_kind) s; INTEGER(i_kind) i
                      b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+d(i); ENDDO; RETURN
 ENTRY DSUBMD(A,B,D); b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
 ENTRY DADDMS(A,B,S); b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
@@ -2446,10 +2446,10 @@ SUBROUTINE l1lm(a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
-REAL(r_kind), INTENT(INOUT) :: b(:,:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(INOUT) :: b(:,:)
 INTEGER(i_kind)             :: m,j, jm, jp, i
-REAL(r_kind)                :: s, bjji
+REAL(my_kind)                :: s, bjji
 m=SIZE(a,1)
 DO j=1,m
   jm=j-1
@@ -2496,11 +2496,11 @@ SUBROUTINE DL1LM(A,B)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:) 
-REAL(r_kind), INTENT(INOUT) :: b(:,:) 
+REAL(my_kind), INTENT(IN   ) :: a(:,:) 
+REAL(my_kind), INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind) :: m,j, jm, jp, i
-REAL(r_kind) :: s, bjji
+REAL(my_kind) :: s, bjji
 
 m=SIZE(a,1)
 DO j=1,m
@@ -2549,12 +2549,12 @@ SUBROUTINE ldlm(a,b,d) ! Modified Cholesky decompose Q --> L*D*U, U(i,j)=L(j,i)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
-REAL(r_kind), INTENT(INOUT) :: b(:,:)
-REAL(r_kind), INTENT(  OUT) :: d(:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(INOUT) :: b(:,:)
+REAL(my_kind), INTENT(  OUT) :: d(:)
 
 INTEGER(i_kind) :: m,j, jm, jp, i
-REAL(r_kind) :: bjji
+REAL(my_kind) :: bjji
 
 m=SIZE(a,1)
 DO j=1,m
@@ -2605,12 +2605,12 @@ SUBROUTINE dldlm(a,b,d) ! Modified Cholesky  Q --> L*D*U, U(i,j)=L(j,i)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
-REAL(r_kind), INTENT(INOUT) :: b(:,:)
-REAL(r_kind), INTENT(  OUT) :: d(:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(INOUT) :: b(:,:)
+REAL(my_kind), INTENT(  OUT) :: d(:)
 
 INTEGER(i_kind)             :: m,j, jm, jp, i
-REAL(r_kind)                :: bjji
+REAL(my_kind)                :: bjji
 
 m=SIZE(a,1)
 DO j=1,m; jm=j-1; jp=j+1
@@ -2659,10 +2659,10 @@ SUBROUTINE invh(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(my_kind), INTENT(INOUT) :: a(:,:) 
 
 INTEGER(i_kind)                  :: m,k, kp, i, ip, j
-REAL(r_kind),DIMENSION(SIZE(a,1)):: d
+REAL(my_kind),DIMENSION(SIZE(a,1)):: d
 
 m=SIZE(a,1)
 !  PERFORM L.D.U DECOMPOSITION OF THE SYMMETRIC MATRIX:
@@ -2725,10 +2725,10 @@ SUBROUTINE dinvh(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(my_kind), INTENT(INOUT) :: a(:,:) 
 
 INTEGER(i_kind)                  :: m,k, kp, i, ip, j
-REAL(r_kind),DIMENSION(SIZE(a,1)):: d
+REAL(my_kind),DIMENSION(SIZE(a,1)):: d
 
 m=SIZE(a,1)
 !  PERFORM L.D.U DECOMPOSITION OF THE SYMMETRIC MATRIX:
@@ -2789,10 +2789,10 @@ SUBROUTINE invl(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(my_kind), INTENT(INOUT) :: a(:,:) 
 
 INTEGER(i_kind)             :: m,j, i
-REAL(r_kind)                :: s
+REAL(my_kind)                :: s
 
 m=SIZE(a,1)
 DO j=m,1,-1
@@ -2831,9 +2831,9 @@ SUBROUTINE dinvl(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(INOUT) :: a(:,:) 
+REAL(my_kind), INTENT(INOUT) :: a(:,:) 
 INTEGER(i_kind)             :: m,j, i
-REAL(r_kind)                :: s
+REAL(my_kind)                :: s
 m=SIZE(a,1)
 DO j=m,1,-1
    a(1:j-1,j) = zero
@@ -2874,8 +2874,8 @@ SUBROUTINE linlv(a,u)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ):: a(:,:)
-REAL(r_kind), INTENT(INOUT):: u(:)
+REAL(my_kind), INTENT(IN   ):: a(:,:)
+REAL(my_kind), INTENT(INOUT):: u(:)
 
 INTEGER(i_kind)            :: m,i, j, jp
 
@@ -2912,8 +2912,8 @@ SUBROUTINE dlinlv(a,u)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
-REAL(r_kind), INTENT(INOUT) :: u(:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(INOUT) :: u(:)
 
 INTEGER(i_kind) :: m,i, j, jp
 
@@ -2951,10 +2951,10 @@ SUBROUTINE powp(a,b,n)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: n       ! of N and output as B
-REAL(r_kind),    INTENT(IN   ) :: a(0:)
-REAL(r_kind),    INTENT(  OUT) :: b(0:)
+REAL(my_kind),    INTENT(IN   ) :: a(0:)
+REAL(my_kind),    INTENT(  OUT) :: b(0:)
 
-REAL(r_kind),DIMENSION(0:SIZE(a)-1):: t; INTEGER(i_kind) :: k
+REAL(my_kind),DIMENSION(0:SIZE(a)-1):: t; INTEGER(i_kind) :: k
 
 b(0)=one; b(1:) = zero; DO k=1,n; CALL mulpp(a,b,t); b=t; ENDDO
 END SUBROUTINE powp
@@ -2987,10 +2987,10 @@ SUBROUTINE DPOWP(A,B,N)        ! Raise power series A to the power
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: n      ! of N and output as B
-REAL(r_kind)   , INTENT(IN   ) :: a(0:)
-REAL(r_kind)   , INTENT(  OUT) :: b(0:)
+REAL(my_kind)   , INTENT(IN   ) :: a(0:)
+REAL(my_kind)   , INTENT(  OUT) :: b(0:)
 
-REAL(r_kind),DIMENSION(0:SIZE(a)-1):: t; INTEGER(i_kind) :: k
+REAL(my_kind),DIMENSION(0:SIZE(a)-1):: t; INTEGER(i_kind) :: k
 
 B(0)=one; b(1:) = zero; DO k=1,n; CALL mulpp_d(a,b,t); b=t; ENDDO
 END SUBROUTINE dpowp
@@ -3022,9 +3022,9 @@ SUBROUTINE polps(a,s1,s2) ! Apply series A to scalar S1 to obtain S2
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN   ) :: a(0:)
-REAL(r_kind),INTENT(IN   ) :: s1
-REAL(r_kind),INTENT(  OUT) :: s2
+REAL(my_kind),INTENT(IN   ) :: a(0:)
+REAL(my_kind),INTENT(IN   ) :: s1
+REAL(my_kind),INTENT(  OUT) :: s2
 
 INTEGER(i_kind) m,k
 
@@ -3058,9 +3058,9 @@ SUBROUTINE dpolps(a,s1,s2) ! Apply series A to scalar S1 to obtain S2
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(IN   ) :: a(0:)
-REAL(r_kind),INTENT(IN   ) :: s1
-REAL(r_kind),INTENT(  OUT) :: s2
+REAL(my_kind),INTENT(IN   ) :: a(0:)
+REAL(my_kind),INTENT(IN   ) :: s1
+REAL(my_kind),INTENT(  OUT) :: s2
 
 INTEGER(i_kind) m,k
 
@@ -3094,9 +3094,9 @@ SUBROUTINE polpp(a,b,c)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(INOUT) :: a(0:),b(0:),c(0:)
+REAL(my_kind),INTENT(INOUT) :: a(0:),b(0:),c(0:)
 
-REAL(r_kind),DIMENSION(0:SIZE(a)-1):: t
+REAL(my_kind),DIMENSION(0:SIZE(a)-1):: t
 INTEGER(i_kind) m,k
 
 m=SIZE(a)-1; c(0)=a(m); c(1:m) = zero
@@ -3130,9 +3130,9 @@ SUBROUTINE dpolpp(a,b,c)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),INTENT(INOUT) :: a(0:),b(0:),c(0:)
+REAL(my_kind),INTENT(INOUT) :: a(0:),b(0:),c(0:)
 
-REAL(r_kind),DIMENSION(0:SIZE(a)-1):: t
+REAL(my_kind),DIMENSION(0:SIZE(a)-1):: t
 INTEGER(i_kind) m,k
 
 m=SIZE(a)-1
@@ -3165,9 +3165,9 @@ FUNCTION trcm(a) RESULT(trc_res)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
 
-REAL(r_kind)             :: trc_res
+REAL(my_kind)             :: trc_res
 INTEGER(i_kind)          :: i
 
 trc_res=zero; DO i=1,SIZE(a,1); trc_res=trc_res+a(i,i); ENDDO
@@ -3196,9 +3196,9 @@ FUNCTION dtrcm(a) RESULT(trc_res)	    ! Trace of square matrix A
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind), INTENT(IN   ) :: a(:,:)
+REAL(my_kind), INTENT(IN   ) :: a(:,:)
 
-REAL(r_kind)             :: trc_res
+REAL(my_kind)             :: trc_res
 INTEGER(i_kind)          :: i
 
 trc_res=zero; DO i=1,SIZE(a,1); trc_res=trc_res+a(i,i); ENDDO
@@ -3230,10 +3230,10 @@ SUBROUTINE invmt(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a
 
 INTEGER(i_kind) m,i,j,jp,l
-REAL(r_kind) d
+REAL(my_kind) d
 INTEGER(i_kind),DIMENSION(SIZE(a,1)):: ipiv
 
 m=SIZE(a,1)
@@ -3288,10 +3288,10 @@ SUBROUTINE dinvmt(a)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a
 
 INTEGER(i_kind)                          :: m,i,j,jp,l
-REAL(r_kind)                             :: d
+REAL(my_kind)                             :: d
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 
 m=SIZE(a,1)
@@ -3346,11 +3346,11 @@ SUBROUTINE linmmt(a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a,b
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a,b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind)                          :: m
-REAL(r_kind)                             :: d
+REAL(my_kind)                             :: d
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmmt is not square'
@@ -3384,11 +3384,11 @@ SUBROUTINE dlinmmt(a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a,b
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a,b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind)                          :: m 
-REAL(r_kind)                             :: d
+REAL(my_kind)                             :: d
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmmt_d is not square'
@@ -3422,12 +3422,12 @@ SUBROUTINE linmvt(a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a
-REAL(r_kind),DIMENSION(:),  INTENT(INOUT) :: b
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a
+REAL(my_kind),DIMENSION(:),  INTENT(INOUT) :: b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind)                          :: m
-REAL(r_kind)                             :: d
+REAL(my_kind)                             :: d
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt is not square'
@@ -3461,11 +3461,11 @@ SUBROUTINE dlinmvt(a,b)
 !$$$ end documentation block
 implicit none
 
-REAL(r_kind),DIMENSION(:,:),INTENT(INOUT) :: a
-REAL(r_kind),DIMENSION(:),  INTENT(INOUT) :: b
+REAL(my_kind),DIMENSION(:,:),INTENT(INOUT) :: a
+REAL(my_kind),DIMENSION(:),  INTENT(INOUT) :: b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
-INTEGER(i_kind) m; REAL(r_kind) d
+INTEGER(i_kind) m; REAL(my_kind) d
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt_d is not square'
