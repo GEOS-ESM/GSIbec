@@ -726,7 +726,7 @@ subroutine write_spread_dualres(ibin,bundle)
     call gsi_bundlegetpointer(bundle,cvars3d(n),ptr3d,istat)
     work8_3d=zero
     do k=1,grd_anl%nsig
-      call gather_stuff2(ptr3d(1,1,k),work8_3d(1,1,k),mype,0)
+      call gather_stuff2(ptr3d(:,:,k),work8_3d(:,:,k),mype,0)
     end do
     if (mype==0) then
       do i=1,grd_anl%nlat
@@ -797,9 +797,9 @@ subroutine write_spread_dualres(ibin,bundle)
   if (mype==0) then
 #ifdef HAVE_BACIO
      call baclose(22,iret)
-#else */ HAVE_BACIO */
+#else /* HAVE_BACIO */
      call ba_close(22,iret)
-#endif */ HAVE_BACIO */
+#endif /* HAVE_BACIO */
      write(6,*)'WRITE_SPREAD_DUALRES:  close 22 with iret=',iret
   end if
 

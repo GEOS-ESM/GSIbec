@@ -53,6 +53,9 @@ m_gsibec.F90
 m_nc_berror.f90
 mpeu_mpif.F90
 mpeu_util.F90
+m_fitcons.f90
+m_plib8mat1.f90
+m_plib8mat2.f90
 m_mpimod.F90
 mpl_allreduce.F90
 m_rerank.f90

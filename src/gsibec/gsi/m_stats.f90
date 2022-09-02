@@ -31,7 +31,7 @@ module m_stats
 use m_kinds,only : r_kind
 use m_kinds,only : i_kind
 use constants, only: zero
-use m_mpimod, only: ierror,mpi_rtype,mpi_sum,mpi_max
+use m_mpimod, only: ierror,mpi_rtype,mpi_sum,mpi_max,mpi_itype
 
 implicit none
 private
@@ -184,7 +184,7 @@ subroutine allreduce_(vdot,vsum,vmin,vmax,vdim,comm)
   vmax=+bufr(2)
 
   vdim_local=vdim
-  call mpi_allreduce(vdim_local,vdim,1,mpi_rtype,mpi_sum,comm,ierror)
+! call mpi_allreduce(vdim_local,vdim,1,mpi_itype,mpi_sum,comm,ierror)
   if(ierror/=0) then
      write(6,*)'m_stats: MPI_allreduce(dim)'
      call stop2(145)

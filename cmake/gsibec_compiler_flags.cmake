@@ -1,6 +1,7 @@
 # Compiler definitions
 # --------------------
-add_definitions( -D_REAL8_ -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -I/usr/local/intel/2020/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include )
+# add_definitions( -D_REAL8_ -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -I/usr/local/intel/2020/compilers_and_libraries_2020.0.166/linux/mpi/intel64/include )
+add_definitions( -D_JEDI_ -D_REAL8_ -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int )
 
 if( NOT CMAKE_BUILD_TYPE MATCHES "Debug" )
   add_definitions( -DNDEBUG )
