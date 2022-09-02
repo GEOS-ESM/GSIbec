@@ -4338,7 +4338,7 @@ subroutine quadfil(n,dmat,rts,fmat)
 !
 !$$$ end documentation block
 
-use module_pmat2,only: mulbb,l1lb
+use m_plib8mat2,only: mulbb,l1lb
 implicit none
 
 integer(i_long)                   ,intent(IN   ) :: n

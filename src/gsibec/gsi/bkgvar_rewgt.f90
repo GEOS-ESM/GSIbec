@@ -75,6 +75,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   real(r_kind),dimension(nsig):: max_dz,max_dd,max_dt,max_dz0,max_dd0,&
        max_dt0,rmax_dz0,rmax_dd0,rmax_dt0
   real(r_kind) max_dps,max_dps0,rmax_dps0
+  real(r_kind) isend(1),irec(1)
   integer(i_kind) i,j,k,l,nsmth,mm1,nf,ier,istatus
 
   real(r_kind),dimension(:,:  ),pointer::ges_ps_01 =>NULL()
@@ -285,7 +286,9 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   call mpi_allreduce(max_dz,max_dz0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
   call mpi_allreduce(max_dd,max_dd0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
   call mpi_allreduce(max_dt,max_dt0,nsig,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
-  call mpi_allreduce(max_dps,max_dps0,1,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
+  isend(1)=max_dps
+  call mpi_allreduce(isend,irec,1,mpi_rtype,mpi_max,gsi_mpi_comm_world,ierror)
+  max_dps0=irec(1)
 
 ! Reintegrate quad precision number and sum over all mpi tasks  
   mean_dz =zero_quad ; mean_dd=zero_quad ; mean_dt=zero_quad
