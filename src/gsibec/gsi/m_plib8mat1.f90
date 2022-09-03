@@ -59,6 +59,8 @@ MODULE m_plib8mat1
 ! program history:
 !   1994-  -    R.J.Purser - initial coding
 !   2008-04-25  safford    - add standard documentation blocks
+!   2022-09-02  Todling    - replace all ENTRY statements w/ actual routines
+!                            (gnu compiler was unable to process code)
 !
 ! subroutines included:
 !   pro333
@@ -159,7 +161,6 @@ MODULE m_plib8mat1
 use m_kinds, only: i_kind
 use m_kinds, only: r_double
 use m_kinds, only: r_single
-use m_kinds, only: my_kind => r_double
 use constants,only: zero,one
 IMPLICIT NONE
 
@@ -1004,7 +1005,83 @@ DO j=mcp,1,-1
    c(j-1)=s
 ENDDO
 RETURN
-ENTRY madpp(a,b,c)
+CONTAINS
+FUNCTION mcmax(a,b,m) RESULT(mmx_res) ! This fn can be contained in mulpp().
+!$$$  subprogram documentation block
+!                .      .    .                                        .
+! subprogram:    mcmax
+!   prgmmr:
+!
+! abstract:
+!
+! program history log:
+!   2009-08-26  lueken - added subprogram doc block
+!
+!   input argument list:
+!    m
+!    a,b
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_single),  INTENT(IN   ) :: a(0:m), b(0:m)
+
+INTEGER(i_kind)             :: mmx_res
+INTEGER(i_kind)             :: ma, mb
+
+mmx_res=0                     ! default for when ALL elements of c are zero
+DO ma=m,0,-1                      ! seek last nonzero coefficient of polynomial a
+   IF(a(ma) /= zero)THEN
+      DO mb=m,0,-1                  ! seek last nonzero coefficient of polynomial b
+         IF(b(mb) /= zero)THEN
+            mmx_res=MIN(m,ma+mb)+1 ! hence, 1+last non-0 element of their product
+            RETURN
+         ENDIF
+      ENDDO
+      RETURN
+   ENDIF
+ENDDO
+END FUNCTION mcmax
+END SUBROUTINE mulpp
+SUBROUTINE madpp(a,b,c)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madpp
+!
+!   prgrmmr:
+!
+! abstract:  multiply polynomials, possibly in place
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a, b       -
+!     c          -
+!
+!   output argument list:
+!     c          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),    INTENT(IN   ) :: a(0:), b(0:)
+REAL(r_single),    INTENT(INOUT) :: c(0:)
+
+INTEGER(i_kind)                :: m,mcp, j
+REAL(r_single)                   :: s
+
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
 DO j=mcp,1,-1
@@ -1012,7 +1089,83 @@ DO j=mcp,1,-1
    c(j-1)=c(j-1)+s
 ENDDO
 RETURN
-ENTRY msbpp(a,b,c)
+CONTAINS
+FUNCTION mcmax(a,b,m) RESULT(mmx_res) ! This fn can be contained in mulpp().
+!$$$  subprogram documentation block
+!                .      .    .                                        .
+! subprogram:    mcmax
+!   prgmmr:
+!
+! abstract:
+!
+! program history log:
+!   2009-08-26  lueken - added subprogram doc block
+!
+!   input argument list:
+!    m
+!    a,b
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_single),  INTENT(IN   ) :: a(0:m), b(0:m)
+
+INTEGER(i_kind)             :: mmx_res
+INTEGER(i_kind)             :: ma, mb
+
+mmx_res=0                     ! default for when ALL elements of c are zero
+DO ma=m,0,-1                      ! seek last nonzero coefficient of polynomial a
+   IF(a(ma) /= zero)THEN
+      DO mb=m,0,-1                  ! seek last nonzero coefficient of polynomial b
+         IF(b(mb) /= zero)THEN
+            mmx_res=MIN(m,ma+mb)+1 ! hence, 1+last non-0 element of their product
+            RETURN
+         ENDIF
+      ENDDO
+      RETURN
+   ENDIF
+ENDDO
+END FUNCTION mcmax
+END SUBROUTINE madpp
+SUBROUTINE msbpp(a,b,c)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbpp
+!
+!   prgrmmr:
+!
+! abstract:  multiply polynomials, possibly in place
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a, b       -
+!     c          -
+!
+!   output argument list:
+!     c          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),    INTENT(IN   ) :: a(0:), b(0:)
+REAL(r_single),    INTENT(INOUT) :: c(0:)
+
+INTEGER(i_kind)                :: m,mcp, j
+REAL(r_single)                   :: s
+
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
 DO j=mcp,1,-1
@@ -1064,7 +1217,7 @@ DO ma=m,0,-1                      ! seek last nonzero coefficient of polynomial 
    ENDIF
 ENDDO
 END FUNCTION mcmax
-END SUBROUTINE mulpp
+END SUBROUTINE msbpp
 
 
 SUBROUTINE difp(a,b) ! Symbolically differentiate polynomial
@@ -1104,14 +1257,76 @@ DO i=1,m        ! possibly with coincident storage for a and b
 ENDDO
 b(m)=zero
 RETURN
-ENTRY intp(a,b) ! Symbolically integrate polynomial
+END SUBROUTINE difp
+SUBROUTINE intp(a,b) ! Symbolically differentiate polynomial
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    intp
+!
+!   prgrmmr:
+!
+! abstract:  Symbolically differentiate polynomial
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a          -
+!
+!   output argument list:
+!     b          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single), INTENT(IN   ) :: a(0:)
+REAL(r_single), INTENT(  OUT) :: b(0:)
+
+INTEGER(i_kind)           :: m, i
+REAL(r_single)            :: s, b0
+
 m=SIZE(a)-1
 DO i=m,1,-1     ! possibly with coincident storage for a and b
    b(i)=a(i-1)/i
 ENDDO
 b(0)=zero
 RETURN
-ENTRY invp(a,b) ! Invert polynomial or power-series
+END SUBROUTINE intp
+SUBROUTINE invp(a,b) ! Symbolically differentiate polynomial
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    invp
+!
+!   prgrmmr:
+!
+! abstract:  Symbolically differentiate polynomial
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a          -
+!
+!   output argument list:
+!     b          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single), INTENT(IN   ) :: a(0:)
+REAL(r_single), INTENT(  OUT) :: b(0:)
+
+INTEGER(i_kind)           :: m, i
+REAL(r_single)            :: s, b0
+
 m=SIZE(a)-1
 b0=one/a(0)     ! storage of a and b must not be the same
 b(0)=b0
@@ -1119,7 +1334,7 @@ DO i=1,m
    s = SUM(b(i-1:0:-1)*a(1:i))
    b(i)=-b0*s
 ENDDO
-END SUBROUTINE difp
+END SUBROUTINE invp
 
 
 SUBROUTINE dmulpp(a,b,c) !  multiply polynomials, possibly in place
@@ -1162,7 +1377,86 @@ DO j=mcp,1,-1
    c(j-1)=s
 ENDDO
 RETURN
-ENTRY dmadpp(a,b,c)
+CONTAINS
+
+FUNCTION mcmax(a,b,m) RESULT(mmx_res)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    mcmax
+!   prgmmr:
+!
+! abstract:
+!
+! program history log:
+!   2009-08-26  lueken - added subprogram doc block
+!
+!   input argument list:
+!    m
+!    a,b
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m
+REAL(r_double) ,  INTENT(IN   ) :: a(0:m), b(0:m)
+
+INTEGER(i_kind)              :: mmx_res
+INTEGER(i_kind)              :: ma, mb
+
+mmx_res=0                     ! default for when all elements of c are zero
+DO ma=m,0,-1                      ! seek last nonzero coefficient of polynomial a
+   IF(a(ma) /= zero)THEN
+      DO mb=m,0,-1                  ! seek last nonzero coefficient of polynomial b
+         IF(b(mb) /= zero)THEN
+            mmx_res=MIN(m,ma+mb)+1 ! hence, 1+last non-0 element of their product
+            RETURN
+         ENDIF
+      ENDDO
+      RETURN
+   ENDIF
+ENDDO
+RETURN
+END FUNCTION mcmax
+
+END SUBROUTINE dmulpp
+SUBROUTINE dmadpp(a,b,c) !  multiply polynomials, possibly in place
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dmadpp
+!
+!   prgrmmr:
+!
+! abstract:  multiply polynomials, possibly in place
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a, b       -
+!     c          -
+!
+!   output argument list:
+!     c          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double), INTENT(IN   ) :: a(0:), b(0:)
+REAL(r_double), INTENT(INOUT) :: c(0:)
+
+INTEGER(i_kind)            :: m,mcp, j
+REAL(r_double)             :: s
+
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
 DO j=mcp,1,-1
@@ -1170,7 +1464,86 @@ DO j=mcp,1,-1
    c(j-1)=c(j-1)+s
 ENDDO
 RETURN
-ENTRY dmsbpp(a,b,c)
+CONTAINS
+
+FUNCTION mcmax(a,b,m) RESULT(mmx_res)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    mcmax
+!   prgmmr:
+!
+! abstract:
+!
+! program history log:
+!   2009-08-26  lueken - added subprogram doc block
+!
+!   input argument list:
+!    m
+!    a,b
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m
+REAL(r_double) ,  INTENT(IN   ) :: a(0:m), b(0:m)
+
+INTEGER(i_kind)              :: mmx_res
+INTEGER(i_kind)              :: ma, mb
+
+mmx_res=0                     ! default for when all elements of c are zero
+DO ma=m,0,-1                      ! seek last nonzero coefficient of polynomial a
+   IF(a(ma) /= zero)THEN
+      DO mb=m,0,-1                  ! seek last nonzero coefficient of polynomial b
+         IF(b(mb) /= zero)THEN
+            mmx_res=MIN(m,ma+mb)+1 ! hence, 1+last non-0 element of their product
+            RETURN
+         ENDIF
+      ENDDO
+      RETURN
+   ENDIF
+ENDDO
+RETURN
+END FUNCTION mcmax
+
+END SUBROUTINE dmadpp
+SUBROUTINE dmsbpp(a,b,c) !  multiply polynomials, possibly in place
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dmsbpp
+!
+!   prgrmmr:
+!
+! abstract:  multiply polynomials, possibly in place
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a, b       -
+!     c          -
+!
+!   output argument list:
+!     c          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double), INTENT(IN   ) :: a(0:), b(0:)
+REAL(r_double), INTENT(INOUT) :: c(0:)
+
+INTEGER(i_kind)            :: m,mcp, j
+REAL(r_double)             :: s
+
 m=SIZE(a)-1
 mcp=mcmax(a,b,m)
 DO j=mcp,1,-1
@@ -1225,7 +1598,7 @@ ENDDO
 RETURN
 END FUNCTION mcmax
 
-END SUBROUTINE dmulpp
+END SUBROUTINE dmsbpp
 
 
 SUBROUTINE ddifp(a,b) ! Symbolically differentiate polynomial
@@ -1266,14 +1639,78 @@ DO i=1,m         ! possibly with coincident storage for a and b
 ENDDO
 b(m)=zero
 RETURN
-ENTRY dintp(a,b) ! Symbolically integrate polynomial
+END SUBROUTINE ddifp
+SUBROUTINE dintp(a,b) ! Symbolically differentiate polynomial
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dintp
+!
+!   prgrmmr:
+!
+! abstract:  Symbolically differentiate polynomial
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a          -
+!     b          -
+!
+!   output argument list:
+!     b          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double), INTENT(IN   ) :: a(0:)
+REAL(r_double), INTENT(INOUT) :: b(0:)
+
+INTEGER(i_kind)            :: m, i
+REAL(r_double)             :: s, b0
+
 m=SIZE(a)-1
 DO i=m,1,-1      ! possibly with coincident storage for a and b
    b(i)=a(i-1)/i
 ENDDO
 b(0)=zero
 RETURN
-ENTRY dinvp(a,b) ! Invert polynomial or power-series
+END SUBROUTINE dintp
+SUBROUTINE dinvp(a,b) ! Symbolically differentiate polynomial
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dinvp
+!
+!   prgrmmr:
+!
+! abstract:  Symbolically differentiate polynomial
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block, rm unused vars
+!
+!   input argument list:
+!     a          -
+!     b          -
+!
+!   output argument list:
+!     b          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double), INTENT(IN   ) :: a(0:)
+REAL(r_double), INTENT(INOUT) :: b(0:)
+
+INTEGER(i_kind)            :: m, i
+REAL(r_double)             :: s, b0
+
 m=SIZE(a)-1
 b0=one/a(0)      ! storage of a and b must not be the same
 b(0)=b0
@@ -1281,7 +1718,7 @@ DO i=1,m
    s = SUM(b(i-1:0:-1)*a(1:i))
    b(i)=-b0*s
 ENDDO
-END SUBROUTINE ddifp
+END SUBROUTINE dinvp
 
 
 SUBROUTINE prgv(d)
@@ -1386,20 +1823,82 @@ REAL(r_single) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
 INTEGER(i_kind)                :: mm, j
 
 c(0:m-1) = zero
-ENTRY madcc(a,b,c,m)
+END SUBROUTINE mulcc
+SUBROUTINE madcc(a,b,c,m)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madcc
+!
+!   prgrmmr:
+!
+! abstract:  Multiply circulant matrices of period M
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b, c    -
+!     m          -
+!
+!   output argument list:
+!     a, b, c    -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_single) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+
+INTEGER(i_kind)                :: mm, j
+
 mm=m-1
 DO j=0,mm
    c(j:m-1) = c(j:m-1) + a(0:m-j-1)*b(j)
    c(0:j-1) = c(0:j-1) + a(m-j:m-1)*b(j)
 ENDDO
 RETURN
-ENTRY msbcc(a,b,c,m)
+END SUBROUTINE madcc
+SUBROUTINE msbcc(a,b,c,m)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbcc
+!
+!   prgrmmr:
+!
+! abstract:  Multiply circulant matrices of period M
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b, c    -
+!     m          -
+!
+!   output argument list:
+!     a, b, c    -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_single) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+
+INTEGER(i_kind)                :: mm, j
+
 mm=m-1
 DO j=0,mm
    c(j:m-1) = c(j:m-1) - a(0:m-j-1)*b(j)
    c(0:j-1) = c(0:j-1) - a(m-j:m-1)*b(j)
 ENDDO
-END SUBROUTINE mulcc
+END SUBROUTINE msbcc
 
 
 SUBROUTINE dmulcc(a,b,c,m)  ! Multiply circulant matrices of period M
@@ -1434,20 +1933,82 @@ REAL(r_double) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
 INTEGER(i_kind)                :: mm, j
 
 c(0:m-1) = zero
-ENTRY dmadcc(a,b,c,m)
+END SUBROUTINE dmulcc
+SUBROUTINE dmadcc(a,b,c,m)  ! Multiply circulant matrices of period M
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dmadcc
+!
+!   prgrmmr:
+!
+! abstract:  Multiply circulant matrices of period M
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b, c    -
+!     m          -
+!
+!   output argument list:
+!     a, b, c    -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_double) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+
+INTEGER(i_kind)                :: mm, j
+
 mm=m-1
 DO j=0,mm
    c(j:m-1) = c(j:m-1) + a(0:m-j-1)*b(j)
    c(0:j-1) = c(0:j-1) + a(m-j:m-1)*b(j)
 ENDDO
 RETURN
-ENTRY dmsbcc(a,b,c,m)
+END SUBROUTINE dmadcc
+SUBROUTINE dmsbcc(a,b,c,m)  ! Multiply circulant matrices of period M
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dmsbcc
+!
+!   prgrmmr:
+!
+! abstract:  Multiply circulant matrices of period M
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b, c    -
+!     m          -
+!
+!   output argument list:
+!     a, b, c    -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind), INTENT(IN   ) :: m
+REAL(r_double) , INTENT(INOUT) :: a(0:m-1), b(0:m-1), c(0:m-1)
+
+INTEGER(i_kind)                :: mm, j
+
 mm=m-1
 DO j=0,mm
    c(j:m-1) = c(j:m-1) - a(0:m-j-1)*b(j)
    c(0:j-1) = c(0:j-1) - a(m-j:m-1)*b(j)
 ENDDO
-END SUBROUTINE dmulcc
+END SUBROUTINE dmsbcc
 
 
 SUBROUTINE zerl(a)
@@ -1481,8 +2042,6 @@ INTEGER(i_kind)           :: m,j
 
 m=SIZE(a,1); DO j=1,m; a(j+1:m,j) = zero; ENDDO; RETURN
 
-ENTRY zeru(a)       ! Zero out the strictly upper triangle of elements
-m=SIZE(a,1); DO j=1,m; a(1:j-1,j) = zero; ENDDO
 END SUBROUTINE zerl
 
 
@@ -1517,9 +2076,72 @@ INTEGER(i_kind)           :: m,j
 
 m=SIZE(a,1); DO j=1,m; a(j+1:m,j) = zero; ENDDO; RETURN
 
-ENTRY dzeru(a)      ! Zero out the strictly upper triangle of elements
-m=SIZE(a,1); DO j=1,m; a(1:j-1,j) = zero; ENDDO
 END SUBROUTINE dzerl
+
+SUBROUTINE zeru(a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    zeru
+!
+!   prgrmmr:
+!
+! abstract:  Zero out the strictly upper triangle of elements
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a          -
+!
+!   output argument list:
+!     a          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),INTENT(INOUT) :: a(:,:)
+
+INTEGER(i_kind)           :: m,j
+
+m=SIZE(a,1); DO j=1,m; a(1:j-1,j) = zero; ENDDO
+END SUBROUTINE zeru
+
+
+SUBROUTINE dzeru(a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dzeru
+!
+!   prgrmmr:
+!
+! abstract:  Zero out the strictly upper triangle of elements
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a          -
+!
+!   output argument list:
+!     a          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double),INTENT(INOUT) :: a(:,:)
+
+INTEGER(i_kind)           :: m,j
+
+m=SIZE(a,1); DO j=1,m; a(1:j-1,j) = zero; ENDDO
+END SUBROUTINE dzeru
 
 
 SUBROUTINE ldum(a,ipiv,d)
@@ -1720,7 +2342,7 @@ SUBROUTINE udlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_single),  INTENT(IN   ) :: a(:,:) 
+REAL(r_single),  INTENT(INOUT) :: a(:,:) 
 REAL(r_single),  INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
@@ -1777,7 +2399,7 @@ SUBROUTINE dudlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_double) , INTENT(IN   ) :: a(:,:) 
+REAL(r_double) , INTENT(INOUT) :: a(:,:) 
 REAL(r_double) , INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
@@ -2255,7 +2877,6 @@ implicit none
 
 REAL(r_single),DIMENSION(:),INTENT(IN)::d; REAL(r_single),DIMENSION(:,:),INTENT(OUT)::a; INTEGER(i_kind) i
                   a=zero; DO i=1,SIZE(a,1); a(i,i)= d(i); ENDDO; RETURN
-ENTRY condm(d,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
 END SUBROUTINE copdm
 
 
@@ -2287,8 +2908,67 @@ implicit none
 REAL(r_double),DIMENSION(:),INTENT(IN)::d; REAL(r_double),DIMENSION(:,:),INTENT(OUT)::a
 INTEGER(i_kind) i
                    a=zero; DO i=1,SIZE(a,1); a(i,i)= d(i); ENDDO; RETURN
-ENTRY dcondm(d,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
 END SUBROUTINE dcopdm
+
+SUBROUTINE condm(d,a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    condm
+!
+!   prgrmmr:     
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     d          - 
+!
+!   output argument list:
+!     a          - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),DIMENSION(:),INTENT(IN)::d; REAL(r_single),DIMENSION(:,:),INTENT(OUT)::a; INTEGER(i_kind) i
+  a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
+END SUBROUTINE condm
+
+
+SUBROUTINE dcondm(d,a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dcondm
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     d          - 
+!
+!   output argument list:
+!     a          - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double),DIMENSION(:),INTENT(IN)::d; REAL(r_double),DIMENSION(:,:),INTENT(OUT)::a
+INTEGER(i_kind) i
+  a=zero; DO i=1,SIZE(a,1); a(i,i)=-d(i); ENDDO
+END SUBROUTINE dcondm
 
 
 SUBROUTINE copsm(s,a)
@@ -2318,7 +2998,6 @@ implicit none
 
 REAL(r_single),INTENT(IN) :: s; REAL(r_single),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
                   a=zero; DO i=1,SIZE(a,1); a(i,i)= s; ENDDO; RETURN
-ENTRY consm(s,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
 END SUBROUTINE copsm
 
 
@@ -2349,9 +3028,66 @@ implicit none
 
 REAL(r_double),INTENT(IN) :: s; REAL(r_double),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
                    a=zero; DO i=1,SIZE(a,1); a(i,i)= s; ENDDO; RETURN
-ENTRY dconsm(s,a); a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
 END SUBROUTINE dcopsm
 
+SUBROUTINE consm(s,a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    consm
+!
+!   prgrmmr:    
+!
+! abstract: 
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     s          -
+!
+!   output argument list:
+!     a          -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),INTENT(IN) :: s; REAL(r_single),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
+                  a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
+END SUBROUTINE consm
+
+
+SUBROUTINE dconsm(s,a)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dconsm
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     s          - 
+!
+!   output argument list:
+!     a          - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double),INTENT(IN) :: s; REAL(r_double),DIMENSION(:,:),INTENT(OUT):: a; INTEGER(i_kind) i
+                   a=zero; DO i=1,SIZE(a,1); a(i,i)=-s; ENDDO
+END SUBROUTINE dconsm
 
 SUBROUTINE addmd(a,b,d)
 !$$$  subprogram documentation block
@@ -2382,10 +3118,97 @@ implicit none
 REAL(r_single),DIMENSION(:,:),INTENT(INOUT):: a,b; REAL(r_single),DIMENSION(:),INTENT(IN):: d
 REAL(r_single) s;  INTEGER(i_kind) i
                    b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+d(i); ENDDO; RETURN
-ENTRY submd(a,b,d);b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
-ENTRY addms(a,b,s);b=a; DO I=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
-ENTRY SUBMS(A,B,S);b=a; DO I=1,SIZE(a,1); B(I,I)=B(I,I)-S;    ENDDO;
 END SUBROUTINE addmd
+SUBROUTINE submd(a,b,d)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    submd
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       -
+!     d          - 
+!
+!   output argument list:
+!     a, b       -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),DIMENSION(:,:),INTENT(INOUT):: a,b; REAL(r_single),DIMENSION(:),INTENT(IN):: d
+REAL(r_single) s;  INTEGER(i_kind) i
+                   b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
+END SUBROUTINE submd
+SUBROUTINE addms(a,b,s)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    addms
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       -
+!     s          - 
+!
+!   output argument list:
+!     a, b       -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),DIMENSION(:,:),INTENT(INOUT):: a,b;
+REAL(r_single) s;  INTEGER(i_kind) i
+                   b=a; DO I=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
+END SUBROUTINE addms
+SUBROUTINE subms(a,b,s)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    subms
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       -
+!     s          - 
+!
+!   output argument list:
+!     a, b       -
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single),DIMENSION(:,:),INTENT(INOUT):: a,b;
+REAL(r_single) s;  INTEGER(i_kind) i
+                   b=a; DO I=1,SIZE(a,1); B(I,I)=B(I,I)-S;    ENDDO;
+END SUBROUTINE subms
 
 
 SUBROUTINE daddmd(a,b,d)
@@ -2416,10 +3239,94 @@ SUBROUTINE daddmd(a,b,d)
 REAL(r_double),DIMENSION(:,:),INTENT(INOUT)::A,B;REAL(r_double),DIMENSION(:),INTENT(IN)::D
 REAL(r_double) s; INTEGER(i_kind) i
                      b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+d(i); ENDDO; RETURN
-ENTRY DSUBMD(A,B,D); b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
-ENTRY DADDMS(A,B,S); b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
-ENTRY DSUBMS(A,B,S); b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-s;    ENDDO;
 END SUBROUTINE daddmd
+SUBROUTINE dsubmd(a,b,d)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dsubmd
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       - 
+!     d          -
+!
+!   output argument list:
+!     a, b       - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+
+REAL(r_double),DIMENSION(:,:),INTENT(INOUT)::A,B;REAL(r_double),DIMENSION(:),INTENT(IN)::D
+REAL(r_double) s; INTEGER(i_kind) i
+                     b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-d(i); ENDDO; RETURN
+END SUBROUTINE dsubmd
+SUBROUTINE daddms(a,b,s)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    daddms
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       - 
+!     s          -
+!
+!   output argument list:
+!     a, b       - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+
+REAL(r_double),DIMENSION(:,:),INTENT(INOUT)::A,B;
+REAL(r_double) s; INTEGER(i_kind) i
+                     b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)+s;    ENDDO; RETURN
+END SUBROUTINE daddms
+SUBROUTINE dsubms(a,b,s)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dsubms
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a, b       - 
+!     d          -
+!
+!   output argument list:
+!     a, b       - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+
+REAL(r_double),DIMENSION(:,:),INTENT(INOUT)::A,B;
+REAL(r_double) s; INTEGER(i_kind) i
+                     b=a; DO i=1,SIZE(a,1); b(i,i)=b(i,i)-s;    ENDDO;
+END SUBROUTINE dsubms
 
 
 SUBROUTINE l1lm(a,b)
@@ -2883,8 +3790,6 @@ INTEGER(i_kind)            :: m,i, j, jp
 
 DO i=1,SIZE(a,1);    u(i)=(u(i) - SUM(u(1:i-1)*a(i,1:i-1)))/a(i,i); ENDDO
 RETURN
-ENTRY linuv(a,u); m=SIZE(a,1)
-DO j=m,1,-1; jp=j+1; u(j)=(u(j) - SUM(a(jp:m,j)*u(jp:m)))  /a(j,j); ENDDO
 END SUBROUTINE linlv
 
 
@@ -2921,9 +3826,80 @@ INTEGER(i_kind) :: m,i, j, jp
 
 DO i=1,SIZE(a,1); u(i)= (u(i) - SUM(u(1:i-1)*a(i,1:i-1)))/a(i,i); ENDDO
 RETURN
-ENTRY dlinuv(a,u); m=SIZE(a,1)
-DO j=m,1,-1; jp=j+1; u(j) = (u(j) - SUM(a(jp:m,j)*u(jp:m)))/a(j,j); ENDDO
 END SUBROUTINE dlinlv
+
+SUBROUTINE linuv(a,u)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    linuv
+!
+!   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1994
+!
+! abstract:   Solve linear system involving lower triangular (LINLV) or upper
+!             triangular (LINUV) matrix. u is input as right-hand-side, output
+!             as the solution vector.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a          - 
+!     u          - 
+!
+!   output argument list:
+!     u          - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_single), INTENT(IN   ):: a(:,:)
+REAL(r_single), INTENT(INOUT):: u(:)
+
+INTEGER(i_kind)            :: m,i, j, jp
+
+m=SIZE(a,1)
+DO j=m,1,-1; jp=j+1; u(j)=(u(j) - SUM(a(jp:m,j)*u(jp:m)))  /a(j,j); ENDDO
+END SUBROUTINE linuv
+
+
+SUBROUTINE dlinuv(a,u)
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    dlinuv
+!
+!   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1994
+!
+! abstract:   Invert lower triangular matrix in place if A are same
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     a          - 
+!     u          - 
+!
+!   output argument list:
+!     u          - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+REAL(r_double), INTENT(IN   ) :: a(:,:)
+REAL(r_double), INTENT(INOUT) :: u(:)
+
+INTEGER(i_kind) :: m,i, j, jp
+
+m=SIZE(a,1)
+DO j=m,1,-1; jp=j+1; u(j) = (u(j) - SUM(a(jp:m,j)*u(jp:m)))/a(j,j); ENDDO
+END SUBROUTINE dlinuv
 
 
 SUBROUTINE powp(a,b,n) 
@@ -3410,6 +4386,7 @@ SUBROUTINE linmvt(a,b)
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
+!   2022-09-02  todling -- rank of b was inconsistent w/ that expected by udlmm
 !
 !   input argument list:
 !     a,b        -
@@ -3430,11 +4407,15 @@ REAL(r_single),DIMENSION(:),  INTENT(INOUT) :: b
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind)                          :: m
 REAL(r_single)                           :: d
+REAL(r_single), allocatable :: baux(:,:)
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt is not square'
 IF(m /= SIZE(b))STOP 'matrix and vectors in linmvt have unmatched sizes'
-CALL ldum(a,ipiv,d); CALL udlmm(a,b,ipiv)
+allocate(baux(SIZE(b),1))
+CALL ldum(a,ipiv,d); CALL udlmm(a,baux,ipiv)
+b=baux(:,1)
+deallocate(baux)
 END SUBROUTINE linmvt
 
 
@@ -3449,6 +4430,7 @@ SUBROUTINE dlinmvt(a,b)
 !
 ! program history log:
 !   2008-04-25  safford -- add subprogram doc block
+!   2022-09-02  todling -- rank of b was inconsistent w/ that expected by udlmm
 !
 !   input argument list:
 !     a,b        -
@@ -3468,11 +4450,15 @@ REAL(r_double),DIMENSION(:),  INTENT(INOUT) :: b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind) m; REAL(r_double) d
+REAL(r_double), allocatable :: baux(:,:)
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt_d is not square'
 IF(m /= SIZE(b))STOP 'matrix and vectors in linmvt_d have unmatched sizes'
-CALL ldum_d(a,ipiv,d); CALL udlmm_d(a,b,ipiv)
+allocate(baux(SIZE(b),1))
+CALL ldum_d(a,ipiv,d); CALL udlmm_d(a,baux,ipiv)
+b=baux(:,1)
+deallocate(baux)
 END SUBROUTINE dlinmvt
 
 end module m_plib8mat1
