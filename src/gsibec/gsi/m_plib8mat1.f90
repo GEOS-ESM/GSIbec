@@ -16,6 +16,7 @@ MODULE m_plib8mat1
 ! program history log:
 !   2011-07-04 todling - set to double precision to allow running GSI in
 !                        in either single or double precision
+!   2022-09-04 todling - redefined interface in proper f90 way
 !
 ! remarks:
 !   1. routines here must work under REAL*8 (double precision)
@@ -168,178 +169,178 @@ IMPLICIT NONE
   private
 ! set subroutines/interfaces to public
   public :: pro333
-  public :: pro333_d
+! public :: pro333_d
   public :: cro33
-  public :: cro33_d
+! public :: cro33_d
   public :: norv
-  public :: norv_d
+! public :: norv_d
   public :: norq
-  public :: norq_d
+! public :: norq_d
   public :: swpvv
-  public :: swpvv_d
+! public :: swpvv_d
   public :: mulmd
-  public :: mulmd_d
+! public :: mulmd_d
   public :: multd
-  public :: multd_d
+! public :: multd_d
   public :: muldm
-  public :: muldm_d
+! public :: muldm_d
   public :: muldt
-  public :: muldt_d
+! public :: muldt_d
   public :: mulpp
-  public :: mulpp_d
+! public :: mulpp_d
   public :: madpp
-  public :: madpp_d
+! public :: madpp_d
   public :: msbpp
-  public :: msbpp_d
+! public :: msbpp_d
   public :: difp
-  public :: difp_d
+! public :: difp_d
   public :: intp
-  public :: intp_d
+! public :: intp_d
   public :: invp
-  public :: invp_d
+! public :: invp_d
   public :: prgv
-  public :: prgv_d
+! public :: prgv_d
   public :: mulcc
-  public :: mulcc_d
+! public :: mulcc_d
   public :: madcc
-  public :: madcc_d
+! public :: madcc_d
   public :: msbcc
-  public :: msbcc_d
+! public :: msbcc_d
   public :: zerl
-  public :: zerl_d
+! public :: zerl_d
   public :: zeru
-  public :: zeru_d
+! public :: zeru_d
   public :: ldum
-  public :: ldum_d
+! public :: ldum_d
   public :: udlmm
-  public :: udlmm_d
+! public :: udlmm_d
   public :: linvan
-  public :: linvan_d
+! public :: linvan_d
   public :: copdm
-  public :: copdm_d
+! public :: copdm_d
   public :: condm
-  public :: condm_d
+! public :: condm_d
   public :: copsm
-  public :: copsm_d
+! public :: copsm_d
   public :: consm
-  public :: consm_d
+! public :: consm_d
   public :: addmd
-  public :: addmd_d
+! public :: addmd_d
   public :: submd
-  public :: submd_d
+! public :: submd_d
   public :: addms
-  public :: addms_d
+! public :: addms_d
   public :: subms
-  public :: subms_d
+! public :: subms_d
   public :: l1lm
-  public :: l1lm_d
+! public :: l1lm_d
   public :: ldlm
-  public :: ldlm_d
+! public :: ldlm_d
   public :: invh
-  public :: invh_d
+! public :: invh_d
   public :: invl
-  public :: invl_d
+! public :: invl_d
   public :: linlv
-  public :: linlv_d
+! public :: linlv_d
   public :: linuv
-  public :: linuv_d
+! public :: linuv_d
   public :: powp
-  public :: powp_d
+! public :: powp_d
   public :: polps
-  public :: polps_d
+! public :: polps_d
   public :: polpp
-  public :: polpp_d
+! public :: polpp_d
   public :: trcm
-  public :: trcm_d
+! public :: trcm_d
   public :: inv
-  public :: inv_d
+! public :: inv_d
 
-INTERFACE pro333  ; MODULE PROCEDURE pro333;                 END INTERFACE
-INTERFACE pro333_d; MODULE PROCEDURE dpro333;                END INTERFACE
-INTERFACE cro33   ; MODULE PROCEDURE cro33;                  END INTERFACE
-INTERFACE cro33_d;  MODULE PROCEDURE dcro33;                 END INTERFACE
-INTERFACE norv;     MODULE PROCEDURE norv;                   END INTERFACE
-INTERFACE norv_d;   MODULE PROCEDURE dnorv;                  END INTERFACE
-INTERFACE norq;     MODULE PROCEDURE norq;                   END INTERFACE
-INTERFACE norq_d;   MODULE PROCEDURE dnorq;                  END INTERFACE
-INTERFACE swpvv;    MODULE PROCEDURE swpvv;                  END INTERFACE
-INTERFACE swpvv_d;  MODULE PROCEDURE dswpvv;                 END INTERFACE
-INTERFACE mulmd;    MODULE PROCEDURE mulmd;                  END INTERFACE
-INTERFACE mulmd_d;  MODULE PROCEDURE dmulmd;                 END INTERFACE
-INTERFACE multd;    MODULE PROCEDURE multd;                  END INTERFACE
-INTERFACE multd_d;  MODULE PROCEDURE dmultd;                 END INTERFACE
-INTERFACE muldm;    MODULE PROCEDURE muldm;                  END INTERFACE
-INTERFACE muldm_d;  MODULE PROCEDURE dmuldm;                 END INTERFACE
-INTERFACE muldt;    MODULE PROCEDURE muldt;                  END INTERFACE
-INTERFACE muldt_d;  MODULE PROCEDURE dmuldt;                 END INTERFACE
-INTERFACE mulpp;    MODULE PROCEDURE mulpp;                  END INTERFACE
-INTERFACE mulpp_d;  MODULE PROCEDURE dmulpp;                 END INTERFACE
-INTERFACE madpp;    MODULE PROCEDURE madpp;                  END INTERFACE
-INTERFACE madpp_d;  MODULE PROCEDURE dmadpp;                 END INTERFACE
-INTERFACE msbpp;    MODULE PROCEDURE msbpp;                  END INTERFACE
-INTERFACE msbpp_d;  MODULE PROCEDURE dmsbpp;                 END INTERFACE
-INTERFACE difp;     MODULE PROCEDURE difp;                   END INTERFACE
-INTERFACE difp_d;   MODULE PROCEDURE ddifp;                  END INTERFACE
-INTERFACE intp;     MODULE PROCEDURE intp;                   END INTERFACE
-INTERFACE intp_d;   MODULE PROCEDURE dintp;                  END INTERFACE
-INTERFACE invp;     MODULE PROCEDURE invp;                   END INTERFACE
-INTERFACE invp_d;   MODULE PROCEDURE dinvp;                  END INTERFACE
-INTERFACE prgv;     MODULE PROCEDURE prgv;                   END INTERFACE
-INTERFACE prgv_d;   MODULE PROCEDURE dprgv;                  END INTERFACE
-INTERFACE mulcc;    MODULE PROCEDURE mulcc;                  END INTERFACE
-INTERFACE mulcc_d;  MODULE PROCEDURE dmulcc;                 END INTERFACE
-INTERFACE madcc;    MODULE PROCEDURE madcc;                  END INTERFACE
-INTERFACE madcc_d;  MODULE PROCEDURE dmadcc;                 END INTERFACE
-INTERFACE msbcc;    MODULE PROCEDURE msbcc;                  END INTERFACE
-INTERFACE msbcc_d;  MODULE PROCEDURE dmsbcc;                 END INTERFACE
-INTERFACE zerl;     MODULE PROCEDURE zerl;                   END INTERFACE
-INTERFACE zerl_d;   MODULE PROCEDURE dzerl;                  END INTERFACE
-INTERFACE zeru;     MODULE PROCEDURE zeru;                   END INTERFACE
-INTERFACE zeru_d;   MODULE PROCEDURE dzeru;                  END INTERFACE
-INTERFACE ldum;     MODULE PROCEDURE ldum;                   END INTERFACE
-INTERFACE ldum_d;   MODULE PROCEDURE dldum;                  END INTERFACE
-INTERFACE udlmm;    MODULE PROCEDURE udlmm, udlmv;           END INTERFACE
-INTERFACE udlmm_d;  MODULE PROCEDURE dudlmm,dudlmv;          END INTERFACE
-INTERFACE linvan;   MODULE PROCEDURE linvan;                 END INTERFACE
-INTERFACE linvan_d; MODULE PROCEDURE dlinvan;                END INTERFACE
-INTERFACE copdm;    MODULE PROCEDURE copdm;                  END INTERFACE
-INTERFACE copdm_d;  MODULE PROCEDURE dcopdm;                 END INTERFACE
-INTERFACE condm;    MODULE PROCEDURE condm;                  END INTERFACE
-INTERFACE condm_d;  MODULE PROCEDURE dcondm;                 END INTERFACE
-INTERFACE copsm;    MODULE PROCEDURE copsm;                  END INTERFACE
-INTERFACE copsm_d;  MODULE PROCEDURE dcopsm;                 END INTERFACE
-INTERFACE consm;    MODULE PROCEDURE consm;                  END INTERFACE
-INTERFACE consm_d;  MODULE PROCEDURE dconsm;                 END INTERFACE
-INTERFACE addmd;    MODULE PROCEDURE addmd;                  END INTERFACE
-INTERFACE addmd_d;  MODULE PROCEDURE daddmd;                 END INTERFACE
-INTERFACE submd;    MODULE PROCEDURE submd;                  END INTERFACE
-INTERFACE submd_d;  MODULE PROCEDURE dsubmd;                 END INTERFACE
-INTERFACE addms;    MODULE PROCEDURE addms;                  END INTERFACE
-INTERFACE addms_d;  MODULE PROCEDURE daddms;                 END INTERFACE
-INTERFACE subms;    MODULE PROCEDURE subms;                  END INTERFACE
-INTERFACE subms_d;  MODULE PROCEDURE dsubms;                 END INTERFACE
-INTERFACE l1lm;     MODULE PROCEDURE l1lm;                   END INTERFACE
-INTERFACE l1lm_d;   MODULE PROCEDURE dl1lm;                  END INTERFACE
-INTERFACE ldlm;     MODULE PROCEDURE ldlm;                   END INTERFACE
-INTERFACE ldlm_d;   MODULE PROCEDURE dldlm;                  END INTERFACE
-INTERFACE invh;     MODULE PROCEDURE invh;                   END INTERFACE
-INTERFACE invh_d;   MODULE PROCEDURE dinvh;                  END INTERFACE
-INTERFACE invl;     MODULE PROCEDURE invl;                   END INTERFACE
-INTERFACE invl_d;   MODULE PROCEDURE dinvl;                  END INTERFACE
-INTERFACE linlv;    MODULE PROCEDURE linlv;                  END INTERFACE
-INTERFACE linlv_d;  MODULE PROCEDURE dlinlv;                 END INTERFACE
-INTERFACE linuv;    MODULE PROCEDURE linuv;                  END INTERFACE
-INTERFACE linuv_d;  MODULE PROCEDURE dlinuv;                 END INTERFACE
-INTERFACE powp;     MODULE PROCEDURE powp;                   END INTERFACE
-INTERFACE powp_d;   MODULE PROCEDURE dpowp;                  END INTERFACE
-INTERFACE polps;    MODULE PROCEDURE polps;                  END INTERFACE
-INTERFACE polps_d;  MODULE PROCEDURE dpolps;                 END INTERFACE
-INTERFACE polpp;    MODULE PROCEDURE polpp;                  END INTERFACE
-INTERFACE polpp_d;  MODULE PROCEDURE dpolpp;                 END INTERFACE
-INTERFACE trcm;     MODULE PROCEDURE trcm;                   END INTERFACE
-INTERFACE trcm_d;   MODULE PROCEDURE dtrcm;                  END INTERFACE
-INTERFACE inv;      MODULE PROCEDURE invmt, linmmt, linmvt;  END INTERFACE
-INTERFACE inv_d;    MODULE PROCEDURE dinvmt,dlinmmt,dlinmvt; END INTERFACE
+INTERFACE pro333  ; MODULE PROCEDURE pro333,                 &
+                                     dpro333;                END INTERFACE
+INTERFACE cro33   ; MODULE PROCEDURE cro33,                  &
+                                     dcro33;                 END INTERFACE
+INTERFACE norv;     MODULE PROCEDURE norv,                   &
+                                     dnorv;                  END INTERFACE
+INTERFACE norq;     MODULE PROCEDURE norq,                   &
+                                     dnorq;                  END INTERFACE
+INTERFACE swpvv;    MODULE PROCEDURE swpvv,                  &
+                                     dswpvv;                 END INTERFACE
+INTERFACE mulmd;    MODULE PROCEDURE mulmd,                  &
+                                     dmulmd;                 END INTERFACE
+INTERFACE multd;    MODULE PROCEDURE multd,                  &
+                                     dmultd;                 END INTERFACE
+INTERFACE muldm;    MODULE PROCEDURE muldm,                  &
+                                     dmuldm;                 END INTERFACE
+INTERFACE muldt;    MODULE PROCEDURE muldt,                  &
+                                     dmuldt;                 END INTERFACE
+INTERFACE mulpp;    MODULE PROCEDURE mulpp,                  &
+                                     dmulpp;                 END INTERFACE
+INTERFACE madpp;    MODULE PROCEDURE madpp,                  &
+                                     dmadpp;                 END INTERFACE
+INTERFACE msbpp;    MODULE PROCEDURE msbpp,                  &
+                                     dmsbpp;                 END INTERFACE
+INTERFACE difp;     MODULE PROCEDURE difp,                   &
+                                     ddifp;                  END INTERFACE
+INTERFACE intp;     MODULE PROCEDURE intp,                   &
+                                     dintp;                  END INTERFACE
+INTERFACE invp;     MODULE PROCEDURE invp,                   &
+                                     dinvp;                  END INTERFACE
+INTERFACE prgv;     MODULE PROCEDURE prgv,                   &
+                                     dprgv;                  END INTERFACE
+INTERFACE mulcc;    MODULE PROCEDURE mulcc,                  &
+                                     dmulcc;                 END INTERFACE
+INTERFACE madcc;    MODULE PROCEDURE madcc,                  &
+                                     dmadcc;                 END INTERFACE
+INTERFACE msbcc;    MODULE PROCEDURE msbcc,                  &
+                                     dmsbcc;                 END INTERFACE
+INTERFACE zerl;     MODULE PROCEDURE zerl,                   &
+                                     dzerl;                  END INTERFACE
+INTERFACE zeru;     MODULE PROCEDURE zeru,                   &
+                                     dzeru;                  END INTERFACE
+INTERFACE ldum;     MODULE PROCEDURE ldum,                   &
+                                     dldum;                  END INTERFACE
+INTERFACE udlmm;    MODULE PROCEDURE udlmm, udlmv,           &
+                                     dudlmm,dudlmv;          END INTERFACE
+INTERFACE linvan;   MODULE PROCEDURE linvan,                 &
+                                     dlinvan;                END INTERFACE
+INTERFACE copdm;    MODULE PROCEDURE copdm,                  &
+                                     dcopdm;                 END INTERFACE
+INTERFACE condm;    MODULE PROCEDURE condm,                  &
+                                     dcondm;                 END INTERFACE
+INTERFACE copsm;    MODULE PROCEDURE copsm,                  &
+                                     dcopsm;                 END INTERFACE
+INTERFACE consm;    MODULE PROCEDURE consm,                  &
+                                     dconsm;                 END INTERFACE
+INTERFACE addmd;    MODULE PROCEDURE addmd,                  &
+                                     daddmd;                 END INTERFACE
+INTERFACE submd;    MODULE PROCEDURE submd,                  &
+                                     dsubmd;                 END INTERFACE
+INTERFACE addms;    MODULE PROCEDURE addms,                  &
+                                     daddms;                 END INTERFACE
+INTERFACE subms;    MODULE PROCEDURE subms,                  &
+                                     dsubms;                 END INTERFACE
+INTERFACE l1lm;     MODULE PROCEDURE l1lm,                   &
+                                     dl1lm;                  END INTERFACE
+INTERFACE ldlm;     MODULE PROCEDURE ldlm,                   &
+                                     dldlm;                  END INTERFACE
+INTERFACE invh;     MODULE PROCEDURE invh,                   &
+                                     dinvh;                  END INTERFACE
+INTERFACE invl;     MODULE PROCEDURE invl,                   &
+                                     dinvl;                  END INTERFACE
+INTERFACE linlv;    MODULE PROCEDURE linlv,                  &
+                                     dlinlv;                 END INTERFACE
+INTERFACE linuv;    MODULE PROCEDURE linuv,                  &
+                                     dlinuv;                 END INTERFACE
+INTERFACE powp;     MODULE PROCEDURE powp,                   &
+                                     dpowp;                  END INTERFACE
+INTERFACE polps;    MODULE PROCEDURE polps,                  &
+                                     dpolps;                 END INTERFACE
+INTERFACE polpp;    MODULE PROCEDURE polpp,                  &
+                                     dpolpp;                 END INTERFACE
+INTERFACE trcm;     MODULE PROCEDURE trcm,                   &
+                                     dtrcm;                  END INTERFACE
+INTERFACE inv;      MODULE PROCEDURE invmt, linmmt, linmvt,  &
+                                     dinvmt,dlinmmt,dlinmvt; END INTERFACE
 
 CONTAINS
 
@@ -406,7 +407,7 @@ REAL(r_double), INTENT(IN   ) :: d(3), e(3), f(3)
 
 REAL(r_double)             :: pro_res
 REAL(r_double)             :: g(3)
-CALL CRO33_d(E,F,G)
+CALL CRO33(E,F,G)
 pro_res=DOT_PRODUCT(d,g)
 END FUNCTION dpro333
 
@@ -2291,7 +2292,7 @@ DO j=1,m-1
    ipiv(j)=ibig
    IF(ibig /= j)THEN
       d=-d
-      CALL swpvv_d(a(j,:),a(ibig,:))
+      CALL swpvv(a(j,:),a(ibig,:))
       s(ibig)=s(j)
    ENDIF
    ajj=a(j,j)
@@ -2342,7 +2343,7 @@ SUBROUTINE udlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_single),  INTENT(INOUT) :: a(:,:) 
+REAL(r_single),  INTENT(IN   ) :: a(:,:) 
 REAL(r_single),  INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
@@ -2399,7 +2400,7 @@ SUBROUTINE dudlmm(a,b,ipiv)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: ipiv(:) 
-REAL(r_double) , INTENT(INOUT) :: a(:,:) 
+REAL(r_double) , INTENT(IN   ) :: a(:,:) 
 REAL(r_double) , INTENT(INOUT) :: b(:,:) 
 
 INTEGER(i_kind)                :: m,mm,i, k, l
@@ -2762,7 +2763,7 @@ DO i=1,nc
    IF(e == zero)STOP 'w effectively singular in linvan'
    d1(i)=EXP(-p/e)
 ENDDO
-CALL muldm_d(d1,w2,w)
+CALL muldm(d1,w2,w)
 
 DO j=1,nc
    p=zero
@@ -2777,7 +2778,7 @@ DO j=1,nc
    IF(e == zero)STOP 'w effectively singular in linvan'
    d2(j)=EXP(-p/e)
 ENDDO
-CALL mulmd_d(w,d2,w)
+CALL mulmd(w,d2,w)
  
 c=1.e-8_r_double  ! reset the criterion for "negligible" elements
 
@@ -2821,12 +2822,12 @@ p=one     ! p becomes product of row-lengths:
 DO i=1,nc
    p=p*SQRT(dot_PRODUCT(w(i,:),w(i,:)))
 ENDDO
-CALL ldum_d(w,ipiv,d)
+CALL ldum(w,ipiv,d)
 DO i=1,nc
   d=d*w(i,i)      ! d becomes the determinant of w
 ENDDO
 wv(:,1) = ab ! convert shape of array
-CALL udlmm_d(w,wv(:,1:1),ipiv)
+CALL udlmm(w,wv(:,1:1),ipiv)
 ab = d2 * wv(:,1) ! rescale solution vector by d2
 !     ab(1:nc) = d2(1:nc) * ab(1:nc) ! Rescale solution vector by D2
 !  Note: it is very likely that round-off errors have accumulated during
@@ -2839,7 +2840,7 @@ ab = d2 * wv(:,1) ! rescale solution vector by d2
 v=v-MATMUL(w2,ab)
 v = d1 * v    ! Rescale the residual vector by D1
 wv(:,1) = v ! Convert shape of array
-CALL UDLMM_d(w,wv(:,1:1),ipiv) ! Solve linear system with THIS rhs.
+CALL UDLMM(w,wv(:,1:1),ipiv) ! Solve linear system with THIS rhs.
 ab=ab+wv(:,1)*d2 ! Add residual solution vector, 
                                       ! scaled, to AB
 
@@ -3535,7 +3536,7 @@ DO j=1,m; jm=j-1; jp=j+1
       b(i,j)=b(j,i)*bjji
    ENDDO
 ENDDO
-CALL zeru_d(b)
+CALL zeru(b)
 RETURN
 END SUBROUTINE dldlm
 
@@ -3641,7 +3642,7 @@ REAL(r_double),DIMENSION(SIZE(a,1)):: d
 
 m=SIZE(a,1)
 !  PERFORM L.D.U DECOMPOSITION OF THE SYMMETRIC MATRIX:
-CALL ldlm_d(a,a,d)
+CALL ldlm(a,a,d)
 
 !  INVERT (IN PLACE) THE LOWER TRIANGULAR PART OF A, (ASSUMING UNIT
 !  DIAGONAL ELEMENTS), AND INVERT THE DIAGONAL PART OF A (ASSUMING
@@ -3970,7 +3971,7 @@ REAL(r_double) , INTENT(  OUT) :: b(0:)
 
 REAL(r_double),DIMENSION(0:SIZE(a)-1):: t; INTEGER(i_kind) :: k
 
-B(0)=one; b(1:) = zero; DO k=1,n; CALL mulpp_d(a,b,t); b=t; ENDDO
+B(0)=one; b(1:) = zero; DO k=1,n; CALL mulpp(a,b,t); b=t; ENDDO
 END SUBROUTINE dpowp
 
 
@@ -4115,7 +4116,7 @@ INTEGER(i_kind) m,k
 
 m=SIZE(a)-1
 c(0)=a(m); c(1:m) = zero
-DO k=m-1,0,-1; CALL mulpp_d(b,c,t); c=t; c(0)=c(0)+a(k); ENDDO
+DO k=m-1,0,-1; CALL mulpp(b,c,t); c=t; c(0)=c(0)+a(k); ENDDO
 END SUBROUTINE dpolpp
 
 
@@ -4275,7 +4276,7 @@ INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to dinvmt is not square'
 ! Perform a pivoted L-D-U decomposition on matrix a:
-CALL ldum_d(a,ipiv,d)
+CALL ldum(a,ipiv,d)
 
 ! Invert upper triangular portion U in place:
 DO i=1,m; a(i,i)=one/a(i,i); ENDDO
@@ -4295,7 +4296,7 @@ DO j=1,m-1; jp=j+1
 ENDDO
 
 !  Permute columns according to ipiv
-DO j=m-1,1,-1; l=ipiv(j); CALL swpvv_d(a(:,j),a(:,l)); ENDDO
+DO j=m-1,1,-1; l=ipiv(j); CALL swpvv(a(:,j),a(:,l)); ENDDO
 END SUBROUTINE dinvmt
 
 
@@ -4371,7 +4372,7 @@ REAL(r_double)                           :: d
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmmt_d is not square'
 IF(m /= SIZE(b,1))STOP 'matrix and vectors in linmmt_d have unmatched sizes'
-CALL ldum_d(a,ipiv,d); CALL udlmm_d(a,b,ipiv)
+CALL ldum(a,ipiv,d); CALL udlmm(a,b,ipiv)
 END SUBROUTINE dlinmmt
 
 
@@ -4407,15 +4408,11 @@ REAL(r_single),DIMENSION(:),  INTENT(INOUT) :: b
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind)                          :: m
 REAL(r_single)                           :: d
-REAL(r_single), allocatable :: baux(:,:)
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt is not square'
 IF(m /= SIZE(b))STOP 'matrix and vectors in linmvt have unmatched sizes'
-allocate(baux(SIZE(b),1))
-CALL ldum(a,ipiv,d); CALL udlmm(a,baux,ipiv)
-b=baux(:,1)
-deallocate(baux)
+CALL ldum(a,ipiv,d); CALL udlmm(a,b,ipiv)
 END SUBROUTINE linmvt
 
 
@@ -4450,15 +4447,11 @@ REAL(r_double),DIMENSION(:),  INTENT(INOUT) :: b
 
 INTEGER(i_kind),DIMENSION(SIZE(a,1))     :: ipiv
 INTEGER(i_kind) m; REAL(r_double) d
-REAL(r_double), allocatable :: baux(:,:)
 
 m=SIZE(a,1)
 IF(m /= SIZE(a,2))STOP 'matrix passed to linmvt_d is not square'
 IF(m /= SIZE(b))STOP 'matrix and vectors in linmvt_d have unmatched sizes'
-allocate(baux(SIZE(b),1))
-CALL ldum_d(a,ipiv,d); CALL udlmm_d(a,baux,ipiv)
-b=baux(:,1)
-deallocate(baux)
+CALL ldum(a,ipiv,d); CALL udlmm(a,b,ipiv)
 END SUBROUTINE dlinmvt
 
 end module m_plib8mat1

@@ -92,11 +92,11 @@ MODULE m_plib8mat2
 !
 !$$$ end documentation block
 
-USE m_plib8mat1
+USE m_plib8mat1, only: inv
 use m_kinds, only: i_kind
 use m_kinds, only: r_single
 use m_kinds, only: r_double
-use m_kinds, only: my_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero,one,two
 IMPLICIT NONE
 
@@ -104,13 +104,13 @@ IMPLICIT NONE
   private
 ! set subroutines/interfaces to public
   public :: avco
-  public :: avco_d
+! public :: avco_d
   public :: dfco
-  public :: dfco_d
+! public :: dfco_d
   public :: dfco2
-  public :: dfco2_d
+! public :: dfco2_d
   public :: clib
-  public :: clib_d
+! public :: clib_d
   public :: cad1b
   public :: csb1b
   public :: cad2b
@@ -123,16 +123,16 @@ IMPLICIT NONE
   public :: madbb
   public :: msbbb
   public :: ldub
-  public :: ldub_d
+! public :: ldub_d
   public :: l1ubb
-  public :: l1ubb_d
+! public :: l1ubb_d
   public :: l1ueb
-  public :: l1ueb_d
+! public :: l1ueb_d
   public :: l1lb
   public :: ldlb
-  public :: ldlb_d
+! public :: ldlb_d
   public :: udub
-  public :: udub_d
+! public :: udub_d
   public :: mulbv
   public :: madbv
   public :: msbbv
@@ -172,14 +172,14 @@ IMPLICIT NONE
   public :: linbv
   public :: wrtb
 
-INTERFACE avco;   MODULE PROCEDURE avco;           END INTERFACE
-INTERFACE avco_d; MODULE PROCEDURE davco;          END INTERFACE
-INTERFACE dfco;   MODULE PROCEDURE dfco;           END INTERFACE
-INTERFACE dfco_d; MODULE PROCEDURE ddfco;          END INTERFACE
-INTERFACE dfco2;  MODULE PROCEDURE dfco2;          END INTERFACE
-INTERFACE dfco2_d;MODULE PROCEDURE ddfco2;         END INTERFACE
-INTERFACE clib;   MODULE PROCEDURE clib;           END INTERFACE
-INTERFACE clib_d; MODULE PROCEDURE dclib;          END INTERFACE
+INTERFACE avco;   MODULE PROCEDURE avco,           &
+                                   davco;          END INTERFACE
+INTERFACE dfco;   MODULE PROCEDURE dfco,           &
+                                   ddfco;          END INTERFACE
+INTERFACE dfco2;  MODULE PROCEDURE dfco2,          &
+                                   ddfco2;         END INTERFACE
+INTERFACE clib;   MODULE PROCEDURE clib,           &
+                                   dclib;          END INTERFACE
 INTERFACE cad1b;  MODULE PROCEDURE cad1b;          END INTERFACE
 INTERFACE csb1b;  MODULE PROCEDURE csb1b;          END INTERFACE
 INTERFACE cad2b;  MODULE PROCEDURE cad2b;          END INTERFACE
@@ -193,17 +193,17 @@ INTERFACE conbm;  MODULE PROCEDURE conbm;          END INTERFACE
 INTERFACE mulbb;  MODULE PROCEDURE mulbb;          END INTERFACE
 INTERFACE madbb;  MODULE PROCEDURE madbb;          END INTERFACE
 INTERFACE msbbb;  MODULE PROCEDURE msbbb;          END INTERFACE
-INTERFACE ldub;   MODULE PROCEDURE ldub;           END INTERFACE
-INTERFACE ldub_d; MODULE PROCEDURE dldub;          END INTERFACE
-INTERFACE l1ubb;  MODULE PROCEDURE l1ubb;          END INTERFACE
-INTERFACE l1ubb_d;MODULE PROCEDURE dl1ubb;         END INTERFACE
-INTERFACE l1ueb;  MODULE PROCEDURE l1ueb;          END INTERFACE
-INTERFACE l1ueb_d;MODULE PROCEDURE dl1ueb;         END INTERFACE
+INTERFACE ldub;   MODULE PROCEDURE ldub,           &
+                                   dldub;          END INTERFACE
+INTERFACE l1ubb;  MODULE PROCEDURE l1ubb,          &
+                                   dl1ubb;         END INTERFACE
+INTERFACE l1ueb;  MODULE PROCEDURE l1ueb,          &
+                                   dl1ueb;         END INTERFACE
 INTERFACE l1lb;   MODULE PROCEDURE l1lb;           END INTERFACE
-INTERFACE ldlb;   MODULE PROCEDURE ldlb;           END INTERFACE
-INTERFACE ldlb_d; MODULE PROCEDURE dldlb;          END INTERFACE
-INTERFACE udub;   MODULE PROCEDURE udub;           END INTERFACE
-INTERFACE udub_d; MODULE PROCEDURE dudub;          END INTERFACE
+INTERFACE ldlb;   MODULE PROCEDURE ldlb,           &
+                                   dldlb;          END INTERFACE
+INTERFACE udub;   MODULE PROCEDURE udub,           &
+                                   dudub;          END INTERFACE
 INTERFACE mulbv;  MODULE PROCEDURE mulbv;          END INTERFACE
 INTERFACE madbv;  MODULE PROCEDURE madbv;          END INTERFACE
 INTERFACE msbbv;  MODULE PROCEDURE msbbv;          END INTERFACE
@@ -299,7 +299,7 @@ pa=one;     pb=-one
 w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=2,nab; w(i,1:na)=pa;    pa=pa*za0; w(i,na1:nab)=pb; pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE davco
 
@@ -414,7 +414,7 @@ w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=3,nab; w(i,1:na)   =pa*(i-2); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;              pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE ddfco 
 
@@ -529,7 +529,7 @@ w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=4,nab; w(i,1:na)   =pa*(i-2)*(i-3); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;                           pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE ddfco2 
 
@@ -697,7 +697,7 @@ SUBROUTINE cad1b(a,m1,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,mah1,mah2,mirror2
-REAL(my_kind),    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
+REAL(r_kind) ,    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jpmax
 
@@ -742,7 +742,7 @@ SUBROUTINE csb1b(a,m1,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,mah1,mah2,mirror2
-REAL(my_kind),    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
+REAL(r_kind) ,    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jpmax
 
@@ -789,7 +789,7 @@ SUBROUTINE cad2b(a,m1,m2,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,m2,mah1,mah2,mirror2
-REAL(my_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
+REAL(r_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jmmin,nah1,nah2,mirror,j0
 
@@ -833,7 +833,7 @@ SUBROUTINE csb2b(a,m1,m2,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,m2,mah1,mah2,mirror2
-REAL(my_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
+REAL(r_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jmmin,nah1,nah2,mirror,j0
 
@@ -877,7 +877,7 @@ SUBROUTINE cex2b(a,m1,m2,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,m2,mah1,mah2,mirror2
-REAL(my_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
+REAL(r_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jmmin,nah1,nah2,mirror,j0
 
@@ -930,12 +930,12 @@ SUBROUTINE copbt(a,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   INTENT(IN   ) :: a(m1,-mah1:mah2)
-REAL(r_double),   INTENT(  OUT) :: b(m2,-mah2:mah1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: b(m2,-mah2:mah1)
 
 INTEGER(i_kind)                 :: j, i
 
-CALL clib_d(b,mah2,mah1,m2,m1)
+CALL clib(b,mah2,mah1,m2,m1)
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); b(j+i,-j)=a(i,j); ENDDO
 ENDDO
@@ -974,12 +974,12 @@ SUBROUTINE conbt(a,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   INTENT(IN   ) :: a(m1,-mah1:mah2)
-REAL(r_double),   INTENT(  OUT) :: b(m2,-mah2:mah1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: b(m2,-mah2:mah1)
 
 INTEGER(i_kind)                 :: j, i
 
-CALL clib_d(b,mah2,mah1,m2,m1)
+CALL clib(b,mah2,mah1,m2,m1)
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); b(j+i,-j)=-a(i,j); ENDDO
 ENDDO
@@ -1015,12 +1015,12 @@ SUBROUTINE copmb(afull,aband,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   DIMENSION(m1,m2),        INTENT(IN   ) :: afull
-REAL(r_double),   DIMENSION(m1,-mah1:mah2),INTENT(  OUT) :: aband
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(IN   ) :: afull
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(  OUT) :: aband
 
 INTEGER(i_kind)                                          :: i1,i2, i, j
 
-CALL clib_d(aband,m1,m2,mah1,mah2)
+CALL clib(aband,m1,m2,mah1,mah2)
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; aband(i,j)= afull(i,j+i); ENDDO
 ENDDO
@@ -1054,12 +1054,12 @@ SUBROUTINE conmb(afull,aband,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   DIMENSION(m1,m2),        INTENT(IN   ) :: afull
-REAL(r_double),   DIMENSION(m1,-mah1:mah2),INTENT(  OUT) :: aband
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(IN   ) :: afull
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(  OUT) :: aband
 
 INTEGER(i_kind)                                          :: i1,i2, i, j
 
-CALL clib_d(aband,m1,m2,mah1,mah2)
+CALL clib(aband,m1,m2,mah1,mah2)
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; aband(i,j)=-afull(i,j+i); ENDDO
 ENDDO
@@ -1095,8 +1095,8 @@ SUBROUTINE copbm(aband,afull,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     DIMENSION(m1,-mah1:mah2),INTENT(IN   ) :: aband
-REAL(my_kind),     DIMENSION(m1,m2),        INTENT(  OUT) :: afull
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(IN   ) :: aband
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(  OUT) :: afull
 
 INTEGER(i_kind)                                          :: i1,i2, i, j
 
@@ -1134,8 +1134,8 @@ SUBROUTINE conbm(aband,afull,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     DIMENSION(m1,-mah1:mah2),INTENT(IN   ) :: aband
-REAL(my_kind),     DIMENSION(m1,m2),        INTENT(  OUT) :: afull
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(IN   ) :: aband
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(  OUT) :: afull
 
 INTEGER(i_kind)                                          :: i1,i2, i, j
 
@@ -1177,8 +1177,8 @@ SUBROUTINE mulbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mbh1, mbh2, mch1, mch2
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
-REAL(my_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
+REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
 
 INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
 
@@ -1215,8 +1215,8 @@ SUBROUTINE madbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mbh1, mbh2, mch1, mch2
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
-REAL(my_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
+REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
 
 INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
 
@@ -1260,8 +1260,8 @@ SUBROUTINE msbbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mbh1, mbh2, mch1, mch2
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
-REAL(my_kind),     INTENT(  OUT) :: c(m1,-mch1:mch2)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
+REAL(r_kind),     INTENT(  OUT) :: c(m1,-mch1:mch2)
 
 INTEGER(i_kind)                 :: nch1, nch2, j, k, jpk, i1,i2
 
@@ -1314,10 +1314,10 @@ SUBROUTINE LDUB(a,m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2 
-REAL(my_kind),    INTENT(INOUT) :: a(m,-mah1:mah2) 
+REAL(r_single),  INTENT(INOUT) :: a(m,-mah1:mah2) 
 
 INTEGER(i_kind)               :: j, imost, jmost, jp, i
-REAL(my_kind)                  :: ajj, ajji, aij
+REAL(r_single)                :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1368,10 +1368,10 @@ SUBROUTINE DLDUB(a,m,mah1,mah2)
 !$$$ end documentation block
 
 INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2 
-REAL(my_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2) 
+REAL(r_double) ,  INTENT(INOUT) :: a(m,-mah1:mah2) 
 
 INTEGER(i_kind)                :: j, imost, jmost, jp, i
-REAL(my_kind)                   :: ajj, ajji, aij
+REAL(r_double)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1434,10 +1434,10 @@ SUBROUTINE L1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) ::  m,mah1, mah2, mbh1, mbh2 
-REAL(my_kind)   , INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_single) , INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: j, imost, jmost, jleast, jp, i
-REAL(my_kind)                   :: ajj, ajji, aij
+REAL(r_single)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1499,10 +1499,10 @@ SUBROUTINE DL1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) ::  mah1, mah2, mbh1, mbh2 
-REAL(my_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_double) ,  INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: m,j, imost, jmost, jleast, jp, i
-REAL(my_kind)                   :: ajj, ajji, aij
+REAL(r_double)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1568,10 +1568,10 @@ SUBROUTINE l1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
-REAL(my_kind)   , INTENT(INOUT) :: a(0:m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_single) , INTENT(INOUT) :: a(0:m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind) :: j, imost, jmost, jleast, jp, i
-REAL(my_kind)    :: ajj, ajji, aij
+REAL(r_single)  :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1637,10 +1637,10 @@ SUBROUTINE dl1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
-REAL(my_kind)   ,  INTENT(INOUT) :: a(0:,-mah1:), b(:,-mbh1:)
+REAL(r_double) ,  INTENT(INOUT) :: a(0:,-mah1:), b(:,-mbh1:)
 
 INTEGER(i_kind)                   :: j, imost, jmost, jleast, jp, i
-REAL(my_kind)                      :: ajj, ajji, aij
+REAL(r_double)                    :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1648,7 +1648,7 @@ DO j=1,m
    jleast=MAX(0,j-mah1)
    jp=j+1
    ajj=a(j,0)
-   IF(ajj == zero)STOP 'failure in L1UEB_d'
+   IF(ajj == zero)STOP 'failure in DL1UEB'
    ajji=one/ajj
    a(j,jleast-j:jmost-j) = ajji * a(j,jleast-j:jmost-j)
    DO i=jp,imost
@@ -1691,13 +1691,13 @@ SUBROUTINE L1LB(a,b,m,mah)   ! Cholesky LU decomposition of Banded.
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah
-REAL(r_double),   INTENT(IN   ) :: a(m,-mah:mah)
-REAL(r_double),   INTENT(  OUT) :: b(m,-mah:0)
+REAL(r_kind),     INTENT(IN   ) :: a(m,-mah:mah)
+REAL(r_kind),     INTENT(  OUT) :: b(m,-mah:0)
 
 INTEGER(i_kind)                 :: i, j,jmi
-REAL(r_double)                  :: s
+REAL(r_kind)                    :: s
 
-CALL clib_d(b,m,m,mah,0)
+CALL clib(b,m,m,mah,0)
 DO j=1,m
    s=a(j,0)-DOT_PRODUCT(b(j,-mah:-1),b(j,-mah:-1))
    IF(s <= zero)THEN
@@ -1809,7 +1809,7 @@ REAL(r_double) ,  INTENT(  OUT) :: d(m)
 INTEGER(i_kind)                 :: i, j,k,jmi,lj,li
 REAL(r_double)                  :: s,t
 
-CALL clib_d(b,m,m,mah,0); b(:,0)=one
+CALL clib(b,m,m,mah,0); b(:,0)=one
 DO j=1,m; lj=MAX(-mah,1-j)
    s=a(j,0)
    do k=lj,-1
@@ -1916,7 +1916,7 @@ REAL(r_double), DIMENSION(m,-mah:mah  ) :: at
 REAL(r_double), DIMENSION(m,-mah:0)     :: bt
 REAL(r_double), DIMENSION(m)            :: dt
 
-at=a(m:1:-1,mah:-mah:-1); CALL ldlb_d(at,bt,dt,m,mah);
+at=a(m:1:-1,mah:-mah:-1); CALL ldlb(at,bt,dt,m,mah);
 b=bt(m:1:-1,0:-mah:-1);   d=dt(m:1:-1)
 END SUBROUTINE DUDUB
 
@@ -1954,8 +1954,8 @@ SUBROUTINE mulbv(a,v1,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
-REAL(r_double),   INTENT(  OUT) :: v2(m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1)
 
 INTEGER(i_kind)                 :: j, i1,i2 
 
@@ -1994,8 +1994,8 @@ SUBROUTINE madbv(a,v1,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
-REAL(r_double),   INTENT(  OUT) :: v2(m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1)
 
 INTEGER(i_kind)                 :: j, i1,i2 
 
@@ -2036,8 +2036,8 @@ SUBROUTINE msbbv(a,v1,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_double),   INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
-REAL(r_double),   INTENT(  OUT) :: v2(m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1)
 
 INTEGER(i_kind)                 :: j, i1,i2 
 
@@ -2081,8 +2081,8 @@ SUBROUTINE mulbx(a,v1,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
-REAL(my_kind),     INTENT(  OUT) :: v2(m1,my)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2122,8 +2122,8 @@ SUBROUTINE madbx(a,v1,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
-REAL(my_kind),     INTENT(  OUT) :: v2(m1,my)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2165,8 +2165,8 @@ SUBROUTINE msbbx(a,v1,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
-REAL(my_kind),     INTENT(  OUT) :: v2(m1,my)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2211,8 +2211,8 @@ SUBROUTINE mulby(a,v1,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2252,8 +2252,8 @@ SUBROUTINE madby(a,v1,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2295,8 +2295,8 @@ SUBROUTINE msbby(a,v1,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m1)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2339,8 +2339,8 @@ SUBROUTINE MULVB(v1,a,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2)
 
 INTEGER(i_kind)                 :: j, i1,i2
 
@@ -2379,8 +2379,8 @@ SUBROUTINE madvb(v1,a,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2)
 
 INTEGER(i_kind)                 :: j, i1,i2
 
@@ -2421,8 +2421,8 @@ SUBROUTINE msbvb(v1,a,v2, m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2)
 
 INTEGER(i_kind)                 :: j, i1,i2
 
@@ -2466,8 +2466,8 @@ SUBROUTINE mulxb(v1,a,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2,my)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2507,8 +2507,8 @@ SUBROUTINE madxb(v1,a,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2,my)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2550,8 +2550,8 @@ SUBROUTINE msbxb(v1,a,v2, m1,m2,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(m2,my)
+REAL(r_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2595,8 +2595,8 @@ SUBROUTINE mulyb(v1,a,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2636,8 +2636,8 @@ SUBROUTINE madyb(v1,a,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2679,8 +2679,8 @@ SUBROUTINE msbyb(v1,a,v2, m1,m2,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
-REAL(my_kind),     INTENT(  OUT) :: v2(mx,m2)
+REAL(r_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
 
 INTEGER(i_kind)                 :: i,j
 
@@ -2723,12 +2723,12 @@ SUBROUTINE mulbd(a,d,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m2)
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m2)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                :: j, i1,i2
 
-CALL clib_d(b,m1,m2,mah1,mah2)
+CALL clib(b,m1,m2,mah1,mah2)
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    b(i1:i2,j)=a(i1:i2,j)*d(j+i1:j+i2)
 ENDDO
@@ -2766,8 +2766,8 @@ SUBROUTINE madbd(a,d,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m2)
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m2)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                :: j, i1,i2
 
@@ -2808,8 +2808,8 @@ SUBROUTINE msbbd(a,d,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m2)
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m2)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                :: j, i1,i2
 
@@ -2852,12 +2852,12 @@ SUBROUTINE muldb(d,a,b,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m1)
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m1)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                 :: j
 
-CALL clib_d(b,m1,m2,mah1,mah2)
+CALL clib(b,m1,m2,mah1,mah2)
 DO j=-mah1,mah2; b(:,j)=d(:)*a(:,j); ENDDO
 END SUBROUTINE muldb
 
@@ -2896,8 +2896,8 @@ SUBROUTINE maddb(d,a,b,m1,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m1)
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m1)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                 :: j
 
@@ -2939,8 +2939,8 @@ SUBROUTINE msbdb(d,a,b,m1,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: d(m1) 
-REAL(my_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: d(m1) 
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
 
 INTEGER(i_kind)                 :: j
 
@@ -2982,11 +2982,11 @@ SUBROUTINE udlbv(a,v, m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ):: m, mah1, mah2
-REAL(my_kind),     INTENT(IN   ):: a(m,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT):: v(m)
+REAL(r_kind),     INTENT(IN   ):: a(m,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT):: v(m)
 
 INTEGER(i_kind)                :: i, j
-REAL(my_kind)                   :: vj
+REAL(r_kind)                   :: vj
 
 DO j=1,m
    vj=v(j)
@@ -3035,8 +3035,8 @@ SUBROUTINE udlbx(a,v, mx,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: mx, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: jx, ix
 
@@ -3086,8 +3086,8 @@ SUBROUTINE udlby(a,v, my,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: my, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: iy, jy
 
@@ -3134,11 +3134,11 @@ SUBROUTINE udlvb(v,a, m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: a(m,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(m)
+REAL(r_kind),     INTENT(IN   ) :: a(m,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(m)
 
 INTEGER(i_kind)                :: i, j
-REAL(my_kind)                   :: vi
+REAL(r_kind)                   :: vi
 
 DO i=1,m
    vi=v(i)
@@ -3188,8 +3188,8 @@ SUBROUTINE udlxb(v,a, mx,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: mx, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: ix, jx
 
@@ -3238,8 +3238,8 @@ SUBROUTINE udlyb(v,a, my,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: my, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: iy, jy
 
@@ -3287,11 +3287,11 @@ SUBROUTINE u1lbv(a,v, m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: a(m,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(m)
+REAL(r_kind),     INTENT(IN   ) :: a(m,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(m)
 
 INTEGER(i_kind)                :: i, j
-REAL(my_kind)                   :: vj
+REAL(r_kind)                   :: vj
 
 DO j=1,m
    vj=v(j)
@@ -3340,8 +3340,8 @@ SUBROUTINE u1lbx(a,v, mx,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: mx, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: ix, jx
 
@@ -3390,8 +3390,8 @@ SUBROUTINE u1lby(a,v, my,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: my, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: iy, jy
 
@@ -3438,11 +3438,11 @@ SUBROUTINE u1lvb(v,a, m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m, mah1, mah2
-REAL(my_kind),    INTENT(IN   ) :: a(m,-mah1:mah2)
-REAL(my_kind),    INTENT(INOUT) :: v(m)
+REAL(r_kind),    INTENT(IN   ) :: a(m,-mah1:mah2)
+REAL(r_kind),    INTENT(INOUT) :: v(m)
 
 INTEGER(i_kind)               :: i, j
-REAL(my_kind)                  :: vi
+REAL(r_kind)                  :: vi
 
 DO i=1,m
    vi=v(i)
@@ -3491,8 +3491,8 @@ SUBROUTINE u1lxb(v,a, mx,mah1,mah2,my)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: mx, mah1, mah2, my
-REAL(my_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(mx,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: ix, jx
 
@@ -3541,8 +3541,8 @@ SUBROUTINE u1lyb(v,a, my,mah1,mah2,mx)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: my, mah1, mah2, mx
-REAL(my_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
-REAL(my_kind),     INTENT(INOUT) :: v(mx,my)
+REAL(r_kind),     INTENT(IN   ) :: a(my,-mah1:mah2)
+REAL(r_kind),     INTENT(INOUT) :: v(mx,my)
 
 INTEGER(i_kind)                :: iy, jy
 
@@ -3588,7 +3588,7 @@ SUBROUTINE linbv(a,v,m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m, mah1, mah2
-REAL(my_kind),    INTENT(INOUT) :: a(m,-mah1:mah2), v(m)
+REAL(r_kind),    INTENT(INOUT) :: a(m,-mah1:mah2), v(m)
 
 CALL ldub(a,m,mah1,mah2)
 CALL udlbv(a,v,m,mah1,mah2)
@@ -3626,7 +3626,7 @@ SUBROUTINE wrtb(a,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(my_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2)
 
 INTEGER(i_kind)              :: i1, i2, i, j1, j2, j, nj1
 

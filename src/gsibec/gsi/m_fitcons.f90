@@ -25,7 +25,7 @@ module m_fitcons
 
 !============================================================================
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero,one,two,three,five
 implicit none
 
