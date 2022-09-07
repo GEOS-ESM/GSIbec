@@ -9,6 +9,8 @@ MODULE m_plib8mat2
 ! program history log:
 !   1994-  -    purser
 !   2008-04-25  safford - add documentation block
+!   2022-09-02  Todling    - replace all ENTRY statements w/ actual routines
+!                            (gnu compiler was unable to process code)
 !
 ! subroutines included:
 !   avco
@@ -90,9 +92,11 @@ MODULE m_plib8mat2
 !
 !$$$ end documentation block
 
-USE m_plib8mat1
+USE m_plib8mat1, only: inv
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_single
+use m_kinds, only: r_double
+use m_kinds, only: r_kind
 use constants, only: zero,one,two
 IMPLICIT NONE
 
@@ -100,13 +104,13 @@ IMPLICIT NONE
   private
 ! set subroutines/interfaces to public
   public :: avco
-  public :: avco_d
+! public :: avco_d
   public :: dfco
-  public :: dfco_d
+! public :: dfco_d
   public :: dfco2
-  public :: dfco2_d
+! public :: dfco2_d
   public :: clib
-  public :: clib_d
+! public :: clib_d
   public :: cad1b
   public :: csb1b
   public :: cad2b
@@ -119,16 +123,16 @@ IMPLICIT NONE
   public :: madbb
   public :: msbbb
   public :: ldub
-  public :: ldub_d
+! public :: ldub_d
   public :: l1ubb
-  public :: l1ubb_d
+! public :: l1ubb_d
   public :: l1ueb
-  public :: l1ueb_d
+! public :: l1ueb_d
   public :: l1lb
   public :: ldlb
-  public :: ldlb_d
+! public :: ldlb_d
   public :: udub
-  public :: udub_d
+! public :: udub_d
   public :: mulbv
   public :: madbv
   public :: msbbv
@@ -168,14 +172,14 @@ IMPLICIT NONE
   public :: linbv
   public :: wrtb
 
-INTERFACE avco;   MODULE PROCEDURE avco;           END INTERFACE
-INTERFACE avco_d; MODULE PROCEDURE davco;          END INTERFACE
-INTERFACE dfco;   MODULE PROCEDURE dfco;           END INTERFACE
-INTERFACE dfco_d; MODULE PROCEDURE ddfco;          END INTERFACE
-INTERFACE dfco2;  MODULE PROCEDURE dfco2;          END INTERFACE
-INTERFACE dfco2_d;MODULE PROCEDURE ddfco2;         END INTERFACE
-INTERFACE clib;   MODULE PROCEDURE clib;           END INTERFACE
-INTERFACE clib_d; MODULE PROCEDURE dclib;          END INTERFACE
+INTERFACE avco;   MODULE PROCEDURE avco,           &
+                                   davco;          END INTERFACE
+INTERFACE dfco;   MODULE PROCEDURE dfco,           &
+                                   ddfco;          END INTERFACE
+INTERFACE dfco2;  MODULE PROCEDURE dfco2,          &
+                                   ddfco2;         END INTERFACE
+INTERFACE clib;   MODULE PROCEDURE clib,           &
+                                   dclib;          END INTERFACE
 INTERFACE cad1b;  MODULE PROCEDURE cad1b;          END INTERFACE
 INTERFACE csb1b;  MODULE PROCEDURE csb1b;          END INTERFACE
 INTERFACE cad2b;  MODULE PROCEDURE cad2b;          END INTERFACE
@@ -189,17 +193,17 @@ INTERFACE conbm;  MODULE PROCEDURE conbm;          END INTERFACE
 INTERFACE mulbb;  MODULE PROCEDURE mulbb;          END INTERFACE
 INTERFACE madbb;  MODULE PROCEDURE madbb;          END INTERFACE
 INTERFACE msbbb;  MODULE PROCEDURE msbbb;          END INTERFACE
-INTERFACE ldub;   MODULE PROCEDURE ldub;           END INTERFACE
-INTERFACE ldub_d; MODULE PROCEDURE dldub;          END INTERFACE
-INTERFACE l1ubb;  MODULE PROCEDURE l1ubb;          END INTERFACE
-INTERFACE l1ubb_d;MODULE PROCEDURE dl1ubb;         END INTERFACE
-INTERFACE l1ueb;  MODULE PROCEDURE l1ueb;          END INTERFACE
-INTERFACE l1ueb_d;MODULE PROCEDURE dl1ueb;         END INTERFACE
+INTERFACE ldub;   MODULE PROCEDURE ldub,           &
+                                   dldub;          END INTERFACE
+INTERFACE l1ubb;  MODULE PROCEDURE l1ubb,          &
+                                   dl1ubb;         END INTERFACE
+INTERFACE l1ueb;  MODULE PROCEDURE l1ueb,          &
+                                   dl1ueb;         END INTERFACE
 INTERFACE l1lb;   MODULE PROCEDURE l1lb;           END INTERFACE
-INTERFACE ldlb;   MODULE PROCEDURE ldlb;           END INTERFACE
-INTERFACE ldlb_d; MODULE PROCEDURE dldlb;          END INTERFACE
-INTERFACE udub;   MODULE PROCEDURE udub;           END INTERFACE
-INTERFACE udub_d; MODULE PROCEDURE dudub;          END INTERFACE
+INTERFACE ldlb;   MODULE PROCEDURE ldlb,           &
+                                   dldlb;          END INTERFACE
+INTERFACE udub;   MODULE PROCEDURE udub,           &
+                                   dudub;          END INTERFACE
 INTERFACE mulbv;  MODULE PROCEDURE mulbv;          END INTERFACE
 INTERFACE madbv;  MODULE PROCEDURE madbv;          END INTERFACE
 INTERFACE msbbv;  MODULE PROCEDURE msbbv;          END INTERFACE
@@ -280,14 +284,14 @@ SUBROUTINE davco(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind)   , INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind)   , INTENT(  OUT) :: a(na),b(nb)
+REAL(r_double) , INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_double) , INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                    :: na1,nab,i
-REAL(r_kind),DIMENSION(na+nb,na+nb):: w
-REAL(r_kind),DIMENSION(na)         :: za0,pa
-REAL(r_kind),DIMENSION(nb)         :: zb0,pb
-REAL(r_kind),DIMENSION(na+nb)      :: ab
+REAL(r_double),DIMENSION(na+nb,na+nb):: w
+REAL(r_double),DIMENSION(na)         :: za0,pa
+REAL(r_double),DIMENSION(nb)         :: zb0,pb
+REAL(r_double),DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -295,7 +299,7 @@ pa=one;     pb=-one
 w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=2,nab; w(i,1:na)=pa;    pa=pa*za0; w(i,na1:nab)=pb; pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE davco
 
@@ -337,14 +341,14 @@ SUBROUTINE avco(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind),    INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind),    INTENT(  OUT) :: a(na),b(nb)
+REAL(r_single),  INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_single),  INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                     :: na1,nab,i
-REAL(r_kind), DIMENSION(na+nb,na+nb):: w
-REAL(r_kind), DIMENSION(na)         :: za0,pa
-REAL(r_kind), DIMENSION(nb)         :: zb0,pb
-REAL(r_kind), DIMENSION(na+nb)      :: ab
+REAL(r_single), DIMENSION(na+nb,na+nb):: w
+REAL(r_single), DIMENSION(na)         :: za0,pa
+REAL(r_single), DIMENSION(nb)         :: zb0,pb
+REAL(r_single), DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -394,14 +398,14 @@ SUBROUTINE ddfco(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind)   , INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind)   , INTENT(  OUT) :: a(na),b(nb)
+REAL(r_double) , INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_double) , INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                     :: na1,nab,i
-REAL(r_kind), DIMENSION(na+nb,na+nb):: w
-REAL(r_kind), DIMENSION(na)         :: za0,pa
-REAL(r_kind), DIMENSION(nb)         :: zb0,pb
-REAL(r_kind), DIMENSION(na+nb)      :: ab
+REAL(r_double), DIMENSION(na+nb,na+nb):: w
+REAL(r_double), DIMENSION(na)         :: za0,pa
+REAL(r_double), DIMENSION(nb)         :: zb0,pb
+REAL(r_double), DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -410,7 +414,7 @@ w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=3,nab; w(i,1:na)   =pa*(i-2); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;              pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE ddfco 
 
@@ -452,14 +456,14 @@ SUBROUTINE dfco(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind),    INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind),    INTENT(  OUT) :: a(na),b(nb)
+REAL(r_single),  INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_single),  INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                     :: na1,nab,i
-REAL(r_kind), DIMENSION(na+nb,na+nb):: w
-REAL(r_kind), DIMENSION(na)         :: za0,pa
-REAL(r_kind), DIMENSION(nb)         :: zb0,pb
-REAL(r_kind), DIMENSION(na+nb)      :: ab
+REAL(r_single), DIMENSION(na+nb,na+nb):: w
+REAL(r_single), DIMENSION(na)         :: za0,pa
+REAL(r_single), DIMENSION(nb)         :: zb0,pb
+REAL(r_single), DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -509,14 +513,14 @@ SUBROUTINE ddfco2(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind)   , INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind)   , INTENT(  OUT) :: a(na),b(nb)
+REAL(r_double) , INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_double) , INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                     :: na1,nab,i
-REAL(r_kind), DIMENSION(na+nb,na+nb):: w
-REAL(r_kind), DIMENSION(na)         :: za0,pa
-REAL(r_kind), DIMENSION(nb)         :: zb0,pb
-REAL(r_kind), DIMENSION(na+nb)      :: ab
+REAL(r_double), DIMENSION(na+nb,na+nb):: w
+REAL(r_double), DIMENSION(na)         :: za0,pa
+REAL(r_double), DIMENSION(nb)         :: zb0,pb
+REAL(r_double), DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -525,7 +529,7 @@ w=zero;     ab=zero
 w(1,1:na)=one; ab(1)=one
 DO i=4,nab; w(i,1:na)   =pa*(i-2)*(i-3); pa=pa*za0; ENDDO
 DO i=2,nab; w(i,na1:nab)=pb;                           pb=pb*zb0; ENDDO
-CALL inv_d(w,ab)
+CALL inv(w,ab)
 a=ab(1:na); b=ab(na1:nab)
 END SUBROUTINE ddfco2 
 
@@ -566,14 +570,14 @@ SUBROUTINE dfco2(na,nb,za,zb,z0,a,b)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: na,nb
-REAL(r_kind),    INTENT(IN   ) :: za(na),zb(nb),z0
-REAL(r_kind),    INTENT(  OUT) :: a(na),b(nb)
+REAL(r_single),  INTENT(IN   ) :: za(na),zb(nb),z0
+REAL(r_single),  INTENT(  OUT) :: a(na),b(nb)
 !-----------------------------------------------------------------------------
 INTEGER(i_kind)                     :: na1,nab,i
-REAL(r_kind), DIMENSION(na+nb,na+nb):: w
-REAL(r_kind), DIMENSION(na)         :: za0,pa
-REAL(r_kind), DIMENSION(nb)         :: zb0,pb
-REAL(r_kind), DIMENSION(na+nb)      :: ab
+REAL(r_single), DIMENSION(na+nb,na+nb):: w
+REAL(r_single), DIMENSION(na)         :: za0,pa
+REAL(r_single), DIMENSION(nb)         :: zb0,pb
+REAL(r_single), DIMENSION(na+nb)      :: ab
 !=============================================================================
 na1=na+1; nab=na+nb
 za0=za-z0  ; zb0=zb-z0
@@ -615,7 +619,7 @@ SUBROUTINE clib(a,m1,m2,mah1,mah2) ! Clip the dead space of the band matrix, a
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_kind)   , INTENT(INOUT) :: a(m1,-mah1:mah2)
+REAL(r_single) , INTENT(INOUT) :: a(m1,-mah1:mah2)
 
 INTEGER(i_kind)                :: j
 
@@ -652,7 +656,7 @@ SUBROUTINE dclib(a,m1,m2,mah1,mah2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m1, m2, mah1, mah2
-REAL(r_kind)   , INTENT(INOUT) :: a(m1,-mah1:mah2)
+REAL(r_double) , INTENT(INOUT) :: a(m1,-mah1:mah2)
 
 INTEGER(i_kind)                :: j
 
@@ -693,7 +697,7 @@ SUBROUTINE cad1b(a,m1,mah1,mah2,mirror2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m1,mah1,mah2,mirror2
-REAL(r_kind),     INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
+REAL(r_kind) ,    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
 
 INTEGER(i_kind)                :: i,i2,jm,jp,jpmax
 
@@ -705,8 +709,43 @@ DO i=0,m1-1; i2=i*2; jpmax=mirror2+mah1-i2; IF(jpmax <= -mah1)EXIT
    ENDDO
 ENDDO
 RETURN
+END SUBROUTINE cad1b
 !=============================================================================
-ENTRY     csb1b(a,m1,mah1,mah2,mirror2)
+SUBROUTINE csb1b(a,m1,mah1,mah2,mirror2)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    csb1b
+!
+!   prgrmmr:    
+!
+! abstract:  Incorporate operand symmetry near end-1 of a band matrix operator
+!
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A          -  Input as unclipped operator, output as symmetrized and clipped.
+!     m1         - Sizes of implied full matrix
+!     mah1, mah2 - Left and right semi-bandwidths of A.
+!     mirror2    - 2*location of symmetry axis relative to end-1 operand element.
+!
+!   output argument list:
+!     A          -  Input as unclipped operator, output as symmetrized and clipped.
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1,mah1,mah2,mirror2
+REAL(r_kind) ,    INTENT(INOUT) :: a(0:m1-1,-mah1:mah2)
+
+INTEGER(i_kind)                :: i,i2,jm,jp,jpmax
+
 !=============================================================================
 ! Like cad1b, but for antisymmetric operand
 IF(mirror2+mah1 > mah2)STOP 'In csb1b, mah2 insufficient'
@@ -716,7 +755,7 @@ DO i=0,m1-1; i2=i*2; jpmax=mirror2+mah1-i2; IF(jpmax < -mah1)EXIT
       a(i,jm)=zero            ! zero the exterior part
    ENDDO
 ENDDO
-END SUBROUTINE cad1b
+END SUBROUTINE csb1b
 
 
 !=============================================================================
@@ -762,10 +801,42 @@ DO i=0,1-m1,-1; i2=i*2; jmmin=mirror2-nah2-i2; IF(jmmin >= nah2)EXIT
       a(i,jp)=zero            ! zero the exterior part
    ENDDO
 ENDDO
-RETURN
+END SUBROUTINE cad2b
 !=============================================================================
-ENTRY    csb2b(a,m1,m2,mah1,mah2,mirror2)
+SUBROUTINE csb2b(a,m1,m2,mah1,mah2,mirror2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    csb2b
+!
+!   prgrmmr:    
+!
+! abstract:  Incorporate operand symmetry near end-2 of a band matrix operator
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A          - Input as unclipped operator, output as symmetrized and clipped.
+!     m1, m2     - Sizes of implied full matrix
+!     mah1, mah2 - Left and right semi-bandwidths of A.
+!     mirror2    - 2*location of symmetry axis relative to end-2 operand element.
+!
+!   output argument list:
+!     A         - Input as unclipped operator, output as symmetrized and clipped.
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1,m2,mah1,mah2,mirror2
+REAL(r_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
+
+INTEGER(i_kind)                :: i,i2,jm,jp,jmmin,nah1,nah2,mirror,j0
+
 nah1=mah1+m2-m1; nah2=mah2+m1-m2 ! Effective 2nd-index bounds of A
 IF(mirror2-nah1 > -nah2)STOP 'In csb2b, mah1 insufficient'
 DO i=0,1-m1,-1; i2=i*2; jmmin=mirror2-nah2-i2; IF(jmmin > nah2)EXIT
@@ -774,9 +845,42 @@ DO i=0,1-m1,-1; i2=i*2; jmmin=mirror2-nah2-i2; IF(jmmin > nah2)EXIT
       a(i,jp)=zero            ! zero the exterior part
    ENDDO
 ENDDO
+END SUBROUTINE csb2b
 !=============================================================================
-ENTRY    cex2b(a,m1,m2,mah1,mah2,mirror2)
+SUBROUTINE cex2b(a,m1,m2,mah1,mah2,mirror2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    cex2b
+!
+!   prgrmmr:    
+!
+! abstract:  Incorporate operand symmetry near end-2 of a band matrix operator
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A          - Input as unclipped operator, output as symmetrized and clipped.
+!     m1, m2     - Sizes of implied full matrix
+!     mah1, mah2 - Left and right semi-bandwidths of A.
+!     mirror2    - 2*location of symmetry axis relative to end-2 operand element.
+!
+!   output argument list:
+!     A         - Input as unclipped operator, output as symmetrized and clipped.
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1,m2,mah1,mah2,mirror2
+REAL(r_kind),     INTENT(INOUT) :: a(1-m1:0,m1-m2-mah1:m1-m2+mah2)
+
+INTEGER(i_kind)                :: i,i2,jm,jp,jmmin,nah1,nah2,mirror,j0
+
 nah1=mah1+m2-m1; nah2=mah2+m1-m2 ! Effective 2nd-index bounds of A
 IF(mirror2-nah1 > -nah2)STOP 'In cex2b, mah1 insufficient'
 mirror=mirror2/2
@@ -789,7 +893,7 @@ DO i=0,1-m1,-1; i2=i*2; jmmin=mirror2-nah2-i2; IF(jmmin >= nah2)EXIT
       a(i,jp)=zero               ! zero the exterior part
    ENDDO
 ENDDO
-END SUBROUTINE cad2b
+END SUBROUTINE cex2b
 
 
 !=============================================================================
@@ -835,13 +939,51 @@ CALL clib(b,mah2,mah1,m2,m1)
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); b(j+i,-j)=a(i,j); ENDDO
 ENDDO
-RETURN
-ENTRY	 conbt(a,b,m1,m2,mah1,mah2)
+END SUBROUTINE copbt
+!=============================================================================
+SUBROUTINE conbt(a,b,m1,m2,mah1,mah2)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    conbt
+!
+!   prgrmmr:  R.J.Purser, National Meteorological Center, Washington D.C.  1994
+!
+! abstract:  Copy transpose of rectangular banded matrix A to B
+!
+!     Note:  This routine expects A and B always to occupy separate storage.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A      - input matrix in banded format
+!     M1     - number of rows of A, columns of B
+!     M2     - number of columns of A, rows of B
+!     MAH1   - left-half-bandwidth of A, right-half-bandwidth of B
+!     MAH2   - right-half-bandwidth of A, left-half-bandwidth of B
+!
+!   output argument list:
+!     B      - output matrix in banded format
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: b(m2,-mah2:mah1)
+
+INTEGER(i_kind)                 :: j, i
+
 CALL clib(b,mah2,mah1,m2,m1)
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); b(j+i,-j)=-a(i,j); ENDDO
 ENDDO
-END SUBROUTINE copbt
+END SUBROUTINE conbt
 
 
 !=============================================================================
@@ -882,15 +1024,46 @@ CALL clib(aband,m1,m2,mah1,mah2)
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; aband(i,j)= afull(i,j+i); ENDDO
 ENDDO
-RETURN
+END SUBROUTINE copmb
 !=============================================================================
-ENTRY      conmb(afull,aband,m1,m2,mah1,mah2)
+SUBROUTINE conmb(afull,aband,m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    conmb
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     m1, m2, mah1, mah2  - 
+!     afull               -
+!
+!   output argument list:
+!     aband               - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(IN   ) :: afull
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(  OUT) :: aband
+
+INTEGER(i_kind)                                          :: i1,i2, i, j
+
 CALL clib(aband,m1,m2,mah1,mah2)
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; aband(i,j)=-afull(i,j+i); ENDDO
 ENDDO
-END SUBROUTINE copmb
+END SUBROUTINE conmb
 
 
 !=============================================================================
@@ -931,15 +1104,46 @@ afull=zero
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; afull(i,j+i)= aband(i,j); ENDDO
 ENDDO
-RETURN
+END SUBROUTINE copbm
 !=============================================================================
-ENTRY      conbm(aband,afull,m1,m2,mah1,mah2)
+SUBROUTINE conbm(aband,afull,m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    conbm
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     m1, m2, mah1, mah2  - 
+!     aband               -
+!
+!   output argument list:
+!     afull               - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),                           INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     DIMENSION(m1,-mah1:mah2),INTENT(IN   ) :: aband
+REAL(r_kind),     DIMENSION(m1,m2),        INTENT(  OUT) :: afull
+
+INTEGER(i_kind)                                          :: i1,i2, i, j
+
 afull=zero
 DO j=1,m1; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    DO i=i1,i2; afull(i,j+i)=-aband(i,j); ENDDO
 ENDDO
-END SUBROUTINE copbm
+END SUBROUTINE conbm
 
  
 !=============================================================================
@@ -979,7 +1183,43 @@ REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
 INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
 
 c=zero
-ENTRY      madbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
+END SUBROUTINE mulbb
+!=============================================================================
+SUBROUTINE madbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madbb
+!
+!   prgrmmr:    
+!
+! abstract:  
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     m1, m2, mah1, mah2     - 
+!     mbh1, mbh2, mch1, mch2 - 
+!     a, b                   -
+!     c                      -
+!
+!   output argument list:
+!     c                   - 
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mbh1, mbh2, mch1, mch2
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), b(m2,-mbh1:mbh2)
+REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
+
+INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
+
 nch1=mah1+mbh1; nch2=mah2+mbh2
 IF(nch1 /= mch1 .OR. nch2 /= mch2)STOP 'In MULBB, dimensions inconsistent'
 DO j=-mah1,mah2
@@ -987,7 +1227,7 @@ DO j=-mah1,mah2
       c(i1:i2,jpk)=c(i1:i2,jpk)+a(i1:i2,j)*b(j+i1:j+i2,k)
    ENDDO
 ENDDO
-END SUBROUTINE mulbb
+END SUBROUTINE madbb
 
 
 !=============================================================================
@@ -1074,10 +1314,10 @@ SUBROUTINE LDUB(a,m,mah1,mah2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2 
-REAL(r_kind),    INTENT(INOUT) :: a(m,-mah1:mah2) 
+REAL(r_single),  INTENT(INOUT) :: a(m,-mah1:mah2) 
 
 INTEGER(i_kind)               :: j, imost, jmost, jp, i
-REAL(r_kind)                  :: ajj, ajji, aij
+REAL(r_single)                :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1128,10 +1368,10 @@ SUBROUTINE DLDUB(a,m,mah1,mah2)
 !$$$ end documentation block
 
 INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2 
-REAL(r_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2) 
+REAL(r_double) ,  INTENT(INOUT) :: a(m,-mah1:mah2) 
 
 INTEGER(i_kind)                :: j, imost, jmost, jp, i
-REAL(r_kind)                   :: ajj, ajji, aij
+REAL(r_double)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1194,10 +1434,10 @@ SUBROUTINE L1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) ::  m,mah1, mah2, mbh1, mbh2 
-REAL(r_kind)   , INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_single) , INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: j, imost, jmost, jleast, jp, i
-REAL(r_kind)                   :: ajj, ajji, aij
+REAL(r_single)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1259,10 +1499,10 @@ SUBROUTINE DL1UBB(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) ::  mah1, mah2, mbh1, mbh2 
-REAL(r_kind)   ,  INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_double) ,  INTENT(INOUT) :: a(m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind)                :: m,j, imost, jmost, jleast, jp, i
-REAL(r_kind)                   :: ajj, ajji, aij
+REAL(r_double)                 :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1328,10 +1568,10 @@ SUBROUTINE l1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind), INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
-REAL(r_kind)   , INTENT(INOUT) :: a(0:m,-mah1:mah2), b(m,-mbh1:mbh2)
+REAL(r_single) , INTENT(INOUT) :: a(0:m,-mah1:mah2), b(m,-mbh1:mbh2)
 
 INTEGER(i_kind) :: j, imost, jmost, jleast, jp, i
-REAL(r_kind)    :: ajj, ajji, aij
+REAL(r_single)  :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1397,10 +1637,10 @@ SUBROUTINE dl1ueb(a,b,m,mah1,mah2,mbh1,mbh2)
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m,mah1, mah2, mbh1, mbh2 
-REAL(r_kind)   ,  INTENT(INOUT) :: a(0:,-mah1:), b(:,-mbh1:)
+REAL(r_double) ,  INTENT(INOUT) :: a(0:,-mah1:), b(:,-mbh1:)
 
 INTEGER(i_kind)                   :: j, imost, jmost, jleast, jp, i
-REAL(r_kind)                      :: ajj, ajji, aij
+REAL(r_double)                    :: ajj, ajji, aij
 
 DO j=1,m
    imost=MIN(m,j+mah1)
@@ -1408,7 +1648,7 @@ DO j=1,m
    jleast=MAX(0,j-mah1)
    jp=j+1
    ajj=a(j,0)
-   IF(ajj == zero)STOP 'failure in L1UEB_d'
+   IF(ajj == zero)STOP 'failure in DL1UEB'
    ajji=one/ajj
    a(j,jleast-j:jmost-j) = ajji * a(j,jleast-j:jmost-j)
    DO i=jp,imost
@@ -1502,12 +1742,12 @@ SUBROUTINE LDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah
-REAL(r_kind),     INTENT(IN   ) :: a(m,-mah:mah)
-REAL(r_kind),     INTENT(  OUT) :: b(m,-mah:0)
-REAL(r_kind),     INTENT(  OUT) :: d(m) 
+REAL(r_single),   INTENT(IN   ) :: a(m,-mah:mah)
+REAL(r_single),   INTENT(  OUT) :: b(m,-mah:0)
+REAL(r_single),   INTENT(  OUT) :: d(m) 
 
 INTEGER(i_kind)                 :: i, j,k,jmi,lj,li
-REAL(r_kind)                    :: s,t
+REAL(r_single)                  :: s,t
 
 CALL clib(b,m,m,mah,0); b(:,0)=one
 DO j=1,m; lj=MAX(-mah,1-j)
@@ -1562,14 +1802,14 @@ SUBROUTINE DLDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 implicit none
 
 INTEGER(i_kind),  INTENT(IN   ) :: m, mah
-REAL(r_kind)   ,  INTENT(IN   ) :: a(m,-mah:mah)
-REAL(r_kind)   ,  INTENT(  OUT) :: b(m,-mah:0)
-REAL(r_kind)   ,  INTENT(  OUT) :: d(m) 
+REAL(r_double) ,  INTENT(IN   ) :: a(m,-mah:mah)
+REAL(r_double) ,  INTENT(  OUT) :: b(m,-mah:0)
+REAL(r_double) ,  INTENT(  OUT) :: d(m) 
 
 INTEGER(i_kind)                 :: i, j,k,jmi,lj,li
-REAL(r_kind)                    :: s,t
+REAL(r_double)                  :: s,t
 
-CALL clib_d(b,m,m,mah,0); b(:,0)=one
+CALL clib(b,m,m,mah,0); b(:,0)=one
 DO j=1,m; lj=MAX(-mah,1-j)
    s=a(j,0)
    do k=lj,-1
@@ -1624,13 +1864,13 @@ SUBROUTINE UDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 implicit none
 
 INTEGER(i_kind),        INTENT(IN   ) :: m, mah
-REAL(r_kind),           INTENT(IN   ) :: a(m,-mah:mah)
-REAL(r_kind),           INTENT(  OUT) :: b(m,0:mah)
-REAL(r_kind),           INTENT(  OUT) :: d(m) 
+REAL(r_single),         INTENT(IN   ) :: a(m,-mah:mah)
+REAL(r_single),         INTENT(  OUT) :: b(m,0:mah)
+REAL(r_single),         INTENT(  OUT) :: d(m) 
 
-REAL(r_kind), DIMENSION(m,-mah:mah  ) :: at
-REAL(r_kind), DIMENSION(m,-mah:0)     :: bt
-REAL(r_kind), DIMENSION(m)            :: dt
+REAL(r_single), DIMENSION(m,-mah:mah  ) :: at
+REAL(r_single), DIMENSION(m,-mah:0)     :: bt
+REAL(r_single), DIMENSION(m)            :: dt
 
 at=a(m:1:-1,mah:-mah:-1); CALL ldlb(at,bt,dt,m,mah);
 b=bt(m:1:-1,0:-mah:-1); d=dt(m:1:-1)
@@ -1668,15 +1908,15 @@ SUBROUTINE DUDUB(a,b,d,m,mah) ! Modified reverse Cholesky [U(D**-1)U^t],
 implicit none
 
 INTEGER(i_kind),        INTENT(IN   ) :: m, mah
-REAL(r_kind),           INTENT(IN   ) :: a(m,-mah:mah)
-REAL(r_kind),           INTENT(  OUT) :: b(m,0:mah)
-REAL(r_kind),           INTENT(  OUT) :: d(m) 
+REAL(r_double),         INTENT(IN   ) :: a(m,-mah:mah)
+REAL(r_double),         INTENT(  OUT) :: b(m,0:mah)
+REAL(r_double),         INTENT(  OUT) :: d(m) 
 
-REAL(r_kind), DIMENSION(m,-mah:mah  ) :: at
-REAL(r_kind), DIMENSION(m,-mah:0)     :: bt
-REAL(r_kind), DIMENSION(m)            :: dt
+REAL(r_double), DIMENSION(m,-mah:mah  ) :: at
+REAL(r_double), DIMENSION(m,-mah:0)     :: bt
+REAL(r_double), DIMENSION(m)            :: dt
 
-at=a(m:1:-1,mah:-mah:-1); CALL ldlb_d(at,bt,dt,m,mah);
+at=a(m:1:-1,mah:-mah:-1); CALL ldlb(at,bt,dt,m,mah);
 b=bt(m:1:-1,0:-mah:-1);   d=dt(m:1:-1)
 END SUBROUTINE DUDUB
 
@@ -1720,20 +1960,91 @@ REAL(r_kind),     INTENT(  OUT) :: v2(m1)
 INTEGER(i_kind)                 :: j, i1,i2 
 
 v2 = zero
+END SUBROUTINE mulbv
 !=============================================================================
-ENTRY	 madbv(a,v1,v2, m1,m2,mah1,mah2)
+SUBROUTINE madbv(a,v1,v2, m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madbv
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times a Vector.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the input vector
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!
+!   output argument list:
+!     V2   - the output vector
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1)
+
+INTEGER(i_kind)                 :: j, i1,i2 
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    v2(i1:i2) = v2(i1:i2) + a(i1:i2,j)*v1(j+i1:j+i2)
 ENDDO
-RETURN
+END SUBROUTINE madbv
 !=============================================================================
-ENTRY	 msbbv(a,v1,v2, m1,m2,mah1,mah2)
+SUBROUTINE msbbv(a,v1,v2, m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbbv
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times a Vector.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the input vector
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!
+!   output argument list:
+!     V2   - the output vector
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1)
+
+INTEGER(i_kind)                 :: j, i1,i2 
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    v2(i1:i2) = v2(i1:i2) - a(i1:i2,j)*v1(j+i1:j+i2)
 ENDDO
-END SUBROUTINE mulbv
+END SUBROUTINE msbbv
 
 
 !=============================================================================
@@ -1776,20 +2087,94 @@ REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
 INTEGER(i_kind)                 :: i,j
 
 v2=zero
+END SUBROUTINE mulbx
 !=============================================================================
-ENTRY	 madbx(a,v1,v2, m1,m2,mah1,mah2,my)
+SUBROUTINE madbx(a,v1,v2, m1,m2,mah1,mah2,my)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madbx
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times parallel X-Vectors.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input vectors
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MY   - the number of parallel X-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(i,:)=v2(i,:)+a(i,j)*v1(i+j,:); ENDDO
 ENDDO
-RETURN
+END SUBROUTINE madbx
 !=============================================================================
-ENTRY	 msbbx(a,v1,v2, m1,m2,mah1,mah2,my)
+SUBROUTINE msbbx(a,v1,v2, m1,m2,mah1,mah2,my)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbbx
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times parallel X-Vectors.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input vectors
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MY   - the number of parallel X-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(m2,my)
+REAL(r_kind),     INTENT(  OUT) :: v2(m1,my)
+
+INTEGER(i_kind)                 :: i,j
+
 !=============================================================================
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(i,:)=v2(i,:)-a(i,j)*v1(i+j,:); ENDDO
 ENDDO
-END SUBROUTINE mulbx
+END SUBROUTINE msbbx
 
 
 !=============================================================================
@@ -1832,16 +2217,93 @@ REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
 INTEGER(i_kind)                 :: i,j
 
 v2(1:mx,1:m1) = zero
-ENTRY	 madby(a,v1,v2, m1,m2,mah1,mah2,mx)
+END SUBROUTINE mulby
+!=============================================================================
+SUBROUTINE madby(a,v1,v2, m1,m2,mah1,mah2,mx)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madby
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times parallel Y-Vectors.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input vectors
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MX   - the length of each of the of parallel Y-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(:,i)=v2(:,i)+a(i,j)*v1(:,i+j); ENDDO
 ENDDO
-RETURN
-ENTRY	 msbby(a,v1,v2, m1,m2,mah1,mah2,mx)
+END SUBROUTINE madby
+!=============================================================================
+SUBROUTINE msbby(a,v1,v2, m1,m2,mah1,mah2,mx)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbby
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times parallel Y-Vectors.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input vectors
+!     M1   - the number of rows assumed for A and for V2
+!     M2   - the number of columns assumed for A and rows for V1
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MX   - the length of each of the of parallel Y-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
+REAL(r_kind),     INTENT(IN   ) :: a(m1,-mah1:mah2), v1(mx,m2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m1)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(:,i)=v2(:,i)-a(i,j)*v1(:,i+j); ENDDO
 ENDDO
-END SUBROUTINE mulby
+END SUBROUTINE msbby
 
 
 !=============================================================================
@@ -1883,20 +2345,91 @@ REAL(r_kind),     INTENT(  OUT) :: v2(m2)
 INTEGER(i_kind)                 :: j, i1,i2
 
 v2=zero
+END SUBROUTINE mulvb
 !=============================================================================
-ENTRY	 madvb(v1,a,v2, m1,m2,mah1,mah2)
+SUBROUTINE madvb(v1,a,v2, m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madvb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Vector times a Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     V1   - the input row-vector
+!     A    - is the matrix
+!     M1   - the number of rows assumed for A and columns for V1
+!     M2   - the number of columns assumed for A and for V2
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!
+!   output argument list:
+!     V2   - the output vector
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2)
+
+INTEGER(i_kind)                 :: j, i1,i2
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    v2(j+i1:j+i2)=v2(j+i1:j+i2)+v1(i1:i2)*a(i1:i2,j)
 ENDDO
-RETURN
+END SUBROUTINE madvb
 !=============================================================================
-ENTRY	 msbvb(v1,a,v2, m1,m2,mah1,mah2)
+SUBROUTINE msbvb(v1,a,v2, m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbvb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Vector times a Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     V1   - the input row-vector
+!     A    - is the matrix
+!     M1   - the number of rows assumed for A and columns for V1
+!     M2   - the number of columns assumed for A and for V2
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!
+!   output argument list:
+!     V2   - the output vector
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: v1(m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2)
+
+INTEGER(i_kind)                 :: j, i1,i2
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    v2(j+i1:j+i2)=v2(j+i1:j+i2)-v1(i1:i2)*a(i1:i2,j)
 ENDDO
-END SUBROUTINE mulvb
+END SUBROUTINE msbvb
 
 
 !=============================================================================
@@ -1939,20 +2472,93 @@ REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
 INTEGER(i_kind)                 :: i,j
 
 v2=zero
+END SUBROUTINE mulxb
 !=============================================================================
-ENTRY	 madxb(v1,a,v2, m1,m2,mah1,mah2,my)
+SUBROUTINE madxb(v1,a,v2, m1,m2,mah1,mah2,my)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madxb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of X-Vectors times Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     V1   - the array of input row-vectors
+!     A    - is the matrix
+!     M1   - the number of rows assumed for A and columns for V1
+!     M2   - the number of columns assumed for A and V2
+!     MAH1 -  the left half-bandwidth of fortran array A
+!     MAH2 -  the right half-bandwidth of fortran array A
+!     MY   - the number of parallel X-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
+REAL(r_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(j+i,:)=v2(j+i,:)+v1(i,:)*a(i,j); ENDDO
 ENDDO
-RETURN
+END SUBROUTINE madxb
 !=============================================================================
-ENTRY	 msbxb(v1,a,v2, m1,m2,mah1,mah2,my)
+SUBROUTINE msbxb(v1,a,v2, m1,m2,mah1,mah2,my)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbxb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of X-Vectors times Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     V1   - the array of input row-vectors
+!     A    - is the matrix
+!     M1   - the number of rows assumed for A and columns for V1
+!     M2   - the number of columns assumed for A and V2
+!     MAH1 -  the left half-bandwidth of fortran array A
+!     MAH2 -  the right half-bandwidth of fortran array A
+!     MY   - the number of parallel X-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, my
+REAL(r_kind),     INTENT(IN   ) :: v1(m1,my), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(m2,my)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(j+i,:)=v2(j+i,:)-v1(i,:)*a(i,j); ENDDO
 ENDDO
-END SUBROUTINE mulxb
+END SUBROUTINE msbxb
 
 
 !=============================================================================
@@ -1995,16 +2601,93 @@ REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
 INTEGER(i_kind)                 :: i,j
 
 v2=zero
-ENTRY	 madyb(v1,a,v2, m1,m2,mah1,mah2,mx)
+END SUBROUTINE mulyb
+!=============================================================================
+SUBROUTINE madyb(v1,a,v2, m1,m2,mah1,mah2,mx)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madyb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of Y-Vectors times a Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input row-vectors
+!     M1   - the number of rows assumed for A and colums for V1
+!     M2   - the number of columns assumed for A and V2
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MX   - the length of each of the parallel Y-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
+REAL(r_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(:,j+i)=v2(:,j+i)+v1(:,i)*a(i,j); ENDDO
 ENDDO
-RETURN
-ENTRY	 msbyb(v1,a,v2, m1,m2,mah1,mah2,mx)
+END SUBROUTINE madyb
+!=============================================================================
+SUBROUTINE msbyb(v1,a,v2, m1,m2,mah1,mah2,mx)
+!=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbyb
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of Y-Vectors times a Banded matrix.
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the matrix
+!     V1   - the array of input row-vectors
+!     M1   - the number of rows assumed for A and colums for V1
+!     M2   - the number of columns assumed for A and V2
+!     MAH1 - the left half-bandwidth of fortran array A
+!     MAH2 - the right half-bandwidth of fortran array A
+!     MX   - the length of each of the parallel Y-vectors
+!
+!   output argument list:
+!     V2   - the array of output vectors
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2, mx
+REAL(r_kind),     INTENT(IN   ) :: v1(mx,m1), a(m1,-mah1:mah2)
+REAL(r_kind),     INTENT(  OUT) :: v2(mx,m2)
+
+INTEGER(i_kind)                 :: i,j
+
 DO j=-mah1,mah2
    DO i=MAX(1,1-j),MIN(m1,m2-j); v2(:,j+i)=v2(:,j+i)-v1(:,i)*a(i,j); ENDDO
 ENDDO
-END SUBROUTINE mulyb
+END SUBROUTINE msbyb
 
 
 !=============================================================================
@@ -2049,21 +2732,91 @@ CALL clib(b,m1,m2,mah1,mah2)
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    b(i1:i2,j)=a(i1:i2,j)*d(j+i1:j+i2)
 ENDDO
-RETURN
+END SUBROUTINE mulbd
 !=============================================================================
-ENTRY	 madbd(a,d,b,m1,m2,mah1,mah2)
+SUBROUTINE madbd(a,d,b,m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    madbd
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times a Diagonal
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the input banded-matrix
+!     D    - the diagonal matrix
+!     M1   - the number of rows assumed for A and for B
+!     M2   - number of columns assumed for A and B, number of elements of D
+!     MAH1 - the left half-bandwidth of arrays A and B
+!     MAH2 - the right half-bandwidth of arrays A and B
+!
+!   output argument list:
+!     B    - the output matrix
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: d(m2)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+
+INTEGER(i_kind)                :: j, i1,i2
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    b(i1:i2,j) = b(i1:i2,j)+a(i1:i2,j)*d(j+i1:j+i2)
 ENDDO
-RETURN
+END SUBROUTINE madbd
 !=============================================================================
-ENTRY	 msbbd(a,d,b,m1,m2,mah1,mah2)
+SUBROUTINE msbbd(a,d,b,m1,m2,mah1,mah2)
 !=============================================================================
+!$$$  subprogram documentation block
+!                .      .    .
+! subprogram:    msbbd
+!
+!   prgrmmr:     R.J.Purser,  1994
+!
+! abstract:      MULtipication of a Banded matrix times a Diagonal
+!
+! program history log:
+!   2008-04-25  safford -- add subprogram doc block
+!
+!   input argument list:
+!     A    - is the input banded-matrix
+!     D    - the diagonal matrix
+!     M1   - the number of rows assumed for A and for B
+!     M2   - number of columns assumed for A and B, number of elements of D
+!     MAH1 - the left half-bandwidth of arrays A and B
+!     MAH2 - the right half-bandwidth of arrays A and B
+!
+!   output argument list:
+!     B    - the output matrix
+!
+! attributes:
+!   language:  f90
+!   machine:   ibm RS/6000 SP
+!
+!$$$ end documentation block
+implicit none
+
+INTEGER(i_kind),  INTENT(IN   ) :: m1, m2, mah1, mah2
+REAL(r_kind),     INTENT(IN   ) :: d(m2)
+REAL(r_kind),     INTENT(INOUT) :: a(m1,-mah1:mah2),b(m1,-mah1:mah2)
+
+INTEGER(i_kind)                :: j, i1,i2
+
 DO j=-mah1,mah2; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
    b(i1:i2,j) = b(i1:i2,j)-a(i1:i2,j)*d(j+i1:j+i2)
 ENDDO
-END SUBROUTINE mulbd
+END SUBROUTINE msbbd
 
 
 !=============================================================================

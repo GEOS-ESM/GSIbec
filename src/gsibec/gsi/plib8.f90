@@ -26,9 +26,9 @@ subroutine coefrf(sig,nu,n,m,bnf,lnf)
 !
 !$$$ end documentation block
 
-use m_plib8mat2
+use m_plib8mat2, only: ldlb,mulbd,muldb,madbb,mulbb
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero,half,one
 implicit none
 
@@ -38,11 +38,11 @@ real(r_kind), dimension(n),   intent(  OUT) :: bnf
 real(r_kind), dimension(m,n), intent(  OUT) :: lnf
 !-------------------------------------------------------------------------- 
 integer(i_kind), parameter                  :: irmax=6
-real(r_kind), dimension(n,-m:m)             :: s
-real(r_kind), dimension(n,-m:0)             :: sl
-real(r_kind), dimension(n,-m:m,m)           :: k,l
-real(r_kind), dimension(n)                  :: eta
-real(r_kind), dimension(irmax)              :: bcofi,bcofh
+real(r_kind)  , dimension(n,-m:m)           :: s
+real(r_kind)  , dimension(n,-m:0)           :: sl
+real(r_kind)  , dimension(n,-m:m,m)         :: k,l
+real(r_kind)  , dimension(n)                :: eta
+real(r_kind)  , dimension(irmax)            :: bcofi,bcofh
 integer(i_kind)                             :: i,i1,il,ir,ik
 !--------------------------------------------------------------------------
 ! The coefficients bcofi are the reciprocals of the i=1 entries of TABLE 1
@@ -148,7 +148,7 @@ subroutine ldlb1i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -214,7 +214,7 @@ subroutine ldlb2i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -227,7 +227,7 @@ subroutine ldlb2i(nol,lnf,bnf,                                              &
                    INTENT(INOUT) :: lnf
 !----------------------------------------------------------------------------
   INTEGER(i_kind)                :: i,j,l,m,nola
-  real(r_kind)                   :: s
+  real(r_kind)                     :: s
 !============================================================================
 do j=jts,jte
    do i=its,ite
@@ -282,7 +282,7 @@ subroutine ldlb2j(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -350,7 +350,7 @@ subroutine ldlb3i(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -420,7 +420,7 @@ subroutine ldlb3j(nol,lnf,bnf,                                              &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -492,7 +492,7 @@ SUBROUTINE hbnrf1i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -561,7 +561,7 @@ SUBROUTINE hbnrf2i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -632,7 +632,7 @@ SUBROUTINE hbnrf2j(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -707,7 +707,7 @@ SUBROUTINE hbnrf3i(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -780,7 +780,7 @@ SUBROUTINE hbnrf3j(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -861,7 +861,7 @@ SUBROUTINE vbnrf1k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -930,7 +930,7 @@ SUBROUTINE vbnrf2k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1005,7 +1005,7 @@ SUBROUTINE vbnrf3k(a,nol,lnf,bnf,                                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1079,7 +1079,7 @@ SUBROUTINE hbncij(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1144,7 +1144,7 @@ SUBROUTINE hbncji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,                           &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1209,7 +1209,7 @@ SUBROUTINE hbncijk(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1279,7 +1279,7 @@ SUBROUTINE hbnckji(a,hamp,nol,lnfi,bnfi,lnfj,bnfj,lnfk,bnfk,                &
 !
 !$$$ end documentation block
   use m_kinds, only: i_kind
-  use m_kinds, only: r_kind => r_double
+  use m_kinds, only: r_kind
   IMPLICIT NONE
 
   INTEGER(i_kind), INTENT(IN   ) :: nol
@@ -1351,7 +1351,7 @@ subroutine rfit(ng,sig,nu, ns,nw,ssig,snu,ins1,wts)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero,one
 use m_fitcons
 implicit none
@@ -1364,10 +1364,10 @@ integer(i_kind), dimension(ng),   intent(INOUT) :: ins1
 real(r_kind)   , dimension(no,ng),intent(INOUT) :: wts
 !----------------------------------------------------------------------------
 integer(i_kind)                                :: i,i1,im,k,l,is
-real(r_kind)                                   :: t
-real(r_kind)   , dimension(-nohm:ng+noh)       :: dcdg
-real(r_kind)   , dimension(-noh:ng+noh)        :: cofg,cofs
-real(r_kind)   , dimension(ng)                 :: dsdg,dhdg
+real(r_kind)                                 :: t
+real(r_kind)   , dimension(-nohm:ng+noh)     :: dcdg
+real(r_kind)   , dimension(-noh:ng+noh)      :: cofg,cofs
+real(r_kind)   , dimension(ng)               :: dsdg,dhdg
 !============================================================================
 nw=0
 do i=1,ng
@@ -1539,7 +1539,7 @@ subroutine jfit(ng,ig1,igm,ns,iw,cofg,dsdg,dhdg,cofs,ins1,wts)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero,half,one,two
 use m_fitcons
 implicit none
@@ -1552,7 +1552,7 @@ real(r_kind)   , dimension(-noh:ng+noh), intent(INOUT) :: cofs
 integer(i_kind), dimension(ng),          intent(INOUT) :: ins1
 real(r_kind)   , dimension(no,ng),       intent(INOUT) :: wts
 !----------------------------------------------------------------------------
-real(r_kind)   , dimension(-noh:ng+noh)               :: sofg,dsdgt
+real(r_kind) , dimension(-noh:ng+noh)                 :: sofg,dsdgt
 real(r_kind)                                          :: et,estar,destar,r,dr,sm
 integer(i_kind)                                       :: i,l,ie,iep,ie1,ien,ig0,is0,ism,init
 !============================================================================
@@ -1741,7 +1741,7 @@ subroutine stog(ns,ng,ins1,wts, as,ag)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero
 implicit none
 
@@ -1798,7 +1798,7 @@ subroutine stogt(ns,ng,ins1,wts, as,ag)
 !$$$ end documentation block
 
 use m_kinds, only: i_kind
-use m_kinds, only: r_kind => r_double
+use m_kinds, only: r_kind
 use constants, only: zero
 implicit none
 
