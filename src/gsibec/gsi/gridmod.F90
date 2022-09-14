@@ -653,7 +653,7 @@ contains
 
     endif
     call general_sub2grid_create_info(grd_a,inner_vars,nlat,nlon,nsig,num_fields, &
-         regional,vector)
+         regional,vector,verbose=print_verbose)
     deallocate(vector)
 
 ! Set values from grd_a to pertinent gridmod variables 
@@ -851,8 +851,20 @@ contains
 !-------------------------------------------------------------------------
     implicit none
 
-    deallocate(rlats,rlons,corlats,coslon,sinlon,wgtlats,wgtfactlats,rbs2)
-    deallocate(ak5,bk5,ck5,tref5)
+    if(allocated(rlats)) deallocate(rlats)
+    if(allocated(rlons)) deallocate(rlons)
+    if(allocated(corlats)) deallocate(corlats)
+    if(allocated(coslon)) deallocate(coslon)
+    if(allocated(sinlon)) deallocate(sinlon)
+    if(allocated(wgtlats)) deallocate(wgtlats)
+    if(allocated(wgtfactlats)) deallocate(wgtfactlats)
+    if(allocated(rbs2)) deallocate(rbs2)
+
+    if(allocated(ak5)) deallocate(ak5)
+    if(allocated(bk5)) deallocate(bk5)
+    if(allocated(ck5)) deallocate(ck5)
+    if(allocated(tref5)) deallocate(tref5)
+
     if (allocated(cp5)) deallocate(cp5)
     if (allocated(dx_gfs)) deallocate(dx_gfs)
     if (allocated(lpl_gfs)) deallocate(lpl_gfs)

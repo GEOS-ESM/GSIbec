@@ -47,7 +47,7 @@ module general_sub2grid_mod
 !                             lnames:    optional level index for each variable (assigned as user desires)
 !                             names:     optional names for each variable (assigned as desired)
 !   2012-06-25  parrish  - add subroutine general_sub2grid_destroy_info.
-!   2013-08-03  todling  - protect write-out with print_verbose (set to false)
+!   2013-08-03  todling  - protect write-out with verbose (set to false)
 !   2013-10-25  todling  - nullify work pointers
 !   2014-12-03  derber   - optimization changes
 !
@@ -83,6 +83,7 @@ module general_sub2grid_mod
    public :: general_suba2sube
 ! set passed variables to public
    public :: sub2grid_info
+   public :: general_deter_subdomain_withLayout ! TEMPORARY _RT
 
    interface general_sub2grid
      module procedure general_sub2grid_r_single_rank11
@@ -198,18 +199,16 @@ module general_sub2grid_mod
       integer(i_kind),pointer :: lnames(:,:)    => null()    !  optional level index for each variable
       character(64),pointer   :: names(:,:)     => null()    !  optional variable names
       logical:: lallocated = .false.
-    
 
    end type sub2grid_info
 
-   logical :: print_verbose=.true.
 
 !  other declarations  ...
 
    contains
 
    subroutine general_sub2grid_create_info(s,inner_vars,nlat,nlon,nsig,num_fields,regional, &
-                                           vector,names,lnames,nskip,s_ref)
+                                           vector,names,lnames,nskip,s_ref,verbose)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    general_sub2grid_create_info populate info variable s
@@ -267,6 +266,7 @@ module general_sub2grid_mod
 !$$$
       use m_kinds, only: r_single
       use m_mpimod, only: gsi_mpi_comm_world
+      use m_mpimod, only: mype
       implicit none
 
       type(sub2grid_info),     intent(inout) :: s
@@ -277,10 +277,16 @@ module general_sub2grid_mod
       integer(i_kind),optional,intent(in   ) :: lnames(inner_vars,num_fields)
       integer(i_kind),optional,intent(in   ) :: nskip
       type(sub2grid_info),optional,intent(inout) :: s_ref
+      logical,        optional,intent(in   ) :: verbose
 
       integer(i_kind) i,ierror,j,k,num_loc_groups,nextra,mm1,n,ns,npe_used,iadd
       integer(i_kind),allocatable:: idoit(:)
+      logical :: verbose_
 
+      verbose_=.false.
+      if(present(verbose)) then
+         verbose_=verbose
+      endif
       call mpi_comm_size(gsi_mpi_comm_world,s%npe,ierror)
       call mpi_comm_rank(gsi_mpi_comm_world,s%mype,ierror)
       s%inner_vars=inner_vars
@@ -321,7 +327,8 @@ module general_sub2grid_mod
 
 !      first determine subdomains
       call general_deter_subdomain(s%npe,s%mype,s%nlat,s%nlon,regional, &
-            s%periodic,s%periodic_s,s%lon1,s%lon2,s%lat1,s%lat2,s%ilat1,s%istart,s%jlon1,s%jstart)
+            s%periodic,s%periodic_s,s%lon1,s%lon2,s%lat1,s%lat2,s%ilat1,s%istart,s%jlon1,s%jstart,&
+            verbose_)
       s%latlon11=s%lat2*s%lon2
       s%latlon1n=s%latlon11*s%nsig
 
@@ -429,9 +436,9 @@ module general_sub2grid_mod
 !      next, determine vertical layout:
       allocate(idoit(0:s%npe-1))
       if(.not.present(nskip).and.s%num_fields<s%npe) then
-         call get_iuse_pe(s%npe,s%num_fields,idoit)
+         call get_iuse_pe(s%npe,s%num_fields,idoit,verbose_)
          npe_used=s%num_fields
-         if(s%mype==0.and.print_verbose) &
+         if(s%mype==0.and.verbose_) &
            write(6,*)' npe,num_fields,npe_used,idoit=',s%npe,s%num_fields,npe_used,idoit
       else
          idoit=0
@@ -459,7 +466,7 @@ module general_sub2grid_mod
       do k=0,s%npe-1
          s%kend(k)=s%kbegin(k+1)-1
       end do
-      if(s%mype == 0.and.print_verbose) then
+      if(s%mype == 0.and.verbose_) then
          do k=0,s%npe-1
             write(6,*)' in general_sub2grid_create_info, k,kbegin,kend,nlevs_loc,nlevs_alloc=', &
                k,s%kbegin(k),s%kend(k),s%kend(k)-s%kbegin(k)+1,max(s%kbegin(k),s%kend(k))-s%kbegin(k)+1
@@ -504,7 +511,7 @@ module general_sub2grid_mod
 
    end subroutine general_sub2grid_create_info
 
-subroutine get_iuse_pe(npe,nz,iuse_pe)
+subroutine get_iuse_pe(npe,nz,iuse_pe,verbose)
 
   use constants, only: one,zero
   use m_mpimod, only: mype
@@ -512,6 +519,7 @@ subroutine get_iuse_pe(npe,nz,iuse_pe)
 
   integer(i_kind),intent(in) ::npe,nz
   integer(i_kind),intent(out)::iuse_pe(0:npe-1)
+  logical,        intent(in) :: verbose
 
   integer(i_kind) i,icount,nskip,ipoint
   real(r_kind) :: point,skip2
@@ -539,7 +547,7 @@ subroutine get_iuse_pe(npe,nz,iuse_pe)
            write(6,*)' get_pe2 - inconsistent icount,nz ',nz,icount,'program stops',npe,skip2
            call stop2(999)
         end if
-        if(mype == 0 .and. print_verbose)write(6,*) ' in get_pe2 ',nz,icount,npe,skip2
+        if(mype == 0 .and. verbose)write(6,*) ' in get_pe2 ',nz,icount,npe,skip2
    
      end if
      return
@@ -594,7 +602,8 @@ end subroutine get_iuse_pe
    end subroutine general_sub2grid_destroy_info
 
    subroutine general_deter_subdomain(npe,mype,nlat,nlon,regional, &
-                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart)
+                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart,&
+                    verbose)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    deter_subdomain          perform domain decomposition
@@ -635,6 +644,7 @@ end subroutine get_iuse_pe
   logical        ,intent(  out) :: periodic,periodic_s(npe)
   integer(i_kind),intent(  out) :: lon1,lon2,lat1,lat2
   integer(i_kind),intent(  out) :: ilat1(npe),istart(npe),jlon1(npe),jstart(npe)
+  logical        ,intent(in   ) :: verbose
 
   character(len=*), parameter :: myname_='general_deter_subdomain'
 ! integer(i_kind)  :: npe2,npsqrt
@@ -654,14 +664,14 @@ end subroutine get_iuse_pe
          call die(myname_,'NPE inconsistent from  NxPE NyPE ',npe)
      endif
      call general_deter_subdomain_withLayout(npe,nxPE,nyPE,mype,nlat,nlon,regional, &
-                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart)
+                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart,verbose)
 
 ! Otherwise, use NCEP original algorithm
 ! --------------------------------------
   else
 
      call general_deter_subdomain_nolayout(npe,mype,nlat,nlon,regional, &
-                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart)
+                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart,verbose)
 
   endif
 
@@ -671,7 +681,8 @@ end subroutine get_iuse_pe
 !BOP
 
   subroutine general_deter_subdomain_withLayout(npe,nxpe,nype,mype,nlat,nlon,regional, &
-                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart)
+                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart, &
+                    verbose)
 
 ! !USES:
 
@@ -687,6 +698,7 @@ end subroutine get_iuse_pe
   logical        ,intent(  out) :: periodic,periodic_s(npe)  ! ??
   integer(i_kind),intent(  out) :: lon1,lon2,lat1,lat2
   integer(i_kind),intent(  out) :: ilat1(npe),istart(npe),jlon1(npe),jstart(npe)
+  logical,        intent(in   ) :: verbose
 
 
 ! !OUTPUT PARAMETERS:
@@ -761,16 +773,6 @@ end subroutine get_iuse_pe
      END DO
   END DO
 
-  if ( print_verbose ) then
-     do k=1,nxpe*nype
-        if(mype == 0) &
-             write(6,100) k,istart(k),jstart(k),ilat1(k),jlon1(k)
-     end do
-  end if
-
-100 format('general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=',5(i6,1x))
-  
-        
 ! Set number of latitude and longitude for given subdomain
   mm1=mype+1
   lat1=ilat1(mm1)
@@ -778,6 +780,15 @@ end subroutine get_iuse_pe
   lat2=lat1+2
   lon2=lon1+2
 !@  periodic=periodic_s(mm1)
+
+  if ( verbose ) then
+     do k=1,nxpe*nype
+!       if(mype == 0) &
+             write(6,100) k,istart(k),jstart(k),ilat1(k),jlon1(k),lat1*lon1
+     end do
+  end if
+100 format('general_DETER_SUBDOMAIN_withlayout:  task,istart,jstart,ilat1,jlon1=',6(i6,1x))
+  
 
   return
 
@@ -824,7 +835,8 @@ end subroutine get_iuse_pe
    end subroutine get_local_dims_
 
    subroutine general_deter_subdomain_nolayout(npe,mype,nlat,nlon,regional, &
-                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart)
+                    periodic,periodic_s,lon1,lon2,lat1,lat2,ilat1,istart,jlon1,jstart,&
+                    verbose)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    general_deter_subdomain_nolayout   perform domain decomposition
@@ -866,6 +878,7 @@ end subroutine get_iuse_pe
       logical        ,intent(  out) :: periodic,periodic_s(npe)
       integer(i_kind),intent(  out) :: lon1,lon2,lat1,lat2
       integer(i_kind),intent(  out) :: ilat1(npe),istart(npe),jlon1(npe),jstart(npe)
+      logical,        intent(in   ) :: verbose
 
 !     Declare local variables
       integer(i_kind) npts,nrnc,iinum,iileft,jrows,jleft,k,i,jjnum
@@ -916,7 +929,7 @@ end subroutine get_iuse_pe
                periodic=.true.
                periodic_s(k)=.true.
             endif
-            if(mype == 0 .and. print_verbose) &
+            if(mype == 0 .and. verbose) &
                  write(6,100) k-1,istart(k),jstart(k),ilat1(k),jlon1(k)
          end do
       end do

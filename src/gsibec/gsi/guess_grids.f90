@@ -197,15 +197,15 @@ subroutine final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  deallocate(tropprs)
-  deallocate(fact_tv)
-  deallocate(isli2)
-  deallocate(geop_hgti)
-  deallocate(geop_hgtl)
-  deallocate(ges_qsat)
-  deallocate(ges_prsl)
-  deallocate(ges_prsi)
-  deallocate(ges_tsen)
+  if(allocated(tropprs)) deallocate(tropprs)
+  if(allocated(fact_tv)) deallocate(fact_tv)
+  if(allocated(isli2)) deallocate(isli2)
+  if(allocated(geop_hgti)) deallocate(geop_hgti)
+  if(allocated(geop_hgtl)) deallocate(geop_hgtl)
+  if(allocated(ges_qsat)) deallocate(ges_qsat)
+  if(allocated(ges_prsl)) deallocate(ges_prsl)
+  if(allocated(ges_prsi)) deallocate(ges_prsi)
+  if(allocated(ges_tsen)) deallocate(ges_tsen)
   call destroy_metguess_grids_(mype,ier)
 end subroutine final_
 !--------------------------------------------------------

@@ -77,12 +77,16 @@
 
 ! !PUBLIC ROUTINES:
 
-   public gsimain_initialize
-   public gsimain_finalize
+   public :: gsimain_initialize
+   public :: gsimain_gridopts
+   public :: gsimain_finalize
 
    interface gsimain_initialize
       module procedure gsimain_initialize_
    end interface gsimain_initialize
+   interface gsimain_gridopts
+      module procedure gridopts_
+   end interface gsimain_gridopts
    interface gsimain_finalize
       module procedure gsimain_finalize_
    end interface gsimain_finalize
@@ -530,13 +534,14 @@
   if(ios/=0) call die(myname_,'read(setup)',ios)  
   close(11)
 
-  open(11,file=thisrc)
-  read(11,gridopts,iostat=ios)
-  if(ios/=0) call die(myname_,'read(gridopts)',ios)
+! open(11,file=thisrc)
+! read(11,gridopts,iostat=ios)
+! if(ios/=0) call die(myname_,'read(gridopts)',ios)
+  call gridopts_(thisrc)
 
+  open(11,file=thisrc)
   read(11,bkgerr,iostat=ios)
   if(ios/=0) call die(myname_,'read(bkgerr)',ios)
-
   close(11)
 
   if(jcap > jcap_cut)then
@@ -573,7 +578,7 @@
 
 ! Initialize variables, create/initialize arrays
   lendian_in = -1
-  call create_ges_derivatives(.true.,nfldsig)
+  call create_ges_derivatives(.false.,nfldsig)
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
@@ -583,6 +588,23 @@
   
   end subroutine gsimain_initialize_
 
+  subroutine gridopts_(thisrc,gnlat,gnlon)
+  use mpeu_util,only: die
+  implicit none
+  character(len=*),intent(in)  :: thisrc
+  integer,optional,intent(out) :: gnlat,gnlon
+  character(len=*),parameter :: myname_="gsimod*gridopts_"
+  integer(i_kind) :: ios
+  open(11,file=thisrc)
+  read(11,gridopts,iostat=ios)
+  if(ios/=0) call die(myname_,'read(gridopts)',ios)  
+  close(11)
+  if(present(gnlat).and.present(gnlon)) then
+    gnlat=nlat
+    gnlon=nlon
+  endif
+  end subroutine gridopts_
+  
 !-------------------------------------------------------------------------
 !  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
 !-------------------------------------------------------------------------
@@ -605,14 +627,23 @@
   logical, intent(in) :: closempi
 ! Deallocate arrays
   call destroy_ges_derivatives
+  print *, 'debug main_final pass 1'
   call destroy_general_commvars
+  print *, 'debug main_final pass 2'
   call final_general_commvars_dims
+  print *, 'debug main_final pass 3'
   call final_grid_vars
+  print *, 'debug main_final pass 4'
   call final_anacv
+  print *, 'debug main_final pass 5'
   call final_anasv
+  print *, 'debug main_final pass 6'
   call gsi_chemguess_final
+  print *, 'debug main_final pass 7'
   call gsi_metguess_final
+  print *, 'debug main_final pass 8'
   call clean_4dvar
+  print *, 'debug main_final pass 9'
 
   if (closempi) then
      call mpi_finalize(ierror)

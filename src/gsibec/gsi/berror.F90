@@ -375,7 +375,7 @@ contains
     if(allocated(dssv))  deallocate(dssv)
     if(allocated(dssvs)) deallocate(dssvs)
 #ifdef USE_ALL_ORIGINAL
-    deallocate(varprd)
+    if(allocated(varprd)) deallocate(varprd)
     if(diag_precon)deallocate(vprecond)
 #endif /* USE_ALL_ORIGINAL */
     if(allocated(slw)) deallocate(slw)
