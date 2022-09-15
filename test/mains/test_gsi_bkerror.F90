@@ -15,9 +15,8 @@ implicit none
 
 character(len=*), parameter :: myname ="SABerror"
 logical :: cv
-integer :: lat2,lon2
 
-call gsibec_init(cv,lat2,lon2)
+call gsibec_init(cv)
 call gsibec_init_guess()
 !call gsibec_set_guess()
 call gsiguess_bkgcov_init()

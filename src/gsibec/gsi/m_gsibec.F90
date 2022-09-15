@@ -110,10 +110,9 @@ logical :: iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,lat2out,lon2out,bkgmock,nmlfile,befile,layout,comm)
+  subroutine init_(cv,bkgmock,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
-  integer, intent(out) :: lat2out,lon2out
   logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
@@ -156,8 +155,6 @@ contains
 ! istart=sg%istart
 ! jstart=sg%jstart
 ! call general_sub2grid_destroy_info(sg)
-  lat2out=lat2
-  lon2out=lon2
 
   cv = simcv
   if (present(bkgmock) ) then

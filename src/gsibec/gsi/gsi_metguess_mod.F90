@@ -649,8 +649,7 @@ end subroutine final_
         call GSI_BundleDestroy ( GSI_MetGuess_Bundle(nt), ier )
         istatus=istatus+ier
      enddo
-     deallocate(GSI_MetGuess_Bundle,stat=istatus)
-     istatus=istatus+ier
+     if(associated(GSI_MetGuess_Bundle)) nullify(GSI_MetGuess_Bundle)
 
     if (istatus/=0) then
        if(mype==0) write(6,*)trim(myname_),':  deallocate error1, istatus=',istatus

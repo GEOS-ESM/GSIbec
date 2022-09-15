@@ -52,6 +52,7 @@ use GSI_MetGuess_Mod, only: gsi_metguess_bundle
 use GSI_ChemGuess_Mod, only: gsi_chemguess_bundle
 
 use mpeu_util, only: getindex
+use mpeu_util, only: die
 implicit none
 save
 private
@@ -347,11 +348,12 @@ drv_set=.true.
   use m_mpimod, only: gsi_mpi_comm_world
   implicit none
   integer(i_kind) nt,ierror
-
-  if(.not.drv_initialized) return
+  character(len=*), parameter :: myname_ = 'destroy_ges_derivatives'
 
 ! destroy mambo-jambo
   call destroy_auxiliar_
+
+  if(.not.drv_initialized) return
 
 ! destroy each instance of derivatives
   do nt=1,size(gsi_yderivative_bundle)
@@ -360,19 +362,21 @@ drv_set=.true.
      call GSI_BundleDestroy(gsi_yderivative_bundle(nt),ierror)
      if(ierror/=0) then
         if(mype==0) write(6,*)'warning: y-derivative not properly destroyed'
+        call die(myname_,'y-derivative not properly destroyed')
      endif
 
 !    create latidutinal derivative bundle
      call GSI_BundleDestroy(gsi_xderivative_bundle(nt),ierror)
      if(ierror/=0) then
         if(mype==0) write(6,*)'warning: x-derivative not properly destroyed'
+        call die(myname_,'x-derivative not properly destroyed')
      endif
 
   enddo
 
 ! deallocate structures
-  deallocate(gsi_xderivative_bundle)
-  deallocate(gsi_yderivative_bundle)
+  if(associated(gsi_xderivative_bundle)) deallocate(gsi_xderivative_bundle)
+  if(associated(gsi_yderivative_bundle)) deallocate(gsi_yderivative_bundle)
 
 ! destroy derivative grid
 ! call GSI_GridDestroy(grid,lat2,lon2,nsig)
