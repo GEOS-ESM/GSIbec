@@ -217,8 +217,8 @@ integer ks
 real(r_kind) :: ptop,pint
 call set_eta (nsig, ks, ptop, pint, ak5, bk5) ! GEOS/FV3 levels/orientation/units
 ak5=kPa_per_Pa*ak5
-ak5=ak5(nsig:1:-1)
-bk5=bk5(nsig:1:-1)
+ak5=ak5(nsig+1:1:-1)
+bk5=bk5(nsig+1:1:-1)
 end subroutine load_vert_coord_
 
 !-------------------------------------------------------------------------
