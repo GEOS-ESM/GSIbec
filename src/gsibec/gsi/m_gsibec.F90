@@ -13,7 +13,7 @@ use m_mpimod, only: setworld
 use gsi_4dvar, only: nsubwin
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
-use gridmod, only: nlon,nlat,lon2,lat2,lat1,lon1,nsig
+use gridmod, only: lon2,lat2,lat1,lon1,nsig
 
 use guess_grids, only: nfldsig
 use guess_grids, only: gsiguess_init
@@ -59,6 +59,8 @@ private
 public gsibec_init
 public gsibec_init_guess
 public gsibec_set_guess
+public gsibec_get_grid
+public gsibec_set_grid
 !public gsibec_set_guess_aux
 public gsibec_cv_space
 public gsibec_sv_space
@@ -73,6 +75,14 @@ end interface gsibec_init
 interface gsibec_init_guess
   module procedure init_guess_
 end interface gsibec_init_guess
+
+interface gsibec_get_grid
+  module procedure get_hgrid_
+end interface gsibec_get_grid
+
+interface gsibec_set_grid
+  module procedure set_vgrid_
+end interface gsibec_set_grid
 
 interface gsibec_set_guess
   module procedure set_guess2_
@@ -192,9 +202,90 @@ contains
 
   end subroutine final_
 !--------------------------------------------------------
+  subroutine get_hgrid_ (eqspace,units,gsi_lats,gsi_lons) ! for now: redundant routine
+  use constants, only: init_constants_derived
+  use constants, only: pi,one,two,half,rad2deg
+  use mpeu_util, only: die
+  implicit none
+   logical,intent(in) :: eqspace
+   character(len=*), intent(in) :: units
+   real(r_kind),intent(inout) :: gsi_lats(:),gsi_lons(:)
+   character(len=*),parameter :: myname_=myname//"*get_hgrid_"
+   real(r_kind) :: amlon,dlat,dlon,pih
+   real(r_kind) :: loncir,latcir,latcen
+   real(r_kind),allocatable,dimension(:) :: wlatx,slatx
+   integer i,j,jb,je,idrt,mlon,mlat,jmax
+
+!  Unfortunately, need to make sure basic constants are initialized
+   call init_constants_derived
+
+   mlat=size(gsi_lats)
+   mlon=size(gsi_lons)
+   if (eqspace) then ! regular Lat-Lon grid
+
+      if(trim(units)=='degree') then
+        loncir=360._r_kind
+        latcir=180._r_kind
+        latcen= 90._r_kind
+      else
+        loncir=pi+pi
+        latcir=pi
+        latcen=half*pi
+      endif
+      dlon=loncir/mlon
+      dlat=latcir/(mlat-1)
+      do i=1,mlon                       ! from 0 to 2pi
+         gsi_lons (i)=(i-one)*dlon
+      enddo
+      do j=1,mlat                       ! from -pi/2 to +pi/2
+         gsi_lats(j)=(j-one)*dlat - latcen
+      end do
+
+   else ! Gaussian grid
+
+      ! Set local constants
+      pih=half*pi
+      amlon=float(mlon)
+      dlon=two*pi/amlon
+      jmax=mlat-2
+      jb=1;je=(jmax+1)/2
+      allocate(wlatx(jmax),slatx(jmax))
+
+      ! Longitudes
+      do i=1,mlon
+         gsi_lons(i)=float(i-1)*dlon
+      enddo
+
+      ! Gaussian Latitudes
+      idrt=4 ! defines Gaussian grid
+      call splat(idrt,jmax,slatx,wlatx)
+
+      gsi_lats(1)=-pih
+      do j=jb,je
+        i=j+1
+        gsi_lats(i)=-asin(slatx(j))
+        i=mlat-j
+        gsi_lats(i)=asin(slatx(j))
+      enddo
+      gsi_lats(mlat)=pih
+      deallocate(wlatx,slatx)
+
+      if (trim(units)=='degree') then
+         gsi_lons=gsi_lons*rad2deg
+         gsi_lats=gsi_lats*rad2deg
+      endif
+
+   endif
+
+  end subroutine get_hgrid_
+  subroutine set_vgrid_
+! this will get ak/bk from JEDI and make it GSI''s
+  end subroutine set_vgrid_
+!--------------------------------------------------------
   subroutine set_
 
    use constants, only: pi,one,half,rearth
+   use gridmod, only: nlon,nlat
    use gridmod, only: rlats,rlons,wgtlats
    use gridmod, only: coslon,sinlon
    use gridmod, only: rbs2
@@ -630,7 +721,7 @@ contains
 !--------------------------------------------------------
   subroutine get_state_perts_(fc)
   use m_grid2sub1var, only: grid2sub1var
-  use gridmod, only: lat1,lon1
+  use gridmod, only: nlon,nlat,lat1,lon1
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none

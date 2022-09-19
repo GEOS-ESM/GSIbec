@@ -813,6 +813,7 @@ end subroutine load_vert_coord_
           if(mype==0) write(6,*) myname_, ': trouble getting name of met-guess fields'
           return
        endif
+       deallocate (mguess)
 
 !      Allocate memory for guess fields
 !      --------------------------------

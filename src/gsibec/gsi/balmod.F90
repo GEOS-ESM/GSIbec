@@ -161,10 +161,10 @@ contains
 !$$$
     implicit none
 
-    if(allocated(agvz)) deallocate(agvz)
-    if(allocated(wgvz)) deallocate(wgvz)
-    if(allocated(bvz)) deallocate(bvz)
     if(allocated(pput)) deallocate(pput)
+    if(allocated(bvz)) deallocate(bvz)
+    if(allocated(wgvz)) deallocate(wgvz)
+    if(allocated(agvz)) deallocate(agvz)
 
     return
   end subroutine destroy_balance_vars
