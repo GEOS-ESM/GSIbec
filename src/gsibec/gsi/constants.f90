@@ -290,6 +290,9 @@ module constants
   integer(i_kind),parameter:: i_missing=-9999
   integer(r_kind),parameter:: r_missing=-9999._r_kind
 
+  logical :: cnts_derived_initialized_=.false.
+  logical :: cnts_initialized_=.false.
+
 contains
 
   subroutine init_constants_derived
@@ -315,6 +318,8 @@ contains
 !$$$
     implicit none
 
+    if(cnts_derived_initialized_) return
+
 !   Trigonometric constants
     pi      = acos(-one)
     deg2rad = pi/180.0_r_kind
@@ -333,6 +338,7 @@ contains
     eccentricity_linear = sqrt(semi_major_axis**2 - semi_minor_axis**2)
     eccentricity = eccentricity_linear / semi_major_axis
 
+    cnts_derived_initialized_=.true.
     return
   end subroutine init_constants_derived
 
@@ -370,6 +376,8 @@ contains
     logical,intent(in   ) :: regional
 
     real(r_kind) reradius,g,r_d,r_v,cliq_wrf
+
+    if(cnts_initialized_) return
 
 !   Define regional constants here
     if (regional) then
@@ -431,6 +439,7 @@ contains
     rd_over_cp = rd/cp
     g_over_rd  = grav/rd
 
+    cnts_initialized_=.true.
     return
   end subroutine init_constants
 

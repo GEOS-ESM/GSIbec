@@ -85,7 +85,8 @@
       module procedure gsimain_initialize_
    end interface gsimain_initialize
    interface gsimain_gridopts
-      module procedure gridopts_
+      module procedure gridopts0_
+      module procedure gridopts1_
    end interface gsimain_gridopts
    interface gsimain_finalize
       module procedure gsimain_finalize_
@@ -534,10 +535,7 @@
   if(ios/=0) call die(myname_,'read(setup)',ios)  
   close(11)
 
-! open(11,file=thisrc)
-! read(11,gridopts,iostat=ios)
-! if(ios/=0) call die(myname_,'read(gridopts)',ios)
-  call gridopts_(thisrc)
+  call gridopts0_(thisrc)
 
   open(11,file=thisrc)
   read(11,bkgerr,iostat=ios)
@@ -588,22 +586,70 @@
   
   end subroutine gsimain_initialize_
 
-  subroutine gridopts_(thisrc,gnlat,gnlon)
+  subroutine gridopts0_(thisrc)
   use mpeu_util,only: die
   implicit none
   character(len=*),intent(in)  :: thisrc
-  integer,optional,intent(out) :: gnlat,gnlon
-  character(len=*),parameter :: myname_="gsimod*gridopts_"
+  character(len=*),parameter :: myname_="gsimod*gridopts0_"
   integer(i_kind) :: ios
   open(11,file=thisrc)
   read(11,gridopts,iostat=ios)
   if(ios/=0) call die(myname_,'read(gridopts)',ios)  
   close(11)
-  if(present(gnlat).and.present(gnlon)) then
-    gnlat=nlat
-    gnlon=nlon
-  endif
-  end subroutine gridopts_
+  end subroutine gridopts0_
+  
+  subroutine gridopts1_(thisrc,thispe,npex,npey,&
+                        gnlat,gnlon,gnlev,eqspace,&
+                        glon2,glat2,&
+                        isc,iec,jsc,jec,igdim)
+  use general_sub2grid_mod, only: general_deter_subdomain_withLayout
+  use mpeu_util,only: die
+  implicit none
+  character(len=*),intent(in)  :: thisrc
+  integer,intent(in)  :: thispe
+  integer,intent(in)  :: npex,npey
+  integer,intent(out) :: gnlat,gnlon,gnlev
+  integer,intent(out) :: glon2,glat2
+  logical,intent(out) :: eqspace
+  integer,intent(out) :: isc,iec,jsc,jec,igdim
+  character(len=*),parameter :: myname_="gsimod*gridopts1_"
+  integer(i_kind) :: glon1,glat1,j,nxy,ios
+  logical :: verbose,periodic
+  logical,allocatable :: periodic_s(:)
+  integer(i_kind),allocatable :: iglat1(:),igstart(:),jglon1(:),jgstart(:)
+
+  verbose = thispe==0
+
+  call gridopts0_(thisrc)
+  gnlat=nlat
+  gnlon=nlon
+  gnlev=nsig
+  eqspace=use_sp_eqspace
+
+  nxy=npex*npey
+  allocate(periodic_s(nxy))
+  allocate(iglat1(nxy),igstart(nxy),jglon1(nxy),jgstart(nxy))
+
+  call general_deter_subdomain_withLayout(npe,npex,npey,&
+                thispe,nlat,nlon,.false.,periodic,periodic_s,&
+                glon1,glon2,glat1,glat2,&
+                iglat1,igstart,jglon1,jgstart,&
+                verbose)
+
+  do j=1,nxy
+     if(thispe==j-1) then
+       isc = jgstart(j)
+       iec = jgstart(j) + jglon1(j) - 1
+       jsc = igstart(j)
+       jec = igstart(j) + iglat1(j) - 1
+     endif
+  end do
+  igdim=glon1*glat1
+
+  deallocate(iglat1,igstart,jglon1,jgstart)
+  deallocate(periodic_s)
+
+  end subroutine gridopts1_
   
 !-------------------------------------------------------------------------
 !  NASA/GSFC, Global Modeling and Assimilation Office, Code 610.3, GMAO  !
