@@ -1409,12 +1409,14 @@ CONTAINS
 
 ! Return code (status)
   rc=0; mype_=0; root_=0
-  verbose=.true.
-  if(present(myid).and.present(root) )then
-    if(myid/=root) verbose=.false.
+  verbose=.false.
+  if(present(myid)) then
     mype_ = myid
+  endif
+  if(present(root)) then
     root_ = root
   endif
+  if(mype_==root_) verbose=.true.
 
   allocate(dimids(nf90_max_var_dims), dimlens(nf90_max_var_dims))
 

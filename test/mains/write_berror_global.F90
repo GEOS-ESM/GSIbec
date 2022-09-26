@@ -272,9 +272,11 @@ contains
 
   subroutine berror_write_(vr,m2c)
 
+  implicit none
+
   type(nc_berror_vars) vr
   logical, intent(in) :: m2c
-  integer  nlon,nlat,nsig
+  integer  i,j,k,m,nlon,nlat,nsig
 
   var=' '
   var(1)='sf'
@@ -425,9 +427,14 @@ contains
      write(luout) vr%corlsst
    close(luout)
   end subroutine berror_write_
+!------------------------------------------------------------------
   subroutine berror_write_grads_(vars)
 
-!  use sstmod, only: write_grads_ctl
+#ifndef HAVE_BACIO
+  use stub_bacio_mod, only: ba_open,ba_close,ba_wryte
+#endif
+   implicit none
+
    type(nc_berror_vars) vars
    integer j,nsig,nlat,nlon,iret
    real(4),allocatable,dimension(:,:) :: aux
@@ -435,7 +442,8 @@ contains
    nlat=vars%nlat 
    nlon=vars%nlon 
    nsig=vars%nsig 
-   
+
+#ifdef HAVE_BACIO
    call baopenwt(lugrd,'bgstats_sp.grd',iret)
 
    call wryte(lugrd,4*nlat*nsig,vars%sfvar)
@@ -482,6 +490,57 @@ contains
    call wryte(lugrd,4*nlat*nsig,vars%pscon)
 
    call baclose(lugrd,iret)
+#else  /*  HAVE_BACIO */
+   call ba_open(lugrd,'bgstats_sp.grd',4*nlat*nlon,iret)
+
+   call ba_wryte(lugrd,vars%sfvar)
+   call ba_wryte(lugrd,vars%vpvar)
+   call ba_wryte(lugrd,vars%tvar)
+   call ba_wryte(lugrd,vars%qvar)
+   call ba_wryte(lugrd,vars%nrhvar)
+   if (hydromet) then
+   call ba_wryte(lugrd,vars%qivar)
+   call ba_wryte(lugrd,vars%qlvar)
+   call ba_wryte(lugrd,vars%qrvar)
+   call ba_wryte(lugrd,vars%qsvar)
+   endif
+   call ba_wryte(lugrd,vars%ozvar)
+   call ba_wryte(lugrd,vars%cvar)
+   call ba_wryte(lugrd,vars%psvar)
+   call ba_wryte(lugrd,vars%sfhln)
+   call ba_wryte(lugrd,vars%vphln)
+   call ba_wryte(lugrd,vars%thln)
+   call ba_wryte(lugrd,vars%qhln)
+   if (hydromet) then
+   call ba_wryte(lugrd,vars%qihln)
+   call ba_wryte(lugrd,vars%qlhln)
+   call ba_wryte(lugrd,vars%qrhln)
+   call ba_wryte(lugrd,vars%qshln)
+   endif
+   call ba_wryte(lugrd,vars%ozhln)
+   call ba_wryte(lugrd,vars%chln)
+   call ba_wryte(lugrd,vars%pshln)
+   allocate(aux(nlat,nsig))
+   aux=1./vars%sfvln; call ba_wryte(lugrd,aux)
+   aux=1./vars%vpvln; call ba_wryte(lugrd,aux)
+   aux=1./vars%tvln;  call ba_wryte(lugrd,aux)
+   aux=1./vars%qvln;  call ba_wryte(lugrd,aux)
+   if (hydromet) then
+   aux=1./vars%qivln; call ba_wryte(lugrd,aux)
+   aux=1./vars%qlvln; call ba_wryte(lugrd,aux)
+   aux=1./vars%qrvln; call ba_wryte(lugrd,aux)
+   aux=1./vars%qsvln; call ba_wryte(lugrd,aux)
+   endif
+   aux=1./vars%ozvln; call ba_wryte(lugrd,aux)
+   aux=1./vars%cvln;  call ba_wryte(lugrd,aux)
+   deallocate(aux)
+   call ba_wryte(lugrd,vars%tcon)
+   call ba_wryte(lugrd,vars%vpcon)
+   call ba_wryte(lugrd,vars%pscon)
+
+   call ba_close(lugrd,iret)
+#endif /*  HAVE_BACIO */
+
 
   open(luout,file='tcon.bin',form='unformatted',convert='little_endian')
   do j=1,nlat
@@ -491,6 +550,7 @@ contains
 
 ! Put out SST info to on a separate grads file
   allocate(aux(nlon,nlat))
+#ifdef HAVE_BACIO
   call baopenwt(lugrd,'sst.grd',iret)
 
   aux = transpose(vars%varsst)
@@ -500,10 +560,44 @@ contains
   call wryte(lugrd,4*nlat*nlon,aux)
 
   call baclose(lugrd,iret)
+#else  /*  HAVE_BACIO */
+  call ba_open(lugrd,'sst.grd',4*nlat*nlon,iret)
+
+  aux = transpose(vars%varsst)
+  call ba_wryte(lugrd,aux)
+
+  aux = transpose(vars%corlsst)
+  call ba_wryte(lugrd,aux)
+
+  call ba_close(lugrd,iret)
+#endif /*  HAVE_BACIO */
+
   deallocate(aux)
-! call write_grads_ctl('sst',lugrd,nlon,nlat)
+  call write_grads_sstctl_('sst',lugrd,nlon,nlat)
 
   end subroutine berror_write_grads_
+
+  subroutine write_grads_sstctl_(fname, lu,im,jm)
+  implicit none
+  character(len=*), intent(in) :: fname
+  integer, intent(in) :: lu,im,jm
+
+  open(lu,file=trim(fname)//'.ctl',form='formatted')
+  write(lu,'(2a)') 'dset  ^', trim(fname)//'.grd'
+  write(lu,'(2a)') 'title ', 'sst berror variances/corlength'
+  write(lu,'(a)')  'options little_endian'
+  write(lu,'(a,2x,f6.1)') 'undef', -999.0 ! any other preference for this?
+  write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'xdef',im, 'linear',   0.0, 360./im
+  write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'ydef',jm, 'linear', -90.0, 180./(jm-1.)
+  write(lu,'(a)')      'zdef 1 linear 1 1'
+  write(lu,'(a,2x,i4,2x,a)')   'tdef', 1, 'LINEAR 12:00Z04JUL1776 6hr' ! any date suffices
+  write(lu,'(a,2x,i4)')        'vars', 2
+  write(lu,'(a,1x,2(i4,1x),a)') 'sst',   1,0, 'sst'
+  write(lu,'(a,1x,2(i4,1x),a)') 'sstcorl',   1,0, 'sstcorl'
+  write(lu,'(a)') 'endvars'
+  close(lu)
+
+  end subroutine write_grads_sstctl_
 
   subroutine vinterp_berror_vars_(ivars,ovars)
 

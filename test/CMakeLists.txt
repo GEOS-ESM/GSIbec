@@ -37,7 +37,7 @@ ecbuild_add_executable( TARGET  test_geos_getens.x
                        )
 
 ecbuild_add_executable( TARGET  write_berror_global.x
-                        SOURCES mains/write_berror_global.f90
+                        SOURCES mains/write_berror_global.F90
                         LIBS    gsibec
                        )
 

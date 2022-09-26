@@ -3891,11 +3891,17 @@ end subroutine reload
      call create_vgrid_vars()
      ifail=0
   endif
+  ! Expect FV3 levels/orientation/units
   if (present(fname)) then
-    call set_eta_read(trim(fname),ak5,bk5,ier,myid=mype)
+    if (trim(fname)=='/dev/null') then
+       call set_eta (nsig, ks, ptop, pint, ak5, bk5)
+    else
+       call set_eta_read(trim(fname),ak5,bk5,ier,myid=mype)
+    endif
   else
-    call set_eta (nsig, ks, ptop, pint, ak5, bk5) ! GEOS/FV3 levels/orientation/units
+    call set_eta (nsig, ks, ptop, pint, ak5, bk5)
   endif
+  ! Reorient and adjust units for GSI
   ak5=kPa_per_Pa*ak5
   ak5=ak5(nsig+1:1:-1)
   bk5=bk5(nsig+1:1:-1)
