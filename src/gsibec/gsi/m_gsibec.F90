@@ -120,9 +120,10 @@ logical :: iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,bkgmock,nmlfile,befile,layout,comm)
+  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
+  logical, optional, intent(in)  :: vgrid
   logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
@@ -157,7 +158,7 @@ contains
      call befname_(befile,0)
   endif
   call gsimain_initialize(nmlfile=nmlfile)
-  call set_()
+  call set_(vgrid=vgrid)
   call set_pointer_()
 
 ! create subdomain/grid indexes 
@@ -278,13 +279,19 @@ contains
    endif
 
   end subroutine get_hgrid_
-  subroutine set_vgrid_
-! this will get ak/bk from JEDI and make it GSI''s
+!--------------------------------------------------------
+  subroutine set_vgrid_(myid,akbk)
+  use gridmod, only: gridmod_vgrid
+  implicit none
+  integer(i_kind),intent(in)  :: myid
+  character(len=*),intent(in) :: akbk
+  call gridmod_vgrid(myid,fname=akbk)
   end subroutine set_vgrid_
 !--------------------------------------------------------
-  subroutine set_
+  subroutine set_(vgrid)
 
    use constants, only: pi,one,half,rearth
+   use m_mpimod, only: mype
    use gridmod, only: nlon,nlat
    use gridmod, only: rlats,rlons,wgtlats
    use gridmod, only: coslon,sinlon
@@ -292,6 +299,7 @@ contains
    use gridmod, only: sp_a
    use gridmod, only: create_grid_vars
    use gridmod, only: use_sp_eqspace
+   use gridmod, only: gridmod_vgrid
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: cdiff_initialized
    use compact_diffs, only: create_cdiff_coefs
@@ -299,6 +307,8 @@ contains
 !  use mp_compact_diffs_mod1, only: init_mp_compact_diffs1
 !  use compact_diffs, only: uv2vordiv
    implicit none
+   logical,optional :: vgrid
+
    real(r_kind) :: dlat,dlon,pih
    integer i,j,i1,ifail
 
@@ -348,6 +358,9 @@ contains
       call gengrid_vars
    endif
 
+   if(present(vgrid)) then
+     if(vgrid) call gridmod_vgrid(mype)
+   endif
    if(.not.cdiff_created()) call create_cdiff_coefs()
    if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)

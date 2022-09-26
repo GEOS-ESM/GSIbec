@@ -135,7 +135,6 @@ subroutine other_set_(need)
   isli2=zero
   tropprs=zero
   fact_tv=one
-  call load_vert_coord_
   ! better fix units here?
   if (present(need)) then
     if(mype==0) then
@@ -208,19 +207,6 @@ subroutine final_
   if(allocated(ges_tsen)) deallocate(ges_tsen)
   call destroy_metguess_grids_(mype,ier)
 end subroutine final_
-!--------------------------------------------------------
-subroutine load_vert_coord_
-use m_set_eta, only: set_eta
-! ideally, these coordinates should be passed from JEDI
-implicit none
-integer ks
-real(r_kind) :: ptop,pint
-call set_eta (nsig, ks, ptop, pint, ak5, bk5) ! GEOS/FV3 levels/orientation/units
-ak5=kPa_per_Pa*ak5
-ak5=ak5(nsig+1:1:-1)
-bk5=bk5(nsig+1:1:-1)
-end subroutine load_vert_coord_
-
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !
 !-------------------------------------------------------------------------
@@ -623,7 +609,7 @@ end subroutine load_vert_coord_
 
 ! !USES: 
 
-  use constants, only: zero,one_tenth,r100,r1000,ten
+  use constants, only: zero,one_tenth,r100,stndrd_atmos_ps,ten
   use gridmod, only: idvc5
   use gridmod, only: nsig
   implicit none
@@ -649,18 +635,21 @@ end subroutine load_vert_coord_
 !-------------------------------------------------------------------------
 
   integer(i_kind) k
+  real(r_kind) :: pstd
+
+  pstd = stndrd_atmos_ps/r100
 
 ! get some reference-like pressure levels
   do k=1,nsig+1
         if (idvc5==1 .or. idvc5==2) then
-           prs(k)=ten*ak5(k)+(bk5(k)*r1000)
+           prs(k)=ten*ak5(k)+(bk5(k)*pstd)
         else if (idvc5==3) then
            if (k==1) then
-              prs(k)=r1000
+              prs(k)=pstd
            else if (k==nsig+1) then
               prs(k)=zero
            else
-              prs(k)=ten*ak5(k)+(bk5(k)*r1000)! +(ck5(k)*trk)
+              prs(k)=ten*ak5(k)+(bk5(k)*pstd)! +(ck5(k)*trk)
            end if
         end if
   enddo
@@ -933,6 +922,7 @@ end subroutine load_vert_coord_
   real(r_kind),dimension(:,:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
+  character(len=80) :: uvar
   integer jj,ier
   do jj=1,nfldsig
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
@@ -941,7 +931,12 @@ end subroutine load_vert_coord_
      endif
      ptr=var
   enddo
-  if ( trim(vname) == 'oz' ) ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
+  if ( trim(vname) == 'oz' ) then
+      call gsi_metguess_get ( 'usrvar::o3ppmv', uvar, ier )
+      if (trim(uvar)=='o3ppmv') then
+         ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
+      endif
+  endif
   end subroutine guess_basics3_
 !--------------------------------------------------------
 end module guess_grids

@@ -3,7 +3,9 @@
 !  pseudo_q2=.false.,
  /
  &GRIDOPTS
-   JCAP=254,NLAT=361,NLON=576,nsig=72,use_sp_eqspace=.true.,
+!  JCAP=254,NLAT=361,NLON=576,nsig=72,use_sp_eqspace=.true.,
+!  JCAP=62,NLAT=46,NLON=72,nsig=72,use_sp_eqspace=.true.,
+   JCAP=62,NLAT=91,NLON=144,nsig=72,use_sp_eqspace=.true.,
  /
  &BKGERR
    vs=0.6,
@@ -15,19 +17,21 @@
 !  adjustozvar=.true.,
    adjustozvar=.false.,
    bkgv_write=.true.,
-   simcv=.true,
+!  bkgv_write_cv=.true.,
+   bkgv_write_sv=.true.,
+   simcv=.false,
  /
 
 met_guess::
 !var     level   crtm_use    desc                 orig_name
   ps        1      -1         surface_pressure     ps
 # z         1      -1         geopotential_height  phis
-# u        72       2         zonal_wind           u
-# v        72       2         meridional_wind      v
+  u        72       2         zonal_wind           u
+  v        72       2         meridional_wind      v
 # div      72      -1         zonal_wind           div
 # vor      72      -1         meridional_wind      vor
   tv       72       2         virtial_temperature  tv
-# q        72       2         specific_humidity    sphu
+  q        72       2         specific_humidity    sphu
 # oz       72       2         ozone                ozone
 # cw       72      -1         cloud_condensate     qctot
 # ql       72      12         Water                qltot
@@ -86,11 +90,11 @@ state_tendencies::
 
 state_vector::
 !var     level  itracer source     funcof
-#u        72      0     met_guess    u
-#v        72      0     met_guess    v
+ u        72      0     met_guess    u
+ v        72      0     met_guess    v
  tv       72      0     met_guess    tv
 #tsen     72      0     met_guess    tv,q
-#q        72      1     met_guess    q
+ q        72      1     met_guess    q
 #oz       72      1     met_guess    oz
 #cw       72      1     met_guess    cw
 #ql       72      1     met_guess    ql
@@ -109,7 +113,7 @@ control_vector::
  sf       72      0       0.45        -1.0     state    u:v     -1.00   
  vp       72      0       0.55        -1.0     state    u:v     -1.00
  t        72      0       0.90        -1.0     state    tv      -1.00
-#q        72      1       0.60        -1.0     state    q       -1.00
+ q        72      1       0.60        -1.0     state    q       -1.00
 #oz       72      1       0.20        -1.0     state    oz      -1.00
 #co       72      1       0.20        -1.0     state    co      -1.00
 #cw       72      1       1.00        -1.0     state    cw      -1.00

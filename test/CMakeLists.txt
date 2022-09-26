@@ -21,6 +21,11 @@ ecbuild_add_resources( TARGET gsibec_test_scripts
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
 
 
+ecbuild_add_executable( TARGET  eta_echo.x
+                        SOURCES mains/eta_echo.f90
+                        LIBS    gsibec
+                       )
+
 ecbuild_add_executable( TARGET  test_gsi_bkerror.x
                         SOURCES mains/test_gsi_bkerror.F90
                         LIBS    gsibec
@@ -31,16 +36,21 @@ ecbuild_add_executable( TARGET  test_geos_getens.x
                         LIBS    gsibec
                        )
 
+ecbuild_add_executable( TARGET  write_berror_global.x
+                        SOURCES mains/write_berror_global.f90
+                        LIBS    gsibec
+                       )
+
 # Test GMAO and NCEP B-Error-Cov:
 
 #ecbuild_add_test( TARGET  test_gsibec_gmao
 #                  SOURCES mains/test_gsi_bkerror.F90
-#                  ARGS    "testinput/gmao_saberror.nml"
+#                  ARGS    "testinput/geos_saberror.nml"
 #                  ENVIRONMENT OOPS_TRAPFPE=1
 #                  LIBS    gsibec )
 
 #ecbuild_add_test( TARGET  test_gsibec_ncep
 #                  SOURCES mains/test_gsi_bkerror.F90
-#                  ARGS    "testinput/ncep_saberror.nml"
+#                  ARGS    "testinput/gfs_saberror.nml"
 #                  ENVIRONMENT OOPS_TRAPFPE=1
 #                  LIBS    gsibec )

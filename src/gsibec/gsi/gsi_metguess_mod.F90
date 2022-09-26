@@ -936,6 +936,19 @@ end subroutine final_
         deallocate(work)
      endif
   endif
+  if(desc(1:8)=='usrvar::') then
+     if(allocated(usrname)) then
+        labfound=.true.
+        is=len_trim(desc)
+        if(is>=9) then
+          i=getindex(usrname,desc(9:is))
+          if(i>0) then
+            ivar=usrname(i)
+            istatus=0
+          endif
+        endif
+     endif
+  endif
   if (.not.labfound) then
      call die(myname_,'label unavailable :'//trim(desc),99)
   endif

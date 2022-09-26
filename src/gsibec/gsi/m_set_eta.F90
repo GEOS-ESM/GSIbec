@@ -24,6 +24,7 @@
 
       module m_set_eta
       use, intrinsic :: iso_fortran_env, only: REAL32, REAL64
+      use netcdf
       PRIVATE
       PUBLIC set_eta
       PUBLIC get_ref_plevs
@@ -31,6 +32,8 @@
       PUBLIC unset_sigma
       PUBLIC set_ncep72
       PUBLIC unset_ncep72
+      PUBLIC set_eta_read
+      PUBLIC set_eta_write
 
       logical :: SIGMA_LEVS  = .false.   ! controls whether levs are sigma or eta
       logical :: NCEP72_4GMAO= .false.   ! controls whether levs are 72, but largely as NCEP's 64
@@ -43,6 +46,13 @@
          module procedure get_ref_plevs_r8_   ! double precision (original) version
          module procedure get_ref_plevs_r4_   ! single precision support
       end interface
+      interface set_eta_read
+         procedure read_eta_              ! double precision (original) version
+      end interface
+      interface set_eta_write
+         procedure write_eta_             ! double precision (original) version
+      end interface
+      character(len=*), parameter :: myname='m_set_eta'
 CONTAINS
 
       subroutine set_eta_r8_ (km, ks, ptop, pint, ak, bk)
@@ -1374,5 +1384,202 @@ CONTAINS
     end subroutine get_ref_plevs_r8_
 
 #ifdef HERMES
+
+  subroutine read_eta_ (fname,ak,bk,rc, myid,root)
+  use m_kinds, only : r8 => r_double
+  use m_kinds, only : r4 => r_single
+  implicit none
+  character(len=*), intent(in) :: fname ! input filename
+  real(r8),intent(inout)       :: ak(:),bk(:)
+  integer, intent(out)         :: rc
+  integer, intent(in), optional :: myid,root ! accommodate MPI calling programs
+
+! This will be the netCDF ID for the file and data variable.
+  integer, allocatable, dimension(:) :: dimids, dimlens
+  integer :: ier, ncid, varid
+
+! Local variables
+  character(len=*), parameter :: myname_ = myname//"::eta_"
+  character(len=4) :: cindx
+  integer :: ii, nlev
+  integer :: mype_,root_
+  real(8), allocatable :: data_in(:)
+  logical :: verbose
+
+
+! Return code (status)
+  rc=0; mype_=0; root_=0
+  verbose=.true.
+  if(present(myid).and.present(root) )then
+    if(myid/=root) verbose=.false.
+    mype_ = myid
+    root_ = root
+  endif
+
+  allocate(dimids(nf90_max_var_dims), dimlens(nf90_max_var_dims))
+
+! Open the file. NF90_NOWRITE tells netCDF we want read-only access to
+! the file.
+
+  call check_( nf90_open(fname, NF90_NOWRITE, ncid), rc, mype_, root_ )
+  if(rc/=0) return
+
+! Check that dimension of ak/bk in the file match vertical levels of model
+  ier = nf90_inq_varid(ncid, "ak", varid)
+  if(ier /= nf90_noerr) then
+    rc=1
+    return
+  endif
+  dimids = 0
+  call check_ ( nf90_inquire_variable(ncid, varid, dimids = dimids), rc, mype_, root_ )
+  rc = -1
+  do ii = 1,nf90_max_var_dims
+    if (dimids(ii) > 0) then
+       call check_( nf90_inquire_dimension(ncid, dimids(ii), len=dimlens(ii)), &
+                    rc, mype_, root_ )
+       if (dimlens(ii) == size(ak)) then
+          nlev=dimlens(ii)
+          rc = 0
+          exit
+       endif
+    endif
+  enddo
+  if (rc/=0) return
+
+! Read data to file
+  allocate(data_in(nlev))
+  call check_( nf90_inq_varid(ncid, 'ak', varid),  rc, mype_, root_  )
+  call check_( nf90_get_var(ncid, varid, data_in), rc, mype_, root_ )
+  ak=data_in
+  call check_( nf90_inq_varid(ncid, 'bk', varid),  rc, mype_, root_  )
+  call check_( nf90_get_var(ncid, varid, data_in), rc, mype_, root_ )
+  bk=data_in
+
+! Close the file, freeing all resources.
+  call check_( nf90_close(ncid), rc, mype_, root_ )
+
+  deallocate(dimids, dimlens)
+
+  if(verbose) print *,"*** Finish reading file: ", trim(fname)
+
+  return
+
+  end subroutine read_eta_
+
+  subroutine write_eta_ (fname,ak,bk,rc, myid,root)
+
+  use m_kinds, only : r8 => r_double
+  use m_kinds, only : r4 => r_single
+  implicit none
+  character(len=*),  intent(in) :: fname ! input filename
+  real(r8), intent(in) :: ak(:) ! ak
+  real(r8), intent(in) :: bk(:) ! bk
+  integer, intent(out) :: rc
+  integer, intent(in), optional :: myid,root        ! accommodate MPI calling programs
+
+  character(len=*), parameter :: myname_ = myname//"::write_eta"
+  integer, parameter :: NDIMS = 1
+
+! When we create netCDF files, variables and dimensions, we get back
+! an ID for each one.
+  character(len=4) :: cindx
+  integer :: ncid, dimids(NDIMS)
+  integer :: z_dimid
+  integer :: ak_varid, bk_varid, edge_varid
+  integer :: ii,nlev
+  integer :: mype_,root_
+  integer, allocatable :: varid1d(:)
+  integer, allocatable :: edge(:)
+  logical :: verbose
+
+! Return code (status)
+  rc=0; mype_=0; root_=0
+  verbose=.true.
+  if(present(myid).and.present(root) )then
+    if(myid/=root) verbose=.false.
+    mype_ = myid
+    root_ = root
+  endif
+
+! Set dims
+  nlev=size(ak)
+
+! Always check the return code of every netCDF function call. In
+! this example program, wrapping netCDF calls with "call check()"
+! makes sure that any return which is not equal to nf90_noerr (0)
+! will print a netCDF error message and exit.
+
+! Create the netCDF file. The nf90_clobber parameter tells netCDF to
+! overwrite this file, if it already exists.
+  call check_( nf90_create(fname, NF90_CLOBBER, ncid), rc, mype_, root_ )
+  if(rc/=0) return
+
+! Define the dimensions. NetCDF will hand back an ID for each. 
+  call check_( nf90_def_dim(ncid, "edge", nlev, z_dimid), rc, mype_, root_ )
+
+  call check_( nf90_def_var(ncid, "edge", NF90_REAL8, z_dimid, edge_varid), rc, mype_, root_ )
+  call check_( nf90_def_var(ncid, "ak"  , NF90_REAL8, z_dimid,   ak_varid), rc, mype_, root_ )
+  call check_( nf90_def_var(ncid, "bk"  , NF90_REAL8, z_dimid,   bk_varid), rc, mype_, root_ )
+
+  call check_( nf90_put_att(ncid, edge_varid, "long_name", "sigma at layer edges"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, edge_varid, "units", "level"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, edge_varid, "standard_name", "atmosphere_hybrid_sigma_pressure_coordinate"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, edge_varid, "coordinate", "eta"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, edge_varid, "positive", "down"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, edge_varid, "formulaTerms", "ap: ak b: bk ps: ps p0: p00"), rc, mype_, root_ )
+
+  call check_( nf90_put_att(ncid, ak_varid, "long_name", "hybrid_sigma_pressure_a"), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, ak_varid, "units", "Pa"), rc, mype_, root_ )
+
+  call check_( nf90_put_att(ncid, bk_varid, "long_name", "hybrid_sigma_pressure_b" ), rc, mype_, root_ )
+  call check_( nf90_put_att(ncid, bk_varid, "units", "1" ), rc, mype_, root_ )
+
+! The dimids array is used to pass the IDs of the dimensions of
+! the variables. Note that in fortran arrays are stored in
+! column-major format.
+  dimids =  (/ z_dimid /)
+
+! Define variables.
+  allocate(varid1d(1))
+  call check_( nf90_def_var(ncid, "edge", NF90_REAL8, (/ z_dimid /), varid1d(1)), rc, mype_, root_ )
+  call check_( nf90_def_var(ncid, "ak",   NF90_REAL8, (/ z_dimid /), varid1d(1)), rc, mype_, root_ )
+  call check_( nf90_def_var(ncid, "bk",   NF90_REAL8, (/ z_dimid /), varid1d(1)), rc, mype_, root_ )
+
+! End define mode. This tells netCDF we are done defining metadata.
+  call check_( nf90_enddef(ncid), rc, mype_, root_ )
+
+! Write coordinate variables data
+  allocate(edge(nlev))
+  do ii=1,nlev
+     edge(ii) = float(ii)
+  enddo
+  call check_( nf90_put_var(ncid, edge_varid, edge ), rc, mype_, root_ )
+  call check_( nf90_put_var(ncid,   ak_varid, ak   ), rc, mype_, root_ )
+  call check_( nf90_put_var(ncid,   bk_varid, bk   ), rc, mype_, root_ )
+
+! Close file
+  call check_( nf90_close(ncid), rc, mype_, root_ )
+
+  deallocate(edge)
+  deallocate(varid1d)
+
+  if(verbose) print *,"*** Finish writing file: ", trim(fname)
+
+  return
+
+  end subroutine write_eta_
+
+  subroutine check_(status,rc, myid, root)
+    integer, intent ( in) :: status
+    integer, intent (out) :: rc
+    integer, intent ( in) :: myid, root
+    rc=0
+    if(status /= nf90_noerr) then
+      if(myid==root) print *, trim(nf90_strerror(status))
+      rc=999
+    end if
+  end subroutine check_
+
   end module m_set_eta
+
 #endif

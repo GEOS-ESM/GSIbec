@@ -268,7 +268,7 @@ subroutine read_berror_ (fname,bvars,rc, myid,root)
   enddo
   deallocate(data_in)
 
-! Write out lat/lon fields
+! Read in lat/lon fields
   allocate(data_in(nlon,nlat,1))
   do nv = 1, nv2dx
      call check_( nf90_inq_varid(ncid, trim(cvars2dx(nv)), varid), rc, mype_, root_ )
@@ -301,7 +301,7 @@ subroutine write_berror_ (fname,bvars,plevs,lats,lons,rc, myid,root)
   integer, intent(out) :: rc
   integer, intent(in), optional :: myid,root        ! accommodate MPI calling programs
 
-  character(len=*), parameter :: myname_ = myname//"::read_"
+  character(len=*), parameter :: myname_ = myname//"::write_"
   integer, parameter :: NDIMS = 3
 
 ! When we create netCDF files, variables and dimensions, we get back
