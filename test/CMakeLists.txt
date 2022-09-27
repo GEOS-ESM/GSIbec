@@ -41,16 +41,24 @@ ecbuild_add_executable( TARGET  write_berror_global.x
                         LIBS    gsibec
                        )
 
+list( APPEND gsibec_testinput
+  testinput/geos_saberror.nml
+  testinput/gfs_saberror.nml
+  testinput/gsi-coeffs-geos-global-l72x72y46.nc4
+  testinput/gsi-coeffs-gfs-global-l127x192y96.nc4
+)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
+LINK_FILES( "${gsibec_testinput}" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
 # Test GMAO and NCEP B-Error-Cov:
 
-#ecbuild_add_test( TARGET  test_gsibec_gmao
-#                  SOURCES mains/test_gsi_bkerror.F90
-#                  ARGS    "testinput/geos_saberror.nml"
-#                  ENVIRONMENT OOPS_TRAPFPE=1
-#                  LIBS    gsibec )
+ecbuild_add_test( TARGET   gsibec_test_tier1_geos
+                  MPI      6
+                  ARGS    "testinput/geos_saberror.nml" "testinput/gsi-coeffs-geos-global-l72x72y46.nc4" 
+                  COMMAND  test_gsi_bkerror.x )
 
-#ecbuild_add_test( TARGET  test_gsibec_ncep
-#                  SOURCES mains/test_gsi_bkerror.F90
-#                  ARGS    "testinput/gfs_saberror.nml"
-#                  ENVIRONMENT OOPS_TRAPFPE=1
-#                  LIBS    gsibec )
+ecbuild_add_test( TARGET   gsibec_test_tier1_gfs
+                  MPI      6
+                  ARGS    "testinput/gfs_saberror.nml" "testinput/gsi-coeffs-gfs-global-l127x192y96.nc4"
+                  COMMAND  test_gsi_bkerror.x )

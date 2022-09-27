@@ -19,6 +19,7 @@ set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 
 option( ENABLE_MKL "Use MKL for LAPACK implementation (if available)" ON )
 include( gsibec_compiler_flags )
+include( gsibec_extra_macros )
 
 ################################################################################
 # Dependencies

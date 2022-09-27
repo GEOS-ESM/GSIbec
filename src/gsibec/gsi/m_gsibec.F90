@@ -463,8 +463,8 @@ contains
   character(len=*), parameter :: myname_ = myname//'*set_silly_'
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   real(r_kind),pointer :: ptr2(:,:)=>NULL()
-  integer k,iset
-  integer :: ier
+  integer xloc, yloc, k,iset
+  integer ier
   integer zex(4),zex072(4), zex127(4)
   real(r_kind) :: val
   character(len=2) :: var
@@ -478,7 +478,7 @@ contains
 !  call die ('main',': fishy', 99)
 !endif
 !
-  if (mod(mype,6) /= 0) return
+  if (mod(mype,3) /= 0) return
 !
 !            sfc  ~500  ~10   ~1
   zex072 = (/  1,   23,  48,  58 /)
@@ -492,6 +492,8 @@ contains
     zex=zex127
     iset=1
   endif
+  xloc=min(20,lat2)
+  yloc=min(20,lon2)
   val=one
   var='sf'
   var='q'
@@ -504,7 +506,7 @@ contains
        val=val*1e-5
      endif
      do k=1,size(zex)
-        ptr3(10,10,zex(k)) = val
+        ptr3(xloc,yloc,zex(k)) = val
      enddo
      if (mype==0) print *, myname_, ': var= ', trim(var)
      return
@@ -513,7 +515,7 @@ contains
      call gsi_bundlegetpointer(bundle,trim(var),ptr3,ier)
      if(ier==0) then
         do k=1,size(zex)
-           ptr3(10,10,zex(k)) = val
+           ptr3(xloc,yloc,zex(k)) = val
         enddo
         if (mype==0) print *, myname_, ': var= ', trim(var)
         return
@@ -522,7 +524,7 @@ contains
   if (var == 'ps') then
      call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
      if(ier==0) then
-        ptr2(10,10) = 100.
+        ptr2(xloc,yloc) = 100.
         if (mype==0) print *, myname_, ': var= ', 'ps(Pa)'
         return
      endif
@@ -550,8 +552,8 @@ contains
      call bkerror_a_en(gradx,grady)
   endif
 
-  if(bkgv_write_cv) &
-  call write_bundle(grady%step(1),'cvbundle')
+  if(bkgv_write_cv/='null') &
+  call write_bundle(grady%step(1),bkgv_write_cv)
 
   call gsi2model_units_(grady%step(1))
 
@@ -598,8 +600,8 @@ contains
      endif
   endif
 
-  if(bkgv_write_cv) &
-  call write_bundle(grady%step(1),'cvbundle')
+  if(bkgv_write_cv/='null') &
+  call write_bundle(grady%step(1),bkgv_write_cv)
 
 ! return result in input vector
   gradx=grady
@@ -650,8 +652,8 @@ contains
   call control2state(grady,fcgrad,sbias)
 
 ! if so write out fields from gsi (in GSI units)
-  if(bkgv_write_sv) &
-  call write_bundle(fcgrad(1),'svbundle')
+  if(bkgv_write_sv/='null') &
+  call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert back to model units (just for consistency here)
   call gsi2model_units_(fcgrad(1))
@@ -719,8 +721,8 @@ contains
   call control2state(grady,fcgrad,sbias)
 
 ! if so write out fields from gsi (in GSI units)
-  if(bkgv_write_sv) &
-  call write_bundle(fcgrad(1),'svbundle')
+  if(bkgv_write_sv/='null') &
+  call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert from gsi to model units
   call gsi2model_units_(fcgrad(1))

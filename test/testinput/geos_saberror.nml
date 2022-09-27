@@ -4,8 +4,8 @@
  /
  &GRIDOPTS
 !  JCAP=254,NLAT=361,NLON=576,nsig=72,use_sp_eqspace=.true.,
-!  JCAP=62,NLAT=46,NLON=72,nsig=72,use_sp_eqspace=.true.,
-   JCAP=62,NLAT=91,NLON=144,nsig=72,use_sp_eqspace=.true.,
+!  JCAP=62,NLAT=91,NLON=144,nsig=72,use_sp_eqspace=.true.,
+   JCAP=62,NLAT=46,NLON=72,nsig=72,use_sp_eqspace=.true.,
  /
  &BKGERR
    vs=0.6,
@@ -16,9 +16,9 @@
    fpsproj=.true.,
 !  adjustozvar=.true.,
    adjustozvar=.false.,
-   bkgv_write=.true.,
-!  bkgv_write_cv=.true.,
-   bkgv_write_sv=.true.,
+   bkgv_write=.false.,
+!  bkgv_write_cv='geos_cvbundle',
+   bkgv_write_sv='geos_svbundle',
    simcv=.false,
  /
 
