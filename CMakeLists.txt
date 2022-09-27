@@ -3,7 +3,7 @@
 ################################################################################
 
 cmake_minimum_required( VERSION 3.12 )
-project( gsibec VERSION 1.0.5 LANGUAGES Fortran )
+project( gsibec VERSION 1.0.6 LANGUAGES Fortran )
 
 ## Ecbuild integration
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
@@ -19,6 +19,7 @@ set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 
 option( ENABLE_MKL "Use MKL for LAPACK implementation (if available)" ON )
 include( gsibec_compiler_flags )
+include( gsibec_extra_macros )
 
 ################################################################################
 # Dependencies

@@ -169,7 +169,7 @@ module berror
   real(r_kind),allocatable,dimension(:,:,:,:):: alv,dssv
 
   logical pert_berr,bkgv_flowdep,bkgv_write,adjustozvar
-  logical bkgv_write_cv,bkgv_write_sv
+  character(len=255) :: bkgv_write_cv,bkgv_write_sv
   real(r_kind) pert_berr_fct,bkgv_rewgtfct
   real(r_kind) adjustozhscl
 
@@ -219,8 +219,8 @@ contains
     adjustozvar = .false.
     adjustozhscl = three
     bkgv_write = .false.
-    bkgv_write_cv = .false.
-    bkgv_write_sv = .false.
+    bkgv_write_cv = 'null'
+    bkgv_write_sv = 'null'
     pert_berr_fct = zero
     bkgv_rewgtfct = zero
     norh=2

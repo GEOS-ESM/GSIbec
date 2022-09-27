@@ -328,6 +328,7 @@
   logical:: writediag,l_foto
   integer(i_kind) i,ngroup
 
+  character(len=*),parameter :: gsimain_rc = 'gsiberror.nml'
 
 ! Declare namelists with run-time gsi options.
 !
@@ -490,7 +491,6 @@
   character(len=*),optional,intent(in):: nmlfile
 
   character(len=*),parameter :: myname_='gsimod.gsimain_initialize'
-  character(len=*),parameter :: myrc = 'gsiberror.nml'
   integer:: ier,ios,lendian_in
   logical:: flag
   logical:: already_init_mpi
@@ -501,7 +501,7 @@
   if (present(nmlfile)) then
      thisrc = trim(nmlfile)
   else
-     thisrc = myrc
+     thisrc = gsimain_rc
   endif
 
 ! Read in user specification of state and control variables
@@ -586,16 +586,26 @@
   
   end subroutine gsimain_initialize_
 
-  subroutine gridopts0_(thisrc)
+  subroutine gridopts0_(nmlfile)
   use mpeu_util,only: die
   implicit none
-  character(len=*),intent(in)  :: thisrc
+  character(len=*),optional,intent(in)  :: nmlfile
   character(len=*),parameter :: myname_="gsimod*gridopts0_"
   integer(i_kind) :: ios
+  character(len=255) :: thisrc
+
+  if (present(nmlfile)) then
+     thisrc = trim(nmlfile)
+  else
+     thisrc = gsimain_rc
+  endif
+
+! read in basic grid parameters
   open(11,file=thisrc)
   read(11,gridopts,iostat=ios)
   if(ios/=0) call die(myname_,'read(gridopts)',ios)  
   close(11)
+
   end subroutine gridopts0_
   
   subroutine gridopts1_(thisrc,thispe,npex,npey,&
@@ -620,7 +630,7 @@
 
   verbose = thispe==0
 
-  call gridopts0_(thisrc)
+  call gridopts0_(nmlfile=thisrc)
   gnlat=nlat
   gnlon=nlon
   gnlev=nsig
@@ -673,23 +683,14 @@
   logical, intent(in) :: closempi
 ! Deallocate arrays
   call destroy_ges_derivatives
-  print *, 'debug main_final pass 1'
   call destroy_general_commvars
-  print *, 'debug main_final pass 2'
   call final_general_commvars_dims
-  print *, 'debug main_final pass 3'
   call final_grid_vars
-  print *, 'debug main_final pass 4'
   call final_anacv
-  print *, 'debug main_final pass 5'
   call final_anasv
-  print *, 'debug main_final pass 6'
   call gsi_chemguess_final
-  print *, 'debug main_final pass 7'
   call gsi_metguess_final
-  print *, 'debug main_final pass 8'
   call clean_4dvar
-  print *, 'debug main_final pass 9'
 
   if (closempi) then
      call mpi_finalize(ierror)

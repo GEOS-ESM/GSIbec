@@ -120,9 +120,10 @@ logical :: iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,bkgmock,nmlfile,befile,layout,comm)
+  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,comm)
 
   logical, intent(out) :: cv
+  logical, optional, intent(in)  :: vgrid
   logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
@@ -157,7 +158,7 @@ contains
      call befname_(befile,0)
   endif
   call gsimain_initialize(nmlfile=nmlfile)
-  call set_()
+  call set_(vgrid=vgrid)
   call set_pointer_()
 
 ! create subdomain/grid indexes 
@@ -278,13 +279,19 @@ contains
    endif
 
   end subroutine get_hgrid_
-  subroutine set_vgrid_
-! this will get ak/bk from JEDI and make it GSI''s
+!--------------------------------------------------------
+  subroutine set_vgrid_(myid,akbk)
+  use gridmod, only: gridmod_vgrid
+  implicit none
+  integer(i_kind),intent(in)  :: myid
+  character(len=*),intent(in) :: akbk
+  call gridmod_vgrid(myid,fname=akbk)
   end subroutine set_vgrid_
 !--------------------------------------------------------
-  subroutine set_
+  subroutine set_(vgrid)
 
    use constants, only: pi,one,half,rearth
+   use m_mpimod, only: mype
    use gridmod, only: nlon,nlat
    use gridmod, only: rlats,rlons,wgtlats
    use gridmod, only: coslon,sinlon
@@ -292,6 +299,7 @@ contains
    use gridmod, only: sp_a
    use gridmod, only: create_grid_vars
    use gridmod, only: use_sp_eqspace
+   use gridmod, only: gridmod_vgrid
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: cdiff_initialized
    use compact_diffs, only: create_cdiff_coefs
@@ -299,6 +307,8 @@ contains
 !  use mp_compact_diffs_mod1, only: init_mp_compact_diffs1
 !  use compact_diffs, only: uv2vordiv
    implicit none
+   logical,optional :: vgrid
+
    real(r_kind) :: dlat,dlon,pih
    integer i,j,i1,ifail
 
@@ -348,6 +358,9 @@ contains
       call gengrid_vars
    endif
 
+   if(present(vgrid)) then
+     if(vgrid) call gridmod_vgrid(mype)
+   endif
    if(.not.cdiff_created()) call create_cdiff_coefs()
    if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)
@@ -450,8 +463,8 @@ contains
   character(len=*), parameter :: myname_ = myname//'*set_silly_'
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   real(r_kind),pointer :: ptr2(:,:)=>NULL()
-  integer k,iset
-  integer :: ier
+  integer xloc, yloc, k,iset
+  integer ier
   integer zex(4),zex072(4), zex127(4)
   real(r_kind) :: val
   character(len=2) :: var
@@ -465,7 +478,7 @@ contains
 !  call die ('main',': fishy', 99)
 !endif
 !
-  if (mod(mype,6) /= 0) return
+  if (mod(mype,3) /= 0) return
 !
 !            sfc  ~500  ~10   ~1
   zex072 = (/  1,   23,  48,  58 /)
@@ -479,6 +492,8 @@ contains
     zex=zex127
     iset=1
   endif
+  xloc=min(20,lat2)
+  yloc=min(20,lon2)
   val=one
   var='sf'
   var='q'
@@ -491,7 +506,7 @@ contains
        val=val*1e-5
      endif
      do k=1,size(zex)
-        ptr3(10,10,zex(k)) = val
+        ptr3(xloc,yloc,zex(k)) = val
      enddo
      if (mype==0) print *, myname_, ': var= ', trim(var)
      return
@@ -500,7 +515,7 @@ contains
      call gsi_bundlegetpointer(bundle,trim(var),ptr3,ier)
      if(ier==0) then
         do k=1,size(zex)
-           ptr3(10,10,zex(k)) = val
+           ptr3(xloc,yloc,zex(k)) = val
         enddo
         if (mype==0) print *, myname_, ': var= ', trim(var)
         return
@@ -509,7 +524,7 @@ contains
   if (var == 'ps') then
      call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
      if(ier==0) then
-        ptr2(10,10) = 100.
+        ptr2(xloc,yloc) = 100.
         if (mype==0) print *, myname_, ': var= ', 'ps(Pa)'
         return
      endif
@@ -537,8 +552,8 @@ contains
      call bkerror_a_en(gradx,grady)
   endif
 
-  if(bkgv_write_cv) &
-  call write_bundle(grady%step(1),'cvbundle')
+  if(bkgv_write_cv/='null') &
+  call write_bundle(grady%step(1),bkgv_write_cv)
 
   call gsi2model_units_(grady%step(1))
 
@@ -585,8 +600,8 @@ contains
      endif
   endif
 
-  if(bkgv_write_cv) &
-  call write_bundle(grady%step(1),'cvbundle')
+  if(bkgv_write_cv/='null') &
+  call write_bundle(grady%step(1),bkgv_write_cv)
 
 ! return result in input vector
   gradx=grady
@@ -637,8 +652,8 @@ contains
   call control2state(grady,fcgrad,sbias)
 
 ! if so write out fields from gsi (in GSI units)
-  if(bkgv_write_sv) &
-  call write_bundle(fcgrad(1),'svbundle')
+  if(bkgv_write_sv/='null') &
+  call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert back to model units (just for consistency here)
   call gsi2model_units_(fcgrad(1))
@@ -706,8 +721,8 @@ contains
   call control2state(grady,fcgrad,sbias)
 
 ! if so write out fields from gsi (in GSI units)
-  if(bkgv_write_sv) &
-  call write_bundle(fcgrad(1),'svbundle')
+  if(bkgv_write_sv/='null') &
+  call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert from gsi to model units
   call gsi2model_units_(fcgrad(1))
