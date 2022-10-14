@@ -640,7 +640,7 @@
   allocate(periodic_s(nxy))
   allocate(iglat1(nxy),igstart(nxy),jglon1(nxy),jgstart(nxy))
 
-  call general_deter_subdomain_withLayout(npe,npex,npey,&
+  call general_deter_subdomain_withLayout(nxy,npex,npey,&
                 thispe,nlat,nlon,.false.,periodic,periodic_s,&
                 glon1,glon2,glat1,glat2,&
                 iglat1,igstart,jglon1,jgstart,&
