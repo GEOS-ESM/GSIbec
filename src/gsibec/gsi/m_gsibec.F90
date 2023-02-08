@@ -4,7 +4,6 @@ module m_gsibec
 
 use constants, only: zero,one
 use constants, only: kPa_per_Pa
-use constants, only: Pa_per_kPa
 use constants, only: constoz
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
@@ -555,7 +554,7 @@ contains
   if(bkgv_write_cv/='null') &
   call write_bundle(grady%step(1),bkgv_write_cv)
 
-  call gsi2model_units_(grady%step(1))
+  call model2gsi_units_ad_(grady%step(1))
 
 ! clean up
   call deallocate_cv(gradx)
@@ -607,7 +606,7 @@ contains
   gradx=grady
 
 ! convert units back to model units
-  call gsi2model_units_(gradx%step(1))
+  call model2gsi_units_ad_(gradx%step(1))
 
 ! clean up
   call deallocate_cv(grady)
@@ -656,7 +655,7 @@ contains
   call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert back to model units (just for consistency here)
-  call gsi2model_units_(fcgrad(1))
+  call model2gsi_units_ad_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -725,7 +724,7 @@ contains
   call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert from gsi to model units
-  call gsi2model_units_(fcgrad(1))
+  call model2gsi_units_ad_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -793,23 +792,23 @@ contains
   endif
   end subroutine model2gsi_units_
 !--------------------------------------------------------
-  subroutine gsi2model_units_(bundle)
+  subroutine model2gsi_units_ad_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
   type(gsi_bundle) bundle
-  real(r_kind),pointer :: ptr2  (:,:)=>NULL()
+  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
-     ptr2 = ptr2 * Pa_per_kPa
+     ptr2 = ptr2 * kPa_per_Pa
   endif
   call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
   if(ier==0) then
-     ptr3 = ptr3 * constoz
+     ptr3 = ptr3 / constoz
   endif
-  end subroutine gsi2model_units_
+  end subroutine model2gsi_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
   end subroutine final_guess_
