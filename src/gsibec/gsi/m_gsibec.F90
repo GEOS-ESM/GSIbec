@@ -3,7 +3,7 @@ module m_gsibec
 !use mpi
 
 use constants, only: zero,one
-use constants, only: kPa_per_Pa
+use constants, only: Pa_per_kPa
 use constants, only: constoz
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
@@ -543,7 +543,7 @@ contains
   grady=zero
 
   call set_silly_(gradx%step(1))
-  call model2gsi_units_(gradx%step(1))
+  call gsi2model_units_ad_(gradx%step(1))
 
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
@@ -554,7 +554,7 @@ contains
   if(bkgv_write_cv/='null') &
   call write_bundle(grady%step(1),bkgv_write_cv)
 
-  call model2gsi_units_ad_(grady%step(1))
+  call gsi2model_units_(grady%step(1))
 
 ! clean up
   call deallocate_cv(gradx)
@@ -583,7 +583,7 @@ contains
   endif
 
 ! convert model units to gsi
-  call model2gsi_units_(gradx%step(1))
+  call gsi2model_units_ad_(gradx%step(1))
 
 ! allocate vectors
   call allocate_cv(grady)
@@ -606,7 +606,7 @@ contains
   gradx=grady
 
 ! convert units back to model units
-  call model2gsi_units_ad_(gradx%step(1))
+  call gsi2model_units_(gradx%step(1))
 
 ! clean up
   call deallocate_cv(grady)
@@ -637,7 +637,7 @@ contains
 ! call get_state_perts_ (fcgrad(1))
 !
   call set_silly_(fcgrad(1))
-  call model2gsi_units_(fcgrad(1))
+  call gsi2model_units_ad_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -655,7 +655,7 @@ contains
   call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert back to model units (just for consistency here)
-  call model2gsi_units_ad_(fcgrad(1))
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -702,7 +702,7 @@ contains
   endif
 
 ! convert from model to gsi units
-  call model2gsi_units_(fcgrad(1))
+  call gsi2model_units_ad_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -724,7 +724,7 @@ contains
   call write_bundle(fcgrad(1),bkgv_write_sv)
 
 ! convert from gsi to model units
-  call model2gsi_units_ad_(fcgrad(1))
+  call gsi2model_units_(fcgrad(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -774,7 +774,7 @@ contains
   call mpi_bcast(berror_stats,clen,mpi_character,root,gsi_mpi_comm_world,ier)
   end subroutine befname_
 !--------------------------------------------------------
-  subroutine model2gsi_units_(bundle)
+  subroutine gsi2model_units_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
@@ -784,15 +784,15 @@ contains
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
-     ptr2 = ptr2 * kPa_per_Pa
+     ptr2 = ptr2 * Pa_per_kPa
   endif
   call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
   if(ier==0) then
-     ptr3 = ptr3 / constoz
+     ptr3 = ptr3 * constoz
   endif
-  end subroutine model2gsi_units_
+  end subroutine gsi2model_units_
 !--------------------------------------------------------
-  subroutine model2gsi_units_ad_(bundle)
+  subroutine gsi2model_units_ad_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
@@ -802,13 +802,13 @@ contains
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
-     ptr2 = ptr2 * kPa_per_Pa
+     ptr2 = ptr2 * Pa_per_kPa
   endif
   call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
   if(ier==0) then
-     ptr3 = ptr3 / constoz
+     ptr3 = ptr3 * constoz
   endif
-  end subroutine model2gsi_units_ad_
+  end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
   end subroutine final_guess_
