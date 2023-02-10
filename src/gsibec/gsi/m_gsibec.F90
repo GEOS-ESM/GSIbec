@@ -3,7 +3,6 @@ module m_gsibec
 !use mpi
 
 use constants, only: zero,one
-use constants, only: kPa_per_Pa
 use constants, only: Pa_per_kPa
 use constants, only: constoz
 use m_kinds, only: i_kind,r_kind
@@ -544,7 +543,7 @@ contains
   grady=zero
 
   call set_silly_(gradx%step(1))
-  call model2gsi_units_(gradx%step(1))
+  call gsi2model_units_ad_(gradx%step(1))
 
   call bkerror(gradx,grady, &
                1,nsclen,npclen,ntclen)
@@ -584,7 +583,7 @@ contains
   endif
 
 ! convert model units to gsi
-  call model2gsi_units_(gradx%step(1))
+  call gsi2model_units_ad_(gradx%step(1))
 
 ! allocate vectors
   call allocate_cv(grady)
@@ -638,7 +637,7 @@ contains
 ! call get_state_perts_ (fcgrad(1))
 !
   call set_silly_(fcgrad(1))
-  call model2gsi_units_(fcgrad(1))
+  call gsi2model_units_ad_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -703,7 +702,7 @@ contains
   endif
 
 ! convert from model to gsi units
-  call model2gsi_units_(fcgrad(1))
+  call gsi2model_units_ad_(fcgrad(1))
 
   call control2state_ad(fcgrad,sbias,gradx)
 
@@ -775,30 +774,12 @@ contains
   call mpi_bcast(berror_stats,clen,mpi_character,root,gsi_mpi_comm_world,ier)
   end subroutine befname_
 !--------------------------------------------------------
-  subroutine model2gsi_units_(bundle)
-  use gsi_bundlemod, only: gsi_bundle
-  use gsi_bundlemod, only: gsi_bundlegetpointer
-  implicit none
-  type(gsi_bundle) bundle
-  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
-  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
-  integer ier
-  call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
-  if(ier==0) then
-     ptr2 = ptr2 * kPa_per_Pa
-  endif
-  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
-  if(ier==0) then
-     ptr3 = ptr3 / constoz
-  endif
-  end subroutine model2gsi_units_
-!--------------------------------------------------------
   subroutine gsi2model_units_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   implicit none
   type(gsi_bundle) bundle
-  real(r_kind),pointer :: ptr2  (:,:)=>NULL()
+  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
@@ -810,6 +791,24 @@ contains
      ptr3 = ptr3 * constoz
   endif
   end subroutine gsi2model_units_
+!--------------------------------------------------------
+  subroutine gsi2model_units_ad_(bundle)
+  use gsi_bundlemod, only: gsi_bundle
+  use gsi_bundlemod, only: gsi_bundlegetpointer
+  implicit none
+  type(gsi_bundle) bundle
+  real(r_kind),pointer :: ptr2(:,:)  =>NULL()
+  real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
+  integer ier
+  call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
+  if(ier==0) then
+     ptr2 = ptr2 * Pa_per_kPa
+  endif
+  call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
+  if(ier==0) then
+     ptr3 = ptr3 * constoz
+  endif
+  end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
   end subroutine final_guess_
