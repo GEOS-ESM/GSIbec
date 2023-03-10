@@ -129,17 +129,22 @@ subroutine compute_qvar3d
   ice=.true.
   call genqsat(qsatg,ges_tsen(1,1,1,ntguessig),ges_prsl(1,1,1,ntguessig),lat2,lon2,nsig,ice,iderivative)
 
-  allocate(rhgues(lat2,lon2,nsig))
-  do k=1,nsig
-     do j=1,lon2
-        do i=1,lat2
-           rhgues(i,j,k)=qgues(i,j,k)/qsatg(i,j,k)
+  print *, 'DEBUG: qvar3 q : ', minval(qgues(1:lat2,1:lon2,1:nsig)), maxval(qgues(1:lat2,1:lon2,1:nsig))
+  print *, 'DEBUG: qvar3 qs: ', minval(qsatg(1:lat2,1:lon2,1:nsig)), maxval(qsatg(1:lat2,1:lon2,1:nsig))
+  if (qoption==2) then
+     allocate(rhgues(lat2,lon2,nsig))
+
+     do k=1,nsig
+        do j=1,lon2
+           do i=1,lat2
+              rhgues(i,j,k)=qgues(i,j,k)/qsatg(i,j,k)
+           end do
         end do
      end do
-  end do
+  print *, 'DEBUG: qvar3 rh: ', minval(rhgues(1:lat2,1:lon2,1:nsig)), maxval(rhgues(1:lat2,1:lon2,1:nsig))
 
-  if (qoption==2) then
      maxvarq1=min(size(varq,1),25)
+  print *, 'DEBUG: qvar3 maxloc: ', maxvarq1
      do k=1,nsig
         do j=1,lon2
            do i=1,lat2
@@ -154,9 +159,9 @@ subroutine compute_qvar3d
            end do
         end do
      end do
-  end if
 
-  deallocate(rhgues)
+     deallocate(rhgues)
+  end if
 
 #ifdef USE_ALL_ORIGINAL
   if (.not. icloud_cv) return

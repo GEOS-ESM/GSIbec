@@ -14,6 +14,8 @@ use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
 use m_rf, only: rf_set,rf_unset
+use tendsmod, only: create_ges_tendencies
+use derivsmod, only: create_ges_derivatives
 implicit none
 private
 !
@@ -21,6 +23,7 @@ public :: ges_prsi
 public :: ges_prsl
 public :: ges_tsen
 public :: ges_qsat
+public :: ges_teta
 
 public :: geop_hgtl
 public :: isli2
@@ -36,6 +39,10 @@ public :: gsiguess_bkgcov_final
 
 public :: nfldsig
 public :: ntguessig
+
+public :: switch_on_derivatives
+public :: tendsflag
+public :: clip_supersaturation
 
 public :: tsensible
 logical, parameter ::  tsensible = .false.   ! jfunc: here set as in jfunc
@@ -53,10 +60,15 @@ logical, parameter ::  use_compress = .true.   ! wired for now
 integer(i_kind),parameter :: nfldsig =  1
 integer(i_kind),parameter :: ntguessig = 1
 
+logical :: switch_on_derivatives = .false.
+logical :: tendsflag = .false.
+logical :: clip_supersaturation = .false.
+
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_tsen
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_qsat
+real(r_kind),allocatable,dimension(:,:,:,:):: ges_teta
 
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgtl
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgti
@@ -121,6 +133,7 @@ subroutine other_set_(need)
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
   allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
   allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
+  allocate(ges_teta(lat2,lon2,nsig,nfldsig))
   allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
   allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
   allocate(isli2(lat2,lon2))
@@ -129,6 +142,7 @@ subroutine other_set_(need)
   ges_tsen=zero
   ges_prsl=zero
   ges_qsat=zero
+  ges_teta=zero
   geop_hgtl=zero
   geop_hgti=zero
   ges_prsi=zero
@@ -175,11 +189,17 @@ subroutine other_set_(need)
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
-subroutine bkgcov_init_(need)
+subroutine bkgcov_init_(rcfile,need)
   implicit none
+  character(len=*), intent(in) :: rcfile
   character(len=*), optional, intent(inout) :: need(:)
   call other_set_(need=need)  ! a little out of place, but ...
   call rf_set(mype)
+! if (switch_on_derivatives) then
+!    call create_ges_tendencies(tendsflag,rcfile)
+!    call create_ges_derivatives(switch_on_derivatives,nfldsig)
+! endif
+  call compute_derived(mype,.true.) ! this belongs in a state set
   initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
@@ -202,6 +222,7 @@ subroutine final_
   if(allocated(geop_hgti)) deallocate(geop_hgti)
   if(allocated(geop_hgtl)) deallocate(geop_hgtl)
   if(allocated(ges_qsat)) deallocate(ges_qsat)
+  if(allocated(ges_teta)) deallocate(ges_teta)
   if(allocated(ges_prsl)) deallocate(ges_prsl)
   if(allocated(ges_prsi)) deallocate(ges_prsi)
   if(allocated(ges_tsen)) deallocate(ges_tsen)
@@ -684,9 +705,9 @@ end subroutine final_
      else
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
         if(ier==0) then
-           ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
-           cycle
-        else
+!          ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
+!          cycle
+!       else
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
            if (istatus/=0) then

@@ -43,6 +43,8 @@ subroutine normal_rh_to_q(rhnorm,t,p,q)
   
   integer(i_kind) i,j,k
 
+  print *, 'DEBUG, normh dq', minval(dqdrh),maxval(dqdrh)
+  print *, 'DEBUG, normh rh', minval(rhnorm),maxval(rhnorm)
 ! Convert normalized rh to q
    do k=1,nsig
       do j=1,lon2

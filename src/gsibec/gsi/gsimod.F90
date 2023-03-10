@@ -57,7 +57,11 @@
   use derivsmod, only: dvars2d, dvars3d, drv_set
   use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
 
+  use tendsmod, only: create_ges_tendencies
+
   use guess_grids, only: nfldsig
+  use guess_grids, only: switch_on_derivatives
+  use guess_grids, only: tendsflag
 
   use hybrid_ensemble_parameters,only : l_hyb_ens,uv_hyb_ens,aniso_a_en,generate_ens,&
                          n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test,oz_univ_static,&
@@ -340,12 +344,10 @@
 !     qoption  - option of analysis variable: 1:q/qsatg-bkg 2:norm RH
 !     cwoption  - option of could-water analysis variable
 !     pseudo_q2- breed between q1/q2 options, that is, (q1/sig(q))
-!     tendsflag - if true, compute time tendencies
 !     mockbgk - if .true., use internally defined (fake) background fields
 !
 
   namelist/setup/&
-!      tendsflag,&
        pseudo_q2,&
        cwoption,&
        qoption,&
@@ -573,10 +575,25 @@
      write(6,bkgerr)
   endif
 
+! check consistency in q option
+  if(pseudo_q2 .and. qoption==1)then
+     if(mype==0)then
+       write(6,*)' pseudo-q2 = ', pseudo_q2, ' qoption = ', qoption
+       write(6,*)' pseudo-q2 must be used together w/ qoption=2 only, aborting.'
+       call stop2(999)
+     endif
+  endif
+
+! if (qoption==2.or.l_tlnmc) then
+! if (qoption==2) then
+     tendsflag =.true.
+     switch_on_derivatives = .true.
+! endif
 
 ! Initialize variables, create/initialize arrays
   lendian_in = -1
-  call create_ges_derivatives(.false.,nfldsig)
+  call create_ges_tendencies(tendsflag,thisrc)
+  call create_ges_derivatives(switch_on_derivatives,nfldsig)
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
