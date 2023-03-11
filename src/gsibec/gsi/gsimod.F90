@@ -18,7 +18,7 @@
   use balmod, only: init_balmod,fstat,lnobalance
 
   use jfunc, only: jfunc_init,mockbkg
-  use m_rf, only: cwoption,qoption,pseudo_q2,rf_set_default
+  use jfunc, only: cwoption,qoption,pseudo_q2
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
@@ -515,7 +515,6 @@
 
   call init_io(mype,npe-1)
   call jfunc_init
-  call rf_set_default
   call init_constants_derived
   call init_constants(.false.)
   call init_balmod
@@ -580,7 +579,7 @@
      if(mype==0)then
        write(6,*)' pseudo-q2 = ', pseudo_q2, ' qoption = ', qoption
        write(6,*)' pseudo-q2 must be used together w/ qoption=2 only, aborting.'
-       call stop2(999)
+       call die(myname_,'consistency(q2)',999)  
      endif
   endif
 

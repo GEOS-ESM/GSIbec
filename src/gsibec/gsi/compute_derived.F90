@@ -92,7 +92,7 @@ subroutine compute_derived(mype,init_pass)
        tendsflag,clip_supersaturation
   use control_vectors, only: cvars3d
   use control_vectors, only: nrf_var
-  use m_rf, only: qoption
+  use jfunc, only: qoption
   use gridmod, only: regional
 #ifdef USE_ALL_ORIGINAL
   use control_vectors, only: an_amp0

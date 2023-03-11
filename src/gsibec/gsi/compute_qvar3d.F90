@@ -46,13 +46,13 @@ subroutine compute_qvar3d
   use gsi_metguess_mod,  only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
-  use m_rf, only: qoption,clip_supersaturation
+  use jfunc, only: qoption,clip_supersaturation
 #ifdef USE_ALL_ORIGINAL
   use jfunc, only: varq,varcw,cwoption
   use radiance_mod, only: icloud_cv,n_clouds_fwd,cloud_names_fwd
   use obsmod, only: l_wcp_cwm
 #else
-  use m_rf, only: varq
+  use m_berror_stats, only: varq
 #endif /* USE_ALL_ORIGINAL */
 
   implicit none
@@ -129,8 +129,6 @@ subroutine compute_qvar3d
   ice=.true.
   call genqsat(qsatg,ges_tsen(1,1,1,ntguessig),ges_prsl(1,1,1,ntguessig),lat2,lon2,nsig,ice,iderivative)
 
-  print *, 'DEBUG: qvar3 q : ', minval(qgues(1:lat2,1:lon2,1:nsig)), maxval(qgues(1:lat2,1:lon2,1:nsig))
-  print *, 'DEBUG: qvar3 qs: ', minval(qsatg(1:lat2,1:lon2,1:nsig)), maxval(qsatg(1:lat2,1:lon2,1:nsig))
   if (qoption==2) then
      allocate(rhgues(lat2,lon2,nsig))
 
@@ -141,10 +139,8 @@ subroutine compute_qvar3d
            end do
         end do
      end do
-  print *, 'DEBUG: qvar3 rh: ', minval(rhgues(1:lat2,1:lon2,1:nsig)), maxval(rhgues(1:lat2,1:lon2,1:nsig))
 
      maxvarq1=min(size(varq,1),25)
-  print *, 'DEBUG: qvar3 maxloc: ', maxvarq1
      do k=1,nsig
         do j=1,lon2
            do i=1,lat2

@@ -33,10 +33,8 @@ subroutine getprs(ps,prs)
   use m_kinds,only: r_kind,i_kind
   use constants,only: zero,half,one_tenth,rd_over_cp,one
   use gridmod,only: nsig,lat2,lon2,ak5,bk5,ck5,tref5,idvc5
-#ifdef USE_ALL_ORIGINAL
   use gridmod,only: wrf_nmm_regional,nems_nmmb_regional,eta1_ll,eta2_ll,pdtop_ll,pt_ll,&
        regional,wrf_mass_regional,cmaq_regional,twodvar_regional,fv3_regional
-#endif /* USE_ALL_ORIGINAL */
   use guess_grids, only: ntguessig
   use gsi_metguess_mod, only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -57,7 +55,6 @@ subroutine getprs(ps,prs)
 ! prs=zero 
   it=ntguessig
 
-#ifdef USE_ALL_ORIGINAL
   if (regional) then
      if(wrf_nmm_regional.or.nems_nmmb_regional.or.&
           cmaq_regional) then
@@ -99,7 +96,6 @@ subroutine getprs(ps,prs)
         end do
      endif
   else
-#endif /* USE_ALL_ORIGINAL */
      k=1
      k2=nsig+1
      do j=1,lon2
@@ -137,9 +133,7 @@ subroutine getprs(ps,prs)
            end do
         end if
      end if
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif /* USE_ALL_ORIGINAL */
 
   return
 end subroutine getprs

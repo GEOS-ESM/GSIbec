@@ -31,7 +31,7 @@ subroutine normal_rh_to_q(rhnorm,t,p,q)
 !$$$
   use m_kinds, only: r_kind,i_kind
   use derivsmod, only: dqdrh,dqdp,dqdt
-  use m_rf, only: qoption
+  use jfunc, only: qoption
   use gridmod, only: lat2,lon2,nsig
 
   implicit none
@@ -43,8 +43,6 @@ subroutine normal_rh_to_q(rhnorm,t,p,q)
   
   integer(i_kind) i,j,k
 
-  print *, 'DEBUG, normh dq', minval(dqdrh),maxval(dqdrh)
-  print *, 'DEBUG, normh rh', minval(rhnorm),maxval(rhnorm)
 ! Convert normalized rh to q
    do k=1,nsig
       do j=1,lon2
@@ -99,7 +97,7 @@ subroutine normal_rh_to_q_ad(rhnorm,t,p,q)
 
   use m_kinds, only: r_kind,i_kind
   use derivsmod, only: dqdrh,dqdp,dqdt
-  use m_rf, only: qoption
+  use jfunc, only: qoption
   use gridmod, only: lat2,lon2,nsig
   use constants, only: zero
   implicit none

@@ -35,7 +35,7 @@ gengrid_vars.f90
 get_derivatives.F90
 get_derivatives2.F90
 get_gefs_ensperts_dualres.F90
-getprs.F90
+getprs.f90
 getuv.F90
 getvvel.f90
 gridmod.F90

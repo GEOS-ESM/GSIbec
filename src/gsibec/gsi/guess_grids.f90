@@ -13,7 +13,7 @@ use gsi_metguess_mod, only: gsi_metguess_bundle
 use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
-use m_rf, only: rf_set,rf_unset
+!_OUTuse m_rf, only: rf_set,rf_unset
 use tendsmod, only: create_ges_tendencies
 use derivsmod, only: create_ges_derivatives
 implicit none
@@ -185,21 +185,15 @@ subroutine other_set_(need)
   endif
   call load_prsges_
   call load_geop_hgt_
-  call tpause(mype,'pvoz')  ! _RT: this needs attention
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
-subroutine bkgcov_init_(rcfile,need)
+subroutine bkgcov_init_(need)
   implicit none
-  character(len=*), intent(in) :: rcfile
   character(len=*), optional, intent(inout) :: need(:)
   call other_set_(need=need)  ! a little out of place, but ...
-  call rf_set(mype)
-! if (switch_on_derivatives) then
-!    call create_ges_tendencies(tendsflag,rcfile)
-!    call create_ges_derivatives(switch_on_derivatives,nfldsig)
-! endif
   call compute_derived(mype,.true.) ! this belongs in a state set
+!_OUT  call rf_set()
   initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
@@ -207,7 +201,7 @@ subroutine bkgcov_final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  call rf_unset()
+!_OUT  call rf_unset()
   initialized_ = .false.
   iamset_ = .false.
 end subroutine bkgcov_final_
