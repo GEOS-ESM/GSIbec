@@ -25,6 +25,7 @@ egrid2agrid_mod.f90
 en_perts_io.f90
 ensctl2state.F90
 ensctl2state_ad.F90
+fgrid2agrid_mod.f90
 general_commvars_mod.f90
 general_specmod.f90
 general_spectral_transforms.f90
@@ -93,6 +94,7 @@ tpause_t.F90
 tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90
+xhat_vordivmod.f90
 
 )
 

@@ -6,6 +6,7 @@ use constants, only: fv,zero,one,max_varname_length
 use constants, only: kPa_per_Pa,Pa_per_kPa
 use constants, only: constoz
 use constants, only: grav
+use constants, only: rearth
 use gridmod, only: nlon,nlat,lon2,lat2,nsig,idsl5
 use gridmod, only: ak5,bk5
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -13,7 +14,6 @@ use gsi_metguess_mod, only: gsi_metguess_bundle
 use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
-!_OUTuse m_rf, only: rf_set,rf_unset
 use tendsmod, only: create_ges_tendencies
 use derivsmod, only: create_ges_derivatives
 implicit none
@@ -40,10 +40,6 @@ public :: gsiguess_bkgcov_final
 public :: nfldsig
 public :: ntguessig
 
-public :: switch_on_derivatives
-public :: tendsflag
-public :: clip_supersaturation
-
 public :: tsensible
 logical, parameter ::  tsensible = .false.   ! jfunc: here set as in jfunc
                           !        gsi handles this completely
@@ -59,10 +55,6 @@ logical, parameter ::  use_compress = .true.   ! wired for now
 ! For now turned into wired-in parameters
 integer(i_kind),parameter :: nfldsig =  1
 integer(i_kind),parameter :: ntguessig = 1
-
-logical :: switch_on_derivatives = .false.
-logical :: tendsflag = .false.
-logical :: clip_supersaturation = .false.
 
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
@@ -125,10 +117,17 @@ subroutine init_(mockbkg)
 end subroutine init_
 !--------------------------------------------------------
 subroutine other_set_(need)
+  use compact_diffs, only: cdiff_created
+  use compact_diffs, only: cdiff_initialized
+  use compact_diffs, only: create_cdiff_coefs
+  use compact_diffs, only: inisph
+  use xhat_vordivmod, only: xhat_vordiv_calc2
   implicit none
   character(len=*), optional, intent(inout) :: need(:)
   character(len=*), parameter :: myname_ = myname//'*other_set_'
-  integer ier
+  integer it,ier,istatus
+  real(r_kind),dimension(:,:,:),pointer :: ges_u,ges_v
+  real(r_kind),dimension(:,:,:),pointer :: ges_div,ges_vor
   allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
   allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
@@ -185,6 +184,31 @@ subroutine other_set_(need)
   endif
   call load_prsges_
   call load_geop_hgt_
+  if (present(need)) then
+    if (any(need=='vor').or.any(need=='div')) then
+!      if(.not.cdiff_created()) call create_cdiff_coefs()
+!      if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
+       ier=0
+       it = 1 ! wired
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'u', ges_u, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'v', ges_v, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'vor', ges_vor, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'div', ges_div, &
+                                   istatus );ier=ier+istatus
+       if(ier==0) then
+          call xhat_vordiv_calc2 (ges_u,ges_v,ges_vor,ges_div)
+       endif
+       where(need=='vor')
+          need='filled-'//need
+       endwhere
+       where(need=='div')
+          need='filled-'//need
+       endwhere
+    endif
+  endif
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
@@ -193,7 +217,6 @@ subroutine bkgcov_init_(need)
   character(len=*), optional, intent(inout) :: need(:)
   call other_set_(need=need)  ! a little out of place, but ...
   call compute_derived(mype,.true.) ! this belongs in a state set
-!_OUT  call rf_set()
   initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
@@ -201,7 +224,6 @@ subroutine bkgcov_final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-!_OUT  call rf_unset()
   initialized_ = .false.
   iamset_ = .false.
 end subroutine bkgcov_final_

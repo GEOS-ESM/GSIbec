@@ -17,6 +17,14 @@ use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
 use m_berror_stats, only: berror_get_dims
 use m_berror_stats, only: berror_init
 
+
+use hybrid_ensemble_parameters, only: l_hyb_ens
+use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
+use hybrid_ensemble_isotropic, only: create_ensemble
+use hybrid_ensemble_isotropic, only: load_ensemble
+use hybrid_ensemble_isotropic, only: hybens_localization_setup
+use hybrid_ensemble_isotropic, only: destroy_ensemble
+
 use mpeu_util, only: getindex
 use mpeu_util, only: die
 implicit none
@@ -40,13 +48,25 @@ contains
     print *, nlat, mlat, nlon, mlon, nsig, msig
     call die(myname,': bad dims',99)
   endif
+  if(l_hyb_ens) then
+     call create_ensemble
+  endif
   call berror_init(mlat,msig)
   call create_balance_vars
   call create_berror_vars
   call prebal(fut2ps,cwcoveqqcov)
   call prewgt(mype)
+! If hybrid covariance
+  if(l_hyb_ens) then
+     call load_ensemble(-1)
+     call hybens_localization_setup
+  end if
   end subroutine set_
   subroutine unset_
+  if (l_hyb_ens) then
+    call destroy_hybens_localization_parameters
+    call destroy_ensemble
+  endif
   call destroy_smooth_polcas ! the set is called in prewgt - gsi typically has inconsistent set/unset
   call destroy_berror_vars
   call destroy_balance_vars

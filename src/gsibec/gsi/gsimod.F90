@@ -19,6 +19,8 @@
 
   use jfunc, only: jfunc_init,mockbkg
   use jfunc, only: cwoption,qoption,pseudo_q2
+  use jfunc, only: switch_on_derivatives
+  use jfunc, only: tendsflag
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
@@ -43,7 +45,7 @@
   use constants, only: zero,one,init_constants,gps_constants,init_constants_derived,three
   use constants, only: init_constants
 
-! use fgrid2agrid_mod, only: nord_f2a,init_fgrid2agrid,final_fgrid2agrid,set_fgrid2agrid
+  use fgrid2agrid_mod, only: set_fgrid2agrid
 
   use smooth_polcarf, only: norsp,init_smooth_polcas
 
@@ -60,8 +62,6 @@
   use tendsmod, only: create_ges_tendencies
 
   use guess_grids, only: nfldsig
-  use guess_grids, only: switch_on_derivatives
-  use guess_grids, only: tendsflag
 
   use hybrid_ensemble_parameters,only : l_hyb_ens,uv_hyb_ens,aniso_a_en,generate_ens,&
                          n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test,oz_univ_static,&
@@ -489,6 +489,7 @@
 ! Begin gsi code
 !
   use mpeu_util,only: die
+  use gsi_fixture, only: fixture_config
   implicit none
   character(len=*),optional,intent(in):: nmlfile
 
@@ -498,6 +499,8 @@
   logical:: already_init_mpi
   real(r_kind):: varqc_max,c_varqc_new
   character(len=255) :: thisrc
+
+  call fixture_config()
 
   ierror=0
   if (present(nmlfile)) then
@@ -523,7 +526,7 @@
   call init_compact_diffs
   call init_smooth_polcas
   call init_hybrid_ensemble_parameters
-! call set_fgrid2agrid
+  call set_fgrid2agrid
 
 
 ! Read user input from namelists.  All processor elements 
@@ -541,6 +544,11 @@
   open(11,file=thisrc)
   read(11,bkgerr,iostat=ios)
   if(ios/=0) call die(myname_,'read(bkgerr)',ios)
+  close(11)
+
+  open(11,file=thisrc)
+  read(11,hybrid_ensemble,iostat=ios)
+  if(ios/=0) call die(myname_,'read(hybrid_ensemble)',ios)
   close(11)
 
   if(jcap > jcap_cut)then

@@ -511,7 +511,7 @@ subroutine allocate_cv(ycv)
          call GSI_BundleSet(ycv%step(jj),ycv%grid_step,bname,ierror,names2d=cvars2d,names3d=cvars3d,bundle_kind=r_kind)
          if (ierror/=0) then
              write(6,*)'allocate_cv: error alloc(static bundle)'
-             call stop2(109)
+             call stop2(106)
          endif
          ndim=ndim+ycv%step(jj)%ndim
 
@@ -524,7 +524,7 @@ subroutine allocate_cv(ycv)
             call GSI_BundleCreate(ycv%motley(jj),grid_motley,bname,ierror,names2d=cvarsmd,bundle_kind=r_kind)
             if (ierror/=0) then
                 write(6,*)'allocate_cv: error alloc(motley bundle)'
-                call stop2(109)
+                call stop2(107)
             endif
          endif
 !    endif ! beta_s0
@@ -539,7 +539,7 @@ subroutine allocate_cv(ycv)
             call GSI_BundleSet(ycv%aens(jj,nn),ycv%grid_aens,bname,ierror,names3d=ltmp,bundle_kind=r_kind)
             if (ierror/=0) then
                 write(6,*)'allocate_cv: error alloc(ensemble bundle)'
-                call stop2(109)
+                call stop2(108)
             endif
             ndim=ndim+ycv%aens(jj,nn)%ndim
 
@@ -550,17 +550,21 @@ subroutine allocate_cv(ycv)
 
   enddo
 
-  ycv%predr => ycv%values(ii+1:ii+nsclen)
-  ii=ii+nsclen
-  ycv%predp => ycv%values(ii+1:ii+npclen)
-  ii=ii+npclen
+  if (nsclen>0) then
+     ycv%predr => ycv%values(ii+1:ii+nsclen)
+     ii=ii+nsclen
+  endif
+  if (npclen>0) then
+     ycv%predp => ycv%values(ii+1:ii+npclen)
+     ii=ii+npclen
+  endif
   if (ntclen>0) then
      ycv%predt => ycv%values(ii+1:ii+ntclen)
      ii=ii+ntclen
   end if
 
   if (ii/=nclen) then
-     write(6,*)'allocate_cv: error length',ii,nclen
+     write(6,*)'allocate_cv: error length',ii,nclen,n_step,n_aens
      call stop2(109)
   end if
 
