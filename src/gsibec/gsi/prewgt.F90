@@ -94,8 +94,7 @@ subroutine prewgt(mype)
   use m_berror_stats,only : berror_read_wgt
   use m_mpimod, only: nvar_id,levs_id
   use m_mpimod, only: gsi_mpi_comm_world,ierror,mpi_rtype
-  use m_rf, only: varcw,cwoption
-  use m_rf, only: varq,qoption
+  use jfunc, only: qoption,cwoption
   use control_vectors, only: cvars2d,cvars3d
   use control_vectors, only: cvars => nrf_var
   use control_vectors, only: as2d,as3d,atsfc_sdv
@@ -107,7 +106,6 @@ subroutine prewgt(mype)
   use constants, only: zero,quarter,half,one,two,three,&
        rearth_equator,pi,r1000,r400
   use guess_grids, only: isli2
-  use guess_grids, only: ges_prsi
   use guess_grids, only: nfldsig,ntguessig
   use smooth_polcarf, only: norsp,setup_smooth_polcas
   use mpeu_util, only: getindex
@@ -308,8 +306,8 @@ subroutine prewgt(mype)
   end if
 
 ! Get background error statistics from a file ("berror_stats").
-  call berror_read_wgt(corz,corp,hwllin,hwllinp,vscalesin,corsst,hsst,varq,qoption,varcw,cwoption, &
-                       ntguessig,ges_prsi,mype)
+  call berror_read_wgt(corz,corp,hwllin,hwllinp,vscalesin,corsst,hsst,&
+                       qoption,cwoption,mype)
                       !n_clouds_fwd,cloud_names_fwd,lunit)
   mlat=nlat
 

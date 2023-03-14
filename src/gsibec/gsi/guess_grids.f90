@@ -6,6 +6,7 @@ use constants, only: fv,zero,one,max_varname_length
 use constants, only: kPa_per_Pa,Pa_per_kPa
 use constants, only: constoz
 use constants, only: grav
+use constants, only: rearth
 use gridmod, only: nlon,nlat,lon2,lat2,nsig,idsl5
 use gridmod, only: ak5,bk5
 use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -13,7 +14,8 @@ use gsi_metguess_mod, only: gsi_metguess_bundle
 use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
-use m_rf, only: rf_set,rf_unset
+use tendsmod, only: create_ges_tendencies
+use derivsmod, only: create_ges_derivatives
 implicit none
 private
 !
@@ -21,6 +23,7 @@ public :: ges_prsi
 public :: ges_prsl
 public :: ges_tsen
 public :: ges_qsat
+public :: ges_teta
 
 public :: geop_hgtl
 public :: isli2
@@ -57,6 +60,7 @@ real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_tsen
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_qsat
+real(r_kind),allocatable,dimension(:,:,:,:):: ges_teta
 
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgtl
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgti
@@ -113,14 +117,22 @@ subroutine init_(mockbkg)
 end subroutine init_
 !--------------------------------------------------------
 subroutine other_set_(need)
+  use compact_diffs, only: cdiff_created
+  use compact_diffs, only: cdiff_initialized
+  use compact_diffs, only: create_cdiff_coefs
+  use compact_diffs, only: inisph
+  use xhat_vordivmod, only: xhat_vordiv_calc2
   implicit none
   character(len=*), optional, intent(inout) :: need(:)
   character(len=*), parameter :: myname_ = myname//'*other_set_'
-  integer ier
+  integer it,ier,istatus
+  real(r_kind),dimension(:,:,:),pointer :: ges_u,ges_v
+  real(r_kind),dimension(:,:,:),pointer :: ges_div,ges_vor
   allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
   allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
   allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
+  allocate(ges_teta(lat2,lon2,nsig,nfldsig))
   allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
   allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
   allocate(isli2(lat2,lon2))
@@ -129,6 +141,7 @@ subroutine other_set_(need)
   ges_tsen=zero
   ges_prsl=zero
   ges_qsat=zero
+  ges_teta=zero
   geop_hgtl=zero
   geop_hgti=zero
   ges_prsi=zero
@@ -171,7 +184,31 @@ subroutine other_set_(need)
   endif
   call load_prsges_
   call load_geop_hgt_
-  call tpause(mype,'pvoz')  ! _RT: this needs attention
+  if (present(need)) then
+    if (any(need=='vor').or.any(need=='div')) then
+!      if(.not.cdiff_created()) call create_cdiff_coefs()
+!      if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
+       ier=0
+       it = 1 ! wired
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'u', ges_u, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'v', ges_v, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'vor', ges_vor, &
+                                   istatus );ier=ier+istatus
+       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'div', ges_div, &
+                                   istatus );ier=ier+istatus
+       if(ier==0) then
+          call xhat_vordiv_calc2 (ges_u,ges_v,ges_vor,ges_div)
+       endif
+       where(need=='vor')
+          need='filled-'//need
+       endwhere
+       where(need=='div')
+          need='filled-'//need
+       endwhere
+    endif
+  endif
   iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
@@ -179,7 +216,7 @@ subroutine bkgcov_init_(need)
   implicit none
   character(len=*), optional, intent(inout) :: need(:)
   call other_set_(need=need)  ! a little out of place, but ...
-  call rf_set(mype)
+  call compute_derived(mype,.true.) ! this belongs in a state set
   initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
@@ -187,7 +224,6 @@ subroutine bkgcov_final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  call rf_unset()
   initialized_ = .false.
   iamset_ = .false.
 end subroutine bkgcov_final_
@@ -202,6 +238,7 @@ subroutine final_
   if(allocated(geop_hgti)) deallocate(geop_hgti)
   if(allocated(geop_hgtl)) deallocate(geop_hgtl)
   if(allocated(ges_qsat)) deallocate(ges_qsat)
+  if(allocated(ges_teta)) deallocate(ges_teta)
   if(allocated(ges_prsl)) deallocate(ges_prsl)
   if(allocated(ges_prsi)) deallocate(ges_prsi)
   if(allocated(ges_tsen)) deallocate(ges_tsen)
@@ -684,9 +721,9 @@ end subroutine final_
      else
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tsen',tsen,ier)
         if(ier==0) then
-           ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
-           cycle
-        else
+!          ges_tsen(:,:,:,jj) = tsen ! warning: assumes this has been filled in properly in JEDI
+!          cycle
+!       else
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
            if (istatus/=0) then

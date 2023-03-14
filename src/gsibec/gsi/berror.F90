@@ -177,7 +177,7 @@ module berror
   logical,save :: fut2ps
   logical,save :: cwcoveqqcov
 
-  logical, save :: balmod_initialized_ = .false.
+  logical, save :: berror_initialized_ = .false.
 
 contains
 
@@ -278,7 +278,7 @@ contains
   use constants, only: zero,one
   implicit none
   
-  if(balmod_initialized_) return
+  if(berror_initialized_) return
 
   llmin=1
   llmax=nlat
@@ -332,7 +332,7 @@ contains
            ii1(2*nf+1,2*nf+1,nhscrf,nnnn1o),jj1(2*nf+1,2*nf+1,nhscrf,nnnn1o),&
            ii2(2*nf+1,2*nf+1,nhscrf,nnnn1o),jj2(2*nf+1,2*nf+1,nhscrf,nnnn1o))
 
-  balmod_initialized_ = .true.
+  berror_initialized_ = .true.
 
   return
  end subroutine create_berror_vars
@@ -388,7 +388,7 @@ contains
     if(allocated(ii2)) deallocate(ii2)
     if(allocated(jj2)) deallocate(jj2)
 
-    balmod_initialized_ = .false.
+    berror_initialized_ = .false.
 
     return
   end subroutine destroy_berror_vars

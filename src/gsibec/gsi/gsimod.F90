@@ -18,7 +18,9 @@
   use balmod, only: init_balmod,fstat,lnobalance
 
   use jfunc, only: jfunc_init,mockbkg
-  use m_rf, only: cwoption,qoption,pseudo_q2,rf_set_default
+  use jfunc, only: cwoption,qoption,pseudo_q2
+  use jfunc, only: switch_on_derivatives
+  use jfunc, only: tendsflag
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
 
@@ -43,7 +45,7 @@
   use constants, only: zero,one,init_constants,gps_constants,init_constants_derived,three
   use constants, only: init_constants
 
-! use fgrid2agrid_mod, only: nord_f2a,init_fgrid2agrid,final_fgrid2agrid,set_fgrid2agrid
+  use fgrid2agrid_mod, only: set_fgrid2agrid
 
   use smooth_polcarf, only: norsp,init_smooth_polcas
 
@@ -56,6 +58,8 @@
 
   use derivsmod, only: dvars2d, dvars3d, drv_set
   use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
+
+  use tendsmod, only: create_ges_tendencies
 
   use guess_grids, only: nfldsig
 
@@ -340,12 +344,10 @@
 !     qoption  - option of analysis variable: 1:q/qsatg-bkg 2:norm RH
 !     cwoption  - option of could-water analysis variable
 !     pseudo_q2- breed between q1/q2 options, that is, (q1/sig(q))
-!     tendsflag - if true, compute time tendencies
 !     mockbgk - if .true., use internally defined (fake) background fields
 !
 
   namelist/setup/&
-!      tendsflag,&
        pseudo_q2,&
        cwoption,&
        qoption,&
@@ -487,6 +489,7 @@
 ! Begin gsi code
 !
   use mpeu_util,only: die
+  use gsi_fixture, only: fixture_config
   implicit none
   character(len=*),optional,intent(in):: nmlfile
 
@@ -496,6 +499,8 @@
   logical:: already_init_mpi
   real(r_kind):: varqc_max,c_varqc_new
   character(len=255) :: thisrc
+
+  call fixture_config()
 
   ierror=0
   if (present(nmlfile)) then
@@ -513,7 +518,6 @@
 
   call init_io(mype,npe-1)
   call jfunc_init
-  call rf_set_default
   call init_constants_derived
   call init_constants(.false.)
   call init_balmod
@@ -522,7 +526,7 @@
   call init_compact_diffs
   call init_smooth_polcas
   call init_hybrid_ensemble_parameters
-! call set_fgrid2agrid
+  call set_fgrid2agrid
 
 
 ! Read user input from namelists.  All processor elements 
@@ -540,6 +544,11 @@
   open(11,file=thisrc)
   read(11,bkgerr,iostat=ios)
   if(ios/=0) call die(myname_,'read(bkgerr)',ios)
+  close(11)
+
+  open(11,file=thisrc)
+  read(11,hybrid_ensemble,iostat=ios)
+  if(ios/=0) call die(myname_,'read(hybrid_ensemble)',ios)
   close(11)
 
   if(jcap > jcap_cut)then
@@ -573,10 +582,25 @@
      write(6,bkgerr)
   endif
 
+! check consistency in q option
+  if(pseudo_q2 .and. qoption==1)then
+     if(mype==0)then
+       write(6,*)' pseudo-q2 = ', pseudo_q2, ' qoption = ', qoption
+       write(6,*)' pseudo-q2 must be used together w/ qoption=2 only, aborting.'
+       call die(myname_,'consistency(q2)',999)  
+     endif
+  endif
+
+! if (qoption==2.or.l_tlnmc) then
+! if (qoption==2) then
+     tendsflag =.true.
+     switch_on_derivatives = .true.
+! endif
 
 ! Initialize variables, create/initialize arrays
   lendian_in = -1
-  call create_ges_derivatives(.false.,nfldsig)
+  call create_ges_tendencies(tendsflag,thisrc)
+  call create_ges_derivatives(switch_on_derivatives,nfldsig)
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &

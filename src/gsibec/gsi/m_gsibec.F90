@@ -44,6 +44,7 @@ use gsimod, only: gsimain_finalize
 use m_berror_stats,only : berror_stats
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use hybrid_ensemble_parameters,only : l_hyb_ens
+use hybrid_ensemble_isotropic, only: hybens_grid_setup
 use hybrid_ensemble_isotropic, only: bkerror_a_en
 
 use general_sub2grid_mod, only: sub2grid_info
@@ -158,6 +159,9 @@ contains
   endif
   call gsimain_initialize(nmlfile=nmlfile)
   call set_(vgrid=vgrid)
+  if(l_hyb_ens) then
+    call hybens_grid_setup()
+  endif
   call set_pointer_()
 
 ! create subdomain/grid indexes 
@@ -408,52 +412,109 @@ contains
 !$$$
     use gridmod, only: latlon11,latlon1n,nsig,lat2,lon2
     use gridmod, only: nlat,nlon
+    use gridmod, only: nnnn1o
     use state_vectors, only: ns2d,levels
     use constants, only : max_varname_length
     use bias_predictors, only: setup_predictors
     use control_vectors, only: nc2d,nc3d
     use control_vectors, only: setup_control_vectors
     use state_vectors, only: setup_state_vectors
+    use hybrid_ensemble_parameters, only: l_hyb_ens,n_ens,generate_ens,grd_ens
+    use jfunc, only: nval_lenz
+    use jfunc, only: nclenz
+    use jfunc, only: npred,jpch_rad
+    use jfunc, only: npredp,npcptype
     implicit none
 
+    character(len=*),parameter :: myname_=myname//'set_pointer_'
     integer(i_kind) n_ensz,nval_lenz_tot,nval_lenz_enz
 
-    integer(i_kind) n_ens,npred,jpch_rad,npredp,npcptype,nvals_levs,nval_len
-    integer(i_kind) nvals_len,nval_levs,nclen,nrclen,nclen1,nclen2,nval2d
+    integer(i_kind) nvals_levs,nval_len
+    integer(i_kind) nvals_len,nval_levs
+    integer(i_kind) nclen,nrclen,nval2d
     logical lsqrtb
 
-    npred=0
-    jpch_rad=0
-    npredp=0
-    npcptype=0
-    lsqrtb=.false.
-    n_ens=0
+    if(lsqrtb) then
+      call die(myname_,': cannot handle lsqrtb=.t.',999)
+    endif
 
-    nvals_levs=ns2d+sum(levels)
+    nvals_levs=max(0,ns2d)+sum(levels)
     nvals_len=nvals_levs*latlon11
 
     nval_levs=max(0,nc3d)*nsig+max(0,nc2d)
     nval_len=nval_levs*latlon11
+    if(l_hyb_ens) then
+       nval_len=nval_len+n_ens*grd_ens%nsig*grd_ens%latlon11
+    end if
     nsclen=npred*jpch_rad
     npclen=npredp*npcptype
     ntclen=0
     nclen=nsubwin*nval_len+nsclen+npclen+ntclen
     nrclen=nsclen+npclen+ntclen
-    nclen1=nclen-nrclen
-    nclen2=nclen1+nsclen
   
     n_ensz=0
     nval_lenz_enz=0
-    nval2d=latlon11
+    if(l_hyb_ens.and.generate_ens) then
+       call set_sqrt_2dsize_(nval2d)
+       nval_lenz=nval2d*nnnn1o
+       nval_lenz_tot=nval_lenz
+       nclenz=nsubwin*nval_lenz_tot+nsclen+npclen+ntclen
+    else
+       nval2d=latlon11
+    end if
 
     CALL setup_control_vectors(nsig,lat2,lon2,latlon11,latlon1n, &
-                               nsclen,npclen,ntclen,nclen,nsubwin,nval_len,lsqrtb,n_ens, &
+                               nsclen,npclen,ntclen,nclen,nsubwin,&
+                               nval_len,lsqrtb,n_ens, &
                                nval_lenz_enz)
     CALL setup_predictors(nrclen,nsclen,npclen,ntclen)
     CALL setup_state_vectors(latlon11,latlon1n,nvals_len,lat2,lon2,nsig)
 
   end subroutine set_pointer_
 !--------------------------------------------------------
+
+  subroutine set_sqrt_2dsize_(ndim2d)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    set_sqrt_2dsize
+!   prgmmr: todling          org: np23                date: 2011-09-05
+!
+! abstract: Calculates size of 2d-component of control vector in sqrt-B
+!           case. This being an independent call allows using ckgcov
+!           within context of B-precond.
+!
+! program history log:
+!   2011-09-05  todling - move as independent piece out of set_pointer
+!
+!   input argument list:
+!
+!   output argument list:
+!     ndim2d - size of 2d component of control vector in sqrt-B case
+!
+! attributes:
+!   language: f90
+!   machine:  ibm rs/6000 sp
+!
+!$$$
+  use m_kinds, only: i_kind
+  use gridmod, only: nlat,nlon
+  implicit none
+  integer(i_kind),intent(out):: ndim2d
+  integer(i_kind) nx,ny,mr,nr,nf
+!           following lifted from subroutine create_berror_vars in module berror.f90
+!            inserted because create_berror_vars called after this routine
+     nx=nlon*3/2
+     nx=nx/2*2
+     ny=nlat*8/9
+     ny=ny/2*2
+     if(mod(nlat,2)/=0)ny=ny+1
+     mr=0
+     nr=nlat/4
+     nf=nr
+     ndim2d=(ny*nx + 2*(2*nf+1)*(2*nf+1))*3
+  end subroutine set_sqrt_2dsize_
+!--------------------------------------------------------
+
   subroutine set_silly_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer

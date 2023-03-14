@@ -35,7 +35,7 @@ module m_berror_stats
 !
 ! !INTERFACE:
 
-   use m_kinds,          only : i_kind
+   use m_kinds,        only: i_kind,r_kind
    use constants,      only: one,zero
    use control_vectors,only: cvars2d,cvars3d
    use mpeu_util,      only: getindex,check_iostat,die
@@ -58,12 +58,17 @@ module m_berror_stats
    public :: berror_read_bal ! get cross-cov.stats., balmod::prebal()
    public :: berror_read_wgt ! get auto-cov.stats., prewgt()
    public :: berror_set      ! set internal parameters
+   public :: berror_init     ! init internal variables
+
+   public :: varq
+   public :: varcw
 
    ! external interfaces relating to internal procedures.
    interface berror_get_dims; module procedure get_dims; end interface
    interface berror_read_bal; module procedure read_bal; end interface
    interface berror_read_wgt; module procedure read_wgt; end interface
    interface berror_set;      module procedure lset;     end interface
+   interface berror_init;     module procedure init_;    end interface
 
 ! !REVISION HISTORY:
 !       30Jul08 - Jing Guo <guo@gmao.gsfc.nasa.gov>
@@ -90,7 +95,24 @@ module m_berror_stats
 
    logical,save :: bin_berror=.false.
 
+   real(r_kind),allocatable,dimension(:,:):: varq
+   real(r_kind),allocatable,dimension(:,:):: varcw
+
 contains
+
+subroutine init_(mlat,msig)
+   integer,intent(in) :: mlat,msig
+   if(.not.allocated(varq)) then
+     if (getindex(cvars3d,'q')>0) then
+        allocate(varq(mlat,msig))
+        varq=zero
+     endif
+   endif
+   if(.not.allocated(varcw)) then
+      allocate(varcw(mlat,msig))
+      varcw=zero
+   endif
+end subroutine init_
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! NASA/GSFC, Global Modeling and Assimilation Office, 900.3, GEOS/DAS  !
@@ -338,8 +360,7 @@ end subroutine read_bal
 !
 ! !INTERFACE:
 
-subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwoption,&
-                    ntguessig,ges_prsi,mype, &
+subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,qoption,cwoption,mype, &
                     n_clouds_fwd,cloud_names_fwd,lunit)
 
    use m_kinds,only : r_single,r_kind
@@ -358,15 +379,9 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
    real(r_single),dimension(nlat,nlon),intent(out  ) :: corsst
    real(r_single),dimension(nlat,nlon),intent(out  ) :: hsst
 
-   real(r_kind),  dimension(:,:)      ,intent(out  ) :: varq
-   real(r_kind),  dimension(:,:)      ,intent(out  ) :: varcw
-
    integer(i_kind)                    ,intent(in   ) :: qoption
    integer(i_kind)                    ,intent(in   ) :: cwoption
    integer(i_kind)                    ,intent(in   ) :: mype  ! "my" processor ID
-
-   integer(i_kind)                    ,intent(in   ) :: ntguessig 
-   real(r_kind)   ,dimension(:,:,:,:) ,intent(in   ) :: ges_prsi
 
 !  Optionals
    integer(i_kind),optional           ,intent(in   ) :: lunit ! an alternative unit
@@ -426,10 +441,10 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
       if ( .not.found3d(n) ) then
          if ( n>0 ) then
             if ( trim(cvars3d(n))=='oz' ) then
-               call setcoroz_(corz(:,:,n),ntguessig,ges_prsi,mype)
+               call setcoroz_(corz(:,:,n),mype)
                call sethwlloz_(hwll(:,:,n),mype)
             else
-               call setcorchem_(cvars3d(n),corz(:,:,n),ntguessig,ges_prsi,ier)
+               call setcorchem_(cvars3d(n),corz(:,:,n),ier)
                call sethwllchem_(hwll(:,:,n),mype)
                if(ier/=0) cycle ! if this happens, code will crash later
             endif
@@ -675,13 +690,15 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
-             cycle
           endif
           if (trim(cvars3d(nv))=='q' .and. qoption==2) then
              allocate(corq2(bvars%nlat,bvars%nsig))
              call nc_berror_getpointer ('nrh',bvars,ptr2d,ier)
              if (ier==0) then
                 corq2=ptr2d
+!               corq2=max(0.0_r_kind,corq2) ! hack 1
+!               corq2=min(1.0_r_kind,2*corq2) ! hack 2
+!               print *, 'DEBUG (berr): ', minval(corq2),maxval(corq2)
                 do k=1,bvars%nsig
                    do i=1,bvars%nlat
                       corq2x=corq2(i,k)
@@ -693,8 +710,18 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,varq,qoption,varcw,cwopt
              endif
              corz(:,:,n)=one
              deallocate(corq2)
-             cycle
           endif
+          cycle
+      endif
+      if (trim(cvars3d(nv))=='q') then
+          n = getindex(cvars3d,'q')
+          found3d(n)=.true.
+          corz(:,:,n)=bvars%qvar
+          if (qoption == 2) then
+          endif
+          hwll(:,:,n)=bvars%qhln
+          vz(:,:,n)=transpose(bvars%qvln)
+          cycle
       endif
    enddo
    call nc_berror_vars_final(bvars)
@@ -712,7 +739,7 @@ end subroutine read_wgt
 !
 ! !INTERFACE:
 
-subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
+subroutine setcoroz_(coroz,mype)
 
    use m_kinds,    only: r_single,r_kind
    use constants,only: zero,rozcon,one
@@ -721,8 +748,8 @@ subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
    use gridmod,only: nlat,nsig
    use gridmod,only: lon1,lat1
 
-!_RT   use guess_grids,only: ntguessig
-!_RT   use guess_grids,only: ges_prsi ! interface pressures (kPa)
+   use guess_grids,only: ntguessig
+   use guess_grids,only: ges_prsi ! interface pressures (kPa)
 
    use gsi_bundlemod,   only: gsi_bundlegetpointer
    use gsi_metguess_mod,only: gsi_metguess_bundle
@@ -730,8 +757,6 @@ subroutine setcoroz_(coroz,ntguessig,ges_prsi,mype)
    implicit none
 
    real(r_single),dimension(nlat,nsig),intent(  out) :: coroz ! of ozone
-   real(r_kind),dimension(:,:,:,:)    ,intent(in   ) :: ges_prsi   ! interface pressures
-   integer(i_kind)                    ,intent(in   ) :: ntguessig  ! number of time slots in guess
    integer(i_kind)                    ,intent(in   ) :: mype  ! ID of this processor
 
 ! !REVISION HISTORY:
@@ -923,7 +948,7 @@ end subroutine setvscalesoz_
 !
 ! !INTERFACE:
 
-subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
+subroutine setcorchem_(cname,corchem,rc)
 
    use m_kinds,    only: r_single,r_kind
    use m_mpimod,   only: mype
@@ -933,8 +958,8 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
    use gridmod,only: nlat,nsig
    use gridmod,only: lon1,lat1
 
-!_RT   use guess_grids,only: ntguessig
-!_RT   use guess_grids,only: ges_prsi ! interface pressures (kPa)
+   use guess_grids,only: ntguessig
+   use guess_grids,only: ges_prsi ! interface pressures (kPa)
 
    use gsi_chemguess_mod,only: gsi_chemguess_bundle
    use gsi_bundlemod,    only: gsi_bundlegetpointer
@@ -943,8 +968,6 @@ subroutine setcorchem_(cname,corchem,ntguessig,ges_prsi,rc)
 
    character(len=*)                   ,intent(in   ) :: cname   ! constituent name
    real(r_single),dimension(nlat,nsig),intent(  out) :: corchem ! constituent correlations
-   real(r_kind),dimension(:,:,:,:)    ,intent(in   ) :: ges_prsi   ! interface pressures
-   integer(i_kind)                    ,intent(in   ) :: ntguessig  ! number of time slots in guess
    integer(i_kind)                    ,intent(  out) :: rc      ! return error code
 
 ! !REVISION HISTORY:

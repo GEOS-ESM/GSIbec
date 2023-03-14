@@ -10,8 +10,10 @@ bkgcov.F90
 bkgvar.f90
 bkgvar_rewgt.f90
 blendmod.f90
+calctends.F90
 class_get_pseudo_ensperts.f90
 compact_diffs.f90
+compute_derived.F90
 compute_qvar3d.F90
 constants.f90
 control2state_ad.F90
@@ -23,6 +25,7 @@ egrid2agrid_mod.f90
 en_perts_io.f90
 ensctl2state.F90
 ensctl2state_ad.F90
+fgrid2agrid_mod.f90
 general_commvars_mod.f90
 general_specmod.f90
 general_spectral_transforms.f90
@@ -30,9 +33,12 @@ general_sub2grid_mod.f90
 general_transform.f90
 genqsat.F90
 gengrid_vars.f90
+get_derivatives.F90
+get_derivatives2.F90
 get_gefs_ensperts_dualres.F90
-getprs.F90
+getprs.f90
 getuv.F90
+getvvel.f90
 gridmod.F90
 gsi_4dvar.f90
 gsi_bundlemod.F90
@@ -82,11 +88,13 @@ stop1.f90
 stub_bacio_mod.F90
 stub_ensmod.f90
 stub_get_pseudo_ensperts.f90
+tendsmod.f90
 tpause.f90
 tpause_t.F90
 tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90
+xhat_vordivmod.f90
 
 )
 

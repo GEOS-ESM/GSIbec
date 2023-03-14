@@ -56,7 +56,7 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
   use constants, only: xai,tmix,xb,omeps,eps,xbi,one,zero,&
        xa,psat,ttp,half,one_tenth
   use derivsmod, only:  qgues,dqdt,dqdrh,dqdp
-  use m_rf, only:  pseudo_q2
+  use jfunc, only:  pseudo_q2
   use guess_grids, only: tropprs
   use gridmod, only: regional
 #ifdef USE_ALL_ORIGINAL
