@@ -46,6 +46,7 @@ use m_berror_stats,only : berror_stats
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use hybrid_ensemble_parameters,only : l_hyb_ens
 use hybrid_ensemble_isotropic, only: hybens_grid_setup
+use hybrid_ensemble_isotropic, only: create_ensemble
 use hybrid_ensemble_isotropic, only: bkerror_a_en
 
 use general_sub2grid_mod, only: sub2grid_info
@@ -162,6 +163,7 @@ contains
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
+    call create_ensemble()
   endif
   call set_pointer_()
 
@@ -776,7 +778,7 @@ contains
   call gsi2model_units_ad_(mval(1))
 
   if (l_hyb_ens) then
-     eval=mval(1)
+     eval(1)=zero
      call ensctl2state_ad(eval,mval,gradx)
   endif
   call control2state_ad(mval,sbias,gradx)
@@ -795,6 +797,7 @@ contains
   call control2state(grady,mval,sbias)
   if (l_hyb_ens) then
      call ensctl2state(grady,mval,eval)
+     mval(1)=eval(1)
   end if
 
 ! if so write out fields from gsi (in GSI units)

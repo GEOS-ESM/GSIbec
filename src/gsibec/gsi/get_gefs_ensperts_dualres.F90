@@ -351,7 +351,8 @@ subroutine get_gefs_ensperts_dualres (tau)
 ! Convert to mean
   bar_norm = one/float(n_ens)
   sig_norm=sqrt(one/max(one,n_ens-one))
-!$omp parallel do schedule(dynamic,1) private(i,j,k,n,m,ic2,ic3,ipic,x2)
+!_RTodling: deactive thread to be safe when spread upd/d or written out
+!_$omp parallel do schedule(dynamic,1) private(i,j,k,n,m,ic2,ic3,ipic,x2)
   do m=1,ntlevs_ens
      do i=1,nelen
         en_bar(m)%values(i)=en_bar(m)%values(i)*bar_norm
@@ -364,7 +365,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 
 ! Before converting to perturbations, get ensemble spread
      !-- if (m == 1 .and. write_ens_sprd )  call ens_spread_dualres(en_bar(1),1)
-     !!! it is not clear of the next statement is thread/$omp safe.
+     !!! the follwing call is not thread/$omp safe -> omp deactivted above.
      if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m)
 
 
@@ -416,7 +417,7 @@ subroutine get_gefs_ensperts_dualres (tau)
            en_perts(n,m)%valuesr4(i)=en_perts(n,m)%valuesr4(i)*sig_norm
         end do
      end do
-    end do
+  end do ! ntlevs
 
 !  since initial version is ignoring sst perturbations, skip following code for now.  revisit
 !   later--creating general_read_gfssfc, analogous to general_read_gfsatm above.
@@ -668,6 +669,7 @@ subroutine write_spread_dualres(ibin,bundle)
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use constants, only: zero
   use jfunc, only: jiter ! should really pass as argument
+  use mpeu_util, only: get_lun => luavail 
 #ifdef USE_ALL_ORIGINAL
   use m_revBens, only: spread2d,spread3d
 #endif /* USE_ALL_ORIGINAL */
@@ -693,7 +695,7 @@ subroutine write_spread_dualres(ibin,bundle)
   real(r_kind),pointer,dimension(:,:,:):: ptr3d
   real(r_kind),pointer,dimension(:,:):: ptr2d
 
-  integer(i_kind) iret,i,j,k,n,mem2d,mem3d,num3d,lu,istat,ifailed
+  integer(i_kind) iret,i,j,k,n,mem2d,mem3d,lu,istat,ifailed
   real(r_kind),dimension(grd_anl%nsig+1) :: prs
 
   character(len=*),parameter :: myname='write_spread_dualres'
@@ -701,21 +703,21 @@ subroutine write_spread_dualres(ibin,bundle)
 ! Initial memory used by 2d and 3d grids
   mem2d = 4*grd_anl%nlat*grd_anl%nlon
   mem3d = 4*grd_anl%nlat*grd_anl%nlon*grd_anl%nsig
-  num3d=11
 
   allocate(work8_3d(grd_anl%nlat,grd_anl%nlon,grd_anl%nsig))
   allocate(work8_2d(grd_anl%nlat,grd_anl%nlon))
   allocate(work4_3d(grd_anl%nlon,grd_anl%nlat,grd_anl%nsig))
   allocate(work4_2d(grd_anl%nlon,grd_anl%nlat))
 
+  lu=get_lun()
   if (mype==0) then
     write(grdfile,'(a,2(i3.3,a))') 'ens_spread_',ibin, '.iter' ,jiter, '.grd'
 #ifdef HAVE_BACIO
-    call baopenwt(22,trim(grdfile),iret)
+    call baopenwt(lu,trim(grdfile),iret)
 #else /* HAVE_BACIO */
-    call ba_open(22,trim(grdfile),mem3d,iret)
+    call ba_open(lu,trim(grdfile),mem2d,iret)
 #endif /* HAVE_BACIO */
-    write(6,*)'WRITE_SPREAD_DUALRES:  open 22 to ',trim(grdfile),' with iret=',iret
+    write(6,*)'WRITE_SPREAD_DUALRES:  open', lu, ' to ',trim(grdfile),' with iret=',iret
   endif
 
   if(mype==0) allocate(cosrlats2d(grd_anl%nlon,grd_anl%nlat))
@@ -747,9 +749,9 @@ subroutine write_spread_dualres(ibin,bundle)
 #endif /* USE_ALL_ORIGINAL */
       end do
 #ifdef HAVE_BACIO
-      call wryte(22,mem3d,work4_3d)
+      call wryte(lu,mem3d,work4_3d)
 #else /* HAVE_BACIO */
-      call ba_wryte(22,work4_3d)
+      call ba_wryte(lu,work4_3d(:,:,:))
 #endif /* HAVE_BACIO */
       write(6,*)'WRITE_SPREAD_DUALRES FOR VARIABLE ',trim(cvars3d(n))
     endif
@@ -780,9 +782,9 @@ subroutine write_spread_dualres(ibin,bundle)
        spread2d(n,ibin,jiter)=sqrt(sum(cosrlats2d*work4_2d*work4_2d)/(grd_anl%nlon*grd_anl%nlat)) ! not quite the proper grid weight
 #endif /* USE_ALL_ORIGINAL */
 #ifdef HAVE_BACIO
-       call wryte(22,mem2d,work4_2d)
+       call wryte(lu,mem2d,work4_2d)
 #else /* HAVE_BACIO */
-       call ba_wryte(22,work4_2d)
+       call ba_wryte(lu,work4_2d(:,:))
 #endif /* HAVE_BACIO */
        write(6,*)'WRITE_SPREAD_DUALRES FOR VARIABLE ',trim(cvars2d(n))
     endif
@@ -796,11 +798,11 @@ subroutine write_spread_dualres(ibin,bundle)
 ! Close byte-addressable binary file for grads
   if (mype==0) then
 #ifdef HAVE_BACIO
-     call baclose(22,iret)
+     call baclose(lu,iret)
 #else /* HAVE_BACIO */
-     call ba_close(22,iret)
+     call ba_close(lu,iret)
 #endif /* HAVE_BACIO */
-     write(6,*)'WRITE_SPREAD_DUALRES:  close 22 with iret=',iret
+     write(6,*)'WRITE_SPREAD_DUALRES:  close', lu, ' with iret=',iret
   end if
 
 ! Get reference pressure levels for grads purposes
@@ -808,6 +810,7 @@ subroutine write_spread_dualres(ibin,bundle)
 
 ! Write out a corresponding grads control file
   if (mype==0) then
+     lu=get_lun()
      write(grdctl,'(a,2(i3.3,a))') 'ens_spread_',ibin,  '.iter' ,jiter, '.ctl'
      open(newunit=lu,file=trim(grdctl),form='formatted')
      write(lu,'(2a)') 'DSET  ^', trim(grdfile)
@@ -815,7 +818,10 @@ subroutine write_spread_dualres(ibin,bundle)
      write(lu,'(a,2x,e13.6)') 'UNDEF', 1.E+15 ! any other preference for this?
      write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'XDEF',grd_anl%nlon, 'LINEAR',   0.0, 360./grd_anl%nlon
      write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'YDEF',grd_anl%nlat, 'LINEAR', -90.0, 180./(grd_anl%nlat-1.)
-     write(lu,'(a,2x,i4,2x,a,100(1x,f10.5))')      'ZDEF',grd_anl%nsig, 'LEVELS', prs(1:grd_anl%nsig)
+     write(lu,'(a,2x,i4,2x,a,1x,f8.3)')    'ZDEF',grd_anl%nsig, 'LEVELS', prs(1) ! prs is in mb
+     do k=2,grd_anl%nsig  ! grads tends not to like a long line of pressures, thus split
+        write(lu,'(1x,f8.3)')   prs(k) ! prs is in mb
+     enddo
      write(lu,'(a,2x,i4,2x,a)')   'TDEF', 1, 'LINEAR 12:00Z04JUL1776 6hr' ! any date suffices
      write(lu,'(a,2x,i4)')        'VARS',nc3d+nc2d
      do n=1,nc3d
