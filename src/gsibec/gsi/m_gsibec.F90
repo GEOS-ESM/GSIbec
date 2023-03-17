@@ -778,7 +778,7 @@ contains
   call gsi2model_units_ad_(mval(1))
 
   if (l_hyb_ens) then
-     eval(1)=zero
+     eval(1)=mval(1)
      call ensctl2state_ad(eval,mval,gradx)
   endif
   call control2state_ad(mval,sbias,gradx)

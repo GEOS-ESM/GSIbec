@@ -3,6 +3,7 @@ use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: mype,mpi_rtype,gsi_mpi_comm_world
 use gridmod, only: sg=>grd_a
 use mpeu_util, only: die 
+! RTodling: this will need revision for dual resolution
 implicit none
 public :: grid2sub1var
 interface grid2sub1var 
@@ -30,7 +31,6 @@ contains
 !     Swap work memory
 !     ----------------
       allocate ( work(sg%itotsub), stat=ierr )
-!     allocate ( work(sg%iglobal), stat=ierr )
         if ( ierr/=0 ) then
             stat_ = 91
             if(mype==proc) print*, trim(myname_), ': Alloc(work)'
