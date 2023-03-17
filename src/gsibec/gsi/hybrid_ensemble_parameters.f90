@@ -286,6 +286,7 @@ module hybrid_ensemble_parameters
   public :: i_en_perts_io
   public :: l_ens_in_diff_time
   public :: ensemble_path
+  public :: ens_fname_tmpl
   public :: nelen
   public :: en_perts,ps_bar
   public :: region_lat_ens,region_lon_ens
@@ -333,6 +334,7 @@ module hybrid_ensemble_parameters
   integer(i_kind) ntlevs_ens
   integer(i_kind) regional_ensemble_option
   character(len=512),save :: ensemble_path
+  character(len=512),save :: ens_fname_tmpl
 
 ! following is for storage of ensemble perturbations:
 
@@ -416,10 +418,12 @@ subroutine init_hybrid_ensemble_parameters
   ntlevs_ens=1               ! default for number of time levels for ensemble perturbations
   i_en_perts_io=0            ! default for en_pert IO. 0 is no IO
   ensemble_path = './'       ! default for path to ensemble members
+  ens_fname_tmpl = 'bkg.eta.%y4%m2%d2_%h2z.nc4' ! this should superseed var ensemble_path
   ens_fast_read=.false.
   bens_recenter=.false.      ! center ensemble cov around background/guess
   upd_ens_spread=.false.     ! redefine ens spread (for jiter>1) by recentering ens around guess 
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
+
 
 end subroutine init_hybrid_ensemble_parameters
 

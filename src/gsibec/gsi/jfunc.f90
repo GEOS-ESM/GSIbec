@@ -63,7 +63,11 @@ subroutine jfunc_init
  nclenz=0
  jpch_rad=0
  ljc4tlevs=.false.  ! used to be in jcmod
- iadate=0           ! used to be in obsmod
+ iadate(1) = 1776   ! year, default: should be replaced in each pass
+ iadate(2) = 07     ! month default: should be replaced in each pass
+ iadate(3) = 04     ! day,  default: should be replaced in each pass
+ iadate(4) =  0     ! hour, default: should be replaced in each pass
+ iadate(5) =  0     ! sec,  default: should be replaced in each pass
  switch_on_derivatives=.false.
  tendsflag=.false.
 

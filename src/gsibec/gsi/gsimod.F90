@@ -71,7 +71,7 @@
                          readin_localization,write_ens_sprd,eqspace_ensgrid,grid_ratio_ens,&
                          readin_beta,use_localization_grid,use_gfs_ens,q_hyb_ens,i_en_perts_io, &
                          l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
-                         bens_recenter,upd_ens_spread,upd_ens_localization
+                         bens_recenter,upd_ens_spread,upd_ens_localization,ens_fname_tmpl
 
   use gsi_io, only: init_io, verbose
 
@@ -463,12 +463,13 @@
 !     bens_recenter - center Bens around background/guess
 !     upd_ens_spread - update ens spread with recentering around guess 
 !     upd_ens_localization - update ens localizations (goes together w/ upd_ens_spread)
+!     ens_fname_tmpl - provides template name of ensmeble members
 !              
 !                         
   namelist/hybrid_ensemble/l_hyb_ens,uv_hyb_ens,q_hyb_ens,aniso_a_en,generate_ens,n_ens,nlon_ens,nlat_ens,jcap_ens,&
                 pseudo_hybens,merge_two_grid_ensperts,regional_ensemble_option,full_ensemble,pwgtflg,&
                 jcap_ens_test,beta_s0,s_ens_h,s_ens_v,readin_localization,eqspace_ensgrid,readin_beta,&
-                grid_ratio_ens, &
+                grid_ratio_ens, ens_fname_tmpl, &
                 oz_univ_static,write_ens_sprd,use_localization_grid,use_gfs_ens, &
                 i_en_perts_io,l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
                 bens_recenter,upd_ens_spread,upd_ens_localization

@@ -1,6 +1,8 @@
 module geos_StateIO
 use m_kinds, only: i_kind
 use m_mpimod, only: mype,npe
+use hybrid_ensemble_parameters, only: ens_fname_tmpl
+use mpeu_util, only: strTemplate
 
 use m_read_geosens, only: geos_readens
 
@@ -50,7 +52,7 @@ character(len=255),allocatable :: fnames(:)
 
 allocate(fnames(size(xx)))
 do ii=1,size(xx)
-   write(fnames(ii),'(a,i3.3,a)') 'mem', ii, '/f525_p7_fp.bkg.eta.20201215_00z.nc4' ! wired for now
+   call strTemplate(fnames(ii),ens_fname_tmpl,nymd=nymd,nhms=nhms,ens=ii,stat=istatus)
 enddo
 call geos_readens(xx,fnames,npe,mype,0)
 deallocate(fnames)
