@@ -20,7 +20,6 @@ use m_berror_stats, only: berror_init
 
 use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
-use hybrid_ensemble_isotropic, only: create_ensemble
 use hybrid_ensemble_isotropic, only: load_ensemble
 use hybrid_ensemble_isotropic, only: hybens_localization_setup
 use hybrid_ensemble_isotropic, only: destroy_ensemble
@@ -47,9 +46,6 @@ contains
   if (.not. good) then
     print *, nlat, mlat, nlon, mlon, nsig, msig
     call die(myname,': bad dims',99)
-  endif
-  if(l_hyb_ens) then
-     call create_ensemble
   endif
   call berror_init(mlat,msig)
   call create_balance_vars

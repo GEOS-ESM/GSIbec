@@ -10,6 +10,7 @@ use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
+use hybrid_ensemble_parameters, only: ntlevs_ens
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
 use gridmod, only: lon2,lat2,lat1,lon1,nsig
@@ -45,6 +46,7 @@ use m_berror_stats,only : berror_stats
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use hybrid_ensemble_parameters,only : l_hyb_ens
 use hybrid_ensemble_isotropic, only: hybens_grid_setup
+use hybrid_ensemble_isotropic, only: create_ensemble
 use hybrid_ensemble_isotropic, only: bkerror_a_en
 
 use general_sub2grid_mod, only: sub2grid_info
@@ -161,6 +163,7 @@ contains
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
+    call create_ensemble()
   endif
   call set_pointer_()
 
@@ -676,16 +679,16 @@ contains
 !--------------------------------------------------------
   subroutine be_sv_space0_
 
-  type(gsi_bundle), allocatable :: fcgrad(:)
+  type(gsi_bundle), allocatable :: mval(:)
   type(control_vector) :: gradx,grady
   type(predictors)     :: sbias
   integer ii
 
 ! start work space
-  allocate(fcgrad(nsubwin))
+  allocate(mval(nsubwin))
   do ii=1,nsubwin
-      call allocate_state(fcgrad(ii))
-      fcgrad(ii) = zero
+      call allocate_state(mval(ii))
+      mval(ii) = zero
   end do
   call allocate_preds(sbias)
 
@@ -694,13 +697,13 @@ contains
   gradx=zero
   grady=zero
 
-! get test vector (fcgrad)
-! call get_state_perts_ (fcgrad(1))
+! get test vector (mval)
+! call get_state_perts_ (mval(1))
 !
-  call set_silly_(fcgrad(1))
-  call gsi2model_units_ad_(fcgrad(1))
+  call set_silly_(mval(1))
+  call gsi2model_units_ad_(mval(1))
 
-  call control2state_ad(fcgrad,sbias,gradx)
+  call control2state_ad(mval,sbias,gradx)
 
 ! apply B to input (transformed) vector
   call bkerror(gradx,grady, &
@@ -709,29 +712,30 @@ contains
      call bkerror_a_en(gradx,grady)
   endif
 
-  call control2state(grady,fcgrad,sbias)
+  call control2state(grady,mval,sbias)
 
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
-  call write_bundle(fcgrad(1),bkgv_write_sv)
+  call write_bundle(mval(1),bkgv_write_sv)
 
 ! convert back to model units (just for consistency here)
-  call gsi2model_units_(fcgrad(1))
+  call gsi2model_units_(mval(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
   call deallocate_cv(grady)
   call deallocate_preds(sbias)
   do ii=1,nsubwin
-      call deallocate_state(fcgrad(ii))
+      call deallocate_state(mval(ii))
   end do
-  deallocate(fcgrad)
+  deallocate(mval)
 
   end subroutine be_sv_space0_
 !--------------------------------------------------------
-  subroutine be_sv_space1_(fcgrad,internalsv,bypassbe)
+  subroutine be_sv_space1_(mval,internalsv,bypassbe)
 
-  type(gsi_bundle) :: fcgrad(1)
+  type(gsi_bundle) :: mval(1)
+  type(gsi_bundle) :: eval(1)
   logical,optional,intent(in) :: internalsv
   logical,optional,intent(in) :: bypassbe
 
@@ -743,6 +747,9 @@ contains
   if (nsubwin/=1) then
      if(ier/=0) call die(myname,'cannot handle this nsubwin =',nsubwin)
   endif
+  if (ntlevs_ens/=1) then
+     if(ier/=0) call die(myname,'cannot handle this ntlevs_ens =',ntlevs_ens)
+  endif
 
   bypassbe_ = .false.
   if (present(bypassbe)) then
@@ -750,22 +757,31 @@ contains
   endif
 
 ! start work space
+  if (l_hyb_ens) then
+     do ii=1,ntlevs_ens
+       call allocate_state(eval(ii))
+    end do
+  endif
   call allocate_preds(sbias)
   call allocate_cv(gradx)
   call allocate_cv(grady)
   gradx=zero
   grady=zero
 
-! get test vector (fcgrad)
-! call get_state_perts_ (fcgrad(1))
+! get test vector (mval)
+! call get_state_perts_ (mval(1))
   if (present(internalsv)) then
-     if (internalsv) call set_silly_(fcgrad(1))
+     if (internalsv) call set_silly_(mval(1))
   endif
 
 ! convert from model to gsi units
-  call gsi2model_units_ad_(fcgrad(1))
+  call gsi2model_units_ad_(mval(1))
 
-  call control2state_ad(fcgrad,sbias,gradx)
+  if (l_hyb_ens) then
+     eval(1)=mval(1)
+     call ensctl2state_ad(eval,mval,gradx)
+  endif
+  call control2state_ad(mval,sbias,gradx)
 
 ! apply B to input (transformed) vector
   if (bypassbe_) then
@@ -778,19 +794,28 @@ contains
     endif
   endif
 
-  call control2state(grady,fcgrad,sbias)
+  call control2state(grady,mval,sbias)
+  if (l_hyb_ens) then
+     call ensctl2state(grady,mval,eval)
+     mval(1)=eval(1)
+  end if
 
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
-  call write_bundle(fcgrad(1),bkgv_write_sv)
+  call write_bundle(mval(1),bkgv_write_sv)
 
 ! convert from gsi to model units
-  call gsi2model_units_(fcgrad(1))
+  call gsi2model_units_(mval(1))
 
 ! clean up work space
   call deallocate_cv(gradx)
   call deallocate_cv(grady)
   call deallocate_preds(sbias)
+  if (l_hyb_ens) then
+     do ii=ntlevs_ens,1,-1
+       call deallocate_state(eval(ii))
+    end do
+  endif
 
   end subroutine be_sv_space1_
 !--------------------------------------------------------
@@ -812,7 +837,7 @@ contains
      allocate(grdfld(0,0,0))
   endif
   allocate(subfld(lat2,lon2,nsig))
-  call grid2sub1var (grdfld,subfld,ier)
+  call grid2sub1var (grdfld,subfld,0,ier)
   do ii=1,fc%n3d
      call gsi_bundlegetpointer(fc,trim(fc%r3(ii)%shortname),ptr3d,ier)
      ptr3d = subfld

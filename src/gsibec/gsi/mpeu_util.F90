@@ -1118,11 +1118,12 @@ end subroutine assert_GE_
 !       "%j"    dims(2) of dims=(/im,jm,km,lm/)
 !       "%k"    dims(3) of dims=(/im,jm,km,lm/)
 !       "%l"    dims(4) of dims=(/im,jm,km,lm/)
+!       "%eX"   where X in range(1,4) for ensemble numbering
 !       "%%"    a "%"
 !
 ! !INTERFACE:
 
-    subroutine strTemplate(str,tmpl,nymd,nhms,dims,xid,stat)
+    subroutine strTemplate(str,tmpl,nymd,nhms,dims,xid,ens,stat)
       !! use m_stdio, only : stderr
       !! use m_die,   only : die,perr
       implicit none
@@ -1145,6 +1146,10 @@ end subroutine assert_GE_
       character(len=*),intent(in ),optional :: xid
                         ! a string substituting a "%s".  Trailing
                         ! spaces will be ignored
+
+      integer,intent(in ),optional :: ens
+                        ! substituting "%e1", "%e2", "%e3",
+                        ! and "%e4"
 
       integer,intent(out),optional :: stat
                         ! error code
@@ -1180,6 +1185,7 @@ end subroutine assert_GE_
 
 
   integer :: iy4,iy2,imo,idy
+  integer :: ie1,ie2,ie3,ie4
   integer :: ihr,imn
   integer :: i,i1,i2,m,k
   integer :: ln_tmpl,ln_str
@@ -1188,6 +1194,23 @@ end subroutine assert_GE_
 
   character(len=1) :: c0,c1,c2
   character(len=8) :: sbuf
+!________________________________________
+! Determine %e
+  ie1=-1;ie2=-1;ie3=-1;ie4=-1
+  if(present(ens)) then
+    if(ens <= 0) then
+        call perr(myname_,'ens <= 0',ens)
+        if(.not.present(stat)) call die(myname_)
+        stat=1
+        return
+    endif
+  endif
+
+  ie4=ens
+  ie3=mod(ie4,1000)
+  ie2=mod(ie3,100)
+  ie1=mod(ie2,10)
+
 !________________________________________
 ! Determine iyr, imo, and idy
   iy4=-1
@@ -1350,6 +1373,16 @@ do while( i+istp <= ln_tmpl )   ! A loop over all tokens in (tmpl)
         endif
         istp=3
 
+      case("e1","e2","e3","e4")
+        if(.not.present(ens)) then
+           write(stderr,'(2a)') myname_,          &
+              ': optional argument expected, "ens="'
+           if(.not.present(stat)) call die(myname_)
+           stat=1
+           return
+        endif
+        istp=3
+
       case default
 
         write(stderr,'(4a)') myname_,     &
@@ -1363,6 +1396,28 @@ do while( i+istp <= ln_tmpl )   ! A loop over all tokens in (tmpl)
 !________________________________________
 
     select case(c1)
+
+    case("e")
+      select case(c2)
+      case("1")
+        write(sbuf,'(i1)') ie1
+        kstp=1
+      case("2")
+        write(sbuf,'(i2.2)') ie2
+        kstp=2
+      case("3")
+        write(sbuf,'(i3.4)') ie3
+        kstp=3
+      case("4")
+        write(sbuf,'(i4.4)') ie4
+        kstp=4
+      case default
+        write(stderr,'(4a)') myname_,                  &
+             ': invalid template entry, "',trim(tmpl(i:)),'"'
+        if(.not.present(stat)) call die(myname_)
+        stat=2
+        return
+      end select
 
     case("y")
       select case(c2)

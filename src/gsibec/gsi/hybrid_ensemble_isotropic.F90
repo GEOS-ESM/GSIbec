@@ -1184,6 +1184,7 @@ end subroutine normal_new_factorization_rf_y
                                           pseudo_hybens,regional_ensemble_option,&
                                           i_en_perts_io
     use hybrid_ensemble_parameters, only: nelen,en_perts,ps_bar
+    use hybrid_ensemble_parameters, only: write_ens_sprd
     use gsi_enscouplermod, only: gsi_enscoupler_put_gsi_ens
     use m_mpimod, only: mype
     use get_pseudo_ensperts_mod, only: get_pseudo_ensperts_class
@@ -1301,6 +1302,8 @@ end subroutine normal_new_factorization_rf_y
                  call stop2(999)
              endif
           enddo
+
+          if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m)
 
           call gsi_bundledestroy(en_bar(m),istatus)
           if(istatus/=0) then
