@@ -37,6 +37,7 @@ end type nc_GEOSens_vars
 character(len=*), parameter :: myname = 'm_nc_GEOSens'
 real, parameter:: PPMV2GpG = 1.6571E-6 ! from ppmv to g/g
 real, parameter:: mbar_per_Pa = 0.01   ! mb to Pa
+real, parameter:: Pa_per_kPa = 1000.0
 
 integer, parameter :: nv2d = 2
 character(len=4),parameter :: cvars2d(nv2d) = (/ 'ps  ', 'ts  ' /)
@@ -714,10 +715,10 @@ subroutine geos2gsi_ (x)
   type(nc_GEOSens_vars) x
 
   !==> input ps in Pa - convert to hPa(mb)
-! x%grid%ak = x%grid%ak * mbar_per_Pa
-  x%ps       = x%ps * mbar_per_Pa
-  x%dp       = x%dp * mbar_per_Pa
-  x%oz       = x%oz * PPMV2GpG
+! x%grid%ak = x%grid%ak / Pa_per_kPa
+  x%ps       = x%ps / Pa_per_kPa
+  x%dp       = x%dp / Pa_per_kPa
+  x%oz       = x%oz / PPMV2GpG
   ! need flip so localization function applies equaly to EnKF and Hybrid-GSI
   call flip_(x)
   ! still need a transpose
@@ -728,10 +729,10 @@ subroutine gsi2geos_ (x)
   type(nc_GEOSens_vars) x
 
   !==> input ps in mbar - convert to Pa
-! x%grid%ak    = x%grid%ak    / mbar_per_Pa
-  x%ps = x%ps / mbar_per_Pa
-  x%dp = x%dp / mbar_per_Pa
-  x%oz = x%oz / PPMV2GpG
+! x%grid%ak    = x%grid%ak * Pa_per_kPa
+  x%ps = x%ps * Pa_per_kPa
+  x%dp = x%dp * Pa_per_kPa
+  x%oz = x%oz * PPMV2GpG
   ! need flip so localization function applies equaly to EnKF and Hybrid-GSI
   call flip_(x)
   ! still need a transpose
@@ -750,20 +751,31 @@ subroutine flip_(x)
 !
   call hflip3_(x%dp,im,jm,km,x%gsiset)
   call vflip_ (x%dp,im,jm,km)
+
   call hflip3_(x%tv,im,jm,km,x%gsiset)
   call vflip_ (x%tv,im,jm,km)
+
   call hflip3_(x%u ,im,jm,km,x%gsiset)
+  call vflip_ (x%u ,im,jm,km)
+
+  call hflip3_(x%v ,im,jm,km,x%gsiset)
   call vflip_ (x%v ,im,jm,km)
+
   call hflip3_(x%qv,im,jm,km,x%gsiset)
   call vflip_ (x%qv,im,jm,km)
+
   call hflip3_(x%qi,im,jm,km,x%gsiset)
   call vflip_ (x%qi,im,jm,km)
+
   call hflip3_(x%ql,im,jm,km,x%gsiset)
   call vflip_ (x%ql,im,jm,km)
+
   call hflip3_(x%qr,im,jm,km,x%gsiset)
   call vflip_ (x%qr,im,jm,km)
+
   call hflip3_(x%qs,im,jm,km,x%gsiset)
   call vflip_ (x%qs,im,jm,km)
+
   call hflip3_(x%oz,im,jm,km,x%gsiset)
   call vflip_ (x%oz,im,jm,km)
 end subroutine flip_
