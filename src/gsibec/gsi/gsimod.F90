@@ -14,6 +14,7 @@
 
   use m_kinds, only: i_kind,r_kind
 
+  use mpeu_util,only: die,warn
   use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mype
   use balmod, only: init_balmod,fstat,lnobalance
 
@@ -489,7 +490,6 @@
 !*************************************************************
 ! Begin gsi code
 !
-  use mpeu_util,only: die
   use gsi_fixture, only: fixture_config
   implicit none
   character(len=*),optional,intent(in):: nmlfile
@@ -549,7 +549,9 @@
 
   open(11,file=thisrc)
   read(11,hybrid_ensemble,iostat=ios)
-  if(ios/=0) call die(myname_,'read(hybrid_ensemble)',ios)
+  if(ios/=0) then
+     call warn(myname_,'using defaults(hybrid_ensemble)')
+  endif
   close(11)
 
   if(jcap > jcap_cut)then
@@ -612,7 +614,6 @@
   end subroutine gsimain_initialize_
 
   subroutine gridopts0_(nmlfile)
-  use mpeu_util,only: die
   implicit none
   character(len=*),optional,intent(in)  :: nmlfile
   character(len=*),parameter :: myname_="gsimod*gridopts0_"
@@ -638,7 +639,6 @@
                         glon2,glat2,&
                         isc,iec,jsc,jec,igdim)
   use general_sub2grid_mod, only: general_deter_subdomain_withLayout
-  use mpeu_util,only: die
   implicit none
   character(len=*),intent(in)  :: thisrc
   integer,intent(in)  :: thispe

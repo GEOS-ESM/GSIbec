@@ -90,6 +90,8 @@ subroutine get_derivatives (guess,xderivative,yderivative)
 
 ! inquire variable names in x(y)derivative
 
+  if(xderivative%n2d<=0.and.xderivative%n3d<=0) return ! nothing to do
+
   if(xderivative%n2d>0) allocate(dvars2d(xderivative%n2d))
   if(xderivative%n3d>0) allocate(dvars3d(xderivative%n3d))
   call gsi_bundleinquire (xderivative,'shortnames::2d',dvars2d,istatus)

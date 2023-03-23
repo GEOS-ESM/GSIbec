@@ -53,7 +53,7 @@ module tendsmod
   use constants, only: max_varname_length
   use gridmod, only: lat2,lon2,nsig
   use m_mpimod, only : mype
-  use mpeu_util, only: die
+  use mpeu_util, only: die,warn
   use GSI_BundleMod, only : GSI_BundleCreate
   use GSI_BundleMod, only : GSI_Bundle
   use GSI_BundleMod, only : GSI_BundleGetPointer
@@ -339,7 +339,7 @@ subroutine create_ges_tendencies(tendsflag,rcfile)
       call GSI_BundleCreate(gsi_tendency_bundle,grid,bname,ierror, &
                             names3d=tvars3d,levels=levels,bundle_kind=r_kind)
   else
-      call die(myname_,'improper initialization of tendsmod, aborting ...',999)
+      call warn(myname_,'no tendency fields requested')
   endif
 
 ! create wired-in fields
