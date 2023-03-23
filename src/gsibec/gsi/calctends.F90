@@ -116,6 +116,9 @@ subroutine calctends(mype,teta,pri,guess,xderivative,yderivative,tendency)
   real(r_kind),dimension(:,:,:),pointer :: oz_t=>NULL()
   real(r_kind),dimension(:,:,:),pointer :: cw_t=>NULL()
 
+! Basic check
+  if (xderivative%n2d<=0.and.xderivative%n3d<=0) return 
+
 ! Get all pointers:
 
 ! from guess ...
