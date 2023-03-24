@@ -94,6 +94,12 @@ subroutine tpause(mype,method)
   if(istatus/=0) return ! if ps not defined forget it ...
 
   call gsi_bundlegetpointer (gsi_metguess_bundle(nt),'tv',ges_tv_nt,ifound_tv)
+  if (ifound_tv/=0) then
+     if (mype==0) then
+         write(6,*) trim(myname), ': Warning, tv-not avail not t-pause calc'
+     endif
+     return
+  endif
   pvoz_capable=ifound_tv==0
   call gsi_bundlegetpointer (gsi_metguess_bundle(nt),'oz',ges_oz_nt,ifound_oz)
   pvoz_capable=pvoz_capable.and.ifound_oz==0
