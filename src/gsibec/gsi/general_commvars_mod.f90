@@ -79,7 +79,7 @@ module general_commvars_mod
    type(sub2grid_info) :: s2g_raf,s2g_cv,s2g2,s1q4,s1g4,s2g4,s2guv,s2g_d,g1,g3,g33p1
 
    integer :: mvars
-   logical :: drv_set
+!  logical :: drv_set
    character(len=max_varname_length),allocatable,dimension(:) :: nrf_var
    character(len=max_varname_length),allocatable,dimension(:) :: cvars2d
    character(len=max_varname_length),allocatable,dimension(:) :: cvars3d
@@ -93,28 +93,40 @@ contains
 !   create general_sub2grid structure variables currently made locally for get_derivatives, etc.
 
    subroutine init_general_commvars_dims (cvars2d_in,cvars3d_in,cvarsmd_in,nrf_var_in, &
-                                          dvars2d_in, dvars3d_in, drv_set_in )
+                                          dvars2d_in, dvars3d_in )!, drv_set_in )
 !  Todling: Add to relax code dependency
    character(len=*),intent(in) :: cvars2d_in(:),cvars3d_in(:),cvarsmd_in(:),nrf_var_in(:)
    character(len=*),intent(in) :: dvars2d_in(:),dvars3d_in(:)
-   logical,         intent(in) :: drv_set_in
+!  logical,         intent(in) :: drv_set_in
    
-   allocate(cvars2d(size(cvars2d_in)))
-   allocate(cvars3d(size(cvars3d_in)))
-   allocate(nrf_var(size(nrf_var_in)))
-   allocate(cvarsmd(size(cvarsmd_in)))
-   cvars2d = cvars2d_in
-   cvars3d = cvars3d_in
-   cvarsmd = cvarsmd_in
-   mvars   = size(cvarsmd_in)
-   nrf_var = nrf_var_in
+   if(size(cvars2d_in)>0) then
+     if(.not.allocated(cvars2d)) allocate(cvars2d(size(cvars2d_in)))
+     cvars2d = cvars2d_in
+   endif
+   if(size(cvars3d_in)>0) then
+     if(.not.allocated(cvars3d)) allocate(cvars3d(size(cvars3d_in)))
+     cvars3d = cvars3d_in
+   endif
+   mvars  = size(cvarsmd_in)
+   if(mvars>0) then
+      if(.not.allocated(cvarsmd)) allocate(cvarsmd(size(cvarsmd_in)))
+      cvarsmd = cvarsmd_in
+   endif
+   if(size(nrf_var_in)>0) then
+     if(.not.allocated(nrf_var)) allocate(nrf_var(size(nrf_var_in)))
+     nrf_var = nrf_var_in
+   endif
 
-   drv_set = drv_set_in
-   if(.not. drv_set) return
-   allocate(dvars2d(size(dvars2d_in)))
-   dvars2d = dvars2d_in
-   allocate(dvars3d(size(dvars3d_in)))
-   dvars3d = dvars3d_in
+!  drv_set = drv_set_in
+!  if(.not. drv_set) return
+   if(size(dvars2d_in)>0) then
+     if(.not.allocated(dvars2d)) allocate(dvars2d(size(dvars2d_in)))
+     dvars2d = dvars2d_in
+   endif
+   if(size(dvars3d_in)>0) then
+     if(.not.allocated(dvars3d)) allocate(dvars3d(size(dvars3d_in)))
+     dvars3d = dvars3d_in
+   endif
 
    end subroutine init_general_commvars_dims
 
@@ -206,12 +218,15 @@ contains
       call general_sub2grid_create_info(s2g_raf,inner_vars,nlat,nlon,nsig,num_fields,regional, &
              names=names_s2g_raf,lnames=lnames_s2g_raf)
 
+      deallocate(names_s2g_raf,lnames_s2g_raf)
+
 !   set various constants previously defined in init_mpi_vars
 
       nsig1o=s2g_raf%nlevs_alloc
       nnnn1o=s2g_raf%nlevs_loc
-      allocate(levs_id(nsig1o),nvar_id(nsig1o))
-      allocate(nvar_pe(s2g_raf%num_fields,2))
+      if(.not.allocated(levs_id)) allocate(levs_id(nsig1o))
+      if(.not.allocated(nvar_id)) allocate(nvar_id(nsig1o))
+      if(.not.allocated(nvar_pe)) allocate(nvar_pe(s2g_raf%num_fields,2))
       levs_id=0
       nvar_id=0
       nvar_pe=-999
@@ -236,7 +251,8 @@ contains
       ijn_s=s2g_raf%ijn_s
       irc_s=s2g_raf%irc_s
       isc_g=s2g_raf%isc_g
-      allocate(ltosi(nlat*nlon),ltosj(nlat*nlon))
+      if(.not.allocated(ltosi)) allocate(ltosi(nlat*nlon))
+      if(.not.allocated(ltosj)) allocate(ltosj(nlat*nlon))
       ltosi=s2g_raf%ltosi
       ltosj=s2g_raf%ltosj
       isd_g=s2g_raf%isd_g
@@ -244,7 +260,8 @@ contains
       ird_s=s2g_raf%ird_s
       displs_s=s2g_raf%displs_s
       itotsub=s2g_raf%itotsub
-      allocate(ltosi_s(itotsub),ltosj_s(itotsub))
+      if(.not.allocated(ltosi_s)) allocate(ltosi_s(itotsub))
+      if(.not.allocated(ltosj_s)) allocate(ltosj_s(itotsub))
       ltosi_s=s2g_raf%ltosi_s
       ltosj_s=s2g_raf%ltosj_s
 
@@ -257,31 +274,34 @@ contains
 
 !  create general_sub2grid structure variable s2g_d, which is used in get_derivatives.f90
 
-      if (drv_set) then 
+      if (allocated(dvars2d).and.allocated(dvars3d)) then 
 
          inner_vars=1
          num_fields=size(dvars2d)+nsig*size(dvars3d)
+         if(num_fields>0) then
 
 !  obtain pointer to each variable in bundle, then populate corresponding names in names_s2g_d for
 !        general_sub2grid_create_info.  this is needed for replacing nvar_id.
-         allocate(names_s2g_d(inner_vars,num_fields),vector_s2g_d(num_fields))
-!                 bundlemod stores 3d fields first, followed by 2d fields, followed by 1d fields
-         i=0
-         do k=1,size(dvars3d)
-            do j=1,nsig
-               i=i+1
-               names_s2g_d(1,i)=dvars3d(k)
-               vector_s2g_d(i)=names_s2g_d(1,i) == 'u'.or.names_s2g_d(1,i) == 'v'
-            end do
-         end do
-         do k=1,size(dvars2d)
-            i=i+1
-            names_s2g_d(1,i)=dvars2d(k)
-            vector_s2g_d(i)=names_s2g_d(1,i) == 'u'.or.names_s2g_d(1,i) == 'v'
-         end do
-         call general_sub2grid_create_info(s2g_d,inner_vars,nlat,nlon,nsig,num_fields,regional, &
-                                        vector=vector_s2g_d,names=names_s2g_d,s_ref=s2g_raf)
-         deallocate(names_s2g_d,vector_s2g_d)
+           allocate(names_s2g_d(inner_vars,num_fields),vector_s2g_d(num_fields))
+!                   bundlemod stores 3d fields first, followed by 2d fields, followed by 1d fields
+           i=0
+           do k=1,size(dvars3d)
+              do j=1,nsig
+                 i=i+1
+                 names_s2g_d(1,i)=dvars3d(k)
+                 vector_s2g_d(i)=names_s2g_d(1,i) == 'u'.or.names_s2g_d(1,i) == 'v'
+              end do
+           end do
+           do k=1,size(dvars2d)
+              i=i+1
+              names_s2g_d(1,i)=dvars2d(k)
+              vector_s2g_d(i)=names_s2g_d(1,i) == 'u'.or.names_s2g_d(1,i) == 'v'
+           end do
+           call general_sub2grid_create_info(s2g_d,inner_vars,nlat,nlon,nsig,num_fields,regional, &
+                                          vector=vector_s2g_d,names=names_s2g_d,s_ref=s2g_raf)
+           deallocate(names_s2g_d,vector_s2g_d)
+
+         endif ! num_fields
 
       endif
 
@@ -400,8 +420,13 @@ contains
        use m_mpimod, only: levs_id,nvar_id,nvar_pe
        implicit none
  
-       deallocate(ltosi,ltosj,ltosi_s,ltosj_s)
-       deallocate(levs_id,nvar_id,nvar_pe)
+       deallocate(ltosj_s)
+       deallocate(ltosi_s)
+       deallocate(ltosj)
+       deallocate(ltosi)
+       deallocate(nvar_pe)
+       deallocate(nvar_id)
+       deallocate(levs_id)
        call general_sub2grid_destroy_info(s2g_cv,s_ref=s2g_raf)
        call general_sub2grid_destroy_info(s2g2,s_ref=s2g_raf)
        call general_sub2grid_destroy_info(s2g4,s_ref=s2g_raf)

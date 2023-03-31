@@ -5,6 +5,7 @@ public :: jfunc_init
 
 public :: mockbkg
 
+public :: jouter_def
 public :: jiter
 public :: jiterstart
 public :: npred
@@ -47,6 +48,8 @@ logical :: pseudo_q2
 logical :: switch_on_derivatives
 logical :: tendsflag
 logical :: clip_supersaturation
+
+integer,save :: jouter_def=0
 contains
 subroutine jfunc_init
  mockbkg=.true. ! fake background state (internally generated)

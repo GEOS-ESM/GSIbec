@@ -99,7 +99,7 @@ module compact_diffs
   public:: cdiff_initialized
 
   integer(i_kind),save :: noq
-  logical,save :: initialized_=.false.
+  logical,save :: compdiff_initialized_=.false.
   real(r_kind),allocatable,dimension(:):: coef
   integer(i_kind) nxh,nbp,nya,nxa,lbcox1,lacox1,lbcox2
   integer(i_kind) lacoy1,lacox2,lbcoy1,lcy,lacoy2,lbcoy2
@@ -115,12 +115,12 @@ contains
   function cdiff_created() result(created)
     implicit none
     logical:: created
-    created = initialized_
+    created = compdiff_initialized_
   end function cdiff_created
   function cdiff_initialized() result(inited)
     implicit none
     logical:: inited
-    inited = initialized_ .and. inisphed_
+    inited = compdiff_initialized_ .and. inisphed_
   end function cdiff_initialized
 
   subroutine init_compact_diffs
@@ -175,9 +175,9 @@ contains
   use gridmod, only: nlat,nlon
   implicit none
 
-  if(initialized_) return
+  if(compdiff_initialized_) return
   allocate(coef(3*nlat+4*(2*(noq+5)+1)*(nlat+nlon/2)))
-  initialized_=.true.
+  compdiff_initialized_=.true.
   nlon_alloced_=nlon
   nlat_alloced_=nlat
   noq_alloced_ =noq
@@ -210,9 +210,9 @@ contains
 !
 !$$$
     implicit none
-    if(.not.initialized_) return
+    if(.not.compdiff_initialized_) return
     deallocate(coef)
-    initialized_=.false.
+    compdiff_initialized_=.false.
     inisphed_=.false.
 
     nlon_alloced_=-1
@@ -1316,7 +1316,7 @@ end subroutine uv2vordiv
 
   character(len=*),parameter :: myname_='compact_diffs.inisph'
 
-  if(.not.initialized_) call die(myname_,'coef not created')
+  if(.not.compdiff_initialized_) call die(myname_,'coef not created')
   if( nlon_alloced_ /= nx       .or. &
       nlat_alloced_ /= ny+2     .or. &
       noq_alloced_  /= noq    ) then

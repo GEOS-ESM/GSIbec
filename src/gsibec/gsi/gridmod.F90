@@ -694,7 +694,8 @@ contains
 !_#omp end parallel
     nthreads=nth
     if(print_verbose)write(6,*) 'INIT_GRID_VARS:  number of threads ',nthreads
-    allocate(jtstart(nthreads),jtstop(nthreads))
+    if(.not.allocated(jtstart)) allocate(jtstart(nthreads))
+    if(.not.allocated(jtstop)) allocate(jtstop(nthreads))
     do tid=1,nthreads
        call looplimits(tid-1, nthreads, 1, lon2, jtstart(tid), jtstop(tid))
        if(print_verbose)write(6,*)'INIT_GRID_VARS:  for thread ',tid,  &
@@ -938,8 +939,9 @@ contains
 !-------------------------------------------------------------------------
     integer(i_kind) i
 
-    allocate(periodic_s(npe),jstart(npe),istart(npe),&
-         ilat1(npe),jlon1(npe),&
+    if(.not.allocated(periodic_s)) &
+       allocate(periodic_s(npe),jstart(npe),istart(npe),&
+       ilat1(npe),jlon1(npe),&
        ijn_s(npe),irc_s(npe),ird_s(npe),displs_s(npe),&
        ijn(npe),isc_g(npe),isd_g(npe),displs_g(npe))
 
@@ -994,6 +996,7 @@ contains
 !-------------------------------------------------------------------------
     implicit none
 
+    if(allocated(periodic_s)) &
     deallocate(periodic_s,jstart,istart,ilat1,jlon1,&
        ijn_s,irc_s,ird_s,displs_s,&
        ijn,isc_g,isd_g,displs_g)

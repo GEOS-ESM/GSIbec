@@ -50,6 +50,7 @@ use constants, only: one,zero,zero_quad,max_varname_length
 use m_mpimod, only: mype
 !use file_utility, only : get_lun
 use mpeu_util, only: get_lun => luavail
+use mpeu_util, only: warn
 use mpl_allreducemod, only: mpl_allreduce,mpl_reduce
 use GSI_BundleMod, only : GSI_BundleCreate
 use GSI_BundleMod, only : GSI_Bundle
@@ -94,7 +95,7 @@ private
 character(len=*),parameter::myname='state_vectors'
 integer(i_kind) :: nval_len,latlon11,latlon1n,latlon1n1,lat2,lon2,nsig
 
-logical :: llinit = .false.
+logical, save :: llinit = .false.
 integer(i_kind) :: m_st_alloc, max_st_alloc, m_allocs, m_deallocs
 
 integer(i_kind) :: nvars,ns2d,ns3d,nsdim
@@ -159,8 +160,6 @@ subroutine setup_state_vectors(katlon11,katlon1n,kval_len,kat2,kon2,ksig)
   nsig=ksig
   latlon1n1=latlon1n+latlon11
 
-  llinit = .true.
-
   m_st_alloc=0
   max_st_alloc=0
   m_allocs=0
@@ -180,6 +179,11 @@ character(len=256),allocatable,dimension(:):: utable
 character(len=20) var,source,funcof
 character(len=*),parameter::myname_=myname//'*init_anasv'
 integer(i_kind) ilev, itracer
+
+if(llinit) then
+  if(mype==0) call warn(myname_,': SV already initialized')
+  return
+endif
 
 ! load file
 luin=get_lun()
@@ -252,6 +256,7 @@ if (mype==0) then
     write(6,*) myname_,':  3D-STATE VARIABLES ', svars3d
     write(6,*) myname_,': ALL STATE VARIABLES ', svars
 end if
+llinit = .true.
 
 end subroutine init_anasv
 subroutine final_anasv
@@ -262,9 +267,10 @@ deallocate(svars,stat=istatus)
 if(istatus/=0) call die(myname_)
 deallocate(svars3d,svars2d,levels,stat=istatus)
 if(istatus/=0) call die(myname_)
+llinit = .false.
 end subroutine final_anasv
 ! ----------------------------------------------------------------------
-subroutine allocate_state(yst)
+subroutine allocate_state(yst,whocalled)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    allocate_state
@@ -288,17 +294,29 @@ subroutine allocate_state(yst)
 !$$$ end documentation block
   implicit none
   type(gsi_bundle), intent(inout) :: yst
+  character(len=*), optional, intent(in) :: whocalled
   type(gsi_grid) :: grid
   integer(i_kind) :: ierror
+  character(len=*), parameter :: myname_ = myname//'*allocate_state'
   character(len=80) :: bname
 
+  if(ns2d<0.and.ns3d<0) then
+    call die(myname_,': dims are not good ',ns2d+ns3d)
+  endif
   call GSI_GridCreate(grid,lat2,lon2,nsig)
   write(bname,'(a)') 'State Vector'
   call GSI_BundleCreate(yst,grid,bname,ierror, &
                         names2d=svars2d,names3d=svars3d,levels=levels,bundle_kind=r_kind)  
+  if(ierror/=0) then
+    call die(myname_,': error from create bundle',ierror)
+  endif
 
   if (yst%ndim/=nval_len) then
-     write(6,*)'allocate_state: error length'
+     if (present(whocalled)) then
+     write(6,*) myname_,'>',trim(whocalled),': error length, (ndim,nval_len):', yst%ndim,nval_len,lat2,lon2,nsig
+     else
+     write(6,*) myname_,': error length, (ndim,nval_len):', yst%ndim,nval_len,lat2,lon2,nsig
+     endif
      call stop2(313)
   end if
 

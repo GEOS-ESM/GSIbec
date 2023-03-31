@@ -298,6 +298,8 @@ subroutine compute_derived(mype,init_pass)
 
 #ifdef USE_ALL_ORIGINAL
         if(.not. wrf_mass_regional .and. tendsflag)then
+#else
+        if(tendsflag)then
 #endif
           if(.not.tnd_initialized) &
             call die(myname,'unexpected tnd_initialized =',tnd_initialized)
@@ -326,10 +328,8 @@ subroutine compute_derived(mype,init_pass)
            end if
 #endif /* TLNMC */
           end if       ! (init_pass)
-#ifdef USE_ALL_ORIGINAL
-        end if
-#endif
-     end if
+        end if     ! tendsflag
+     end if     ! switch_on_derivatives
 
      if(init_pass) then
 
@@ -452,6 +452,7 @@ subroutine compute_derived(mype,init_pass)
 
   call final_vars_('guess')
 
+#ifdef USE_ALL_ORIGINAL
 !??????????????????????????  need any of this????
 !! qoption 1:  use psuedo-RH
 !  if(qoption==1)then
@@ -465,7 +466,6 @@ subroutine compute_derived(mype,init_pass)
 ! Load arrays based on option for moisture background error
 
 ! variance update for anisotropic mode
-#ifdef USE_ALL_ORIGINAL
      if( anisotropic .and. .not.rtma_subdomain_option ) then
         hswgtsum=sum(hswgt(1:ngauss))
         call setup_sub2fslab
@@ -575,14 +575,16 @@ subroutine compute_derived(mype,init_pass)
 
               end if
            end do
-           deallocate(rh0f,rh2f,rh3f)
+           deallocate(rh3f)
+           deallocate(rh2f)
+           deallocate(rh0f)
         end if
         call destroy_sub2fslab
      end if
-#endif
 
 ! End of qoption block
   endif
+#endif
 
 ! End of routine
   return

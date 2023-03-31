@@ -78,6 +78,7 @@ use constants, only: zero, one, two, three, zero_quad, tiny_r_kind
 !_RTuse gsi_4dvar, only: iadatebgn
 !_RT use file_utility, only : get_lun
 use mpeu_util, only: get_lun => luavail
+use mpeu_util, only: warn
 use mpl_allreducemod, only: mpl_allreduce
 use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: grd_ens
@@ -177,7 +178,7 @@ real(r_kind)    ,allocatable,dimension(:) :: bemo ! not public; not needed
 real(r_kind)    ,allocatable,dimension(:) :: atsfc_sdv
 real(r_kind)    ,allocatable,dimension(:) :: an_amp0
 
-logical :: llinit = .false.
+logical, save :: llinit = .false.
 
 ! ----------------------------------------------------------------------
 INTERFACE ASSIGNMENT (=)
@@ -261,7 +262,6 @@ subroutine setup_control_vectors(ksig,klat,klon,katlon11,katlon1n, &
   n_ens=k_ens
   nval_lenz_en=kval_lenz_en
 
-  llinit = .true.
   m_vec_alloc=0
   max_vec_alloc=0
   m_allocs=0
@@ -305,6 +305,11 @@ integer(i_kind) luin,ii,ntot
 integer(i_kind) ioflag
 integer(i_kind) ilev, itracer
 real(r_kind) aas,amp,bes
+
+if(llinit) then
+  if(mype==0) call warn(myname_,': CV already initialized')
+  return
+endif
 
 ! load file
 luin=get_lun()
@@ -410,19 +415,20 @@ if (mype==0) then
     write(6,*) myname_,': ALL CONTROL VARIABLES    ', nrf_var
 end if
 lcalc_gfdl_cfrac = .false.
+llinit = .true.
 
 end subroutine init_anacv
 subroutine final_anacv
   implicit none
-  deallocate(nrf_var)
+  deallocate(evars2d,evars3d)
   deallocate(nrf_3d,nrf2_loc,nrf3_loc,nmotl_loc)
-  deallocate(as3d,as2d)
-  deallocate(be3d,be2d,bemo)
   deallocate(an_amp0)
   deallocate(atsfc_sdv)
   deallocate(cvarsmd)
-  deallocate(cvars2d,cvars3d)
-  deallocate(evars2d,evars3d)
+  deallocate(be3d,be2d,bemo)
+  deallocate(as3d,as2d)
+  deallocate(nrf_var,cvars2d,cvars3d)
+  llinit=.false.
 end subroutine final_anacv
 
 ! ----------------------------------------------------------------------

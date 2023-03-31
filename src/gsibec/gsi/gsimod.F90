@@ -43,24 +43,29 @@
 
   use gridmod, only: init_reg_glob_ll
 
-  use constants, only: zero,one,init_constants,gps_constants,init_constants_derived,three
-  use constants, only: init_constants
+  use constants, only: zero,one,init_constants,gps_constants,three
+  use constants, only: init_constants,init_constants_derived
+  use constants, only: final_constants,final_constants_derived
 
   use fgrid2agrid_mod, only: set_fgrid2agrid
 
   use smooth_polcarf, only: norsp,init_smooth_polcas
 
   use gsi_metguess_mod, only: gsi_metguess_init,gsi_metguess_final
+  use gsi_metguess_mod, only: gsi_metguess_destroy_grids
   use gsi_chemguess_mod, only: gsi_chemguess_init,gsi_chemguess_final
+  use gsi_chemguess_mod, only: gsi_chemguess_destroy_grids
 
   use general_commvars_mod, only: init_general_commvars,destroy_general_commvars
   use general_commvars_mod, only: init_general_commvars_dims
   use general_commvars_mod, only: final_general_commvars_dims
 
-  use derivsmod, only: dvars2d, dvars3d, drv_set
+  use derivsmod, only: dvars2d, dvars3d !, drv_set
   use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
+  use derivsmod, only: final_anadv 
 
   use tendsmod, only: create_ges_tendencies
+  use tendsmod, only: destroy_ges_tendencies
 
   use guess_grids, only: nfldsig
 
@@ -330,6 +335,8 @@
 !-------------------------------------------------------------------------
 
 ! Declare variables.
+  character(len=*),parameter :: myname='gsimod'
+
   logical:: writediag,l_foto
   integer(i_kind) i,ngroup
 
@@ -494,7 +501,7 @@
   implicit none
   character(len=*),optional,intent(in):: nmlfile
 
-  character(len=*),parameter :: myname_='gsimod.gsimain_initialize'
+  character(len=*),parameter :: myname_=myname//'*gsimain_initialize'
   integer:: ier,ios,lendian_in
   logical:: flag
   logical:: already_init_mpi
@@ -595,10 +602,10 @@
   endif
 
 ! if (qoption==2.or.l_tlnmc) then
-! if (qoption==2) then
+  if (qoption==2) then
      tendsflag =.true.
      switch_on_derivatives = .true.
-! endif
+  endif
 
 ! Initialize variables, create/initialize arrays
   lendian_in = -1
@@ -607,9 +614,12 @@
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
-                                   dvars2d,dvars3d,drv_set )
+                                   dvars2d,dvars3d)!_OUT ,drv_set )
   call init_general_commvars
 
+  if(mype==0)then
+    write(6,*) myname_, ': Complete'
+  endif
   
   end subroutine gsimain_initialize_
 
@@ -706,16 +716,25 @@
 
   implicit none
   logical, intent(in) :: closempi
+  integer :: ier
 ! Deallocate arrays
+
+  call destroy_ges_tendencies
   call destroy_ges_derivatives
+! call final_reg_glob_ll ! if ever regional
   call destroy_general_commvars
   call final_general_commvars_dims
   call final_grid_vars
+  call clean_4dvar
+  call final_anadv
   call final_anacv
   call final_anasv
   call gsi_chemguess_final
   call gsi_metguess_final
-  call clean_4dvar
+  call gsi_metguess_destroy_grids(ier)
+  call gsi_chemguess_destroy_grids(ier)
+  call final_constants_derived
+  call final_constants
 
   if (closempi) then
      call mpi_finalize(ierror)

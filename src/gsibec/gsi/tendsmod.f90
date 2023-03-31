@@ -339,8 +339,9 @@ subroutine create_ges_tendencies(tendsflag,rcfile)
       call GSI_BundleCreate(gsi_tendency_bundle,grid,bname,ierror, &
                             names3d=tvars3d,levels=levels,bundle_kind=r_kind)
   else
-      call warn(myname_,'no tendency fields requested')
+      if(mype==0) call warn(myname_,'no tendency fields requested')
   endif
+! call GSI_GridDestroy(
 
 ! create wired-in fields
   call create_tendvars
@@ -396,14 +397,19 @@ subroutine destroy_ges_tendencies
      if(mype==0) write(6,*)'destroy_ges_tendencies warning: vector not allocated'
   endif
 
-  if(allocated(tvars2d))deallocate(tvars2d)
-  if(allocated(tvars3d))deallocate(tvars3d)
-  if(allocated(tsrcs2d))deallocate(tsrcs2d)
-  if(allocated(tsrcs3d))deallocate(tsrcs3d)
-  if(allocated(levels))deallocate(levels)
+  call unset_
 
   tnd_initialized = .false.
   if(mype==0) write(6,*) 'destroy_ges_tendencies: successfully complete'
 end subroutine destroy_ges_tendencies
+
+subroutine unset_
+if(allocated(tvars2d)) deallocate(tvars2d)
+if(allocated(tvars3d)) deallocate(tvars3d)
+if(allocated(tsrcs2d)) deallocate(tsrcs2d)
+if(allocated(tsrcs3d)) deallocate(tsrcs3d)
+if(allocated(levels)) deallocate(levels)
+tnd_set_= .false.
+end subroutine unset_
 
 end module tendsmod

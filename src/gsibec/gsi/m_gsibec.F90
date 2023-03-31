@@ -13,6 +13,7 @@ use gsi_4dvar, only: nsubwin
 use hybrid_ensemble_parameters, only: ntlevs_ens
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
+use jfunc, only: jouter_def
 use gridmod, only: lon2,lat2,lat1,lon1,nsig
 
 use guess_grids, only: nfldsig
@@ -54,6 +55,7 @@ use general_sub2grid_mod, only: general_sub2grid_create_info
 use general_sub2grid_mod, only: general_sub2grid_destroy_info
 
 use mpeu_util, only: die
+use mpeu_util, only: warn
 use m_mpimod, only: nxpe,nype
 implicit none
 
@@ -117,12 +119,12 @@ interface gsibec_final
   module procedure final_
 end interface gsibec_final
 
-logical :: initialized_ = .false.
-logical :: iamset_ = .false.
+logical,save :: gsibec_initialized_ = .false.
+logical,save :: gsibec_iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,comm)
+  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,jouter,comm)
 
   logical, intent(out) :: cv
   logical, optional, intent(in)  :: vgrid
@@ -130,6 +132,7 @@ contains
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
+  integer,optional,intent(out):: jouter
   integer,optional,intent(in) :: comm
 
   character(len=*), parameter :: myname_=myname//"init_"
@@ -137,8 +140,13 @@ contains
   integer :: ier
   logical :: already_init_mpi
 
-  if (initialized_) then
-     call final_(.false.) ! finalize what should have been finalized
+  jouter_def = jouter_def + 1
+  if(present(jouter)) then
+    jouter=jouter_def
+  endif
+  if(jouter_def > 1) then
+     if (mype==0) call warn(myname_,': already initialized, skipping ...')
+    return
   endif
 
   ier=0
@@ -177,7 +185,7 @@ contains
   if (present(bkgmock) ) then
     bkgmock = mockbkg
   endif
-  initialized_=.true.
+  gsibec_initialized_=.true.
   end subroutine init_
 !--------------------------------------------------------
   subroutine init_guess_
@@ -201,11 +209,9 @@ contains
 
   logical, intent(in) :: closempi
 
-  call gsiguess_bkgcov_final()
-  call gsiguess_final()
+  gsibec_initialized_=.false.
   call unset_()
   call gsimain_finalize(closempi)
-  initialized_=.false.
 
   end subroutine final_
 !--------------------------------------------------------
@@ -318,7 +324,7 @@ contains
    real(r_kind) :: dlat,dlon,pih
    integer i,j,i1,ifail
 
-   if (iamset_ ) return
+   if (gsibec_iamset_ ) return
 
    call create_grid_vars()
    ifail=0
@@ -370,7 +376,7 @@ contains
    if(.not.cdiff_created()) call create_cdiff_coefs()
    if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)
-   iamset_ = .true.
+   gsibec_iamset_ = .true.
   end subroutine set_
 !--------------------------------------------------------
   subroutine unset_
@@ -380,7 +386,7 @@ contains
    implicit none
    if(cdiff_created()) call destroy_cdiff_coefs
    call destroy_grid_vars
-   iamset_ = .false.
+   gsibec_iamset_ = .false.
   end subroutine unset_
 !--------------------------------------------------------
   subroutine set_pointer_
@@ -725,7 +731,7 @@ contains
   call deallocate_cv(gradx)
   call deallocate_cv(grady)
   call deallocate_preds(sbias)
-  do ii=1,nsubwin
+  do ii=nsubwin,1,-1
       call deallocate_state(mval(ii))
   end do
   deallocate(mval)
@@ -897,5 +903,6 @@ contains
   end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
+  call gsiguess_final()
   end subroutine final_guess_
 end module m_gsibec

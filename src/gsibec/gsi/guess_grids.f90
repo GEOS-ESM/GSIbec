@@ -77,20 +77,16 @@ interface gsiguess_set
   module procedure guess_basics3_
 end interface gsiguess_set
 
-!interface gsiguess_set_aux
-!  module procedure other_set_
-!end interface gsiguess_set_aux
-
-interface gsiguess_bkgcov_init
+interface gsiguess_bkgcov_init  ! WARNING: this does not belog here
   module procedure bkgcov_init_
 end interface gsiguess_bkgcov_init
 
-interface gsiguess_bkgcov_final
+interface gsiguess_bkgcov_final ! WARNING: this does not belog here
   module procedure bkgcov_final_
 end interface gsiguess_bkgcov_final
 
-logical, save :: initialized_ = .false.
-logical, save :: iamset_ = .false.
+logical, save :: gesgrid_initialized_ = .false.
+logical, save :: gesgrid_iamset_ = .false.
 
 character(len=*), parameter :: myname="guess_grids"
 contains
@@ -126,18 +122,21 @@ subroutine other_set_(need)
   character(len=*), optional, intent(inout) :: need(:)
   character(len=*), parameter :: myname_ = myname//'*other_set_'
   integer it,ier,istatus
-  real(r_kind),dimension(:,:,:),pointer :: ges_u,ges_v
-  real(r_kind),dimension(:,:,:),pointer :: ges_div,ges_vor
-  allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
-  allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
-  allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
-  allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
-  allocate(ges_teta(lat2,lon2,nsig,nfldsig))
-  allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
-  allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
-  allocate(isli2(lat2,lon2))
-  allocate(fact_tv(lat2,lon2,nsig))
-  allocate(tropprs(lat2,lon2))
+  real(r_kind),dimension(:,:,:),pointer :: ges_u=>NULL()
+  real(r_kind),dimension(:,:,:),pointer :: ges_v=>NULL()
+  real(r_kind),dimension(:,:,:),pointer :: ges_div=>NULL()
+  real(r_kind),dimension(:,:,:),pointer :: ges_vor=>NULL()
+! this if alloc below are here only because saber does not delete its obj properly
+  if(.not.allocated(ges_tsen)) allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(ges_prsi)) allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
+  if(.not.allocated(ges_prsl)) allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(ges_qsat)) allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(ges_teta)) allocate(ges_teta(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(geop_hgtl)) allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(geop_hgti)) allocate(geop_hgti(lat2,lon2,nsig+1,nfldsig))
+  if(.not.allocated(isli2)) allocate(isli2(lat2,lon2))
+  if(.not.allocated(fact_tv)) allocate(fact_tv(lat2,lon2,nsig))
+  if(.not.allocated(tropprs)) allocate(tropprs(lat2,lon2))
   ges_tsen=zero
   ges_prsl=zero
   ges_qsat=zero
@@ -154,7 +153,7 @@ subroutine other_set_(need)
        print *, 'vars still needing to be filled ', need
     endif
     if (size(need)<1) then
-        iamset_ = .true.
+        gesgrid_iamset_ = .true.
         return
     endif
   endif
@@ -209,29 +208,28 @@ subroutine other_set_(need)
        endwhere
     endif
   endif
-  iamset_ = .true.
+  gesgrid_iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
 subroutine bkgcov_init_(need)
   implicit none
   character(len=*), optional, intent(inout) :: need(:)
+  logical, save :: init_pass = .true.
   call other_set_(need=need)  ! a little out of place, but ...
-  call compute_derived(mype,.true.) ! this belongs in a state set
-  initialized_ = .true.
+  call compute_derived(mype,init_pass) ! this belongs in a state set
+  init_pass = .false.
+  gesgrid_initialized_ = .true.
 end subroutine bkgcov_init_
 !--------------------------------------------------------
 subroutine bkgcov_final_
   use m_mpimod, only: mype
   implicit none
   integer ier
-  initialized_ = .false.
-  iamset_ = .false.
+  gesgrid_initialized_ = .false.
+  gesgrid_iamset_ = .false.
 end subroutine bkgcov_final_
 !--------------------------------------------------------
-subroutine final_
-  use m_mpimod, only: mype
-  implicit none
-  integer ier
+subroutine other_unset_
   if(allocated(tropprs)) deallocate(tropprs)
   if(allocated(fact_tv)) deallocate(fact_tv)
   if(allocated(isli2)) deallocate(isli2)
@@ -242,6 +240,13 @@ subroutine final_
   if(allocated(ges_prsl)) deallocate(ges_prsl)
   if(allocated(ges_prsi)) deallocate(ges_prsi)
   if(allocated(ges_tsen)) deallocate(ges_tsen)
+end subroutine other_unset_
+!--------------------------------------------------------
+subroutine final_
+  use m_mpimod, only: mype
+  implicit none
+  integer ier
+  call other_unset_
   call destroy_metguess_grids_(mype,ier)
 end subroutine final_
 !-------------------------------------------------------------------------
@@ -700,9 +705,9 @@ end subroutine final_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
-  logical iamset,mock_
+  logical gesgrid_iamset,mock_
   mock_=.false. 
-  iamset=.true.
+  gesgrid_iamset=.true.
   if (present(mock)) then
      if(mock) mock_=.true.
   endif
@@ -713,7 +718,7 @@ end subroutine final_
         call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
         if (istatus/=0) then
            ! call die(myname_,'cannot retrieve pointers',istatus)
-           iamset=.false.
+           gesgrid_iamset=.false.
            exit
         else
            ges_tsen(:,:,:,jj) = tv/(one+fv*q)
@@ -728,7 +733,7 @@ end subroutine final_
            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
            if (istatus/=0) then
               ! call die(myname_,'cannot retrieve pointers',istatus)
-              iamset=.false.
+              gesgrid_iamset=.false.
               exit
            else
               ges_tsen(:,:,:,jj) = tv/(one+fv*q)
@@ -736,7 +741,7 @@ end subroutine final_
         endif
      endif
   enddo
-  if(.not.iamset) then
+  if(.not.gesgrid_iamset) then
     if (mype==0) call tell (myname_, ': warning, tsen pointer not set, could be an issue')
   endif
   end subroutine load_guess_tsen_
@@ -748,14 +753,14 @@ end subroutine final_
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
   integer jj,ier,istatus
-  logical iamset
-  iamset=.true.
+  logical gesgrid_iamset
+  gesgrid_iamset=.true.
   do jj=1,nfldsig
      istatus=0
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'tv',tv,ier); istatus=ier+istatus
      call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'q' , q,ier); istatus=ier+istatus
      if (istatus/=0) then
-        iamset=.false.
+        gesgrid_iamset=.false.
         cycle
         !call die(myname_,'cannot retrieve pointers',istatus)
      endif
@@ -767,13 +772,13 @@ end subroutine final_
         if(allocated(ges_tsen)) then
            tv=ges_tsen(:,:,:,jj)*(one+fv*q)
         else
-           iamset=.false.
+           gesgrid_iamset=.false.
            cycle
            !call die(myname_,': cannot define ges_tsen',99)
         endif
      endif
   enddo
-  if(.not.iamset) then
+  if(.not.gesgrid_iamset) then
     if(mype==0) call tell (myname_, ': warning, tv pointer not set, could be an issue')
   endif
   end subroutine load_guess_tv_
