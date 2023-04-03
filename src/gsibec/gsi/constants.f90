@@ -55,6 +55,8 @@ module constants
 ! set subroutines as public
   public :: init_constants_derived
   public :: init_constants
+  public :: final_constants_derived
+  public :: final_constants
   public :: gps_constants
 ! set passed variables to public
   public :: one,two,half,zero,deg2rad,pi,three,quarter,one_tenth
@@ -342,6 +344,10 @@ contains
     return
   end subroutine init_constants_derived
 
+  subroutine final_constants_derived
+    cnts_derived_initialized_=.false.
+  end subroutine final_constants_derived
+
   subroutine init_constants(regional)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -442,6 +448,10 @@ contains
     cnts_initialized_=.true.
     return
   end subroutine init_constants
+
+  subroutine final_constants
+    cnts_initialized_=.false.
+  end subroutine final_constants
 
   subroutine gps_constants(use_compress)
 !$$$  subprogram documentation block

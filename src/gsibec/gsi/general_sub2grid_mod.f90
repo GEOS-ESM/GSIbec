@@ -589,12 +589,19 @@ end subroutine get_iuse_pe
          deallocate(s%irc_s,s%ird_s,s%isc_g,s%isd_g,s%displs_s,s%rdispls_s,s%sendcounts_s,s%sdispls_s)
          deallocate(s%ijn_s,s%kbegin,s%kend,s%lnames,s%names)
          if(present(s_ref)) then
-            s%ltosj   => NULL()
-            s%ltosi   => NULL()
-            s%ltosj_s => NULL()
-            s%ltosi_s => NULL()
+!           s_ref%ltosj   => NULL()
+!           s_ref%ltosi   => NULL()
+!           s_ref%ltosj_s => NULL()
+!           s_ref%ltosi_s => NULL()
+            if(associated(s_ref%ltosj_s)) deallocate(s_ref%ltosj_s)
+            if(associated(s_ref%ltosi_s)) deallocate(s_ref%ltosi_s)
+            if(associated(s_ref%ltosj)) deallocate(s_ref%ltosj)
+            if(associated(s_ref%ltosi)) deallocate(s_ref%ltosi)
          else
-            deallocate(s%ltosj,s%ltosi,s%ltosj_s,s%ltosi_s)
+            if(associated(s%ltosj_s)) deallocate(s%ltosj_s)
+            if(associated(s%ltosi_s)) deallocate(s%ltosi_s)
+            if(associated(s%ltosj)) deallocate(s%ltosj)
+            if(associated(s%ltosi)) deallocate(s%ltosi)
          end if
          s%lallocated=.false.
       end if

@@ -58,7 +58,7 @@ save
 private
 
 public :: drv_initialized
-public :: drv_set
+!public :: drv_set
 public :: create_ges_derivatives
 public :: destroy_ges_derivatives
 
@@ -71,6 +71,7 @@ public :: ggues,vgues,pgues,lgues,dvisdlog,dlcbasdlog
 public :: w10mgues,howvgues,cldchgues,dcldchdlog
 public :: qsatg,qgues,dqdt,dqdrh,dqdp
 public :: init_anadv
+public :: final_anadv
 
 logical :: drv_initialized = .false.
 logical :: drv_set = .false.  
@@ -178,8 +179,11 @@ enddo
 
 deallocate(utable)
 
-allocate(dvars2d(n2d),dvars3d(n3d),&
-         dsrcs2d(n2d),dsrcs3d(n3d),levels(n3d))
+allocate(dvars2d(n2d))
+allocate(dvars3d(n3d))
+allocate(dsrcs2d(n2d))
+allocate(dsrcs3d(n3d))
+allocate(levels(n3d))
 
 ! loop over variables and identify them by comparison
 i2d=0; i3d=0
@@ -318,6 +322,9 @@ drv_set=.true.
 
   enddo
 
+! destroy derivative grid
+! call GSI_GridDestroy()
+
   drv_initialized = .true.
 
   if(mype==0) write(6,*) 'create_ges_derivatives: successfully complete'
@@ -378,8 +385,12 @@ drv_set=.true.
   if(associated(gsi_xderivative_bundle)) deallocate(gsi_xderivative_bundle)
   if(associated(gsi_yderivative_bundle)) deallocate(gsi_yderivative_bundle)
 
-! destroy derivative grid
-! call GSI_GridDestroy(grid,lat2,lon2,nsig)
+  drv_initialized=.false.
+
+  if(mype==0) write(6,*) 'destroy_ges_derivatives: successfully complete'
+  end subroutine destroy_ges_derivatives
+
+  subroutine final_anadv
 
   if(allocated(dvars2d)) deallocate(dvars2d)
   if(allocated(dvars3d)) deallocate(dvars3d)
@@ -387,8 +398,7 @@ drv_set=.true.
   if(allocated(dsrcs3d)) deallocate(dsrcs3d)
   if(allocated(levels))  deallocate(levels)
 
-  if(mype==0) write(6,*) 'destroy_ges_derivatives: successfully complete'
-  end subroutine destroy_ges_derivatives
+  end subroutine final_anadv
 
   subroutine create_auxiliar_
 !$$$  subprogram documentation block
@@ -432,7 +442,7 @@ drv_set=.true.
     integer(i_kind) i,j,k
 
     if (getindex(svars3d,'q')>0) then
-       allocate(qsatg(lat2,lon2,nsig),&
+       if(.not.allocated(qsatg)) allocate(qsatg(lat2,lon2,nsig),&
             dqdt(lat2,lon2,nsig),dqdrh(lat2,lon2,nsig),&
             dqdp(lat2,lon2,nsig),&
             qgues(lat2,lon2,nsig))
@@ -450,7 +460,7 @@ drv_set=.true.
        end do
     endif
 
-    allocate(cwgues(lat2,lon2,nsig))
+    if(.not.allocated(cwgues)) allocate(cwgues(lat2,lon2,nsig))
     do k=1,nsig
        do j=1,lon2
           do i=1,lat2
@@ -459,7 +469,7 @@ drv_set=.true.
         end do
     end do
 
-    allocate(cfgues(lat2,lon2,nsig))
+    if(.not.allocated(cfgues)) allocate(cfgues(lat2,lon2,nsig))
     do k=1,nsig
        do j=1,lon2
           do i=1,lat2

@@ -58,7 +58,8 @@ module m_berror_stats
    public :: berror_read_bal ! get cross-cov.stats., balmod::prebal()
    public :: berror_read_wgt ! get auto-cov.stats., prewgt()
    public :: berror_set      ! set internal parameters
-   public :: berror_init     ! init internal variables
+   public :: berror_init     ! initialize internal variables
+   public :: berror_final    ! finalize internal variables
 
    public :: varq
    public :: varcw
@@ -69,6 +70,7 @@ module m_berror_stats
    interface berror_read_wgt; module procedure read_wgt; end interface
    interface berror_set;      module procedure lset;     end interface
    interface berror_init;     module procedure init_;    end interface
+   interface berror_final;    module procedure final_;   end interface
 
 ! !REVISION HISTORY:
 !       30Jul08 - Jing Guo <guo@gmao.gsfc.nasa.gov>
@@ -113,6 +115,11 @@ subroutine init_(mlat,msig)
       varcw=zero
    endif
 end subroutine init_
+
+subroutine final_
+  if(allocated(varq))  deallocate(varq)
+  if(allocated(varcw)) deallocate(varcw)
+end subroutine final_
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! NASA/GSFC, Global Modeling and Assimilation Office, 900.3, GEOS/DAS  !

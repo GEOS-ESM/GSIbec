@@ -339,7 +339,10 @@ module egrid2agrid_mod
 
       if(present(e2a_only)) then
          if(e2a_only) then
-            allocate(e2a%twin(1,1),e2a%itwin(1,1),e2a%ntwin(1),e2a%swin(1,1))
+            if(.not.associated(e2a%twin)) allocate(e2a%twin(1,1))
+            if(.not.associated(e2a%itwin)) allocate(e2a%itwin(1,1))
+            if(.not.associated(e2a%ntwin)) allocate(e2a%ntwin(1))
+            if(.not.associated(e2a%swin)) allocate(e2a%swin(1,1))
             e2a%lallocated=.true.
             return
          end if

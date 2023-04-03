@@ -16,7 +16,7 @@ use smooth_polcarf, only: destroy_smooth_polcas
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
 use m_berror_stats, only: berror_get_dims
 use m_berror_stats, only: berror_init
-
+use m_berror_stats, only: berror_final
 
 use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
@@ -67,6 +67,7 @@ contains
   call destroy_berror_vars
   call destroy_balance_vars
   call final_rftable         ! out of place as consequence of gsi typically has inconsistent set/unset
+  call berror_final
   call final_
   end subroutine unset_
   subroutine final_

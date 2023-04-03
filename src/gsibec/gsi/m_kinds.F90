@@ -38,6 +38,7 @@ module m_kinds
 !$$$ end documentation block
   implicit none
   private
+  save
 
 ! Integer type definitions below
 

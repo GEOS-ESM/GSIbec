@@ -368,7 +368,7 @@ if ( mype == 0 ) &
 ! Set up the time levels (nobs_bins) for the ensemble
 if ( mype == 0 ) &
     write(6,'(A)')' SETUP_4DVAR: allocate array containing time levels for ensemble'
-allocate(ens_fmnlevs(ntlevs_ens))
+if(.not.allocated(ens_fmnlevs)) allocate(ens_fmnlevs(ntlevs_ens))
 do k=1,ntlevs_ens
    ens_fmnlevs(k) = ens_nstarthr*60 + (k-1)*ens_nmn
    if ( mype == 0 ) &
