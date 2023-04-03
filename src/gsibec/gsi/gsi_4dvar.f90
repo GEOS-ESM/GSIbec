@@ -104,6 +104,7 @@ module gsi_4dvar
 
 ! set default to private
   private
+  save
 ! set subroutines to public
   public :: init_4dvar
   public :: setup_4dvar
