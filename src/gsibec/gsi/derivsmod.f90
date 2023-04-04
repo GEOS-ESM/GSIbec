@@ -12,8 +12,6 @@ module derivsmod
 !   2015-07-10 Pondeca - add cldchgues and dcldchdlog
 !   2016-05-10 Thomas - remove references to cwgues0
 !   2019-05-08 mtong - replace set_ with init_anadv 
-!   2019-05-08 eliu - recover logic (drv_set) to indicate the derivative
-!                     vars are allocated and defined
 !
 ! public subroutines:
 !  drv_initialized         - initialize name of fields to calc derivs for
@@ -26,7 +24,6 @@ module derivsmod
 !  dvars2d, dvars3d        - names of 2d/3d derivatives
 !  dsrcs2d, dsrcs3d        - names of where original fields reside
 !  drv_initialized         - flag indicating initialization status
-!  drv_set                 - flag indicating the variables are allocated and defined 
 !
 ! attributes:
 !   language: f90
@@ -58,7 +55,6 @@ save
 private
 
 public :: drv_initialized
-!public :: drv_set
 public :: create_ges_derivatives
 public :: destroy_ges_derivatives
 
@@ -74,7 +70,7 @@ public :: init_anadv
 public :: final_anadv
 
 logical :: drv_initialized = .false.
-logical :: drv_set = .false.  
+logical :: llinit = .false.
 
 type(gsi_bundle),pointer :: gsi_xderivative_bundle(:)
 type(gsi_bundle),pointer :: gsi_yderivative_bundle(:)
@@ -106,8 +102,6 @@ subroutine init_anadv(rcname)
 !   2013-09-27  todling  - initial code
 !   2014-02-03  todling  - negative levels mean rank-3 array
 !   2019-05-08  mtong    - replace set_ with init_anadv 
-!   2019-05-08  eliu     - recover logic (drv_set) to indicate the derivative
-!                          vars are allocated and defined
 !
 !   input argument list: see Fortran 90 style document below
 !
@@ -137,8 +131,7 @@ character(len=max_varname_length),allocatable,dimension(:):: vars
 character(len=max_varname_length),allocatable,dimension(:):: sources
 logical matched
 
-n2d=0; n3d=0
-if(drv_set) return 
+if(llinit) return 
 
 if(present(rcname)) then
  open(newunit=luin,file=trim(rcname),form='formatted')
@@ -149,10 +142,6 @@ endif
 ! Scan file for desired table first
 ! and get size of table
 call gettablesize(tbname,luin,ntot,nrows)
-if(nrows==0) then
-   if(luin/=5) close(luin)
-   return
-endif
 
 ! Get contents of table
 allocate(utable(nrows))
@@ -166,6 +155,7 @@ allocate(vars(nrows),nlevs(nrows),sources(nrows))
 
 ! Retrieve each token of interest from table and define
 ! variables participating in state vector
+n2d=0; n3d=0
 do ii=1,nrows
    read(utable(ii),*) vars(ii),&  ! variable name
                       nlevs(ii),& ! number of levels
@@ -245,19 +235,19 @@ do ii=1,nrows
 enddo
 
 if (mype == 0) then
-    write(6,*) myname_,':  DERIVATIVE VARIABLES: '
-    write(6,*) myname_,':  2D-DERV STATE VARIABLES: '
+    if(n2d>0.or.n3d>0) write(6,*) myname_,':  DERIVATIVE VARIABLES: '
+    if(n2d>0) write(6,*) myname_,':  2D-DERV STATE VARIABLES: '
     do ii=1,n2d
        write(6,*) trim(dvars2d(ii))
     enddo
-    write(6,*) myname_,':  3D-DERV STATE VARIABLES:'
+    if(n3d>0) write(6,*) myname_,':  3D-DERV STATE VARIABLES:'
     do ii=1,n3d
        write(6,*) trim(dvars3d(ii))
     enddo
 end if
 
 deallocate(vars,nlevs,sources)
-drv_set=.true.  
+llinit=.true.  
 
  end subroutine init_anadv
 
@@ -397,6 +387,7 @@ drv_set=.true.
   if(allocated(dsrcs2d)) deallocate(dsrcs2d)
   if(allocated(dsrcs3d)) deallocate(dsrcs3d)
   if(allocated(levels))  deallocate(levels)
+  llinit=.false.
 
   end subroutine final_anadv
 
