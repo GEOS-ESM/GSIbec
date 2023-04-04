@@ -581,7 +581,7 @@ end subroutine get_iuse_pe
       implicit none
 
       type(sub2grid_info),     intent(inout) :: s
-      type(sub2grid_info),optional,intent(in) :: s_ref
+      type(sub2grid_info),optional,intent(inout) :: s_ref
 
       if(s%lallocated) then
          deallocate(s%periodic_s,s%vector,s%ilat1,s%jlon1,s%istart,s%jstart,s%recvcounts,s%displs_g)

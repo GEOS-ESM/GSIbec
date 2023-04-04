@@ -95,7 +95,7 @@ private
 character(len=*),parameter::myname='state_vectors'
 integer(i_kind) :: nval_len,latlon11,latlon1n,latlon1n1,lat2,lon2,nsig
 
-logical, save :: llinit = .false.
+logical :: llinit = .false.
 integer(i_kind) :: m_st_alloc, max_st_alloc, m_allocs, m_deallocs
 
 integer(i_kind) :: nvars,ns2d,ns3d,nsdim
