@@ -1,31 +1,16 @@
 look for USE_ALL_ORIGINAL
 
-- will need to call: init_general_commvars_dims
 - remove regional from gridmod
-- remove hyb from bkgcov; interface change
 - remove lsqrtb, tlnmc, and regional from balmod (balmod to F90)
-- remove hybens from control_vector
-- interface change in random_cv
-- interface change to read_wgt
-- ifdef'ed out aircraft predictors from berror (from f90 to F90)
-- bkerror: f90 to F90; remove lsqrtb check; ifdef hyb out; interface change
-- bkgvar: interface change; from f90 to F90
-- smoothrf.f90 to smoothrf.F90
+- bypass all varBC stuff
+- many files changed extension from f90 to F90
 
-TODO:
+Possible To-Do:
 
-general_commvars - make dvars optional
+- general_commvars - make dvars optional
 
-rid code of bacio lib dependence, ie. replace these:
-baopenwt
-wryte
-baclose
-
-tsensible: is non-sense define CV var name for T should be enough to determine T var
-balmod: decision on when to apply balance operator is too restrictive (should not need all t,ps,sf,vp)
-
-sequence:
-
+B error sequence:
+-----------------
 bkerror
 tbalmod
 bkgcov
@@ -43,16 +28,11 @@ balmod
    TO DO FOR SABER CONNECTION
 ++++++++++++++++++++++++++++++++++++++++++++++++
 - replace kinds w/ OOPS kinds
-- interface to return lats/lons
-- correctly pass guess information, that is:
-  o set pressures as those from JEDI seen guess_grids: guess_grids_get_ref_gesprs
-  o properly fill in required guess fields; see guess_grids guess_basics
-
+- complete bringing back hybrid capability: need 4d still
+- bring in hybrid capability for NCEP
 
 Other TO DOs
 ------------
 - revise items above
 - fill in halo for var comming from saber
-- var units fixes must be moved to center-specific dir
-- eta levels should come from JEDI
-
+- fill in isli properly

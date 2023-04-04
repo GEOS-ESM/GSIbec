@@ -10,6 +10,7 @@ use m_mpimod, only: npe,mype,mpi_character,gsi_mpi_comm_world
 use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
+use gsi_4dvar, only: lsqrtb
 use hybrid_ensemble_parameters, only: ntlevs_ens
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
@@ -441,7 +442,6 @@ contains
     integer(i_kind) nvals_levs,nval_len
     integer(i_kind) nvals_len,nval_levs
     integer(i_kind) nclen,nrclen,nval2d
-    logical lsqrtb
 
     if(lsqrtb) then
       call die(myname_,': cannot handle lsqrtb=.t.',999)
