@@ -178,7 +178,7 @@ real(r_kind)    ,allocatable,dimension(:) :: bemo ! not public; not needed
 real(r_kind)    ,allocatable,dimension(:) :: atsfc_sdv
 real(r_kind)    ,allocatable,dimension(:) :: an_amp0
 
-logical, save :: llinit = .false.
+logical :: llinit = .false.
 
 ! ----------------------------------------------------------------------
 INTERFACE ASSIGNMENT (=)
