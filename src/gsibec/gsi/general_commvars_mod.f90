@@ -36,8 +36,6 @@ module general_commvars_mod
    use m_kinds, only: r_kind,i_kind
    use general_sub2grid_mod, only: sub2grid_info
    use constants, only : max_varname_length
-!  use control_vectors, only: cvars2d,cvars3d,mvars,cvarsmd,nrf_var
-!  use derivsmod, only: dvars2d, dvars3d, drv_set
 
    implicit none
 
@@ -69,6 +67,10 @@ module general_commvars_mod
    public :: load_grid
    public :: ltosj_s,ltosi_s,ltosj,ltosi
 
+   interface init_general_commvars_dims
+     module procedure init_dims_
+   end interface init_general_commvars_dims
+
    integer(i_kind),allocatable,dimension(:):: ltosi   !   lats in iglobal array excluding buffer
    integer(i_kind),allocatable,dimension(:):: ltosj   !   lons in iglobal array excluding buffer
    integer(i_kind),allocatable,dimension(:):: ltosi_s !   lats in itotsub array including buffer
@@ -79,7 +81,6 @@ module general_commvars_mod
    type(sub2grid_info) :: s2g_raf,s2g_cv,s2g2,s1q4,s1g4,s2g4,s2guv,s2g_d,g1,g3,g33p1
 
    integer :: mvars
-!  logical :: drv_set
    character(len=max_varname_length),allocatable,dimension(:) :: nrf_var
    character(len=max_varname_length),allocatable,dimension(:) :: cvars2d
    character(len=max_varname_length),allocatable,dimension(:) :: cvars3d
@@ -92,43 +93,39 @@ contains
 
 !   create general_sub2grid structure variables currently made locally for get_derivatives, etc.
 
-   subroutine init_general_commvars_dims (cvars2d_in,cvars3d_in,cvarsmd_in,nrf_var_in, &
-                                          dvars2d_in, dvars3d_in )!, drv_set_in )
+   subroutine init_dims_ (cvars2d_in,cvars3d_in,cvarsmd_in,nrf_var_in, &
+                          dvars2d_in, dvars3d_in )
 !  Todling: Add to relax code dependency
    character(len=*),intent(in) :: cvars2d_in(:),cvars3d_in(:),cvarsmd_in(:),nrf_var_in(:)
    character(len=*),intent(in) :: dvars2d_in(:),dvars3d_in(:)
-!  logical,         intent(in) :: drv_set_in
    
-   if(size(cvars2d_in)>0) then
+   if(size(cvars2d_in)>=0) then
      if(.not.allocated(cvars2d)) allocate(cvars2d(size(cvars2d_in)))
      cvars2d = cvars2d_in
    endif
-   if(size(cvars3d_in)>0) then
+   if(size(cvars3d_in)>=0) then
      if(.not.allocated(cvars3d)) allocate(cvars3d(size(cvars3d_in)))
      cvars3d = cvars3d_in
    endif
-   mvars  = size(cvarsmd_in)
-   if(mvars>0) then
+   if(size(cvarsmd_in)>=0) then
       if(.not.allocated(cvarsmd)) allocate(cvarsmd(size(cvarsmd_in)))
       cvarsmd = cvarsmd_in
    endif
-   if(size(nrf_var_in)>0) then
+   if(size(nrf_var_in)>=0) then
      if(.not.allocated(nrf_var)) allocate(nrf_var(size(nrf_var_in)))
      nrf_var = nrf_var_in
    endif
 
-!  drv_set = drv_set_in
-!  if(.not. drv_set) return
-   if(size(dvars2d_in)>0) then
+   if(size(dvars2d_in)>=0) then
      if(.not.allocated(dvars2d)) allocate(dvars2d(size(dvars2d_in)))
      dvars2d = dvars2d_in
    endif
-   if(size(dvars3d_in)>0) then
+   if(size(dvars3d_in)>=0) then
      if(.not.allocated(dvars3d)) allocate(dvars3d(size(dvars3d_in)))
      dvars3d = dvars3d_in
    endif
 
-   end subroutine init_general_commvars_dims
+   end subroutine init_dims_
 
    subroutine final_general_commvars_dims
    if(allocated(dvars3d)) deallocate(dvars3d)
@@ -152,8 +149,6 @@ contains
 !   2012-06-25  parrish
 !   2013-10-28  todling - rename p3d to prse
 !   2018-05-09  mtong - use derivative vector to structure variable s2g_d
-!   2018-05-09  eliu - construct variable s2g_d for derivatives when derivative variables
-!                      are set (drv_set = .true.)   
 !
 !   input argument list:
 !
@@ -175,7 +170,7 @@ contains
       implicit none
 
 !  Local Variables
-      integer(i_kind) i,j,k,kk,num_fields,inner_vars,l,n,n_one,n2d,n3d
+      integer(i_kind) i,j,k,kk,num_fields,inner_vars,l,n,n_one,n2d,n3d,mvars
       character(len=64),allocatable,dimension(:,:) :: names_s2g_d,names_s2g_raf
       integer(i_kind),allocatable,dimension(:,:) :: lnames_s2g_raf
       logical,allocatable,dimension(:) :: vector_s2g_d
@@ -193,6 +188,7 @@ contains
       inner_vars=1
       n2d=size(cvars2d)
       n3d=size(cvars3d)
+      mvars=size(cvarsmd)
       num_fields=n2d+nsig*n3d+mvars
       vlevs=num_fields
       allocate(names_s2g_raf(inner_vars,num_fields),lnames_s2g_raf(inner_vars,num_fields))
@@ -274,7 +270,8 @@ contains
 
 !  create general_sub2grid structure variable s2g_d, which is used in get_derivatives.f90
 
-      if (allocated(dvars2d).and.allocated(dvars3d)) then 
+      if (allocated(dvars2d).and.allocated(dvars3d).and. &
+         size(dvars2d)+size(dvars3d)>0) then 
 
          inner_vars=1
          num_fields=size(dvars2d)+nsig*size(dvars3d)

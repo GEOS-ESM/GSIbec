@@ -60,7 +60,7 @@
   use general_commvars_mod, only: init_general_commvars_dims
   use general_commvars_mod, only: final_general_commvars_dims
 
-  use derivsmod, only: dvars2d, dvars3d !, drv_set
+  use derivsmod, only: dvars2d, dvars3d
   use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
   use derivsmod, only: final_anadv 
 
@@ -614,7 +614,7 @@
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
-                                   dvars2d,dvars3d)!_OUT ,drv_set )
+                                   dvars2d,dvars3d)
   call init_general_commvars
 
   if(mype==0)then
