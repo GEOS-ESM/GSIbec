@@ -137,10 +137,13 @@ contains
  end subroutine init_
 
  subroutine read_(n,proc1)
+
+  implicit none
+
   integer, intent(in) :: n, proc1
 
   character(len=*),parameter :: myname_ = myname//'*read_' 
-  integer i,j,k,ke,nv,istatus
+  integer i,j,k,ii,ke,nv,istatus
 
     if(mype/=proc1) return
 
