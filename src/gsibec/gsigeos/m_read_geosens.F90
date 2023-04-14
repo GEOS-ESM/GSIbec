@@ -140,7 +140,7 @@ contains
   integer, intent(in) :: n, proc1
 
   character(len=*),parameter :: myname_ = myname//'*read_' 
-  integer i,j,k,ke,nv,istatus
+  integer i,j,jj,k,ke,nv,istatus
 
     if(mype/=proc1) return
 
@@ -159,11 +159,11 @@ contains
     do nv=1,nc3d
        if (cvars3d(nv)=='sf') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%u(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%u(i,j,k)
              enddo
              enddo
           enddo
@@ -171,11 +171,11 @@ contains
        endif
        if (cvars3d(nv)=='vp') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%v(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%v(i,j,k)
              enddo
              enddo
           enddo
@@ -183,11 +183,11 @@ contains
        endif
        if (cvars3d(nv)=='t') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%tv(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%tv(i,j,k)
              enddo
              enddo
           enddo
@@ -195,11 +195,11 @@ contains
        endif
        if (cvars3d(nv)=='q') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qv(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%qv(i,j,k)
              enddo
              enddo
           enddo
@@ -207,11 +207,11 @@ contains
        endif
        if (cvars3d(nv)=='oz') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%oz(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%oz(i,j,k)
              enddo
              enddo
           enddo
@@ -219,11 +219,11 @@ contains
        endif
        if (cvars3d(nv)=='qi') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qi(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%qi(i,j,k)
              enddo
              enddo
           enddo
@@ -231,11 +231,11 @@ contains
        endif
        if (cvars3d(nv)=='ql') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%ql(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%ql(i,j,k)
              enddo
              enddo
           enddo
@@ -243,11 +243,11 @@ contains
        endif
        if (cvars3d(nv)=='qr') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qr(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%qr(i,j,k)
              enddo
              enddo
           enddo
@@ -255,11 +255,11 @@ contains
        endif
        if (cvars3d(nv)=='qs') then
           do k=1,nsig
-             ii =0
+             jj =0
              do j=1,nlon
              do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qs(i,j,k)
+                jj = jj +1
+                z4all(jj,ke+k)=evars%qs(i,j,k)
              end do
              end do
           enddo
@@ -269,21 +269,21 @@ contains
 
     do nv=1,nc2d
        if (cvars2d(nv)=='ps') then
-          ii=0
+          jj=0
           do j=1,nlon
           do i=1,nlat
-             ii = ii+1
-             z4all(ii,ke+1)=evars%ps(i,j)
+             jj = jj+1
+             z4all(jj,ke+1)=evars%ps(i,j)
           enddo
           enddo
           ke=ke+1
        endif
        if (cvars2d(nv)=='ts') then
-          ii=0
+          jj=0
           do j=1,nlon
           do i=1,nlat
-             ii = ii+1
-             z4all(ii,ke+1)=evars%ts(i,j)
+             jj = jj+1
+             z4all(jj,ke+1)=evars%ts(i,j)
           enddo
           enddo
        endif
