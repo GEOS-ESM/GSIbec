@@ -1,7 +1,7 @@
 module guess_grids
 use m_kinds, only: i_kind, r_kind
 use m_mpimod, only: mype
-use mpeu_util, only: tell,die
+use mpeu_util, only: tell,die,warn
 use constants, only: fv,zero,one,max_varname_length
 use constants, only: kPa_per_Pa,Pa_per_kPa
 use constants, only: constoz
@@ -144,9 +144,9 @@ subroutine other_set_(need)
   geop_hgtl=zero
   geop_hgti=zero
   ges_prsi=zero
-  isli2=zero
   tropprs=zero
   fact_tv=one
+  it = size(GSI_MetGuess_Bundle)
   ! better fix units here?
   if (present(need)) then
     if(mype==0) then
@@ -188,7 +188,6 @@ subroutine other_set_(need)
 !      if(.not.cdiff_created()) call create_cdiff_coefs()
 !      if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
        ier=0
-       it = 1 ! wired
        call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'u', ges_u, &
                                    istatus );ier=ier+istatus
        call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'v', ges_v, &
@@ -208,6 +207,9 @@ subroutine other_set_(need)
        endwhere
     endif
   endif
+! fill in land-water-ice mask
+  call lwi_mask_(it)
+
   gesgrid_iamset_ = .true.
 end subroutine other_set_
 !--------------------------------------------------------
@@ -696,6 +698,43 @@ end subroutine final_
         end if
   enddo
   end subroutine get_ref_gesprs_
+
+  subroutine lwi_mask_(it)
+! this is very GEOS-centric
+  implicit none
+  integer, intent(in) :: it
+  character(len=*), parameter :: myname_ = myname//'*lwi_mask_'
+  real(r_kind),pointer :: frocean(:,:)=>NULL()
+  real(r_kind),pointer :: frlake(:,:)=>NULL()
+  real(r_kind),pointer :: frseaice(:,:)=>NULL()
+  real(r_kind),pointer :: tskin(:,:)=>NULL()
+  integer :: its,ier,istatus
+
+  isli2=zero ! ocean
+  istatus=0
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frocean' ,frocean,ier)
+        istatus=ier+istatus
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frseaice',frseaice,ier)
+        istatus=ier+istatus
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frlake'  ,frlake ,ier)
+       istatus=ier+istatus
+  if (istatus/=0) then
+     if(mype==0) &
+     call warn(myname_, ': not enough to fill LWI, all Ocean')
+     return
+  endif
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ts',tskin,its)
+
+                                           isli2 = 1  ! Land
+  where (  frocean+frlake >= 0.6         ) isli2 = 0  ! Water
+  where (  isli2==0 .and. frseaice > 0.5 ) isli2 = 2  ! Ice
+  if(its==0) then
+    where( isli2==0 .and. tskin  < 271.4 ) isli2 = 2  ! Ice
+    if(mype==0) write(6,'(2a)') myname_, ': filled LWI'
+  else
+    if(mype==0) write(6,'(2a)') myname_, ': filled LWI (no T-skin)'
+  endif
+  end subroutine lwi_mask_
 
   subroutine load_guess_tsen_(mock)
   implicit none

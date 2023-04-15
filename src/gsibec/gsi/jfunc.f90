@@ -52,9 +52,9 @@ logical :: clip_supersaturation
 integer,save :: jouter_def=0
 contains
 subroutine jfunc_init
- mockbkg=.true. ! fake background state (internally generated)
- jiter=1        ! used as index for output spread - wired for now
- jiterstart=1   ! used as index for output spread - wired for now
+ mockbkg=.false. ! fake background state (internally generated)
+ jiter=1         ! used as index for output spread - wired for now
+ jiterstart=1    ! used as index for output spread - wired for now
  npred=0
  npredp=0
  npcptype=0
