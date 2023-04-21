@@ -1,4 +1,4 @@
-subroutine write_bkgvars_grid(a,b,c,d,mype)
+subroutine write_bkgvars_grid(a,b,c,d,grdfile,mype)
 !$$$  subroutine documentation block
 !
 ! subprogram:    write_bkgvars_grid
@@ -34,11 +34,11 @@ subroutine write_bkgvars_grid(a,b,c,d,mype)
   implicit none
 
   integer(i_kind)                       ,intent(in   ) :: mype
+  character(len=*)                      ,intent(in   ) :: grdfile
 
   real(r_kind),dimension(lat2,lon2,nsig),intent(in   ) :: a,b,c
   real(r_kind),dimension(lat2,lon2)     ,intent(in   ) :: d
 
-  character(255):: grdfile
 
   real(r_kind),dimension(nlat,nlon,nsig):: ag,bg,cg
   real(r_kind),dimension(nlat,nlon):: dg
@@ -75,7 +75,6 @@ subroutine write_bkgvars_grid(a,b,c,d,mype)
      end do
 
 ! Create byte-addressable binary file for grads
-     grdfile='bkgvar_rewgt.grd'
      ncfggg=len_trim(grdfile)
 #ifdef HAVE_BACIO
      call baopenwt(22,grdfile(1:ncfggg),iret)

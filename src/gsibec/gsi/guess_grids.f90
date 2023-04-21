@@ -68,6 +68,8 @@ real(r_kind),allocatable,dimension(:,:,:):: fact_tv
 real(r_kind),allocatable,dimension(:,:):: tropprs
 integer(i_kind),allocatable,dimension(:,:):: isli2
 
+real(r_kind),allocatable :: debugvar(:,:,:)
+
 interface gsiguess_init; module procedure init_; end interface
 interface gsiguess_final; module procedure final_; end interface
 interface gsiguess_get_ref_gesprs; module procedure get_ref_gesprs_; end interface
@@ -205,6 +207,8 @@ subroutine other_set_(need)
        where(need=='div')
           need='filled-'//need
        endwhere
+!      call write_bkgvars_grid(ges_u,ges_v,ges_vor,ges_div(:,:,1),&
+!                             'wind.grd',mype) ! debug
     endif
   endif
 ! fill in land-water-ice mask
@@ -734,6 +738,13 @@ end subroutine final_
   else
     if(mype==0) write(6,'(2a)') myname_, ': filled LWI (no T-skin)'
   endif
+! allocate(debugvar(size(frocean,1),size(frocean,2),nsig))
+! debugvar(:,:,1) = frocean
+! debugvar(:,:,2) = frlake
+! debugvar(:,:,3) = frseaice
+! debugvar(:,:,4) = tskin
+! call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
+! deallocate(debugvar)
   end subroutine lwi_mask_
 
   subroutine load_guess_tsen_(mock)

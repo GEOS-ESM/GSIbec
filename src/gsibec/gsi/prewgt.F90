@@ -439,7 +439,8 @@ subroutine prewgt(mype)
   if (bkgv_flowdep) then
       call bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   else
-      if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,mype)
+      if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,&
+                                             'bkgvar_rewgt.grd',mype)
   endif
 
 ! vertical length scales
