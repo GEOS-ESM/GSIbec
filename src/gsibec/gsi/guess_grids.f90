@@ -708,43 +708,66 @@ end subroutine final_
   implicit none
   integer, intent(in) :: it
   character(len=*), parameter :: myname_ = myname//'*lwi_mask_'
-  real(r_kind),pointer :: frocean(:,:)=>NULL()
-  real(r_kind),pointer :: frlake(:,:)=>NULL()
+  real(r_kind),pointer :: slmsk   (:,:)=>NULL()
+  real(r_kind),pointer :: frocean (:,:)=>NULL()
+  real(r_kind),pointer :: frlake  (:,:)=>NULL()
   real(r_kind),pointer :: frseaice(:,:)=>NULL()
-  real(r_kind),pointer :: tskin(:,:)=>NULL()
+  real(r_kind),pointer :: tskin   (:,:)=>NULL()
+  real(r_kind),pointer :: ps      (:,:)=>NULL()
+  real(r_kind),pointer :: z       (:,:)=>NULL()
   integer :: its,ier,istatus
+  logical :: fromges
 
+  fromges=.false.
   isli2=zero ! ocean
   istatus=0
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frocean' ,frocean,ier)
-        istatus=ier+istatus
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frseaice',frseaice,ier)
-        istatus=ier+istatus
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frlake'  ,frlake ,ier)
-       istatus=ier+istatus
-  if (istatus/=0) then
-     if(mype==0) &
-     call warn(myname_, ': not enough to fill LWI, all Ocean')
-     return
-  endif
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ts',tskin,its)
-
-                                           isli2 = 1  ! Land
-  where (  frocean+frlake >= 0.6         ) isli2 = 0  ! Water
-  where (  isli2==0 .and. frseaice > 0.5 ) isli2 = 2  ! Ice
-  if(its==0) then
-    where( isli2==0 .and. tskin  < 271.4 ) isli2 = 2  ! Ice
-    if(mype==0) write(6,'(2a)') myname_, ': filled LWI'
+  
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ts'    ,tskin,its)
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'slmsk' ,slmsk,ier)
+  if(ier==0) then
+    isli2 = nint(slmsk)
+    if(mype==0) write(6,'(2a)') myname_, ': ges-filled LWI'
+    fromges=.true.
   else
-    if(mype==0) write(6,'(2a)') myname_, ': filled LWI (no T-skin)'
+    call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frocean' ,frocean,ier)
+          istatus=ier+istatus
+    call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frseaice',frseaice,ier)
+          istatus=ier+istatus
+    call gsi_bundlegetpointer(gsi_metguess_bundle(it),'frlake'  ,frlake ,ier)
+          istatus=ier+istatus
+    if (istatus/=0) then
+       if(mype==0) &
+       call warn(myname_, ': not enough to fill LWI, all Ocean')
+       return
+    endif
+                                             isli2 = 1  ! Land
+    where (  frocean+frlake >= 0.6         ) isli2 = 0  ! Water
+    where (  isli2==0 .and. frseaice > 0.5 ) isli2 = 2  ! Ice
+    if(its==0) then
+      where( isli2==0 .and. tskin  < 271.4 ) isli2 = 2  ! Ice
+      if(mype==0) write(6,'(2a)') myname_, ': frac-filled LWI'
+    else
+      if(mype==0) write(6,'(2a)') myname_, ': frac-filled LWI (no T-skin)'
+    endif
   endif
-! allocate(debugvar(size(frocean,1),size(frocean,2),nsig))
-! debugvar(:,:,1) = frocean
-! debugvar(:,:,2) = frlake
-! debugvar(:,:,3) = frseaice
-! debugvar(:,:,4) = tskin
-! call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
-! deallocate(debugvar)
+
+! debug
+  allocate(debugvar(lat2,lon2,nsig))
+  debugvar=zero
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ps',ps,its)
+  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'z',z,its)
+  if(fromges) then
+    debugvar(:,:,1) = slmsk
+  else
+    debugvar(:,:,1) = frocean
+    debugvar(:,:,2) = frlake
+    debugvar(:,:,3) = frseaice
+  endif
+  debugvar(:,:,4) = tskin
+  debugvar(:,:,5) = z
+  call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
+  deallocate(debugvar)
+
   end subroutine lwi_mask_
 
   subroutine load_guess_tsen_(mock)
