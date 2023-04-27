@@ -121,6 +121,7 @@ subroutine prewgt(mype)
 
 ! Declare local variables
   character(len=*), parameter :: myname = 'prewgt'
+  logical :: bflow_vars
   integer(i_kind) n,nrr,iii,jjj,nxg,i2,im,jm,j2
   integer(i_kind) i,j,k,ii,nn,nbuf,nmix,nxe,nor,ndx,ndy
   integer(i_kind) nlathh,mm1,nolp,mm,ir,k1
@@ -208,6 +209,7 @@ subroutine prewgt(mype)
   nrf2_sst  = getindex(cvars2d,'sst')
 ! nrf2_stl  = getindex(cvarsmd,'stl')
 ! nrf2_sti  = getindex(cvarsmd,'sti')
+  bflow_vars = (nrf3_sf>0).and.(nrf3_vp>0).and.(nrf3_t>0).and.(nrf2_ps>0)
 
 ! Setup blending
   mm=4
@@ -312,15 +314,17 @@ subroutine prewgt(mype)
   mlat=nlat
 
 ! load the horizontal length scales
-  hwll=zero
-  do j=1,nc3d
-     do k=1,nsig
-        do i=1,nlat
-           hwll(i,k,j)=hwllin(i,k,j)
-        end do
-     end do
-  end do
-  if(nrf3_oz>0.and.adjustozhscl>zero) hwll(:,:,nrf3_oz)=hwll(:,:,nrf3_oz)*adjustozhscl   !inflate scale
+  if(nc3d>0) then
+    hwll=zero
+    do j=1,nc3d
+       do k=1,nsig
+          do i=1,nlat
+             hwll(i,k,j)=hwllin(i,k,j)
+          end do
+       end do
+    end do
+    if(nrf3_oz>0.and.adjustozhscl>zero) hwll(:,:,nrf3_oz)=hwll(:,:,nrf3_oz)*adjustozhscl   !inflate scale
+  endif
 
 ! surface pressure
   if(nrf2_ps>0) then
@@ -383,7 +387,7 @@ subroutine prewgt(mype)
   vs=one/vs
 
 ! Initialize full array to zero before loading part of array below
-  vz=zero
+  if(nc3d>0) vz=zero
 
 ! load vertical length scales
   do j=1,nc3d
@@ -436,11 +440,13 @@ subroutine prewgt(mype)
   end if
 
 ! Reweight the variances based on flow dependence if flag set
-  if (bkgv_flowdep) then
-      call bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
-  else
-      if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,&
-                                             'bkgvar_rewgt.grd',mype)
+  if (bflow_vars) then
+     if (bkgv_flowdep) then
+        call bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
+     else
+        if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,&
+                                               'bkgvar_rewgt.grd',mype)
+    endif
   endif
 
 ! vertical length scales

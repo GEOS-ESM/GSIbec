@@ -89,6 +89,7 @@ end interface gsiguess_bkgcov_final
 
 logical, save :: gesgrid_initialized_ = .false.
 logical, save :: gesgrid_iamset_ = .false.
+logical :: debug_guess=.false.
 
 character(len=*), parameter :: myname="guess_grids"
 contains
@@ -715,7 +716,7 @@ end subroutine final_
   real(r_kind),pointer :: tskin   (:,:)=>NULL()
   real(r_kind),pointer :: ps      (:,:)=>NULL()
   real(r_kind),pointer :: z       (:,:)=>NULL()
-  integer :: its,ier,istatus
+  integer :: ic,its,ier,istatus
   logical :: fromges
 
   fromges=.false.
@@ -752,21 +753,24 @@ end subroutine final_
   endif
 
 ! debug
-  allocate(debugvar(lat2,lon2,nsig))
-  debugvar=zero
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ps',ps,its)
-  call gsi_bundlegetpointer(gsi_metguess_bundle(it),'z',z,its)
-  if(fromges) then
-    debugvar(:,:,1) = slmsk
-  else
-    debugvar(:,:,1) = frocean
-    debugvar(:,:,2) = frlake
-    debugvar(:,:,3) = frseaice
+  if(debug_guess) then
+     allocate(debugvar(lat2,lon2,nsig))
+     debugvar=zero
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ps',ps,its)
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'z',z,its)
+     ic=0
+     if(fromges) then
+       ic=ic+1; debugvar(:,:,ic) = slmsk
+     else
+       ic=ic+1; debugvar(:,:,ic) = frocean
+       ic=ic+1; debugvar(:,:,ic) = frlake
+       ic=ic+1; debugvar(:,:,ic) = frseaice
+     endif
+     ic=ic+1; debugvar(:,:,ic) = tskin
+     ic=ic+1; debugvar(:,:,ic) = z
+     call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
+     deallocate(debugvar)
   endif
-  debugvar(:,:,4) = tskin
-  debugvar(:,:,5) = z
-  call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
-  deallocate(debugvar)
 
   end subroutine lwi_mask_
 
