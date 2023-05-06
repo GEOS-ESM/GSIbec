@@ -1,5 +1,5 @@
 # Build list of subdirs with files to add
-set(_subdirs gsi gsigeos )
+set(_subdirs gsi gsigeos gsigfs )
 foreach( _subdir IN LISTS _subdirs )
     add_subdirectory( ${_subdir} )
     list( TRANSFORM ${_subdir}_src_files PREPEND ${_subdir}/ )

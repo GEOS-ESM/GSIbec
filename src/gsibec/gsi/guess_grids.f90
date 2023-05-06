@@ -89,7 +89,7 @@ end interface gsiguess_bkgcov_final
 
 logical, save :: gesgrid_initialized_ = .false.
 logical, save :: gesgrid_iamset_ = .false.
-logical :: debug_guess=.false.
+logical :: debug_guess=.true.
 
 character(len=*), parameter :: myname="guess_grids"
 contains
@@ -768,7 +768,7 @@ end subroutine final_
      endif
      ic=ic+1; debugvar(:,:,ic) = tskin
      ic=ic+1; debugvar(:,:,ic) = z
-     call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
+     call write_bkgvars_grid(debugvar,debugvar,debugvar,ps,'skin.grd',mype) ! debug
      deallocate(debugvar)
   endif
 

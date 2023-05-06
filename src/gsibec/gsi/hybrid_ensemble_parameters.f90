@@ -296,6 +296,7 @@ module hybrid_ensemble_parameters
   public :: bens_recenter
   public :: upd_ens_spread
   public :: upd_ens_localization
+  public :: EnsSource
 
   logical l_hyb_ens,uv_hyb_ens,q_hyb_ens,oz_univ_static,sst_staticB
   logical bens_recenter,upd_ens_spread,upd_ens_localization
@@ -335,6 +336,7 @@ module hybrid_ensemble_parameters
   integer(i_kind) regional_ensemble_option
   character(len=512),save :: ensemble_path
   character(len=512),save :: ens_fname_tmpl
+  character(len=80) :: EnsSource
 
 ! following is for storage of ensemble perturbations:
 
@@ -424,6 +426,7 @@ subroutine init_hybrid_ensemble_parameters
   upd_ens_spread=.false.     ! redefine ens spread (for jiter>1) by recentering ens around guess 
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
 
+  EnsSource = 'NULL'
 
 end subroutine init_hybrid_ensemble_parameters
 
