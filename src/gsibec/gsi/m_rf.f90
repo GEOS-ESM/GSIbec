@@ -36,7 +36,10 @@ interface rf_unset; module procedure unset_; end interface
 
 character(len=*), parameter :: myname = 'm_rf'
 contains
-  subroutine set_ ()
+  subroutine set_ (nymd,nhms)
+  implicit none
+  integer(i_kind), intent(in) :: nymd,nhms
+ 
   character(len=*), parameter :: mynmae_ = myname//'*set_'
   integer(i_kind) msig,mlat,mlon
   logical good
@@ -54,7 +57,7 @@ contains
   call prewgt(mype)
 ! If hybrid covariance
   if(l_hyb_ens) then
-     call load_ensemble(-1)
+     call load_ensemble(nymd,nhms,-1)
      call hybens_localization_setup
   end if
   end subroutine set_
