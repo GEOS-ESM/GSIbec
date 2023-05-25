@@ -479,7 +479,9 @@ contains
     CALL setup_control_vectors(nsig,lat2,lon2,latlon11,latlon1n, &
                                nsclen,npclen,ntclen,nclen,nsubwin,&
                                nval_len,lsqrtb,n_ens, &
-                               nval_lenz_enz)
+                               nval_lenz_enz,&
+                               grd_ens%lat2,grd_ens%lon2,grd_ens%nsig,&
+                               grd_ens%latlon11,l_hyb_ens)
     CALL setup_predictors(nrclen,nsclen,npclen,ntclen)
     CALL setup_state_vectors(latlon11,latlon1n,nvals_len,lat2,lon2,nsig)
 

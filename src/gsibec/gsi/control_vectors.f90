@@ -80,8 +80,6 @@ use constants, only: zero, one, two, three, zero_quad, tiny_r_kind
 use mpeu_util, only: get_lun => luavail
 use mpeu_util, only: warn
 use mpl_allreducemod, only: mpl_allreduce
-use hybrid_ensemble_parameters, only: l_hyb_ens
-use hybrid_ensemble_parameters, only: grd_ens
 use constants, only : max_varname_length
 
 use m_rerank, only : rerank
@@ -152,8 +150,10 @@ character(len=*),parameter:: myname='control_vectors'
 
 integer(i_kind) :: nclen,nclen1,nsclen,npclen,ntclen,nrclen,nsubwin,nval_len
 integer(i_kind) :: latlon11,latlon1n,lat2,lon2,nsig,n_ens
+integer(i_kind) :: enlat2,enlon2,ennsig,enlatlon11
 integer(i_kind) :: nval_lenz_en
 logical :: lsqrtb,lcalc_gfdl_cfrac  
+logical :: l_hyb_ens
 
 integer(i_kind) :: m_vec_alloc, max_vec_alloc, m_allocs, m_deallocs
 
@@ -200,7 +200,7 @@ contains
 ! ----------------------------------------------------------------------
 subroutine setup_control_vectors(ksig,klat,klon,katlon11,katlon1n, &
                                  ksclen,kpclen,ktclen,kclen,ksubwin,kval_len,ldsqrtb,k_ens,&
-                                 kval_lenz_en)
+                                 kval_lenz_en,kenlat,kenlon,kensig,kenlatlon11,lhybens)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    setup_control_vectors
@@ -241,11 +241,18 @@ subroutine setup_control_vectors(ksig,klat,klon,katlon11,katlon1n, &
   integer(i_kind)          , intent(in   ) :: ksig,klat,klon,katlon11,katlon1n, &
                                  ksclen,kpclen,ktclen,kclen,ksubwin,kval_len,k_ens,&
                                  kval_lenz_en
+  integer(i_kind)          , intent(in   ) :: kensig,kenlat,kenlon,kenlatlon11
   logical                  , intent(in   ) :: ldsqrtb
+  logical                  , intent(in   ) :: lhybens
 
+  l_hyb_ens = lhybens
   nsig=ksig
   lat2=klat
   lon2=klon
+  ennsig=kensig
+  enlat2=kenlat
+  enlon2=kenlon
+  enlatlon11=kenlatlon11
   latlon11=katlon11
   latlon1n=katlon1n
   nsclen=ksclen
@@ -438,7 +445,7 @@ subroutine allocate_cv(ycv)
 ! program history log:
 !   2009-08-04  lueken - added subprogram doc block
 !   2009-09-20  parrish - add optional allocation of hybrid ensemble control variable a_en
-!   2010-02-20  parrish - add structure variable grd_ens as part of changes for dual-resolution
+!   2010-02-20  parrish - add ens dims as part of changes for dual-resolution
 !                           hybrid ensemble system.
 !   2010-02-25  zhu     - use nrf_var and nrf_3d to specify the order control variables
 !   2010-05-01  todling - update to use gsi_bundle
@@ -492,11 +499,11 @@ subroutine allocate_cv(ycv)
   n_aens=0
   if (l_hyb_ens) then
       ALLOCATE(ycv%aens(nsubwin,n_ens))
-         call GSI_GridCreate(ycv%grid_aens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
+         call GSI_GridCreate(ycv%grid_aens,enlat2,enlon2,ennsig)
          if (lsqrtb) then
             n_aens=nval_lenz_en
          else
-            n_aens=grd_ens%latlon11*grd_ens%nsig
+            n_aens=enlatlon11*ennsig
          endif
   endif
 
