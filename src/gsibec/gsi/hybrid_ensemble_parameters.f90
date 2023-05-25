@@ -287,8 +287,6 @@ module hybrid_ensemble_parameters
   public :: l_ens_in_diff_time
   public :: ensemble_path
   public :: ens_fname_tmpl
-  public :: nelen
-  public :: en_perts,ps_bar
   public :: region_lat_ens,region_lon_ens
   public :: region_dx_ens,region_dy_ens
   public :: ens_fast_read
@@ -297,6 +295,7 @@ module hybrid_ensemble_parameters
   public :: upd_ens_spread
   public :: upd_ens_localization
   public :: EnsSource
+  public :: test_nymd,test_nhms
 
   logical l_hyb_ens,uv_hyb_ens,q_hyb_ens,oz_univ_static,sst_staticB
   logical bens_recenter,upd_ens_spread,upd_ens_localization
@@ -317,6 +316,7 @@ module hybrid_ensemble_parameters
   logical ens_fast_read
   integer(i_kind) i_en_perts_io
   integer(i_kind) n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test
+  integer(i_kind) :: test_nymd(7),test_nhms(7)
   real(r_kind) beta_s0,s_ens_h,s_ens_v,grid_ratio_ens
   type(sub2grid_info),save :: grd_ens,grd_loc,grd_sploc,grd_anl,grd_e1,grd_a1
   type(spec_vars),save :: sp_ens,sp_loc
@@ -337,15 +337,6 @@ module hybrid_ensemble_parameters
   character(len=512),save :: ensemble_path
   character(len=512),save :: ens_fname_tmpl
   character(len=80) :: EnsSource
-
-! following is for storage of ensemble perturbations:
-
-!   def en_perts            - array of ensemble perturbations
-!   def nelen               - length of one ensemble perturbation vector
-
-  integer(i_kind) nelen
-  type(gsi_bundle),save,allocatable :: en_perts(:,:)
-  real(r_single),dimension(:,:,:),allocatable:: ps_bar
 
 !    following is for interpolation of global ensemble to regional ensemble grid
 
@@ -427,6 +418,8 @@ subroutine init_hybrid_ensemble_parameters
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
 
   EnsSource = 'NULL'
+  test_nymd = -1
+  test_nhms = -1
 
 end subroutine init_hybrid_ensemble_parameters
 

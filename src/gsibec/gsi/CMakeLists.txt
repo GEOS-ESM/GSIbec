@@ -20,6 +20,7 @@ control2state_ad.F90
 control2state.F90
 control_vectors.f90
 gsi_convert_cv_mod.f90
+gsi_enperts_mod.F90
 derivsmod.f90
 egrid2agrid_mod.f90
 en_perts_io.f90
