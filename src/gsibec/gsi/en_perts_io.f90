@@ -21,7 +21,7 @@ subroutine en_perts_get_from_save_fulldomain(epts)
 !$$$ end documentation block
 
   use gridmod, only: regional
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens,grd_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle
@@ -186,7 +186,7 @@ subroutine en_perts_get_from_save(epts)
 !
 !$$$ end documentation block
 
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle
@@ -283,7 +283,7 @@ subroutine en_perts_save(epts)
 !
 !$$$ end documentation block
 
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle

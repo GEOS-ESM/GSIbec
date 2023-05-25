@@ -22,8 +22,8 @@ use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
 use hybrid_ensemble_isotropic, only: load_ensemble
 use hybrid_ensemble_isotropic, only: hybens_localization_setup
-use gsi_enperts_mod, only: gsi_enperts
-use gsi_enperts_mod, only: gsi_destroy_ensemble
+use hybrid_ensemble_parameters, only: gsi_enperts
+use hybrid_ensemble_parameters, only: gsi_destroy_ensemble
 
 use mpeu_util, only: getindex
 use mpeu_util, only: die

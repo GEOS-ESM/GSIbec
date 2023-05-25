@@ -132,7 +132,6 @@ public atsfc_sdv   ! standard deviation of surface temperature error over (1) la
 public an_amp0     ! multiplying factors on reference background error variances
 public lcalc_gfdl_cfrac ! when .t., calculate and use GFDL cloud fraction in obs operator 
 
-public nrf2_loc,nrf3_loc,nmotl_loc   ! what are these for??
 public ntracer
 
 type control_vector
@@ -159,7 +158,6 @@ logical :: lsqrtb,lcalc_gfdl_cfrac
 integer(i_kind) :: m_vec_alloc, max_vec_alloc, m_allocs, m_deallocs
 
 logical,allocatable,dimension(:):: nrf_3d
-integer(i_kind),allocatable,dimension(:):: nrf2_loc,nrf3_loc,nmotl_loc
 integer(i_kind) nrf,nvars
 integer(i_kind) ntracer
 
@@ -360,7 +358,7 @@ allocate(an_amp0(nvars))
 
 ! want to rid code from the following ...
 nrf=nc2d+nc3d
-allocate(nrf_3d(nrf),nrf2_loc(nc2d),nrf3_loc(nc3d),nmotl_loc(max(1,mvars)))
+allocate(nrf_3d(nrf))
 
 ! Now load information from table
 nc3d=0;nc2d=0;mvars=0
@@ -374,20 +372,17 @@ do ii=1,nvars
    if(trim(adjustl(source))=='motley') then
        mvars=mvars+1
        cvarsmd(mvars)=trim(adjustl(var))
-       nmotl_loc(mvars)=ii
        atsfc_sdv(mvars)=aas
        bemo(mvars)=bes
    else
       if(ilev==1) then
          nc2d=nc2d+1
          cvars2d(nc2d)=trim(adjustl(var))
-         nrf2_loc(nc2d)=ii  ! rid of soon
          as2d(nc2d)=aas
          be2d(nc2d)=bes
       else
          nc3d=nc3d+1
          cvars3d(nc3d)=trim(adjustl(var))
-         nrf3_loc(nc3d)=ii  ! rid of soon
          nrf_3d(ii)=.true.
          as3d(nc3d)=aas
          be3d(nc3d)=bes
@@ -421,7 +416,7 @@ end subroutine init_anacv
 subroutine final_anacv
   implicit none
   deallocate(evars2d,evars3d)
-  deallocate(nrf_3d,nrf2_loc,nrf3_loc,nmotl_loc)
+  deallocate(nrf_3d)
   deallocate(an_amp0)
   deallocate(atsfc_sdv)
   deallocate(cvarsmd)

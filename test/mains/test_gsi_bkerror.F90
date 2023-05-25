@@ -8,7 +8,7 @@ use m_gsibec, only: gsibec_final_guess
 use m_gsibec, only: gsibec_final
 
 use guess_grids, only: gsiguess_bkgcov_init
-use gsi_enperts_mod, only: gsi_enperts
+use hybrid_ensemble_parameters, only: gsi_enperts
 
 use mpeu_util, only: die
 use m_mpimod, only: gsi_mpi_comm_world

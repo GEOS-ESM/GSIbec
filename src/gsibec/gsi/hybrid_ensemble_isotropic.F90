@@ -238,7 +238,7 @@ subroutine init_rf_z(epts,z_len)
 #endif /* USE_ALL_ORIGINAL */
   use constants, only: half,one,rd_over_cp,zero,one_tenth,ten,two
   use hybrid_ensemble_parameters, only: grd_ens
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
 
   implicit none
 
@@ -1119,7 +1119,7 @@ end subroutine normal_new_factorization_rf_y
     use hybrid_ensemble_parameters, only: n_ens,generate_ens,grd_ens,grd_anl,ntlevs_ens, &
                                           pseudo_hybens,regional_ensemble_option,&
                                           i_en_perts_io
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     use hybrid_ensemble_parameters, only: write_ens_sprd
     use gsi_enscouplermod, only: gsi_enscoupler_put_gsi_ens
     use m_mpimod, only: mype
@@ -1599,7 +1599,7 @@ end subroutine normal_new_factorization_rf_y
     use m_kinds, only: r_kind,i_kind
     use gridmod, only: regional
     use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_anl,grd_a1,grd_e1,p_e2a,ntlevs_ens
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     use general_sub2grid_mod, only: general_suba2sube
     use berror, only: qvar3d
     implicit none
@@ -1681,7 +1681,7 @@ end subroutine normal_new_factorization_rf_y
 !
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     use constants, only: zero
 
     implicit none
@@ -1832,7 +1832,7 @@ end subroutine normal_new_factorization_rf_y
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
     use hybrid_ensemble_parameters, only: grd_ens,grd_anl,p_e2a
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     use general_sub2grid_mod, only: general_sube2suba
     use gridmod,only: regional
     use constants, only: zero
@@ -2006,7 +2006,7 @@ end subroutine normal_new_factorization_rf_y
 !$$$
 
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     implicit none
 
     type(gsi_bundle),intent(inout) :: cvec
@@ -2137,7 +2137,7 @@ end subroutine normal_new_factorization_rf_y
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
     use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_anl,p_e2a
-    use gsi_enperts_mod, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: gsi_enperts
     use general_sub2grid_mod, only: general_sube2suba_ad
     use gridmod,only: regional
     use constants, only: zero
@@ -3987,7 +3987,7 @@ subroutine hybens_localization_setup(epts)
    use hybrid_ensemble_parameters, only: readin_beta,beta_s,beta_e,beta_s0,sqrt_beta_s,sqrt_beta_e
    use hybrid_ensemble_parameters, only: readin_localization,create_hybens_localization_parameters, &
                                          vvlocal,s_ens_h,s_ens_hv,s_ens_v,s_ens_vv
-   use gsi_enperts_mod, only: gsi_enperts
+   use hybrid_ensemble_parameters, only: gsi_enperts
    use gsi_io, only: verbose
    use guess_grids, only: gsiguess_get_ref_gesprs
 
@@ -5153,8 +5153,8 @@ end subroutine setup_pwgt
 subroutine ens_iterate_update(nymd,nhms,jiter)
   use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
   use hybrid_ensemble_parameters, only: bens_recenter
-  use gsi_enperts_mod, only: gsi_create_ensemble
-  use gsi_enperts_mod, only: gsi_destroy_ensemble
+  use hybrid_ensemble_parameters, only: gsi_create_ensemble
+  use hybrid_ensemble_parameters, only: gsi_destroy_ensemble
   use m_revBens, only: update_spread
   implicit none
   integer(i_kind),intent(in) :: nymd,nhms

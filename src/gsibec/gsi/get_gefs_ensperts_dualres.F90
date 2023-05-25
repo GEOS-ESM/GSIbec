@@ -53,7 +53,7 @@ subroutine get_gefs_ensperts_dualres (epts,nymd,nhms,tau)
   use hybrid_ensemble_parameters, only: n_ens,write_ens_sprd,oz_univ_static,ntlevs_ens
   use hybrid_ensemble_parameters, only: sst_staticB
   use hybrid_ensemble_parameters, only: bens_recenter
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: test_nymd,test_nhms
   use constants,only: zero,zero_single,half,fv,rd_over_cp,one,qcmin
   use m_mpimod, only: gsi_mpi_comm_world,mype,npe
@@ -525,7 +525,7 @@ subroutine ens_spread_dualres(epts,en_bar,ibin,nymd,nhms)
   use m_mpimod, only: mype
   use m_kinds, only: r_single,r_kind,i_kind
   use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_anl,p_e2a,uv_hyb_ens
-  use gsi_enperts_mod, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use general_sub2grid_mod, only: sub2grid_info,general_sub2grid_create_info,general_sube2suba
   use constants, only:  zero,two,half,one
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d

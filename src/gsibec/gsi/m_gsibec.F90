@@ -28,7 +28,6 @@ use state_vectors, only: allocate_state,deallocate_state
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
 use control_vectors, only: assignment(=)
-use control_vectors, only: cvars3d
 use control_vectors, only: prt_control_norms
 use control_vectors, only: inquire_cv
 use control_vectors, only: cvars2d, cvars3d
@@ -48,8 +47,8 @@ use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
 use hybrid_ensemble_parameters,only: l_hyb_ens
 use hybrid_ensemble_parameters,only: ntlevs_ens
 use hybrid_ensemble_isotropic, only: hybens_grid_setup
-use gsi_enperts_mod, only: gsi_create_ensemble
-use gsi_enperts_mod, only: gsi_enperts
+use hybrid_ensemble_parameters, only: gsi_create_ensemble
+use hybrid_ensemble_parameters, only: gsi_enperts
 use hybrid_ensemble_isotropic, only: bkerror_a_en
 use hybrid_ensemble_isotropic, only: ensemble_forward_model_ad
 use hybrid_ensemble_isotropic, only: ensemble_forward_model
@@ -177,7 +176,7 @@ contains
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
-    call gsi_create_ensemble(epts)
+    call gsi_create_ensemble(cvars2d,cvars3d,epts)
   endif
   call set_pointer_()
 
