@@ -37,3 +37,4 @@ Other TO DOs
 - fill in halo for var comming from saber
 - need to put back call to turbl in calctends
 - need to encapsulate namelists (might be able to do it piecemeal)
+- remove test_nymd/nhms
