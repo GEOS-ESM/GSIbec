@@ -1,4 +1,4 @@
-subroutine ensctl2state_ad(eval,mval,grad)
+subroutine ensctl2state_ad(epts,eval,mval,grad)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensctl2state_ad
@@ -27,6 +27,7 @@ use m_kinds, only: r_kind,i_kind
 use control_vectors, only: control_vector,cvars3d
 use gsi_4dvar, only: ibin_anl
 use hybrid_ensemble_parameters, only: uv_hyb_ens,dual_res,ntlevs_ens,q_hyb_ens
+use hybrid_ensemble_parameters, only: gsi_enperts
 use hybrid_ensemble_isotropic, only: ensemble_forward_model_ad
 use hybrid_ensemble_isotropic, only: ensemble_forward_model_ad_dual_res
 use gsi_bundlemod, only: gsi_bundlecreate
@@ -51,6 +52,7 @@ use gridmod, only: nems_nmmb_regional
 implicit none
 
 ! Declare passed variables
+type(gsi_enperts)   , intent(in)    :: epts
 type(control_vector), intent(inout) :: grad
 type(gsi_bundle)    , intent(inout) :: mval
 type(gsi_bundle)    , intent(in   ) :: eval(ntlevs_ens)
@@ -267,9 +269,9 @@ do jj=1,ntlevs_ens
 !$omp end parallel sections
 
    if(dual_res) then
-      call ensemble_forward_model_ad_dual_res(wbundle_c,grad%aens(1,:),jj)
+      call ensemble_forward_model_ad_dual_res(wbundle_c,grad%aens(1,:),epts,jj)
    else
-      call ensemble_forward_model_ad(wbundle_c,grad%aens(1,:),jj)
+      call ensemble_forward_model_ad(wbundle_c,grad%aens(1,:),epts,jj)
    end if
 
 end do

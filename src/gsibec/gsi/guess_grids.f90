@@ -173,6 +173,12 @@ subroutine other_set_(need)
           need='filled-'//need
        endwhere
     endif
+    if (any(need=='cw')) then
+       call load_guess_cw_
+       where(need=='cw')
+          need='filled-'//need
+       endwhere
+    endif
   else
     call load_guess_tsen_(mock=.true.)
   endif
@@ -208,8 +214,10 @@ subroutine other_set_(need)
        where(need=='div')
           need='filled-'//need
        endwhere
-!      call write_bkgvars_grid(ges_u,ges_v,ges_vor,ges_div(:,:,1),&
+!      call write_bkgvars_grid(ges_u,ges_v,ges_u,ges_u(:,:,1),&
 !                             'wind.grd',mype) ! debug
+!      call write_bkgvars_grid(ges_div,ges_vor,ges_div,ges_div(:,:,1),&
+!                             'divo.grd',mype) ! debug
     endif
   endif
 ! fill in land-water-ice mask
@@ -777,7 +785,7 @@ end subroutine final_
   subroutine load_guess_tsen_(mock)
   implicit none
   logical,optional,intent(in) :: mock
-  character(len=*), parameter :: myname_ = myname//'*get_guess_tsen_'
+  character(len=*), parameter :: myname_ = myname//'*load_guess_tsen_'
   real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
@@ -825,7 +833,7 @@ end subroutine final_
 
   subroutine load_guess_tv_
   implicit none
-  character(len=*), parameter :: myname_ = myname//'*get_guess_tv_'
+  character(len=*), parameter :: myname_ = myname//'*load_guess_tv_'
   real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()
@@ -859,6 +867,27 @@ end subroutine final_
     if(mype==0) call tell (myname_, ': warning, tv pointer not set, could be an issue')
   endif
   end subroutine load_guess_tv_
+
+  subroutine load_guess_cw_
+  implicit none
+  character(len=*), parameter :: myname_ = myname//'*load_guess_cw_'
+  real(r_kind),dimension(:,:,:),pointer::cw=>NULL()
+  real(r_kind),dimension(:,:,:),pointer::qi=>NULL()
+  real(r_kind),dimension(:,:,:),pointer::ql=>NULL()
+  integer jj,istatus,ier
+  do jj=1,nfldsig
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'cw',cw,ier)
+     if (ier/=0) call die(myname_, ': expecting CW in met guess')
+     istatus=0
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'qi',qi,ier); istatus=ier+istatus
+     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ql',ql,ier); istatus=ier+istatus
+     if(istatus==0) then 
+       cw = qi+ql
+     else
+       cw = zero
+     endif
+  enddo
+  end subroutine load_guess_cw_
 
 !-------------------------------------------------------------------------
 !    NOAA/NCEP, National Centers for Environmental Prediction GSI        !

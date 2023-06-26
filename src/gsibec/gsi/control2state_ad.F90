@@ -77,7 +77,7 @@ use constants, only: max_varname_length,zero
 implicit none
 
 ! Declare passed variables
-type(gsi_bundle)    , intent(inout) :: rval(1)
+type(gsi_bundle)    , intent(inout) :: rval(nsubwin)
 type(predictors)    , intent(in   ) :: bval
 type(control_vector), intent(inout) :: grad
 

@@ -39,7 +39,6 @@ subroutine bkgcov(cstate)
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero
   use gridmod, only: nlat,nlon
-  use gridmod, only: lat2,lon2
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
@@ -131,13 +130,12 @@ subroutine ckgcov(z,cstate,nval_lenz)
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero
   use gridmod, only: nlat,nlon
-  use gridmod, only: lat2,lon2
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_grid2sub
   use general_commvars_mod, only: s2g_raf
-!_RT  use hybrid_ensemble_parameters, only: l_hyb_ens
-!_RT  use hybrid_ensemble_isotropic, only: sqrt_beta_s_mult
+  use hybrid_ensemble_parameters, only: l_hyb_ens
+  use hybrid_ensemble_isotropic, only: sqrt_beta_s_mult
   implicit none
 
 ! Passed Variables
@@ -171,7 +169,7 @@ subroutine ckgcov(z,cstate,nval_lenz)
   call bkgvar(cstate,1)
 
 ! Apply static betas
-!_RT  if(l_hyb_ens) call sqrt_beta_s_mult(cstate)
+  if(l_hyb_ens) call sqrt_beta_s_mult(cstate)
 
   return
 end subroutine ckgcov
@@ -217,7 +215,6 @@ subroutine ckgcov_ad(z,cstate,nval_lenz)
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero
   use gridmod, only: nlat,nlon
-  use gridmod, only: lat2,lon2
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use general_sub2grid_mod, only: general_sub2grid

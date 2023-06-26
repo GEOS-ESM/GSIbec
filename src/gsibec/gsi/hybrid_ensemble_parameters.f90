@@ -248,6 +248,10 @@ module hybrid_ensemble_parameters
   use general_specmod, only: spec_vars
   use egrid2agrid_mod, only: egrid2agrid_parm
   use gsi_bundlemod, only: gsi_bundle
+  use gsi_bundlemod, only: gsi_grid
+  use gsi_bundlemod, only: gsi_gridcreate
+  use gsi_bundlemod, only: gsi_bundlecreate
+  use gsi_bundlemod, only: gsi_bundleunset
 
   implicit none
 
@@ -287,8 +291,6 @@ module hybrid_ensemble_parameters
   public :: l_ens_in_diff_time
   public :: ensemble_path
   public :: ens_fname_tmpl
-  public :: nelen
-  public :: en_perts,ps_bar
   public :: region_lat_ens,region_lon_ens
   public :: region_dx_ens,region_dy_ens
   public :: ens_fast_read
@@ -297,6 +299,11 @@ module hybrid_ensemble_parameters
   public :: upd_ens_spread
   public :: upd_ens_localization
   public :: EnsSource
+  public :: test_nymd,test_nhms
+
+  public :: gsi_enperts
+  public :: gsi_create_ensemble
+  public :: gsi_destroy_ensemble
 
   logical l_hyb_ens,uv_hyb_ens,q_hyb_ens,oz_univ_static,sst_staticB
   logical bens_recenter,upd_ens_spread,upd_ens_localization
@@ -317,6 +324,7 @@ module hybrid_ensemble_parameters
   logical ens_fast_read
   integer(i_kind) i_en_perts_io
   integer(i_kind) n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test
+  integer(i_kind) :: test_nymd(7),test_nhms(7)
   real(r_kind) beta_s0,s_ens_h,s_ens_v,grid_ratio_ens
   type(sub2grid_info),save :: grd_ens,grd_loc,grd_sploc,grd_anl,grd_e1,grd_a1
   type(spec_vars),save :: sp_ens,sp_loc
@@ -343,14 +351,26 @@ module hybrid_ensemble_parameters
 !   def en_perts            - array of ensemble perturbations
 !   def nelen               - length of one ensemble perturbation vector
 
-  integer(i_kind) nelen
-  type(gsi_bundle),save,allocatable :: en_perts(:,:)
-  real(r_single),dimension(:,:,:),allocatable:: ps_bar
+  type gsi_enperts
+    integer(i_kind) nelen
+    type(gsi_bundle),allocatable :: en_perts(:,:)
+    real(r_single),dimension(:,:,:),allocatable:: ps_bar
+  end type gsi_enperts
 
 !    following is for interpolation of global ensemble to regional ensemble grid
 
   real(r_kind),allocatable:: region_lat_ens(:,:),region_lon_ens(:,:)
   real(r_kind),allocatable:: region_dx_ens(:,:),region_dy_ens(:,:)
+
+  character(len=*),parameter :: myname = 'hybrid_ensemble_parameters'
+  logical, parameter :: debug = .true.
+
+  interface gsi_create_ensemble
+    module procedure create_ensemble_
+  end interface
+  interface gsi_destroy_ensemble
+    module procedure destroy_ensemble_
+  end interface
 
 contains
 
@@ -427,6 +447,8 @@ subroutine init_hybrid_ensemble_parameters
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
 
   EnsSource = 'NULL'
+  test_nymd = -1
+  test_nhms = -1
 
 end subroutine init_hybrid_ensemble_parameters
 
@@ -455,5 +477,113 @@ subroutine destroy_hybens_localization_parameters
   deallocate(sqrt_beta_s,sqrt_beta_e,pwgt)
 
 end subroutine destroy_hybens_localization_parameters
+
+
+  subroutine create_ensemble_(cvars2d,cvars3d,epts)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    create_ensemble        allocate space for ensembles
+!   prgmmr: parrish          org: np22                date: 2009-06-16
+!
+! abstract: allocate space for ensemble perturbations used with the 
+!             hybrid ensemble option.
+!
+! program history log:
+!   2009-06-16  parrish
+!   2010-02-20  parrish  modifications for dual resolution
+!   2011-02-28  parrish - introduce more complete use of gsi_bundlemod to eliminate hard-wired variables
+!   2011-08-31  todling - revisit en_perts (single-prec) in light of extended bundle
+!
+!   input argument list:
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+    implicit none
+
+    character(len=*), intent(in) :: cvars2d(:),cvars3d(:)
+    type(gsi_enperts) :: epts
+
+    type(gsi_grid) :: grid_ens
+    integer(i_kind) n,istatus,m
+    integer(i_kind) nc2d,nc3d
+    character(len=*),parameter::myname_=trim(myname)//'*create_ensemble'
+
+    nc2d=size(cvars2d); nc3d=size(cvars3d)
+    epts%nelen=grd_ens%latlon11*(max(0,nc3d)*grd_ens%nsig+max(0,nc2d))
+!   create ensemble perturbations bundles (using newly added r_single capability
+
+    allocate(epts%en_perts(n_ens,ntlevs_ens))
+    call gsi_gridcreate(grid_ens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
+ 
+    do m=1,ntlevs_ens
+       do n=1,n_ens
+          call gsi_bundlecreate(epts%en_perts(n,m),grid_ens,'ensemble perts',istatus, &
+                                names2d=cvars2d,names3d=cvars3d,bundle_kind=r_single)
+          if(istatus/=0) then
+             write(6,*)trim(myname_),': trouble creating en_perts bundle'
+             call stop2(999)
+          endif
+       enddo
+    enddo
+
+
+    allocate(epts%ps_bar(grd_ens%lat2,grd_ens%lon2,ntlevs_ens) )
+    if(debug) then
+       write(6,*)' in create_ensemble, grd_ens%latlon11,grd_ens%latlon1n,n_ens,ntlevs_ens=', &
+                                 grd_ens%latlon11,grd_ens%latlon1n,n_ens,ntlevs_ens
+       write(6,*)' in create_ensemble, total bytes allocated=',4*epts%nelen*n_ens*ntlevs_ens
+    end if
+    return
+
+  end subroutine create_ensemble_
+
+  subroutine destroy_ensemble_(epts)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    destroy_ensemble       deallocate space for ensembles
+!   prgmmr: parrish          org: np22                date: 2009-06-16
+!
+! abstract: deallocate space for ensemble perturbations used with the 
+!             hybrid ensemble option.
+!
+! program history log:
+!   2009-06-16  parrish
+!   2011-02-28  parrish, replace specific ensemble perturbation arrays with pseudo-bundle en_perts array
+!
+!   input argument list:
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+    implicit none
+
+    type(gsi_enperts) :: epts
+    integer(i_kind) istatus,n,m
+
+    if(l_hyb_ens) then
+       do m=1,ntlevs_ens
+          do n=1,n_ens
+             call gsi_bundleunset(epts%en_perts(n,m),istatus)
+             if(istatus/=0) then
+                write(6,*)'in destroy_ensemble: trouble destroying en_perts bundle'
+                call stop2(999)
+             endif
+          enddo
+       enddo
+       deallocate(epts%ps_bar)
+       deallocate(epts%en_perts)
+    end if
+    return
+
+  end subroutine destroy_ensemble_
 
 end module hybrid_ensemble_parameters

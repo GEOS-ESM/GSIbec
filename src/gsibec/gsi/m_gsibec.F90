@@ -11,7 +11,6 @@ use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
 use gsi_4dvar, only: lsqrtb
-use hybrid_ensemble_parameters, only: ntlevs_ens
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
 use jfunc, only: jouter_def
@@ -29,7 +28,6 @@ use state_vectors, only: allocate_state,deallocate_state
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
 use control_vectors, only: assignment(=)
-use control_vectors, only: cvars3d
 use control_vectors, only: prt_control_norms
 use control_vectors, only: inquire_cv
 use control_vectors, only: cvars2d, cvars3d
@@ -46,10 +44,14 @@ use gsimod, only: gsimain_finalize
 
 use m_berror_stats,only : berror_stats
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
-use hybrid_ensemble_parameters,only : l_hyb_ens
+use hybrid_ensemble_parameters,only: l_hyb_ens
+use hybrid_ensemble_parameters,only: ntlevs_ens
 use hybrid_ensemble_isotropic, only: hybens_grid_setup
-use hybrid_ensemble_isotropic, only: create_ensemble
+use hybrid_ensemble_parameters, only: gsi_create_ensemble
+use hybrid_ensemble_parameters, only: gsi_enperts
 use hybrid_ensemble_isotropic, only: bkerror_a_en
+use hybrid_ensemble_isotropic, only: ensemble_forward_model_ad
+use hybrid_ensemble_isotropic, only: ensemble_forward_model
 
 use general_sub2grid_mod, only: sub2grid_info
 use general_sub2grid_mod, only: general_sub2grid_create_info
@@ -125,9 +127,11 @@ logical,save :: gsibec_iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,jouter,comm)
+  subroutine init_(cv,epts,vgrid,bkgmock,nmlfile,befile,&
+                   layout,jouter,comm)
 
   logical, intent(out) :: cv
+  type(gsi_enperts), intent(inout) :: epts
   logical, optional, intent(in)  :: vgrid
   logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
@@ -172,7 +176,7 @@ contains
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
-    call create_ensemble()
+    call gsi_create_ensemble(cvars2d,cvars3d,epts)
   endif
   call set_pointer_()
 
@@ -475,7 +479,9 @@ contains
     CALL setup_control_vectors(nsig,lat2,lon2,latlon11,latlon1n, &
                                nsclen,npclen,ntclen,nclen,nsubwin,&
                                nval_len,lsqrtb,n_ens, &
-                               nval_lenz_enz)
+                               nval_lenz_enz,&
+                               grd_ens%lat2,grd_ens%lon2,grd_ens%nsig,&
+                               grd_ens%latlon11,l_hyb_ens)
     CALL setup_predictors(nrclen,nsclen,npclen,ntclen)
     CALL setup_state_vectors(latlon11,latlon1n,nvals_len,lat2,lon2,nsig)
 
@@ -632,11 +638,12 @@ contains
 
   end subroutine be_cv_space0_
 
-  subroutine be_cv_space1_(gradx,internalcv,bypassbe)
+  subroutine be_cv_space1_(gradx,internalcv,bypassbe,epts)
 
-  type(control_vector) :: gradx
+  type(control_vector)  :: gradx
   logical,optional,intent(in) :: internalcv
   logical,optional,intent(in) :: bypassbe
+  type(gsi_enperts),optional,intent(in) :: epts
 
   type(control_vector) :: grady
 
@@ -665,7 +672,9 @@ contains
      call bkerror(gradx,grady, &
                   1,nsclen,npclen,ntclen)
      if (l_hyb_ens) then
+        call ensemble_forward_model_ad(gradx%step(1),gradx%aens(1,:),epts,1)
         call bkerror_a_en(gradx,grady)
+        call ensemble_forward_model(grady%step(1),grady%aens(1,:),epts,1)
      endif
   endif
 
@@ -686,8 +695,6 @@ contains
   subroutine be_sv_space0_
 
   type(gsi_bundle), allocatable :: mval(:)
-  type(control_vector) :: gradx,grady
-  type(predictors)     :: sbias
   integer ii
 
 ! start work space
@@ -696,41 +703,9 @@ contains
       call allocate_state(mval(ii))
       mval(ii) = zero
   end do
-  call allocate_preds(sbias)
 
-  call allocate_cv(gradx)
-  call allocate_cv(grady)
-  gradx=zero
-  grady=zero
+  call be_sv_space1_(mval,internalsv=.true.)
 
-! get test vector (mval)
-! call get_state_perts_ (mval(1))
-!
-  call set_silly_(mval(1))
-  call gsi2model_units_ad_(mval(1))
-
-  call control2state_ad(mval,sbias,gradx)
-
-! apply B to input (transformed) vector
-  call bkerror(gradx,grady, &
-               1,nsclen,npclen,ntclen)
-  if (l_hyb_ens) then
-     call bkerror_a_en(gradx,grady)
-  endif
-
-  call control2state(grady,mval,sbias)
-
-! if so write out fields from gsi (in GSI units)
-  if(bkgv_write_sv/='null') &
-  call write_bundle(mval(1),bkgv_write_sv)
-
-! convert back to model units (just for consistency here)
-  call gsi2model_units_(mval(1))
-
-! clean up work space
-  call deallocate_cv(gradx)
-  call deallocate_cv(grady)
-  call deallocate_preds(sbias)
   do ii=nsubwin,1,-1
       call deallocate_state(mval(ii))
   end do
@@ -738,13 +713,15 @@ contains
 
   end subroutine be_sv_space0_
 !--------------------------------------------------------
-  subroutine be_sv_space1_(mval,internalsv,bypassbe)
+  subroutine be_sv_space1_(mval,internalsv,bypassbe,epts)
 
-  type(gsi_bundle) :: mval(1)
-  type(gsi_bundle) :: eval(1)
+  type(gsi_bundle) :: mval(nsubwin)
   logical,optional,intent(in) :: internalsv
   logical,optional,intent(in) :: bypassbe
+  type(gsi_enperts),optional,intent(in) :: epts
 
+  character(len=*), parameter :: myname_ = myname//'*be_sv_space1_'
+  type(gsi_bundle),allocatable :: eval(:)
   type(control_vector) :: gradx,grady
   type(predictors)     :: sbias
   logical bypassbe_
@@ -753,9 +730,10 @@ contains
   if (nsubwin/=1) then
      if(ier/=0) call die(myname,'cannot handle this nsubwin =',nsubwin)
   endif
-  if (ntlevs_ens/=1) then
-     if(ier/=0) call die(myname,'cannot handle this ntlevs_ens =',ntlevs_ens)
-  endif
+! if (ntlevs_ens/=1) then
+!    if(ier/=0) call die(myname,'cannot handle this ntlevs_ens =',ntlevs_ens)
+! endif
+  allocate(eval(ntlevs_ens))
 
   bypassbe_ = .false.
   if (present(bypassbe)) then
@@ -775,7 +753,6 @@ contains
   grady=zero
 
 ! get test vector (mval)
-! call get_state_perts_ (mval(1))
   if (present(internalsv)) then
      if (internalsv) call set_silly_(mval(1))
   endif
@@ -785,7 +762,7 @@ contains
 
   if (l_hyb_ens) then
      eval(1)=mval(1)
-     call ensctl2state_ad(eval,mval,gradx)
+     call ensctl2state_ad(epts,eval,mval(1),gradx)
   endif
   call control2state_ad(mval,sbias,gradx)
 
@@ -794,7 +771,7 @@ contains
     grady=gradx
   else
     call bkerror(gradx,grady, &
-                 1,nsclen,npclen,ntclen)
+                 nsubwin,nsclen,npclen,ntclen)
     if (l_hyb_ens) then
        call bkerror_a_en(gradx,grady)
     endif
@@ -802,7 +779,7 @@ contains
 
   call control2state(grady,mval,sbias)
   if (l_hyb_ens) then
-     call ensctl2state(grady,mval,eval)
+     call ensctl2state(epts,grady,mval(1),eval)
      mval(1)=eval(1)
   end if
 
@@ -822,6 +799,7 @@ contains
        call deallocate_state(eval(ii))
     end do
   endif
+  deallocate(eval)
 
   end subroutine be_sv_space1_
 !--------------------------------------------------------

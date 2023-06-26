@@ -1,4 +1,4 @@
-subroutine en_perts_get_from_save_fulldomain
+subroutine en_perts_get_from_save_fulldomain(epts)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    en_perts_get_from_save  get content of en_perts from saved
@@ -21,7 +21,7 @@ subroutine en_perts_get_from_save_fulldomain
 !$$$ end documentation block
 
   use gridmod, only: regional
-  use hybrid_ensemble_parameters, only: en_perts
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens,grd_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle
@@ -36,6 +36,8 @@ subroutine en_perts_get_from_save_fulldomain
   use m_mpimod, only: mpi_rtype,mpi_info_null,mpi_offset_kind
 
   implicit none
+
+  type(gsi_enperts) :: epts
 
   type(sub2grid_info) grd_arw
   real(r_single),pointer,dimension(:,:,:):: w3
@@ -124,7 +126,7 @@ subroutine en_perts_get_from_save_fulldomain
 
      do ic3=1,nc3d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars3d(ic3)),' for ensemble member ',n
            call stop2(999)
@@ -142,7 +144,7 @@ subroutine en_perts_get_from_save_fulldomain
 
      do ic2=1,nc2d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars2d(ic2)),' for ensemble member ',n
            call stop2(999)
@@ -162,7 +164,7 @@ subroutine en_perts_get_from_save_fulldomain
 
 end subroutine en_perts_get_from_save_fulldomain
 
-subroutine en_perts_get_from_save
+subroutine en_perts_get_from_save(epts)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    en_perts_get_from_save  get content of en_perts from saved
@@ -184,7 +186,7 @@ subroutine en_perts_get_from_save
 !
 !$$$ end documentation block
 
-  use hybrid_ensemble_parameters, only: en_perts,ps_bar
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle
@@ -196,6 +198,7 @@ subroutine en_perts_get_from_save
   use mpeu_util, only: die
   implicit none
 
+  type(gsi_enperts) :: epts
   real(r_single),pointer,dimension(:,:,:):: w3
   real(r_single),pointer,dimension(:,:):: w2
 
@@ -217,11 +220,11 @@ subroutine en_perts_get_from_save
         write(6,*)' error in ensemble number. read in ',nn,' looking for ',n
         call stop2(999)
      endif
-     read(iunit) ps_bar(:,:,1)
+     read(iunit) epts%ps_bar(:,:,1)
 !
      do ic3=1,nc3d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars3d(ic3)),' for ensemble member ',n
            call stop2(999)
@@ -238,7 +241,7 @@ subroutine en_perts_get_from_save
 
      do ic2=1,nc2d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars2d(ic2)),' for ensemble member ',n
            call stop2(999)
@@ -259,7 +262,7 @@ subroutine en_perts_get_from_save
 
 end subroutine en_perts_get_from_save
 
-subroutine en_perts_save
+subroutine en_perts_save(epts)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    en_perts_save  save content in en_perts to a file.
@@ -280,7 +283,7 @@ subroutine en_perts_save
 !
 !$$$ end documentation block
 
-  use hybrid_ensemble_parameters, only: en_perts,ps_bar
+  use hybrid_ensemble_parameters, only: gsi_enperts
   use hybrid_ensemble_parameters, only: n_ens
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundle
@@ -291,6 +294,7 @@ subroutine en_perts_save
   use mpeu_util, only: die
   implicit none
 
+  type(gsi_enperts) :: epts
   real(r_single),pointer,dimension(:,:,:):: w3
   real(r_single),pointer,dimension(:,:):: w2
 
@@ -308,11 +312,11 @@ subroutine en_perts_save
   do n=1,n_ens
 !
      write(iunit) n
-     write(iunit) ps_bar(:,:,1)
+     write(iunit) epts%ps_bar(:,:,1)
 !
      do ic3=1,nc3d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars3d(ic3)),' for ensemble member ',n
            call stop2(999)
@@ -324,7 +328,7 @@ subroutine en_perts_save
      end do
      do ic2=1,nc2d
 
-        call gsi_bundlegetpointer(en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
+        call gsi_bundlegetpointer(epts%en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars2d(ic2)),' for ensemble member ',n
            call stop2(999)

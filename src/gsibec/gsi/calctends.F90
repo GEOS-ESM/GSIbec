@@ -406,6 +406,7 @@ subroutine calctends(mype,teta,pri,guess,xderivative,yderivative,tendency)
 
   character(len=*),parameter::myname_=myname//'*init_vars_'
   integer(i_kind) ier,istatus
+  integer(i_kind) icw,ioz,iq,ip3d
 
 !NOTE: this is not general - and in many ways it's wired just as the original
 !      code. However, this can be easily generalized by a little re-write

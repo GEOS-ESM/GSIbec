@@ -8,6 +8,7 @@ use m_gsibec, only: gsibec_final_guess
 use m_gsibec, only: gsibec_final
 
 use guess_grids, only: gsiguess_bkgcov_init
+use hybrid_ensemble_parameters, only: gsi_enperts
 
 use mpeu_util, only: die
 use m_mpimod, only: gsi_mpi_comm_world
@@ -21,6 +22,7 @@ character(len=*), parameter :: myname = "test_gsi_berror"
 character(len=MAXSTR) :: nml, bef
 integer :: mype,ier
 logical :: cv
+type(gsi_enperts) :: epts
 
 call mpi_init(ier)
 call setworld()
@@ -31,7 +33,7 @@ if(ier/=0) then
   call die(trim(myname),'fail reading cmd line, try again',ier)
 endif
 
-call gsibec_init(cv,nmlfile=nml,befile=bef,vgrid=.true.)
+call gsibec_init(cv,epts,nmlfile=nml,befile=bef,vgrid=.true.)
 call gsibec_init_guess()
 call gsiguess_bkgcov_init()
 

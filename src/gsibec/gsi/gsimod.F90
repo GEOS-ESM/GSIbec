@@ -25,6 +25,7 @@
   use jfunc, only: tendsflag
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
+  use gsi_4dvar, only: l4densvar,nmn_obsbin,ens_nstarthr
 
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
@@ -79,6 +80,7 @@
                          readin_beta,use_localization_grid,use_gfs_ens,q_hyb_ens,i_en_perts_io, &
                          l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
                          bens_recenter,upd_ens_spread,upd_ens_localization,ens_fname_tmpl,&
+                         test_nymd,test_nhms,&
                          EnsSource
 
   use gsi_io, only: init_io, verbose
@@ -362,6 +364,7 @@
        cwoption,&
        qoption,&
        verbose,&
+       l4densvar,nmn_obsbin,ens_nstarthr,&
        mockbkg
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
@@ -482,6 +485,7 @@
                 grid_ratio_ens, ens_fname_tmpl, &
                 oz_univ_static,write_ens_sprd,use_localization_grid,use_gfs_ens, &
                 i_en_perts_io,l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
+                test_nymd,test_nhms,&
                 bens_recenter,upd_ens_spread,upd_ens_localization,EnsSource
    CONTAINS
 
@@ -536,6 +540,7 @@
   call init_smooth_polcas
   call init_hybrid_ensemble_parameters
   call set_fgrid2agrid
+  call init_4dvar
 
 
 ! Read user input from namelists.  All processor elements 
@@ -584,7 +589,6 @@
 !_RT call gsi_4dcoupler_setservices(rc=ier)
 !_RT if(ier/=0) call die(myname_,'gsi_4dcoupler_setServices(), rc =',ier)
 
-  call init_4dvar
 
   call setup_4dvar(mype)
 
@@ -602,6 +606,7 @@
      write(6,setup)
      write(6,gridopts)
      write(6,bkgerr)
+     write(6,hybrid_ensemble)
   endif
 
 ! check consistency in q option

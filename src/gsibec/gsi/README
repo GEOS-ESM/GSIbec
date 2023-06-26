@@ -28,11 +28,13 @@ balmod
    TO DO FOR SABER CONNECTION
 ++++++++++++++++++++++++++++++++++++++++++++++++
 - replace kinds w/ OOPS kinds
-- complete bringing back hybrid capability: need 4d still
+- complete bringing back hybrid capability: 4d does something but not quite correct
 - bring in hybrid capability for NCEP
 
 Other TO DOs
 ------------
 - revise items above
 - fill in halo for var comming from saber
-- fill in isli properly
+- need to put back call to turbl in calctends
+- need to encapsulate namelists (might be able to do it piecemeal)
+- remove test_nymd/nhms
