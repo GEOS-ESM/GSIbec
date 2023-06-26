@@ -1145,7 +1145,7 @@ end subroutine normal_new_factorization_rf_y
 
   end subroutine create_ensemble
 
-  subroutine load_ensemble (tau)
+  subroutine load_ensemble (nymd,nhms,tau)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    load_ensemble    read/generate ensemble perturbations
@@ -1196,6 +1196,7 @@ end subroutine normal_new_factorization_rf_y
 
     implicit none
 
+    integer,intent(in) :: nymd,nhms
     integer,intent(in) :: tau
 
     type(get_pseudo_ensperts_class) :: pseudo_enspert
@@ -1320,7 +1321,7 @@ end subroutine normal_new_factorization_rf_y
 !            read in ensembles
        if (.not.regional) then
 
-          call get_gefs_ensperts_dualres(tau)
+          call get_gefs_ensperts_dualres(nymd,nhms,tau)
 
        else
 
@@ -5239,11 +5240,12 @@ subroutine setup_pwgt
 end subroutine setup_pwgt
 
 #ifdef USE_ALL_ORIGINAL
-subroutine ens_iterate_update(jiter)
+subroutine ens_iterate_update(nymd,nhms,jiter)
   use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
   use hybrid_ensemble_parameters, only: bens_recenter
   use m_revBens, only: update_spread
   implicit none
+  integer(i_kind),intent(in) :: nymd,nhms
   integer(i_kind),intent(in) :: jiter
 
   if (jiter<2) return
@@ -5259,7 +5261,7 @@ subroutine ens_iterate_update(jiter)
 
 ! reload ensemble but this time use analysis for recentering
   call create_ensemble
-  call load_ensemble(-1)
+  call load_ensemble(nymd,nhms,-1)
   call hybens_localization_setup
 
 end subroutine ens_iterate_update

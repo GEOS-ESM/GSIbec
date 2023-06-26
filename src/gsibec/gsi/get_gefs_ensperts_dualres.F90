@@ -1,4 +1,4 @@
-subroutine get_gefs_ensperts_dualres (tau)
+subroutine get_gefs_ensperts_dualres (nymd,nhms,tau)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    get_gefs_ensperts_dualres copy of get_gefs_ensperts for dual resolution
@@ -76,6 +76,8 @@ subroutine get_gefs_ensperts_dualres (tau)
 #endif /* USE_ALL_ORIGINAL */
   implicit none
 
+  integer(i_kind),intent(in) :: nymd ! yyyymmdd
+  integer(i_kind),intent(in) :: nhms ! hhmmss
   integer(i_kind),intent(in) :: tau
 
   real(r_kind),pointer,dimension(:,:)   :: ps
@@ -162,7 +164,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 
      en_bar(m)%values=zero
 
-     call gsi_enscoupler_get_user_Nens(grd_tmp,n_ens,m,tau,en_read,iret)
+     call gsi_enscoupler_get_user_Nens(grd_tmp,n_ens,nymd,nhms,tau,en_read,iret)
 
      ! Check read return code.  Revert to static B if read error detected
      if ( iret /= 0 ) then

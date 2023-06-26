@@ -35,7 +35,7 @@ function typename()
   typename='['//myname//'::ensemble]'
 end function typename
 
-subroutine get_geos_ens(this,grd,member,ntindex,tau,atm_bundle,iret)
+subroutine get_geos_ens(this,grd,member,nymd,nhms,tau,atm_bundle,iret)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    get_user_ens_    pretend atmos bkg is the ensemble
@@ -95,7 +95,7 @@ implicit none
    class(ensemble)                      , intent(inout) :: this
    type(sub2grid_info)                   ,intent(in   ) :: grd
    integer(i_kind)                       ,intent(in   ) :: member
-   integer(i_kind)                       ,intent(in   ) :: ntindex
+   integer(i_kind)                       ,intent(in   ) :: nymd,nhms
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
    type(gsi_bundle)                      ,intent(inout) :: atm_bundle                      
@@ -103,7 +103,7 @@ implicit none
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_ens_'
    character(len=40) evar
-   integer(i_kind) nymd,nhms,istatus,ii,ier
+   integer(i_kind) istatus,ii,ier
    integer(i_kind) ida(8),jda(8)
    logical,save :: first=.true.
    real(r_kind) fha(5)
@@ -148,19 +148,6 @@ implicit none
    endif
 
 !  Read in a single ensemble member
-   if(l4densvar) then
-      ida(1:3)=ibdate(1:3)
-      ida(5:6)=ibdate(4:5)
-      jda(:)=0
-      fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      !call w3movdat(fha,ida,jda)
-      nymd=jda(1)*10000+jda(2)*100+jda(3)
-      nhms=jda(5)*10000+jda(6)*100
-   else
-      nymd = iadate(1)*10000 + iadate(2)*100 + iadate(3)
-      nhms = iadate(4)*10000 + iadate(5)*100
-   endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
 #endif /* USE_ALL_ORIGINAL */
@@ -209,7 +196,7 @@ implicit none
 
 end subroutine get_geos_ens
 
-subroutine get_geos_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
+subroutine get_geos_Nens(this,grd,members,nymd,nhms,tau,atm_bundle,iret)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    get_user_Nens_    pretend atmos bkg is the ensemble
@@ -270,7 +257,7 @@ implicit none
    class(ensemble)                      , intent(inout) :: this
    type(sub2grid_info)                   ,intent(in   ) :: grd
    integer(i_kind)                       ,intent(in   ) :: members
-   integer(i_kind)                       ,intent(in   ) :: ntindex
+   integer(i_kind)                       ,intent(in   ) :: nymd,nhms
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
    type(gsi_bundle)                      ,intent(inout) :: atm_bundle(:)                      
@@ -278,7 +265,7 @@ implicit none
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_Nens_'
    character(len=40) evar
-   integer(i_kind) nymd,nhms,istatus,ii,ier
+   integer(i_kind) istatus,ii,ier
    integer(i_kind) ida(8),jda(8)
    integer(i_kind) mm
    logical,save :: first=.true.
@@ -327,19 +314,6 @@ implicit none
    enddo
 
 !  Read in ensemble members
-   if(l4densvar) then
-      ida(1:3)=ibdate(1:3)
-      ida(5:6)=ibdate(4:5)
-      jda(:)=0
-      fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      !call w3movdat(fha,ida,jda)
-      nymd=jda(1)*10000+jda(2)*100+jda(3)
-      nhms=jda(5)*10000+jda(6)*100
-   else
-      nymd = iadate(1)*10000 + iadate(2)*100 + iadate(3)
-      nhms = iadate(4)*10000 + iadate(5)*100
-   endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
 #endif /* USE_ALL_ORIGINAL */
