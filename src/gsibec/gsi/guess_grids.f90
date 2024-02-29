@@ -52,9 +52,8 @@ logical, parameter ::  tsensible = .false.   ! jfunc: here set as in jfunc
                           !        var in cv is tv to be tv and t
 logical, parameter ::  use_compress = .true.   ! wired for now
 
-! For now turned into wired-in parameters
-integer(i_kind),parameter :: nfldsig =  1
-integer(i_kind),parameter :: ntguessig = 1
+integer(i_kind) :: nfldsig
+integer(i_kind) :: ntguessig
 
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
@@ -79,11 +78,11 @@ interface gsiguess_set
   module procedure guess_basics3_
 end interface gsiguess_set
 
-interface gsiguess_bkgcov_init  ! WARNING: this does not belog here
+interface gsiguess_bkgcov_init  ! WARNING: this does not belong here
   module procedure bkgcov_init_
 end interface gsiguess_bkgcov_init
 
-interface gsiguess_bkgcov_final ! WARNING: this does not belog here
+interface gsiguess_bkgcov_final ! WARNING: this does not belong here
   module procedure bkgcov_final_
 end interface gsiguess_bkgcov_final
 
@@ -149,7 +148,9 @@ subroutine other_set_(need)
   ges_prsi=zero
   tropprs=zero
   fact_tv=one
-  it = size(GSI_MetGuess_Bundle)
+  if (nfldsig /= size(GSI_MetGuess_Bundle)) then
+     call die (myname_,': inconsistent time index in metguess',99)
+  endif
   ! better fix units here?
   if (present(need)) then
     if(mype==0) then
@@ -190,30 +191,34 @@ subroutine other_set_(need)
     if (any(need=='vor').or.any(need=='div')) then
 !      if(.not.cdiff_created()) call create_cdiff_coefs()
 !      if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
-       ier=0
-       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'u', ges_u, &
-                                   istatus );ier=ier+istatus
-       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'v', ges_v, &
-                                   istatus );ier=ier+istatus
-       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'vor', ges_vor, &
-                                   istatus );ier=ier+istatus
-       call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'div', ges_div, &
-                                   istatus );ier=ier+istatus
-       if(ier==0) then
-          call xhat_vordiv_calc2 (ges_u,ges_v,ges_vor,ges_div)
-       endif
-       where(need=='vor')
-          need='filled-'//need
-       endwhere
-       where(need=='div')
-          need='filled-'//need
-       endwhere
-!      call write_bkgvars_grid(ges_u,ges_v,ges_vor,ges_div(:,:,1),&
-!                             'wind.grd',mype) ! debug
+       do it=1,nfldsig
+         ier=0
+         call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'u', ges_u, &
+                                     istatus );ier=ier+istatus
+         call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'v', ges_v, &
+                                     istatus );ier=ier+istatus
+         call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'vor', ges_vor, &
+                                     istatus );ier=ier+istatus
+         call GSI_BundleGetPointer ( GSI_MetGuess_Bundle(it), 'div', ges_div, &
+                                     istatus );ier=ier+istatus
+         if(ier==0) then
+            call xhat_vordiv_calc2 (ges_u,ges_v,ges_vor,ges_div)
+         endif
+         where(need=='vor')
+            need='filled-'//need
+         endwhere
+         where(need=='div')
+            need='filled-'//need
+         endwhere
+!        call write_bkgvars_grid(ges_u,ges_v,ges_vor,ges_div(:,:,1),&
+!                               'wind.grd',mype) ! debug
+         enddo
     endif
   endif
 ! fill in land-water-ice mask
-  call lwi_mask_(it)
+  do it=1,nfldsig
+     call lwi_mask_(it)
+  enddo
 
   gesgrid_iamset_ = .true.
 end subroutine other_set_
@@ -1019,37 +1024,37 @@ end subroutine final_
   enddo
   end subroutine guess_basics0_
 !--------------------------------------------------------
-  subroutine guess_basics2_(vname,var)
+  subroutine guess_basics2_(vname,islot,var)
   character(len=*),intent(in) :: vname
+  integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics2_'
   real(r_kind),dimension(:,:),pointer::ptr
   integer jj,ier
-  do jj=1,nfldsig
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
-     if (ier/=0) then
-       call die(myname_,'pointer to '//trim(vname)//" not found",ier)
-     endif
-     ptr=var
-     if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
-     if ( trim(vname) == 'z'  ) ptr=ptr/grav       ! RT_TBD: is this the best place for this?
-  enddo
+  jj=islot
+  call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
+  if (ier/=0) then
+    call die(myname_,'pointer to '//trim(vname)//" not found",ier)
+  endif
+  ptr=var
+  if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
+  if ( trim(vname) == 'z'  ) ptr=ptr/grav       ! RT_TBD: is this the best place for this?
   end subroutine guess_basics2_
 !--------------------------------------------------------
-  subroutine guess_basics3_(vname,var)
+  subroutine guess_basics3_(vname,islot,var)
   character(len=*),intent(in)   :: vname
+  integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
   character(len=80) :: uvar
   integer jj,ier
-  do jj=1,nfldsig
-     call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
-     if (ier/=0) then
-       call die(myname_,'pointer to '//trim(vname)//" not found",ier)
-     endif
-     ptr=var
-  enddo
+  jj=islot
+  call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
+  if (ier/=0) then
+    call die(myname_,'pointer to '//trim(vname)//" not found",ier)
+  endif
+  ptr=var
   if ( trim(vname) == 'oz' ) then
       call gsi_metguess_get ( 'usrvar::o3ppmv', uvar, ier )
       if (trim(uvar)=='o3ppmv') then

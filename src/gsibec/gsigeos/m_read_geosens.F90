@@ -289,6 +289,7 @@ contains
              z4all(ii,ke+1)=evars%ts(i,j)
           enddo
           enddo
+          ke=ke+1
        endif
     enddo
 

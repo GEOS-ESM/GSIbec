@@ -24,6 +24,7 @@
   use jfunc, only: tendsflag
 
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
+  use gsi_4dvar, only: l4densvar,nmn_obsbin
 
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
@@ -360,6 +361,8 @@
        cwoption,&
        qoption,&
        verbose,&
+       l4densvar,&
+       nmn_obsbin,&
        mockbkg
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
@@ -536,6 +539,7 @@
   call init_hybrid_ensemble_parameters
   call set_fgrid2agrid
 
+  call init_4dvar
 
 ! Read user input from namelists.  All processor elements 
 ! read the namelist input.  SGI MPI FORTRAN does not allow
@@ -572,8 +576,6 @@
 !_RT call gsi_4dcoupler_setservices(rc=ier)
 !_RT if(ier/=0) call die(myname_,'gsi_4dcoupler_setServices(), rc =',ier)
 
-  call init_4dvar
-
   call setup_4dvar(mype)
 
 ! Ensure valid number of horizontal scales
@@ -590,6 +592,7 @@
      write(6,setup)
      write(6,gridopts)
      write(6,bkgerr)
+     write(6,hybrid_ensemble)
   endif
 
 ! check consistency in q option

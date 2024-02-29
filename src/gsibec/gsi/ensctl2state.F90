@@ -179,7 +179,7 @@ do jj=1,ntlevs_ens
    call gsi_bundlegetpointer (eval(jj),'tv'  ,sv_tv,  istatus)
    call gsi_bundlegetpointer (eval(jj),'q'   ,sv_q ,  istatus)
    call gsi_bundlegetpointer (eval(jj),'prse',sv_prse,istatus)
-   call gsi_bundlegetpointer (wbundle_c,'q'  ,cv_rh ,istatus)
+   call gsi_bundlegetpointer (wbundle_c,'q'  ,cv_rh  ,istatus)
    call gsi_bundlegetpointer (eval(jj),'u'   ,sv_u,   istatus)
    call gsi_bundlegetpointer (eval(jj),'v'   ,sv_v,   istatus)
    call gsi_bundlegetpointer (eval(jj),'tsen',sv_tsen,istatus)

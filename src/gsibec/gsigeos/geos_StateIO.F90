@@ -32,7 +32,6 @@ integer(i_kind),    intent(in   ) :: nymd,nhms
 integer(i_kind),    intent(in   ) :: iwhat
 integer(i_kind),optional,intent(in ) :: tau   ! time interval in hours
 character(len=*), parameter :: myname_ = myname//'get_1state_'
-print *, 'DEBUG: get_1state_ - getting here '
 end subroutine get_1state_
 subroutine get_Nstate_(xx,sgrid,nymd,nhms,tau)
 use constants, only: zero

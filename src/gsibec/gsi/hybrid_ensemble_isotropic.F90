@@ -1467,6 +1467,7 @@ end subroutine normal_new_factorization_rf_y
     integer(4) iiseed(4) ! must be integer*4 given lapack interface
     integer(i_kind) nvert,i,is,naux,k,ic3
     integer(i_kind) istat_st,istat_vp
+    integer(i_kind) istat_uu,istat_vv
     integer(i_kind) nval_lenz_save
     real(r_kind),dimension(nh_0:nh_1,vlevs,nscl):: zsub
     real(r_kind),dimension(:,:,:),allocatable:: ua,va
@@ -1531,23 +1532,27 @@ end subroutine normal_new_factorization_rf_y
 
 !     if uv_hyb_ens=.true., then convert st,vp to u,v
     if(uv_hyb_ens) then
-       allocate(ua(grd_anl%lat2,grd_anl%lon2,grd_anl%nsig))
-       allocate(va(grd_anl%lat2,grd_anl%lon2,grd_anl%nsig))
-       istat_st=-999
-       istat_vp=-999
        do ic3=1,nc3d
-          if(trim(cvars3d(ic3))=='sf') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),st, istat_st)
-          if(trim(cvars3d(ic3))=='vp') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),vp, istat_vp)
+          if(trim(cvars3d(ic3))=='u') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),st, istat_uu)
+          if(trim(cvars3d(ic3))=='v') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),vp, istat_vv)
        enddo
-       if(istat_st/=0.or.istat_vp/=0) then
-          write(6,*) myname_,': error getting sf/vp pointers, aborting ...'
-          call stop2(999)
+       if(istat_uu+istat_vv/=0) then
+         allocate(ua(grd_anl%lat2,grd_anl%lon2,grd_anl%nsig))
+         allocate(va(grd_anl%lat2,grd_anl%lon2,grd_anl%nsig))
+         do ic3=1,nc3d
+            if(trim(cvars3d(ic3))=='sf') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),st, istat_st)
+            if(trim(cvars3d(ic3))=='vp') call gsi_bundlegetpointer (bundle_anl, cvars3d(ic3),vp, istat_vp)
+         enddo
+         if(istat_st/=0.or.istat_vp/=0) then
+            write(6,*) myname_,': error getting sf/vp pointers, aborting ...'
+            call stop2(999)
+         endif
+         call getuv(ua,va,st,vp,0)
+         st=ua
+         vp=va
+         deallocate(va)
+         deallocate(ua)
        endif
-       call getuv(ua,va,st,vp,0)
-       st=ua
-       vp=va
-       deallocate(va)
-       deallocate(ua)
     end if
 
     if(p_e2a%identity) then

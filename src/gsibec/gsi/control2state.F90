@@ -84,7 +84,7 @@ implicit none
   
 ! Declare passed variables  
 type(control_vector), intent(in   ) :: xhat
-type(gsi_bundle)    , intent(inout) :: sval(1)
+type(gsi_bundle)    , intent(inout) :: sval(nsubwin)
 type(predictors)    , intent(inout) :: bval
 
 ! Declare local variables  	

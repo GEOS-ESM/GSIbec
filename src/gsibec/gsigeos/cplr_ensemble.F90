@@ -67,6 +67,7 @@ subroutine get_geos_ens(this,grd,member,ntindex,tau,atm_bundle,iret)
 !$$$
 use m_mpimod, only: mype
 use m_kinds, only: i_kind,r_kind
+use mpeu_util, only: tick
 use general_sub2grid_mod, only: sub2grid_info
 use gsi_bundlemod, only: gsi_grid
 use gsi_bundlemod, only: gsi_gridcreate
@@ -153,13 +154,13 @@ implicit none
       ida(5:6)=ibdate(4:5)
       jda(:)=0
       fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      !call w3movdat(fha,ida,jda)
-      nymd=jda(1)*10000+jda(2)*100+jda(3)
-      nhms=jda(5)*10000+jda(6)*100
-   else
-      nymd = iadate(1)*10000 + iadate(2)*100 + iadate(3)
-      nhms = iadate(4)*10000 + iadate(5)*100
+      fha(3)=ens_fmnlevs(ntindex)-360.0_r_kind ! fmlevs defined as in GSI: off by 6-hours
+      nymd=ida(1)*10000+ida(2)*100+ida(3)
+      nhms=ida(5)*10000+ida(6)*100
+      call tick ( nymd, nhms, nint(fha(3))*60 )
+   else ! in 3d, ibdate in JEDI is iadate in GSI
+      nymd = ibdate(1)*10000 + ibdate(2)*100 + ibdate(3)
+      nhms = ibdate(4)*10000 + ibdate(5)*100
    endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
@@ -242,6 +243,7 @@ subroutine get_geos_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
 !$$$
 use m_mpimod, only: mype
 use m_kinds, only: i_kind,r_kind
+use mpeu_util, only: tick
 use general_sub2grid_mod, only: sub2grid_info
 use gsi_bundlemod, only: gsi_grid
 use gsi_bundlemod, only: gsi_gridcreate
@@ -332,13 +334,13 @@ implicit none
       ida(5:6)=ibdate(4:5)
       jda(:)=0
       fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-180.0_r_kind ! NCEP counts time from previous syn analysis (180min=3hr)
-      !call w3movdat(fha,ida,jda)
-      nymd=jda(1)*10000+jda(2)*100+jda(3)
-      nhms=jda(5)*10000+jda(6)*100
-   else
-      nymd = iadate(1)*10000 + iadate(2)*100 + iadate(3)
-      nhms = iadate(4)*10000 + iadate(5)*100
+      fha(3)=ens_fmnlevs(ntindex)-360.0_r_kind ! fmlevs defined as in GSI: off by 6-hours
+      nymd=ida(1)*10000+ida(2)*100+ida(3)
+      nhms=ida(5)*10000+ida(6)*100
+      call tick ( nymd, nhms, nint(fha(3))*60 )
+   else ! in 3d, ibdate in JEDI is iadate in GSI
+      nymd = ibdate(1)*10000 + ibdate(2)*100 + ibdate(3)
+      nhms = ibdate(4)*10000 + ibdate(5)*100
    endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
