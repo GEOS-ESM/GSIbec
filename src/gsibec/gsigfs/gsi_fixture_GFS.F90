@@ -1,4 +1,4 @@
-module gsi_fixture
+module gsi_fixture_GFS
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:	 module gsi_fixture_GFS (but named as gsi_fixture)
@@ -46,20 +46,19 @@ subroutine fixture_config()
 !> singleton timermod and gsi_enscouplemod, which manage the actual timer and
 !> gfs_ensenble extentions.
 
-!_RT  use timermod         , only: timer_typedef
-  use gsi_enscouplermod, only: ensemble_typedef => gsi_enscoupler_registry
+! use gsi_enscouplermod, only: ensemble_typedef => gsi_enscoupler_registry
 
 !> Define the actual extensions (timermod and gfs_ensemble) to be used.
 
-!_RT  use m_stubTimer       , only: my_timer_mold    => timer_typemold
-  use get_gfs_ensmod_mod, only: my_ensemble_mold => ensemble_typemold
+! use get_gfs_ensmod_mod, only: my_ensemble_mold => ensemble_typemold
 
   implicit none
 
 !> Fix up the extensions used by corresponding GSI singleton modules.
 
-!_RT  call    timer_typedef(my_timer_mold())
-  call ensemble_typedef(my_ensemble_mold())
+! call ensemble_typedef(my_ensemble_mold())
+  print *, 'Want to read GFS ensemble, not avail, abort ... ' 
+  call stop2(9999)
 
 end subroutine fixture_config
-end module gsi_fixture
+end module gsi_fixture_GFS

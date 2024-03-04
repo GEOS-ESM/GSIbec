@@ -15,6 +15,7 @@
   use m_kinds, only: i_kind,r_kind
 
   use mpeu_util,only: die,warn
+  use mpeu_util,only: uppercase
   use m_mpimod, only: npe,gsi_mpi_comm_world,ierror,mype
   use balmod, only: init_balmod,fstat,lnobalance
 
@@ -78,7 +79,8 @@
                          readin_localization,write_ens_sprd,eqspace_ensgrid,grid_ratio_ens,&
                          readin_beta,use_localization_grid,use_gfs_ens,q_hyb_ens,i_en_perts_io, &
                          l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
-                         bens_recenter,upd_ens_spread,upd_ens_localization,ens_fname_tmpl
+                         bens_recenter,upd_ens_spread,upd_ens_localization,ens_fname_tmpl,&
+                         EnsSource
 
   use gsi_io, only: init_io, verbose
 
@@ -483,7 +485,7 @@
                 grid_ratio_ens, ens_fname_tmpl, &
                 oz_univ_static,write_ens_sprd,use_localization_grid,use_gfs_ens, &
                 i_en_perts_io,l_ens_in_diff_time,ensemble_path,ens_fast_read,sst_staticB,&
-                bens_recenter,upd_ens_spread,upd_ens_localization
+                bens_recenter,upd_ens_spread,upd_ens_localization,EnsSource
    CONTAINS
 
 !-------------------------------------------------------------------------
@@ -500,7 +502,8 @@
 !*************************************************************
 ! Begin gsi code
 !
-  use gsi_fixture, only: fixture_config
+  use gsi_fixture_GEOS, only: config_GEOS => fixture_config
+  use gsi_fixture_GFS,  only: config_GFS  => fixture_config
   implicit none
   character(len=*),optional,intent(in):: nmlfile
 
@@ -510,8 +513,6 @@
   logical:: already_init_mpi
   real(r_kind):: varqc_max,c_varqc_new
   character(len=255) :: thisrc
-
-  call fixture_config()
 
   ierror=0
   if (present(nmlfile)) then
@@ -538,8 +539,8 @@
   call init_smooth_polcas
   call init_hybrid_ensemble_parameters
   call set_fgrid2agrid
-
   call init_4dvar
+
 
 ! Read user input from namelists.  All processor elements 
 ! read the namelist input.  SGI MPI FORTRAN does not allow
@@ -564,6 +565,17 @@
      call warn(myname_,'using defaults(hybrid_ensemble)')
   endif
   close(11)
+
+  if (l_hyb_ens) then
+    select case (trim(uppercase(EnsSource)))
+      case("GEOS")
+        call config_GEOS()
+      case("GFS")
+        call config_GFS()
+      case default
+        call die(myname_,': unknown ensemble source')
+    end select
+  endif
 
   if(jcap > jcap_cut)then
     jcap_cut = jcap+1

@@ -782,7 +782,7 @@ end subroutine final_
   subroutine load_guess_tsen_(mock)
   implicit none
   logical,optional,intent(in) :: mock
-  character(len=*), parameter :: myname_ = myname//'*get_guess_tsen_'
+  character(len=*), parameter :: myname_ = myname//'*load_guess_tsen_'
   real(r_kind),dimension(:,:,:),pointer::tsen=>NULL()
   real(r_kind),dimension(:,:,:),pointer::tv=>NULL()
   real(r_kind),dimension(:,:,:),pointer::q =>NULL()

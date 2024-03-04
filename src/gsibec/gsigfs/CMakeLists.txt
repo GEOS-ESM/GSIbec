@@ -1,7 +1,7 @@
-# GSI-GEOS
+# GSI-GFS
 
 list(APPEND gsigfs_src_files_list
-ncepnems_io.f90
+gsi_fixture_GFS.F90
 )
 
 set( gsigfs_src_files
