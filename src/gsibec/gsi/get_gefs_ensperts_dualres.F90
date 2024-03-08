@@ -51,6 +51,7 @@ subroutine get_gefs_ensperts_dualres (tau)
   use mpeu_util, only: die
   use gridmod, only: idsl5
   use hybrid_ensemble_parameters, only: n_ens,write_ens_sprd,oz_univ_static,ntlevs_ens
+  use hybrid_ensemble_parameters, only: nymd,nhms
   use hybrid_ensemble_parameters, only: sst_staticB
   use hybrid_ensemble_parameters, only: bens_recenter
   use hybrid_ensemble_parameters, only: en_perts,ps_bar,nelen
@@ -162,7 +163,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 
      en_bar(m)%values=zero
 
-     call gsi_enscoupler_get_user_Nens(grd_tmp,n_ens,m,tau,en_read,iret)
+     call gsi_enscoupler_get_user_Nens(grd_tmp,n_ens,nymd(m),nhms(m),tau,en_read,iret)
 
      ! Check read return code.  Revert to static B if read error detected
      if ( iret /= 0 ) then
@@ -366,7 +367,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 ! Before converting to perturbations, get ensemble spread
      !-- if (m == 1 .and. write_ens_sprd )  call ens_spread_dualres(en_bar(1),1)
      !!! the follwing call is not thread/$omp safe -> omp deactivted above.
-     if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m)
+     if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m,nymd(m),nhms(m))
 
 
      call gsi_bundlegetpointer(en_bar(m),'ps',x2,istatus)
@@ -475,7 +476,7 @@ subroutine get_gefs_ensperts_dualres (tau)
   return
 end subroutine get_gefs_ensperts_dualres
 
-subroutine ens_spread_dualres(en_bar,ibin)
+subroutine ens_spread_dualres(en_bar,ibin,nymd,nhms)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ens_spread_dualres  output ensemble spread for diagnostics
@@ -527,7 +528,7 @@ subroutine ens_spread_dualres(en_bar,ibin)
   implicit none
 
   type(gsi_bundle),intent(in):: en_bar
-  integer(i_kind),intent(in):: ibin
+  integer(i_kind),intent(in):: ibin,nymd,nhms
 
   type(gsi_bundle):: sube,suba
   type(gsi_grid):: grid_ens,grid_anl
@@ -622,13 +623,13 @@ subroutine ens_spread_dualres(en_bar,ibin)
      call general_sube2suba(se,sa,p_e2a,sube%values,suba%values,regional)
   end if
 
-  call write_spread_dualres(ibin,suba)
+  call write_spread_dualres(nymd,nhms,suba)
 
   return
 end subroutine ens_spread_dualres
 
 
-subroutine write_spread_dualres(ibin,bundle)
+subroutine write_spread_dualres(nymd,nhms,bundle)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    write_spread_dualres   write ensemble spread for diagnostics
@@ -678,7 +679,7 @@ subroutine write_spread_dualres(ibin,bundle)
 #endif /* HAVE_BACIO */
   implicit none
 
-  integer(i_kind), intent(in) :: ibin
+  integer(i_kind), intent(in) :: nymd,nhms
   type(gsi_bundle):: bundle
 
 ! local variables
@@ -711,7 +712,10 @@ subroutine write_spread_dualres(ibin,bundle)
 
   lu=get_lun()
   if (mype==0) then
-    write(grdfile,'(a,2(i3.3,a))') 'ens_spread_',ibin, '.iter' ,jiter, '.grd'
+    write(grdfile,'(a,(i8.8,a),(i6.6,a),(i3.3,a))') 'ens_spread_', &
+                                                     nymd, '_', &
+                                                     nhms, '.iter', &
+                                                     jiter, '.grd'
 #ifdef HAVE_BACIO
     call baopenwt(lu,trim(grdfile),iret)
 #else /* HAVE_BACIO */
@@ -811,7 +815,10 @@ subroutine write_spread_dualres(ibin,bundle)
 ! Write out a corresponding grads control file
   if (mype==0) then
      lu=get_lun()
-     write(grdctl,'(a,2(i3.3,a))') 'ens_spread_',ibin,  '.iter' ,jiter, '.ctl'
+     write(grdctl,'(a,(i8.8,a),(i6.6,a),(i3.3,a))') 'ens_spread_', &
+                                                     nymd, '_', &
+                                                     nhms, '.iter', &
+                                                     jiter, '.ctl'
      open(newunit=lu,file=trim(grdctl),form='formatted')
      write(lu,'(2a)') 'DSET  ^', trim(grdfile)
      write(lu,'(2a)') 'TITLE ', 'gsi ensemble spread'

@@ -11,8 +11,8 @@ use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
 use gsi_4dvar, only: lsqrtb
-use gsi_4dvar, only: ibdate
 use hybrid_ensemble_parameters, only: ntlevs_ens
+use hybrid_ensemble_parameters, only: nymd,nhms
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
 use jfunc, only: jouter_def
@@ -130,8 +130,8 @@ logical,save :: gsibec_iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout,ntimes, &
-                   jouter,idate,&
+  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout, &
+                   jouter,inymd,inhms,&
                    comm)
 
   logical, intent(out) :: cv
@@ -140,8 +140,7 @@ contains
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
-  integer,optional,intent(in) :: ntimes
-  integer,optional,intent(in) :: idate(:)
+  integer,optional,intent(in) :: inymd(:),inhms(:)
   integer,optional,intent(out):: jouter
   integer,optional,intent(in) :: comm
 
@@ -157,16 +156,6 @@ contains
   if(jouter_def > 1) then
      if (mype==0) call warn(myname_,': already initialized, skipping ...')
     return
-  endif
-  if (present(ntimes) ) then
-     nfldsig=ntimes 
-     ntguessig=(ntimes+1)/2
-  else
-     nfldsig=1 
-     ntguessig=1
-  endif
-  if (present(idate) ) then
-      ibdate = idate
   endif
 
   ier=0
@@ -188,6 +177,21 @@ contains
      call befname_(befile,0)
   endif
   call gsimain_initialize(nmlfile=nmlfile)
+
+  nfldsig=1 
+  ntguessig=1
+  if (present(inymd) .and. present(inhms)) then
+      if (size(inymd)/=ntlevs_ens) then
+         print *, 'nymd,ntlevs ', size(inymd), ntlevs_ens
+         call die(myname,'inconsistent number of time slots ier =',99)
+      endif
+      allocate(nymd(ntlevs_ens),nhms(ntlevs_ens))
+      nymd = inymd
+      nhms = inhms
+      nfldsig=ntlevs_ens 
+      ntguessig=(ntlevs_ens+1)/2
+  endif
+
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
@@ -958,6 +962,8 @@ contains
   end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
+  if(allocated(nymd)) deallocate(nymd)
+  if(allocated(nhms)) deallocate(nhms)
   call gsiguess_final()
   end subroutine final_guess_
 end module m_gsibec

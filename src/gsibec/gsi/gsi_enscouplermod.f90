@@ -94,7 +94,7 @@ function typename_() result(name)
         ! Note the use of typemold_, instead of this_ensemble_.
 end function typename_
 
-   subroutine get_user_ens_(grd,member,ntindex,tau,atm_bundle,iret)
+   subroutine get_user_ens_(grd,member,nymd,nhms,tau,atm_bundle,iret)
    use m_kinds, only: i_kind,r_kind
    use gsi_bundlemod, only: gsi_bundle
    use general_sub2grid_mod, only: sub2grid_info
@@ -102,15 +102,15 @@ end function typename_
 !  Declare passed variables
       type(sub2grid_info)                   ,intent(in   ) :: grd
       integer(i_kind)                       ,intent(in   ) :: member
-      integer(i_kind)                       ,intent(in   ) :: ntindex
+      integer(i_kind)                       ,intent(in   ) :: nymd,nhms
       integer(i_kind)                       ,intent(in   ) :: tau
       type(gsi_bundle)                      ,intent(inout) :: atm_bundle
       integer(i_kind)                       ,intent(  out) :: iret
       call ifn_alloc_()     ! to ensure an allocated(this_ensemble_)
-      call this_ensemble_%get_user_ens(grd,member,ntindex,tau,atm_bundle,iret)
+      call this_ensemble_%get_user_ens(grd,member,nymd,nhms,tau,atm_bundle,iret)
    end subroutine get_user_ens_
 
-   subroutine get_user_Nens_(grd,members,ntindex,tau,atm_bundle,iret)
+   subroutine get_user_Nens_(grd,members,nymd,nhms,tau,atm_bundle,iret)
    use m_kinds, only: i_kind,r_kind
    use gsi_bundlemod, only: gsi_bundle
    use general_sub2grid_mod, only: sub2grid_info
@@ -118,12 +118,12 @@ end function typename_
 !  Declare passed variables
       type(sub2grid_info)                   ,intent(in   ) :: grd
       integer(i_kind)                       ,intent(in   ) :: members
-      integer(i_kind)                       ,intent(in   ) :: ntindex
+      integer(i_kind)                       ,intent(in   ) :: nymd,nhms
       integer(i_kind)                       ,intent(in   ) :: tau
       type(gsi_bundle)                      ,intent(inout) :: atm_bundle(:)
       integer(i_kind)                       ,intent(  out) :: iret
       call ifn_alloc_()     ! to ensure an allocated(this_ensemble_)
-      call this_ensemble_%get_user_Nens(grd,members,ntindex,tau,atm_bundle,iret)
+      call this_ensemble_%get_user_Nens(grd,members,nymd,nhms,tau,atm_bundle,iret)
    end subroutine get_user_Nens_
 
    subroutine put_user_ens_(grd,member,ntindex,pert,iret)

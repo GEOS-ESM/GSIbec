@@ -35,7 +35,7 @@ function typename()
   typename='['//myname//'::ensemble]'
 end function typename
 
-subroutine get_geos_ens(this,grd,member,ntindex,tau,atm_bundle,iret)
+subroutine get_geos_ens(this,grd,member,nymd,nhms,tau,atm_bundle,iret)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    get_user_ens_    pretend atmos bkg is the ensemble
@@ -67,7 +67,6 @@ subroutine get_geos_ens(this,grd,member,ntindex,tau,atm_bundle,iret)
 !$$$
 use m_mpimod, only: mype
 use m_kinds, only: i_kind,r_kind
-use mpeu_util, only: tick
 use general_sub2grid_mod, only: sub2grid_info
 use gsi_bundlemod, only: gsi_grid
 use gsi_bundlemod, only: gsi_gridcreate
@@ -96,7 +95,7 @@ implicit none
    class(ensemble)                      , intent(inout) :: this
    type(sub2grid_info)                   ,intent(in   ) :: grd
    integer(i_kind)                       ,intent(in   ) :: member
-   integer(i_kind)                       ,intent(in   ) :: ntindex
+   integer(i_kind)                       ,intent(in   ) :: nymd,nhms
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
    type(gsi_bundle)                      ,intent(inout) :: atm_bundle                      
@@ -104,7 +103,7 @@ implicit none
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_ens_'
    character(len=40) evar
-   integer(i_kind) nymd,nhms,istatus,ii,ier
+   integer(i_kind) istatus,ii,ier
    integer(i_kind) ida(8),jda(8)
    logical,save :: first=.true.
    real(r_kind) fha(5)
@@ -149,19 +148,6 @@ implicit none
    endif
 
 !  Read in a single ensemble member
-   if(l4densvar) then
-      ida(1:3)=ibdate(1:3)
-      ida(5:6)=ibdate(4:5)
-      jda(:)=0
-      fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-360.0_r_kind ! fmlevs defined as in GSI: off by 6-hours
-      nymd=ida(1)*10000+ida(2)*100+ida(3)
-      nhms=ida(5)*10000+ida(6)*100
-      call tick ( nymd, nhms, nint(fha(3))*60 )
-   else ! in 3d, ibdate in JEDI is iadate in GSI
-      nymd = ibdate(1)*10000 + ibdate(2)*100 + ibdate(3)
-      nhms = ibdate(4)*10000 + ibdate(5)*100
-   endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
 #endif /* USE_ALL_ORIGINAL */
@@ -210,7 +196,7 @@ implicit none
 
 end subroutine get_geos_ens
 
-subroutine get_geos_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
+subroutine get_geos_Nens(this,grd,members,nymd,nhms,tau,atm_bundle,iret)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    get_user_Nens_    pretend atmos bkg is the ensemble
@@ -243,7 +229,6 @@ subroutine get_geos_Nens(this,grd,members,ntindex,tau,atm_bundle,iret)
 !$$$
 use m_mpimod, only: mype
 use m_kinds, only: i_kind,r_kind
-use mpeu_util, only: tick
 use general_sub2grid_mod, only: sub2grid_info
 use gsi_bundlemod, only: gsi_grid
 use gsi_bundlemod, only: gsi_gridcreate
@@ -272,7 +257,7 @@ implicit none
    class(ensemble)                      , intent(inout) :: this
    type(sub2grid_info)                   ,intent(in   ) :: grd
    integer(i_kind)                       ,intent(in   ) :: members
-   integer(i_kind)                       ,intent(in   ) :: ntindex
+   integer(i_kind)                       ,intent(in   ) :: nymd,nhms
    integer(i_kind)                       ,intent(in   ) :: tau
    integer(i_kind)                       ,intent(  out) :: iret
    type(gsi_bundle)                      ,intent(inout) :: atm_bundle(:)                      
@@ -280,7 +265,7 @@ implicit none
 !  Declare internal variables
    character(len=*),parameter::myname='geos_get_Nens_'
    character(len=40) evar
-   integer(i_kind) nymd,nhms,istatus,ii,ier
+   integer(i_kind) istatus,ii,ier
    integer(i_kind) ida(8),jda(8)
    integer(i_kind) mm
    logical,save :: first=.true.
@@ -329,19 +314,6 @@ implicit none
    enddo
 
 !  Read in ensemble members
-   if(l4densvar) then
-      ida(1:3)=ibdate(1:3)
-      ida(5:6)=ibdate(4:5)
-      jda(:)=0
-      fha(:)=0.0
-      fha(3)=ens_fmnlevs(ntindex)-360.0_r_kind ! fmlevs defined as in GSI: off by 6-hours
-      nymd=ida(1)*10000+ida(2)*100+ida(3)
-      nhms=ida(5)*10000+ida(6)*100
-      call tick ( nymd, nhms, nint(fha(3))*60 )
-   else ! in 3d, ibdate in JEDI is iadate in GSI
-      nymd = ibdate(1)*10000 + ibdate(2)*100 + ibdate(3)
-      nhms = ibdate(4)*10000 + ibdate(5)*100
-   endif
 #ifdef USE_ALL_ORIGINAL
    call timer_ini('GetEns')
 #endif /* USE_ALL_ORIGINAL */

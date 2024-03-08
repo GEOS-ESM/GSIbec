@@ -297,6 +297,7 @@ module hybrid_ensemble_parameters
   public :: upd_ens_spread
   public :: upd_ens_localization
   public :: EnsSource
+  public :: nymd,nhms
 
   logical l_hyb_ens,uv_hyb_ens,q_hyb_ens,oz_univ_static,sst_staticB
   logical bens_recenter,upd_ens_spread,upd_ens_localization
@@ -337,6 +338,8 @@ module hybrid_ensemble_parameters
   character(len=512),save :: ensemble_path
   character(len=512),save :: ens_fname_tmpl
   character(len=80) :: EnsSource
+
+  integer, allocatable :: nymd(:),nhms(:)
 
 ! following is for storage of ensemble perturbations:
 
