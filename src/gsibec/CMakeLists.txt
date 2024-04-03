@@ -20,7 +20,9 @@ target_link_libraries( ${PROJECT_NAME} PUBLIC MPI::MPI_Fortran )
 target_link_libraries( ${PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} )
 
 # NCEP spectral library
-if( sp_FOUND )
+if( ip_FOUND )
+    target_link_libraries( gsibec PUBLIC ip::ip_d)
+elseif( sp_FOUND )
     target_link_libraries( gsibec PUBLIC sp::sp_d)
 endif()
 
