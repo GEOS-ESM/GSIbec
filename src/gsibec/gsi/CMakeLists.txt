@@ -99,7 +99,7 @@ xhat_vordivmod.f90
 )
 
 # Stubs for sp lib if package is not found
-if( NOT sp_FOUND )
+if( NOT ip_FOUND AND NOT sp_FOUND )
   list( APPEND gsi_src_files_list stub_sp.f90 )
 endif()
 
