@@ -88,7 +88,7 @@ end interface gsiguess_bkgcov_final
 
 logical, save :: gesgrid_initialized_ = .false.
 logical, save :: gesgrid_iamset_ = .false.
-logical :: debug_guess=.false.
+logical :: debug_guess=.true.
 
 character(len=*), parameter :: myname="guess_grids"
 contains
@@ -721,8 +721,10 @@ end subroutine final_
   real(r_kind),pointer :: tskin   (:,:)=>NULL()
   real(r_kind),pointer :: ps      (:,:)=>NULL()
   real(r_kind),pointer :: z       (:,:)=>NULL()
+  real(r_kind),pointer :: ptr3  (:,:,:)=>NULL()
   integer :: ic,its,ier,istatus
   logical :: fromges
+  character(len=12) fname
 
   fromges=.false.
   isli2=zero ! ocean
@@ -761,9 +763,11 @@ end subroutine final_
   if(debug_guess) then
      allocate(debugvar(lat2,lon2,nsig))
      debugvar=zero
-     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ps',ps,its)
-     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'z',z,its)
      ic=0
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'ps',ps,its)
+     ic=ic+1; debugvar(:,:,ic) = ps
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'z',z,its)
+     ic=ic+1; debugvar(:,:,ic) = z
      if(fromges) then
        ic=ic+1; debugvar(:,:,ic) = slmsk
      else
@@ -772,8 +776,14 @@ end subroutine final_
        ic=ic+1; debugvar(:,:,ic) = frseaice
      endif
      ic=ic+1; debugvar(:,:,ic) = tskin
-     ic=ic+1; debugvar(:,:,ic) = z
-     call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,'skin.grd',mype) ! debug
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'tsen',ptr3,its)
+     ic=ic+1; debugvar(:,:,ic) = ptr3(:,:,nint(size(ptr3,3)/2.0))
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'tv',ptr3,its)
+     ic=ic+1; debugvar(:,:,ic) = ptr3(:,:,nint(size(ptr3,3)/2.0))
+     call gsi_bundlegetpointer(gsi_metguess_bundle(it),'q',ptr3,its)
+     ic=ic+1; debugvar(:,:,ic) = ptr3(:,:,nint(size(ptr3,3)/2.0))
+     write(fname,'(a,i3.3)') 'skin_', it
+     call write_bkgvars_grid(debugvar,debugvar,debugvar,tskin,trim(fname),mype) ! debug
      deallocate(debugvar)
   endif
 
@@ -791,7 +801,7 @@ end subroutine final_
   mock_=.false. 
   gesgrid_iamset=.true.
   if (present(mock)) then
-     if(mock) mock_=.true.
+     if(mock) mock_=mock
   endif
   do jj=1,nfldsig
      istatus=0

@@ -358,7 +358,8 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   nsmth=8
   call smooth2d(sfvar,vpvar,tvar,psvar,nsig,nsmth,mype)
  
-  if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,mype)
+  if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,&
+                                             'bkgvar_rewgt',mype)
   if(mype==0) write(6,*) 'bkgvar_rewgt: Flow-dependent feature on: nt=',nfldsig, ' minus nt= 1'
 
   return

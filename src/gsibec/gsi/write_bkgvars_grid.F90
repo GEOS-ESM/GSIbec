@@ -1,4 +1,4 @@
-subroutine write_bkgvars_grid(a,b,c,d,grdfile,mype)
+subroutine write_bkgvars_grid(a,b,c,d,fname,mype)
 !$$$  subroutine documentation block
 !
 ! subprogram:    write_bkgvars_grid
@@ -31,10 +31,12 @@ subroutine write_bkgvars_grid(a,b,c,d,grdfile,mype)
 #ifndef HAVE_BACIO
   use stub_bacio_mod, only: ba_open,ba_close,ba_wryte
 #endif
+  use guess_grids, only: gsiguess_get_ref_gesprs
+  use mpeu_util, only: get_lun => luavail
   implicit none
 
   integer(i_kind)                       ,intent(in   ) :: mype
-  character(len=*)                      ,intent(in   ) :: grdfile
+  character(len=*)                      ,intent(in   ) :: fname
 
   real(r_kind),dimension(lat2,lon2,nsig),intent(in   ) :: a,b,c
   real(r_kind),dimension(lat2,lon2)     ,intent(in   ) :: d
@@ -46,7 +48,9 @@ subroutine write_bkgvars_grid(a,b,c,d,grdfile,mype)
   real(r_single),dimension(nlon,nlat,nsig):: a4,b4,c4
   real(r_single),dimension(nlon,nlat):: d4
 
-  integer(i_kind) ncfggg,iret,i,j,k
+  character(len=80) :: grdfile
+  integer(i_kind) iret,i,j,k,lu
+  real(r_kind),dimension(nsig+1)::prs
 
 ! gather stuff to processor 0
   do k=1,nsig
@@ -75,23 +79,47 @@ subroutine write_bkgvars_grid(a,b,c,d,grdfile,mype)
      end do
 
 ! Create byte-addressable binary file for grads
-     ncfggg=len_trim(grdfile)
+     grdfile = trim(fname)//'.grd' 
 #ifdef HAVE_BACIO
-     call baopenwt(22,grdfile(1:ncfggg),iret)
+     call baopenwt(22,trim(grdfile),iret)
      call wryte(22,4*nlat*nlon*nsig,a4)
      call wryte(22,4*nlat*nlon*nsig,b4)
      call wryte(22,4*nlat*nlon*nsig,c4)
      call wryte(22,4*nlat*nlon,d4)
      call baclose(22,iret)
 #else /* HAVE_BACIO */
-     call ba_open(22,grdfile(1:ncfggg),4*nlat*nlon,iret)
+     call ba_open(22,trim(grdfile),4*nlat*nlon,iret)
      call ba_wryte(22,a4)
      call ba_wryte(22,b4)
      call ba_wryte(22,c4)
      call ba_wryte(22,d4)
      call ba_close(22,iret)
 #endif /* HAVE_BACIO */
-  end if
+
+     call gsiguess_get_ref_gesprs(prs)
+
+!    Now create corresponding grads table file
+     lu=get_lun()
+     open(lu,file=trim(fname)//'.ctl',form='formatted')
+     write(lu,'(2a)') 'DSET  ^', trim(grdfile)
+     write(lu,'(2a)') 'TITLE ', 'gsi berror variances'
+     write(lu,'(a,2x,e13.6)') 'UNDEF', 1.E+15 ! any other preference for this?
+     write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'XDEF',nlon, 'LINEAR',   0.0, 360./nlon
+     write(lu,'(a,2x,i4,2x,a,2x,f5.1,2x,f9.6)') 'YDEF',nlat, 'LINEAR', -90.0, 180./(nlat-1.)
+     write(lu,'(a,2x,i4,2x,a,1x,f8.3)')    'ZDEF',nsig, 'LEVELS', prs(1) ! prs is in mb
+     do k=2,nsig  ! grads tends not to like a long line of pressures, thus split
+        write(lu,'(1x,f8.3)')   prs(k) ! prs is in mb
+     enddo
+     write(lu,'(a,2x,i4,2x,a)')   'TDEF', 1, 'LINEAR 12:00Z04JUL1776 6hr' ! any date suffices
+     write(lu,'(a,2x,i4)')        'VARS', 4
+     write(lu,'(a,1x,2(i4,1x),a)') 'a',nsig,0,'a'
+     write(lu,'(a,1x,2(i4,1x),a)') 'b',nsig,0,'b'
+     write(lu,'(a,1x,2(i4,1x),a)') 'c',nsig,0,'c'
+     write(lu,'(a,1x,2(i4,1x),a)') 'd',   1,0,'d'
+     write(lu,'(a)') 'ENDVARS'
+     close(lu)
+
+  end if ! mype=0
    
   return
 end subroutine write_bkgvars_grid

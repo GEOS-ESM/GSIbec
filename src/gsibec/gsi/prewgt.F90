@@ -445,7 +445,7 @@ subroutine prewgt(mype)
         call bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
      else
         if (bkgv_write) call write_bkgvars_grid(sfvar,vpvar,tvar,psvar,&
-                                               'bkgvar_rewgt.grd',mype)
+                                               'bkgvar_prewgt',mype)
     endif
   endif
 
