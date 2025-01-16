@@ -101,6 +101,10 @@ xhat_vordivmod.f90
 # Stubs for sp lib if package is not found
 if( NOT ip_FOUND AND NOT sp_FOUND )
   list( APPEND gsi_src_files_list stub_sp.f90 )
+  # If ip is >= 5.1, we need to set -DUSE_SP_MOD on stub_sp.f90
+  if(ip_VERSION VERSION_GREATER_EQUAL 5.1)
+    set_source_files_properties( stub_sp.f90 PROPERTIES COMPILE_DEFINITIONS USE_SP_MOD )
+  endif()
 endif()
 
 set( gsi_src_files
