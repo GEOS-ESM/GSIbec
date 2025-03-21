@@ -11,12 +11,15 @@ use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
 use gsi_4dvar, only: lsqrtb
+use hybrid_ensemble_parameters, only: ntlevs_ens
+use hybrid_ensemble_parameters, only: nymd,nhms
 use jfunc, only: nsclen,npclen,ntclen
 use jfunc, only: mockbkg
 use jfunc, only: jouter_def
 use gridmod, only: lon2,lat2,lat1,lon1,nsig
 
 use guess_grids, only: nfldsig
+use guess_grids, only: ntguessig
 use guess_grids, only: gsiguess_init
 use guess_grids, only: gsiguess_final
 use guess_grids, only: gsiguess_set
@@ -28,6 +31,7 @@ use state_vectors, only: allocate_state,deallocate_state
 use control_vectors, only: control_vector
 use control_vectors, only: allocate_cv,deallocate_cv
 use control_vectors, only: assignment(=)
+use control_vectors, only: cvars3d
 use control_vectors, only: prt_control_norms
 use control_vectors, only: inquire_cv
 use control_vectors, only: cvars2d, cvars3d
@@ -38,17 +42,16 @@ use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: gsi_bundlegetpointer
 use gsi_bundlemod, only: gsi_bundleprint
 use gsi_bundlemod, only: assignment(=)
+use gsi_bundlemod, only: self_add
 
 use gsimod, only: gsimain_initialize
 use gsimod, only: gsimain_finalize
 
 use m_berror_stats,only : berror_stats
 use berror, only: simcv,bkgv_write_cv,bkgv_write_sv
-use hybrid_ensemble_parameters,only: l_hyb_ens
-use hybrid_ensemble_parameters,only: ntlevs_ens
+use hybrid_ensemble_parameters,only : l_hyb_ens
 use hybrid_ensemble_isotropic, only: hybens_grid_setup
-use hybrid_ensemble_parameters, only: gsi_create_ensemble
-use hybrid_ensemble_parameters, only: gsi_enperts
+use hybrid_ensemble_isotropic, only: create_ensemble
 use hybrid_ensemble_isotropic, only: bkerror_a_en
 use hybrid_ensemble_isotropic, only: ensemble_forward_model_ad
 use hybrid_ensemble_isotropic, only: ensemble_forward_model
@@ -127,16 +130,17 @@ logical,save :: gsibec_iamset_ = .false.
 
 character(len=*), parameter :: myname ="m_gsibec"
 contains
-  subroutine init_(cv,epts,vgrid,bkgmock,nmlfile,befile,&
-                   layout,jouter,comm)
+  subroutine init_(cv,vgrid,bkgmock,nmlfile,befile,layout, &
+                   jouter,inymd,inhms,&
+                   comm)
 
   logical, intent(out) :: cv
-  type(gsi_enperts), intent(inout) :: epts
   logical, optional, intent(in)  :: vgrid
   logical, optional, intent(out) :: bkgmock
   character(len=*),optional,intent(in) :: nmlfile
   character(len=*),optional,intent(in) :: befile
   integer,optional,intent(in) :: layout(2) ! 1=nx, 2=ny
+  integer,optional,intent(in) :: inymd(:),inhms(:)
   integer,optional,intent(out):: jouter
   integer,optional,intent(in) :: comm
 
@@ -173,10 +177,25 @@ contains
      call befname_(befile,0)
   endif
   call gsimain_initialize(nmlfile=nmlfile)
+
+  nfldsig=1 
+  ntguessig=1
+  if (present(inymd) .and. present(inhms)) then
+      if (size(inymd)/=ntlevs_ens) then
+         print *, 'nymd,ntlevs ', size(inymd), ntlevs_ens
+         call die(myname,'inconsistent number of time slots ier =',99)
+      endif
+      allocate(nymd(ntlevs_ens),nhms(ntlevs_ens))
+      nymd = inymd
+      nhms = inhms
+      nfldsig=ntlevs_ens 
+      ntguessig=(ntlevs_ens+1)/2
+  endif
+
   call set_(vgrid=vgrid)
   if(l_hyb_ens) then
     call hybens_grid_setup()
-    call gsi_create_ensemble(cvars2d,cvars3d,epts)
+    call create_ensemble()
   endif
   call set_pointer_()
 
@@ -198,16 +217,18 @@ contains
 ! call gsiguess_bkgcov_init()  ! not where I want for this to be
   end subroutine init_guess_
 !--------------------------------------------------------
-  subroutine set_guess2_(varname,var)
+  subroutine set_guess2_(varname,islot,var)
   character(len=*),intent(in) :: varname
+  integer(i_kind),intent(in) :: islot
   real(r_kind),intent(in) :: var(:,:)
-  call gsiguess_set(varname,var) 
+  call gsiguess_set(varname,islot,var) 
   end subroutine set_guess2_
 !--------------------------------------------------------
-  subroutine set_guess3_(varname,var)
+  subroutine set_guess3_(varname,islot,var)
   character(len=*),intent(in) :: varname
+  integer(i_kind),intent(in) :: islot
   real(r_kind),intent(in) :: var(:,:,:)
-  call gsiguess_set(varname,var) 
+  call gsiguess_set(varname,islot,var) 
   end subroutine set_guess3_
 !--------------------------------------------------------
   subroutine final_(closempi)
@@ -479,9 +500,7 @@ contains
     CALL setup_control_vectors(nsig,lat2,lon2,latlon11,latlon1n, &
                                nsclen,npclen,ntclen,nclen,nsubwin,&
                                nval_len,lsqrtb,n_ens, &
-                               nval_lenz_enz,&
-                               grd_ens%lat2,grd_ens%lon2,grd_ens%nsig,&
-                               grd_ens%latlon11,l_hyb_ens)
+                               nval_lenz_enz)
     CALL setup_predictors(nrclen,nsclen,npclen,ntclen)
     CALL setup_state_vectors(latlon11,latlon1n,nvals_len,lat2,lon2,nsig)
 
@@ -638,12 +657,11 @@ contains
 
   end subroutine be_cv_space0_
 
-  subroutine be_cv_space1_(gradx,internalcv,bypassbe,epts)
+  subroutine be_cv_space1_(gradx,internalcv,bypassbe)
 
-  type(control_vector)  :: gradx
+  type(control_vector) :: gradx
   logical,optional,intent(in) :: internalcv
   logical,optional,intent(in) :: bypassbe
-  type(gsi_enperts),optional,intent(in) :: epts
 
   type(control_vector) :: grady
 
@@ -672,9 +690,9 @@ contains
      call bkerror(gradx,grady, &
                   1,nsclen,npclen,ntclen)
      if (l_hyb_ens) then
-        call ensemble_forward_model_ad(gradx%step(1),gradx%aens(1,:),epts,1)
+        call ensemble_forward_model_ad(gradx%step(1),gradx%aens(1,:),1)
         call bkerror_a_en(gradx,grady)
-        call ensemble_forward_model(grady%step(1),grady%aens(1,:),epts,1)
+        call ensemble_forward_model(grady%step(1),grady%aens(1,:),1)
      endif
   endif
 
@@ -695,6 +713,8 @@ contains
   subroutine be_sv_space0_
 
   type(gsi_bundle), allocatable :: mval(:)
+  type(control_vector) :: gradx,grady
+  type(predictors)     :: sbias
   integer ii
 
 ! start work space
@@ -703,9 +723,41 @@ contains
       call allocate_state(mval(ii))
       mval(ii) = zero
   end do
+  call allocate_preds(sbias)
 
-  call be_sv_space1_(mval,internalsv=.true.)
+  call allocate_cv(gradx)
+  call allocate_cv(grady)
+  gradx=zero
+  grady=zero
 
+! get test vector (mval)
+! call get_state_perts_ (mval(1))
+!
+  call set_silly_(mval(1))
+  call gsi2model_units_ad_(mval(1))
+
+  call control2state_ad(mval,sbias,gradx)
+
+! apply B to input (transformed) vector
+  call bkerror(gradx,grady, &
+               1,nsclen,npclen,ntclen)
+  if (l_hyb_ens) then
+     call bkerror_a_en(gradx,grady)
+  endif
+
+  call control2state(grady,mval,sbias)
+
+! if so write out fields from gsi (in GSI units)
+  if(bkgv_write_sv/='null') &
+  call write_bundle(mval(1),bkgv_write_sv)
+
+! convert back to model units (just for consistency here)
+  call gsi2model_units_(mval(1))
+
+! clean up work space
+  call deallocate_cv(gradx)
+  call deallocate_cv(grady)
+  call deallocate_preds(sbias)
   do ii=nsubwin,1,-1
       call deallocate_state(mval(ii))
   end do
@@ -713,27 +765,25 @@ contains
 
   end subroutine be_sv_space0_
 !--------------------------------------------------------
-  subroutine be_sv_space1_(mval,internalsv,bypassbe,epts)
+  subroutine be_sv_space1_(sval,internalsv,bypassbe)
 
-  type(gsi_bundle) :: mval(nsubwin)
+  type(gsi_bundle) :: sval(:)
   logical,optional,intent(in) :: internalsv
   logical,optional,intent(in) :: bypassbe
-  type(gsi_enperts),optional,intent(in) :: epts
 
-  character(len=*), parameter :: myname_ = myname//'*be_sv_space1_'
-  type(gsi_bundle),allocatable :: eval(:)
   type(control_vector) :: gradx,grady
   type(predictors)     :: sbias
+  type(gsi_bundle),allocatable :: eval(:)
+  type(gsi_bundle),allocatable :: mval(:)
   logical bypassbe_
   integer ii,ier
 
   if (nsubwin/=1) then
      if(ier/=0) call die(myname,'cannot handle this nsubwin =',nsubwin)
   endif
-! if (ntlevs_ens/=1) then
-!    if(ier/=0) call die(myname,'cannot handle this ntlevs_ens =',ntlevs_ens)
-! endif
-  allocate(eval(ntlevs_ens))
+  if (ntlevs_ens/=size(sval)) then
+     if(ier/=0) call die(myname,'inconsistent size of sval; ntlevs_ens =',ntlevs_ens)
+  endif
 
   bypassbe_ = .false.
   if (present(bypassbe)) then
@@ -742,10 +792,15 @@ contains
 
 ! start work space
   if (l_hyb_ens) then
+     allocate(eval(ntlevs_ens))
      do ii=1,ntlevs_ens
        call allocate_state(eval(ii))
     end do
   endif
+  allocate(mval(nsubwin))
+  do ii=1,nsubwin
+    call allocate_state(mval(ii))
+  end do
   call allocate_preds(sbias)
   call allocate_cv(gradx)
   call allocate_cv(grady)
@@ -753,16 +808,30 @@ contains
   grady=zero
 
 ! get test vector (mval)
+! call get_state_perts_ (mval(1))
   if (present(internalsv)) then
-     if (internalsv) call set_silly_(mval(1))
+     if (internalsv) then
+        do ii=1,ntlevs_ens
+          call set_silly_(sval(ii))
+        end do
+     endif
   endif
 
 ! convert from model to gsi units
-  call gsi2model_units_ad_(mval(1))
+  do ii=1,ntlevs_ens
+     call gsi2model_units_ad_(sval(ii))
+  end do
 
   if (l_hyb_ens) then
-     eval(1)=mval(1)
-     call ensctl2state_ad(epts,eval,mval(1),gradx)
+     do ii=1,ntlevs_ens
+        eval(ii)=sval(ii)
+     end do
+     call ensctl2state_ad(eval,mval(1),gradx)
+  else
+     mval(1)=sval(1)
+     do ii=2,ntlevs_ens
+        call self_add(mval(1),sval(ii))
+     end do
   endif
   call control2state_ad(mval,sbias,gradx)
 
@@ -771,7 +840,7 @@ contains
     grady=gradx
   else
     call bkerror(gradx,grady, &
-                 nsubwin,nsclen,npclen,ntclen)
+                 1,nsclen,npclen,ntclen)
     if (l_hyb_ens) then
        call bkerror_a_en(gradx,grady)
     endif
@@ -779,16 +848,24 @@ contains
 
   call control2state(grady,mval,sbias)
   if (l_hyb_ens) then
-     call ensctl2state(epts,grady,mval(1),eval)
-     mval(1)=eval(1)
+     call ensctl2state(grady,mval(1),eval)
+     do ii=1,ntlevs_ens
+        sval(ii)=eval(ii)
+     end do
+  else
+     do ii=1,ntlevs_ens
+        sval(ii)=mval(1)
+     enddo
   end if
 
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
-  call write_bundle(mval(1),bkgv_write_sv)
+  call write_bundle(sval(ntguessig),bkgv_write_sv)
 
 ! convert from gsi to model units
-  call gsi2model_units_(mval(1))
+  do ii=1,ntlevs_ens
+     call gsi2model_units_(sval(ii))
+  end do
 
 ! clean up work space
   call deallocate_cv(gradx)
@@ -798,8 +875,12 @@ contains
      do ii=ntlevs_ens,1,-1
        call deallocate_state(eval(ii))
     end do
+    deallocate(eval)
   endif
-  deallocate(eval)
+  do ii=nsubwin,1,-1
+    call deallocate_state(mval(ii))
+  end do
+  deallocate(mval)
 
   end subroutine be_sv_space1_
 !--------------------------------------------------------
@@ -881,6 +962,8 @@ contains
   end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
   subroutine final_guess_
+  if(allocated(nymd)) deallocate(nymd)
+  if(allocated(nhms)) deallocate(nhms)
   call gsiguess_final()
   end subroutine final_guess_
 end module m_gsibec
