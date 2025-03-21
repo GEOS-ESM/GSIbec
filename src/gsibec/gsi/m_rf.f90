@@ -22,8 +22,7 @@ use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
 use hybrid_ensemble_isotropic, only: load_ensemble
 use hybrid_ensemble_isotropic, only: hybens_localization_setup
-use hybrid_ensemble_parameters, only: gsi_enperts
-use hybrid_ensemble_parameters, only: gsi_destroy_ensemble
+use hybrid_ensemble_isotropic, only: destroy_ensemble
 
 use mpeu_util, only: getindex
 use mpeu_util, only: die
@@ -37,11 +36,7 @@ interface rf_unset; module procedure unset_; end interface
 
 character(len=*), parameter :: myname = 'm_rf'
 contains
-  subroutine set_ (epts,nymd,nhms)
-  implicit none
-  type(gsi_enperts) :: epts
-  integer(i_kind), intent(in) :: nymd,nhms
- 
+  subroutine set_ ()
   character(len=*), parameter :: mynmae_ = myname//'*set_'
   integer(i_kind) msig,mlat,mlon
   logical good
@@ -59,16 +54,14 @@ contains
   call prewgt(mype)
 ! If hybrid covariance
   if(l_hyb_ens) then
-     call load_ensemble(epts,nymd,nhms,-1)
-     call hybens_localization_setup(epts)
+     call load_ensemble(-1)
+     call hybens_localization_setup
   end if
   end subroutine set_
-  subroutine unset_(epts)
-  implicit none
-  type(gsi_enperts) :: epts
+  subroutine unset_
   if (l_hyb_ens) then
     call destroy_hybens_localization_parameters
-    call gsi_destroy_ensemble(epts)
+    call destroy_ensemble
   endif
   call destroy_smooth_polcas ! the set is called in prewgt - gsi typically has inconsistent set/unset
   call destroy_berror_vars

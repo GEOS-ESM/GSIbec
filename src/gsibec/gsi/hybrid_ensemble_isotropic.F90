@@ -59,6 +59,7 @@ module hybrid_ensemble_isotropic
 !   sub normal_new_factorization_rf_z     - normalize localization recursive filter (z direction)
 !   sub normal_new_factorization_rf_x     - normalize localization recursive filter (x direction)
 !   sub normal_new_factorization_rf_y     - normalize localization recursive filter (y direction)
+!   sub create_ensemble                   - allocate space for ensemble perturbations
 !   sub load_ensemble                     - read/generate ensemble perturbations
 !   sub rescale_ensemble_rh_perturbations - for internal generated perturbations only, normalize by ges q
 !   sub ensemble_forward_model            - add ensemble contribution to analysis increment
@@ -114,7 +115,9 @@ module hybrid_ensemble_isotropic
   public :: normal_new_factorization_rf_z
   public :: normal_new_factorization_rf_x
   public :: normal_new_factorization_rf_y
+  public :: create_ensemble
   public :: load_ensemble
+  public :: destroy_ensemble
   public :: rescale_ensemble_rh_perturbations
   public :: ensemble_forward_model
   public :: ensemble_forward_model_dual_res
@@ -190,7 +193,7 @@ module hybrid_ensemble_isotropic
 
 contains
 
-subroutine init_rf_z(epts,z_len)
+subroutine init_rf_z(z_len)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    init_rf_z    initialize vertical recursive filter
@@ -238,11 +241,10 @@ subroutine init_rf_z(epts,z_len)
 #endif /* USE_ALL_ORIGINAL */
   use constants, only: half,one,rd_over_cp,zero,one_tenth,ten,two
   use hybrid_ensemble_parameters, only: grd_ens
-  use hybrid_ensemble_parameters, only: gsi_enperts
+  use hybrid_ensemble_parameters, only: ps_bar
 
   implicit none
 
-  type(gsi_enperts) :: epts
   real(r_kind)   ,intent(in) :: z_len(grd_ens%nsig)
 
   integer(i_kind) k,nxy,i,ii,jj,j,l
@@ -305,17 +307,17 @@ subroutine init_rf_z(epts,z_len)
                  if (wrf_nmm_regional.or.nems_nmmb_regional.or.cmaq_regional) then
                     p_interface(k)= one_tenth* &
                           (eta1_ll(k)*pdtop_ll + &
-                           eta2_ll(k)*(ten*epts%ps_bar(ii,jj,1)-pdtop_ll-pt_ll) + &
+                           eta2_ll(k)*(ten*ps_bar(ii,jj,1)-pdtop_ll-pt_ll) + &
                            pt_ll)
                  endif
                  if (fv3_regional) then
-                    p_interface(k)=eta1_ll(k)+ eta2_ll(k)*epts%ps_bar(ii,jj,1)
+                    p_interface(k)=eta1_ll(k)+ eta2_ll(k)*ps_bar(ii,jj,1)
                  endif
                  if (twodvar_regional) then
-                    p_interface(k)=one_tenth*(eta1_ll(k)*(ten*epts%ps_bar(ii,jj,1)-pt_ll)+pt_ll)
+                    p_interface(k)=one_tenth*(eta1_ll(k)*(ten*ps_bar(ii,jj,1)-pt_ll)+pt_ll)
                  endif
                  if (wrf_mass_regional) then
-                    p_interface(k)=one_tenth*(eta1_ll(k)*(ten*epts%ps_bar(ii,jj,1)-pt_ll)+&
+                    p_interface(k)=one_tenth*(eta1_ll(k)*(ten*ps_bar(ii,jj,1)-pt_ll)+&
                                               eta2_ll(k) + pt_ll)
                  endif
                  ln_p_int(k)=log(max(p_interface(k),0.0001_r_kind))
@@ -324,7 +326,7 @@ subroutine init_rf_z(epts,z_len)
            else
 #endif /* USE_ALL_ORIGINAL  */
               do k=1,nsig+1
-                 p_interface(k)=ak5(k)+(bk5(k)*epts%ps_bar(ii,jj,1))
+                 p_interface(k)=ak5(k)+(bk5(k)*ps_bar(ii,jj,1))
                  ln_p_int(k)=log(max(p_interface(k),0.0001_r_kind))
               enddo
 #ifdef USE_ALL_ORIGINAL
@@ -1081,7 +1083,69 @@ subroutine normal_new_factorization_rf_y
   return
 end subroutine normal_new_factorization_rf_y
 
-  subroutine load_ensemble (epts,nymd,nhms,tau)
+  subroutine create_ensemble
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    create_ensemble        allocate space for ensembles
+!   prgmmr: parrish          org: np22                date: 2009-06-16
+!
+! abstract: allocate space for ensemble perturbations used with the 
+!             hybrid ensemble option.
+!
+! program history log:
+!   2009-06-16  parrish
+!   2010-02-20  parrish  modifications for dual resolution
+!   2011-02-28  parrish - introduce more complete use of gsi_bundlemod to eliminate hard-wired variables
+!   2011-08-31  todling - revisit en_perts (single-prec) in light of extended bundle
+!
+!   input argument list:
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+    use hybrid_ensemble_parameters, only: n_ens,grd_ens,ntlevs_ens
+    use hybrid_ensemble_parameters, only: nelen,en_perts,ps_bar
+
+    implicit none
+
+    type(gsi_grid)  :: grid_ens
+
+    integer(i_kind) n,istatus,m
+    character(len=*),parameter::myname_=trim(myname)//'*create_ensemble'
+
+    nelen=grd_ens%latlon11*(max(0,nc3d)*grd_ens%nsig+max(0,nc2d))
+!   create ensemble perturbations bundles (using newly added r_single capability
+
+    allocate(en_perts(n_ens,ntlevs_ens))
+    call gsi_gridcreate(grid_ens,grd_ens%lat2,grd_ens%lon2,grd_ens%nsig)
+ 
+    do m=1,ntlevs_ens
+       do n=1,n_ens
+          call gsi_bundlecreate(en_perts(n,m),grid_ens,'ensemble perts',istatus, &
+                                names2d=cvars2d,names3d=cvars3d,bundle_kind=r_single)
+          if(istatus/=0) then
+             write(6,*)trim(myname_),': trouble creating en_perts bundle'
+             call stop2(999)
+          endif
+       enddo
+    enddo
+
+
+    allocate(ps_bar(grd_ens%lat2,grd_ens%lon2,ntlevs_ens) )
+    if(debug) then
+       write(6,*)' in create_ensemble, grd_ens%latlon11,grd_ens%latlon1n,n_ens,ntlevs_ens=', &
+                                 grd_ens%latlon11,grd_ens%latlon1n,n_ens,ntlevs_ens
+       write(6,*)' in create_ensemble, total bytes allocated=',4*nelen*n_ens*ntlevs_ens
+    end if
+    return
+
+  end subroutine create_ensemble
+
+  subroutine load_ensemble (tau)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    load_ensemble    read/generate ensemble perturbations
@@ -1119,8 +1183,9 @@ end subroutine normal_new_factorization_rf_y
     use hybrid_ensemble_parameters, only: n_ens,generate_ens,grd_ens,grd_anl,ntlevs_ens, &
                                           pseudo_hybens,regional_ensemble_option,&
                                           i_en_perts_io
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: nelen,en_perts,ps_bar
     use hybrid_ensemble_parameters, only: write_ens_sprd
+    use hybrid_ensemble_parameters, only: nymd,nhms
     use gsi_enscouplermod, only: gsi_enscoupler_put_gsi_ens
     use m_mpimod, only: mype
     use get_pseudo_ensperts_mod, only: get_pseudo_ensperts_class
@@ -1132,8 +1197,6 @@ end subroutine normal_new_factorization_rf_y
 
     implicit none
 
-    type(gsi_enperts) :: epts
-    integer,intent(in) :: nymd,nhms
     integer,intent(in) :: tau
 
     type(get_pseudo_ensperts_class) :: pseudo_enspert
@@ -1144,14 +1207,12 @@ end subroutine normal_new_factorization_rf_y
     type(gsi_bundle),allocatable:: en_bar(:)
     type(gsi_bundle):: bundle_anl,bundle_ens
     type(gsi_grid)  :: grid_anl,grid_ens
-    integer(i_kind) i,j,n,ii,m,nelen
+    integer(i_kind) i,j,n,ii,m
     integer(i_kind) istatus
     real(r_kind),allocatable:: seed(:,:)
     real(r_kind),pointer,dimension(:,:)   :: cv_ps=>NULL()
     real(r_kind) sig_norm,bar_norm
     character(len=*),parameter::myname_=trim(myname)//'*load_ensemble'
-
-    nelen=epts%nelen
 
 !      create simple regular grid
 
@@ -1203,7 +1264,7 @@ end subroutine normal_new_factorization_rf_y
           do n=1,n_ens
              call generate_one_ensemble_perturbation(bundle_anl,bundle_ens,seed)
              do ii=1,nelen
-                epts%en_perts(n,m)%valuesr4(ii)=bundle_ens%values(ii)
+                en_perts(n,m)%valuesr4(ii)=bundle_ens%values(ii)
                 en_bar(m)%values(ii)=en_bar(m)%values(ii)+bundle_ens%values(ii)
              enddo
           enddo
@@ -1212,7 +1273,7 @@ end subroutine normal_new_factorization_rf_y
           call gsi_bundlegetpointer (en_bar(m),'ps' ,cv_ps ,istatus)
           do j=1,grd_ens%lon2
              do i=1,grd_ens%lat2
-                epts%ps_bar(i,j,m)=cv_ps(i,j)*bar_norm
+                ps_bar(i,j,m)=cv_ps(i,j)*bar_norm
              enddo
           enddo
        enddo
@@ -1234,16 +1295,16 @@ end subroutine normal_new_factorization_rf_y
        do m=1,ntlevs_ens
           do n=1,n_ens
              do ii=1,nelen
-                epts%en_perts(n,m)%valuesr4(ii)=(epts%en_perts(n,m)%valuesr4(ii)-en_bar(m)%values(ii)*bar_norm)*sig_norm
+                en_perts(n,m)%valuesr4(ii)=(en_perts(n,m)%valuesr4(ii)-en_bar(m)%values(ii)*bar_norm)*sig_norm
              enddo
-             call gsi_enscoupler_put_gsi_ens(grd_ens,n,m,epts%en_perts(n,m),istatus)
+             call gsi_enscoupler_put_gsi_ens(grd_ens,n,m,en_perts(n,m),istatus)
              if(istatus/=0) then
                  write(6,*)trim(myname_),': trouble writing perts'
                  call stop2(999)
              endif
           enddo
 
-          if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m)
+          if (write_ens_sprd)  call ens_spread_dualres(en_bar(m),m,nymd(m),nhms(m))
 
           call gsi_bundledestroy(en_bar(m),istatus)
           if(istatus/=0) then
@@ -1260,7 +1321,7 @@ end subroutine normal_new_factorization_rf_y
 !            read in ensembles
        if (.not.regional) then
 
-          call get_gefs_ensperts_dualres(epts,nymd,nhms,tau)
+          call get_gefs_ensperts_dualres(tau)
 
        else
 
@@ -1302,14 +1363,14 @@ end subroutine normal_new_factorization_rf_y
 !                             GEFS ensemble perturbations in TC vortex area
 !                             are replaced with TC vortex library perturbations
                 if (pseudo_hybens) then
-                   call pseudo_enspert%get_pseudo_ensperts(epts%en_perts,nelen)
+                   call pseudo_enspert%get_pseudo_ensperts(en_perts,nelen)
                 end if
              case(2)
 
 !     regional_ensemble_option = 2: ensembles are WRF NMM (HWRF) format
 
 #ifdef USE_ALL_ORIGINAL
-                call wrf_nmm_enspert%get_wrf_nmm_ensperts(epts%en_perts,nelen,region_lat_ens,region_lon_ens,epts%ps_bar)
+                call wrf_nmm_enspert%get_wrf_nmm_ensperts(en_perts,nelen,region_lat_ens,region_lon_ens,ps_bar)
 #endif /* USE_ALL_ORIGINAL */
 
              case(3)
@@ -1317,7 +1378,7 @@ end subroutine normal_new_factorization_rf_y
 !     regional_ensemble_option = 3: ensembles are ARW netcdf format.
 
 #ifdef USE_ALL_ORIGINAL
-                call wrf_mass_enspert%get_wrf_mass_ensperts(epts%en_perts,nelen,epts%ps_bar)
+                call wrf_mass_enspert%get_wrf_mass_ensperts(en_perts,nelen,ps_bar)
 #endif /* USE_ALL_ORIGINAL */
 
              case(4)
@@ -1572,7 +1633,7 @@ end subroutine normal_new_factorization_rf_y
     
   end subroutine fix_belt
 
-  subroutine rescale_ensemble_rh_perturbations(epts)
+  subroutine rescale_ensemble_rh_perturbations
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    rescale_ensemble_rh_perturbations
@@ -1599,18 +1660,16 @@ end subroutine normal_new_factorization_rf_y
     use m_kinds, only: r_kind,i_kind
     use gridmod, only: regional
     use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_anl,grd_a1,grd_e1,p_e2a,ntlevs_ens
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: en_perts
     use general_sub2grid_mod, only: general_suba2sube
     use berror, only: qvar3d
     implicit none
-
-    type(gsi_enperts) :: epts 
 
     integer(i_kind) i,j,k,n,istatus,m
     real(r_kind) qvar3d_ens(grd_ens%lat2,grd_ens%lon2,grd_ens%nsig,1)
     real(r_single),pointer,dimension(:,:,:):: w3=>NULL()
 
-    call gsi_bundlegetpointer(epts%en_perts(1,1),'q',w3,istatus)
+    call gsi_bundlegetpointer(en_perts(1,1),'q',w3,istatus)
     if(istatus/=0) then
        write(6,*)' rh variable not available, skip subroutine rescale_ensemble_rh_perturbations'
        return
@@ -1625,7 +1684,7 @@ end subroutine normal_new_factorization_rf_y
     do m=1,ntlevs_ens
 !$omp parallel do schedule(dynamic,1) private(n,i,j,k,w3,istatus)
        do n=1,n_ens
-          call gsi_bundlegetpointer(epts%en_perts(n,m),'q',w3,istatus)
+          call gsi_bundlegetpointer(en_perts(n,m),'q',w3,istatus)
           if(istatus/=0) then
              write(6,*)' error retrieving pointer to rh variable for ensemble number ',n
              call stop2(999)
@@ -1643,7 +1702,52 @@ end subroutine normal_new_factorization_rf_y
  
   end subroutine rescale_ensemble_rh_perturbations
 
-  subroutine ensemble_forward_model(cvec,a_en,epts,ibin)
+  subroutine destroy_ensemble
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    destroy_ensemble       deallocate space for ensembles
+!   prgmmr: parrish          org: np22                date: 2009-06-16
+!
+! abstract: deallocate space for ensemble perturbations used with the 
+!             hybrid ensemble option.
+!
+! program history log:
+!   2009-06-16  parrish
+!   2011-02-28  parrish, replace specific ensemble perturbation arrays with pseudo-bundle en_perts array
+!
+!   input argument list:
+!
+!   output argument list:
+!
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!
+!$$$
+    use hybrid_ensemble_parameters, only: l_hyb_ens,n_ens,ntlevs_ens
+    use hybrid_ensemble_parameters, only: en_perts,ps_bar
+    implicit none
+
+    integer(i_kind) istatus,n,m
+
+    if(l_hyb_ens) then
+       do m=1,ntlevs_ens
+          do n=1,n_ens
+             call gsi_bundleunset(en_perts(n,m),istatus)
+             if(istatus/=0) then
+                write(6,*)'in destroy_ensemble: trouble destroying en_perts bundle'
+                call stop2(999)
+             endif
+          enddo
+       enddo
+       deallocate(ps_bar)
+       deallocate(en_perts)
+    end if
+    return
+
+  end subroutine destroy_ensemble
+
+  subroutine ensemble_forward_model(cvec,a_en,ibin)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensemble_forward_model  add ensemble part to anl vars
@@ -1681,13 +1785,12 @@ end subroutine normal_new_factorization_rf_y
 !
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: en_perts
     use constants, only: zero
 
     implicit none
     type(gsi_bundle),intent(inout) :: cvec
     type(gsi_bundle),intent(in)    :: a_en(n_ens)
-    type(gsi_enperts),intent(in)   :: epts
     integer,intent(in)             :: ibin
 
     character(len=*),parameter :: myname_=trim(myname)//'*ensemble_forward_model'
@@ -1735,7 +1838,7 @@ end subroutine normal_new_factorization_rf_y
              do j=1,jm
                 do i=1,im
                    cvec%r3(ipic)%q(i,j,k)=cvec%r3(ipic)%q(i,j,k) &
-                         +a_en(n)%r3(ipx)%q(i,j,k)*epts%en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
+                         +a_en(n)%r3(ipx)%q(i,j,k)*en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
                 enddo
              enddo
           enddo
@@ -1766,7 +1869,7 @@ end subroutine normal_new_factorization_rf_y
                    do k=1,km_tmp
                       do i=1,im
                          cvec%r2(ipic)%q(i,j)=cvec%r2(ipic)%q(i,j) &
-                            +a_en(n)%r3(ipx)%q(i,j,k)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
+                            +a_en(n)%r3(ipx)%q(i,j,k)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
                       enddo
                    enddo
                 enddo
@@ -1778,7 +1881,7 @@ end subroutine normal_new_factorization_rf_y
                 do j=1,jm
                    do i=1,im
                       cvec%r2(ipic)%q(i,j)=cvec%r2(ipic)%q(i,j) &
-                         +a_en(n)%r3(ipx)%q(i,j,1)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)
+                         +a_en(n)%r3(ipx)%q(i,j,1)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)
                    enddo
                 enddo
              enddo ! enddo n_ens
@@ -1790,7 +1893,7 @@ end subroutine normal_new_factorization_rf_y
 
   end subroutine ensemble_forward_model
 
-  subroutine ensemble_forward_model_dual_res(cvec,a_en,epts,ibin)
+  subroutine ensemble_forward_model_dual_res(cvec,a_en,ibin)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensemble_forward_model_dual_res  use for dualres option
@@ -1832,7 +1935,7 @@ end subroutine normal_new_factorization_rf_y
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
     use hybrid_ensemble_parameters, only: grd_ens,grd_anl,p_e2a
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: en_perts
     use general_sub2grid_mod, only: general_sube2suba
     use gridmod,only: regional
     use constants, only: zero
@@ -1840,7 +1943,6 @@ end subroutine normal_new_factorization_rf_y
 
     type(gsi_bundle),intent(inout) :: cvec
     type(gsi_bundle),intent(in)    :: a_en(n_ens)
-    type(gsi_enperts),intent(in)   :: epts
     integer,intent(in)             :: ibin
 
     character(len=*),parameter::myname_=trim(myname)//'*ensemble_forward_model_dual_res'
@@ -1896,7 +1998,7 @@ end subroutine normal_new_factorization_rf_y
              do j=1,jm
                 do i=1,im
                    work_ens%r3(ipic)%q(i,j,k)=work_ens%r3(ipic)%q(i,j,k) &
-                      +a_en(n)%r3(ipx)%q(i,j,k)*epts%en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
+                      +a_en(n)%r3(ipx)%q(i,j,k)*en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
                 enddo
              enddo
           enddo
@@ -1926,7 +2028,7 @@ end subroutine normal_new_factorization_rf_y
                    do j=1,jm
                       do i=1,im
                          work_ens%r2(ipic)%q(i,j)=work_ens%r2(ipic)%q(i,j) &
-                            +a_en(n)%r3(ipx)%q(i,j,k)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
+                            +a_en(n)%r3(ipx)%q(i,j,k)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
                       enddo
                    enddo
                 enddo
@@ -1938,7 +2040,7 @@ end subroutine normal_new_factorization_rf_y
                 do j=1,jm
                    do i=1,im
                       work_ens%r2(ipic)%q(i,j)=work_ens%r2(ipic)%q(i,j) &
-                         +a_en(n)%r3(ipx)%q(i,j,1)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)
+                         +a_en(n)%r3(ipx)%q(i,j,1)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)
                    enddo
                 enddo
              enddo ! enddo n_ens
@@ -1968,7 +2070,7 @@ end subroutine normal_new_factorization_rf_y
 
   end subroutine ensemble_forward_model_dual_res
 
-  subroutine ensemble_forward_model_ad(cvec,a_en,epts,ibin)
+  subroutine ensemble_forward_model_ad(cvec,a_en,ibin)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensemble_forward_model  add ensemble part to anl vars
@@ -2006,12 +2108,11 @@ end subroutine normal_new_factorization_rf_y
 !$$$
 
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: en_perts
     implicit none
 
     type(gsi_bundle),intent(inout) :: cvec
     type(gsi_bundle),intent(inout) :: a_en(n_ens)
-    type(gsi_enperts),intent(in)   :: epts
     integer,intent(in)             :: ibin
 
     character(len=*),parameter :: myname_=trim(myname)//'*ensemble_forward_model_ad'
@@ -2052,7 +2153,7 @@ end subroutine normal_new_factorization_rf_y
              do j=1,jm
                 do i=1,im
                       a_en(n)%r3(ipx)%q(i,j,k)=a_en(n)%r3(ipx)%q(i,j,k) &
-                            +cvec%r3(ipic)%q(i,j,k)*epts%en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
+                            +cvec%r3(ipic)%q(i,j,k)*en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
                 enddo
              enddo
           enddo
@@ -2074,7 +2175,7 @@ end subroutine normal_new_factorization_rf_y
                    do j=1,jm
                       do i=1,im
                          a_en(n)%r3(ipx)%q(i,j,k)=a_en(n)%r3(ipx)%q(i,j,k) &
-                            +cvec%r2(ipic)%q(i,j)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
+                            +cvec%r2(ipic)%q(i,j)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
                       enddo
                    enddo
                 enddo
@@ -2084,7 +2185,7 @@ end subroutine normal_new_factorization_rf_y
                 do j=1,jm
                    do i=1,im
                       a_en(n)%r3(ipx)%q(i,j,1)=a_en(n)%r3(ipx)%q(i,j,1) &
-                         +cvec%r2(ipic)%q(i,j)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)
+                         +cvec%r2(ipic)%q(i,j)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)
                    enddo
                 enddo
  
@@ -2094,7 +2195,7 @@ end subroutine normal_new_factorization_rf_y
     return
   end subroutine ensemble_forward_model_ad
 
-  subroutine ensemble_forward_model_ad_dual_res(cvec,a_en,epts,ibin)
+  subroutine ensemble_forward_model_ad_dual_res(cvec,a_en,ibin)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensemble_forward_model_ad_dual_res  use for dualres option
@@ -2137,7 +2238,7 @@ end subroutine normal_new_factorization_rf_y
 !$$$
     use hybrid_ensemble_parameters, only: n_ens,pwgtflg,pwgt
     use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_anl,p_e2a
-    use hybrid_ensemble_parameters, only: gsi_enperts
+    use hybrid_ensemble_parameters, only: en_perts
     use general_sub2grid_mod, only: general_sube2suba_ad
     use gridmod,only: regional
     use constants, only: zero
@@ -2145,7 +2246,6 @@ end subroutine normal_new_factorization_rf_y
 
     type(gsi_bundle),intent(inout) :: cvec
     type(gsi_bundle),intent(inout) :: a_en(n_ens)
-    type(gsi_enperts),intent(in)   :: epts
     integer,intent(in)             :: ibin
 
     character(len=*),parameter::myname_=trim(myname)//'*ensemble_forward_model_ad_dual_res'
@@ -2209,7 +2309,7 @@ end subroutine normal_new_factorization_rf_y
              do j=1,jm
                 do i=1,im
                    a_en(n)%r3(ipx)%q(i,j,k)=a_en(n)%r3(ipx)%q(i,j,k) &
-                            +work_ens%r3(ipic)%q(i,j,k)*epts%en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
+                            +work_ens%r3(ipic)%q(i,j,k)*en_perts(n,ibin)%r3(ipic)%qr4(i,j,k)
                 enddo
              enddo
           enddo
@@ -2231,7 +2331,7 @@ end subroutine normal_new_factorization_rf_y
                    do j=1,jm
                       do i=1,im
                          a_en(n)%r3(ipx)%q(i,j,k)=a_en(n)%r3(ipx)%q(i,j,k) &
-                            +work_ens%r2(ipic)%q(i,j)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
+                            +work_ens%r2(ipic)%q(i,j)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)*pwgt(i,j,k)
                       enddo
                    enddo
                 enddo
@@ -2241,7 +2341,7 @@ end subroutine normal_new_factorization_rf_y
                 do j=1,jm
                    do i=1,im
                       a_en(n)%r3(ipx)%q(i,j,1)=a_en(n)%r3(ipx)%q(i,j,1) &
-                         +work_ens%r2(ipic)%q(i,j)*epts%en_perts(n,ibin)%r2(ipic)%qr4(i,j)
+                         +work_ens%r2(ipic)%q(i,j)*en_perts(n,ibin)%r2(ipic)%qr4(i,j)
                    enddo
                 enddo
 
@@ -2651,7 +2751,7 @@ subroutine sqrt_beta_s_mult_bundle(grady)
            if(sst_staticB) then
               cycle
            else
-              if(j==1.and.mype==0) write(6,*) myname_, ': scale static SST B-error by ', sqrt_beta_s(1)
+              if(mype==0) write(6,*) myname_, ': scale static SST B-error by ', sqrt_beta_s(1)
            endif
         endif
         do i=1,lat2
@@ -3949,7 +4049,7 @@ subroutine hybens_grid_setup
   return
 end subroutine hybens_grid_setup
 
-subroutine hybens_localization_setup(epts)
+subroutine hybens_localization_setup
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    hybens_localization_setup   setup for hybrid localization
@@ -3987,13 +4087,10 @@ subroutine hybens_localization_setup(epts)
    use hybrid_ensemble_parameters, only: readin_beta,beta_s,beta_e,beta_s0,sqrt_beta_s,sqrt_beta_e
    use hybrid_ensemble_parameters, only: readin_localization,create_hybens_localization_parameters, &
                                          vvlocal,s_ens_h,s_ens_hv,s_ens_v,s_ens_vv
-   use hybrid_ensemble_parameters, only: gsi_enperts
    use gsi_io, only: verbose
    use guess_grids, only: gsiguess_get_ref_gesprs
 
    implicit none
-
-   type(gsi_enperts) :: epts
 
    integer(i_kind),parameter   :: lunin = 47
    character(len=40),parameter :: fname = 'hybens_info'
@@ -4091,7 +4188,7 @@ subroutine hybens_localization_setup(epts)
 
    ! Set up localization filters
 
-   call init_rf_z(epts,s_ens_vv)
+   call init_rf_z(s_ens_vv)
    call normal_new_factorization_rf_z
 
    if ( regional ) then ! convert s_ens_h from km to grid units.
@@ -5084,7 +5181,6 @@ subroutine setup_pwgt
 !$$$ end documentation block
 
    use m_kinds, only: r_kind,i_kind
-   use mpeu_util, only: die
    use constants,only: zero,one
    use m_mpimod, only: mype,gsi_mpi_comm_world,mpi_rtype,mpi_sum
    use gridmod, only: lat2,lon2,nsig,regional
@@ -5094,7 +5190,7 @@ subroutine setup_pwgt
 
    implicit none
 
-   character(len=*),parameter :: myname_=myname//'*setup_pwgt'
+   character(len=*),parameter :: myname='setup_pwgt::'
    integer(i_kind) :: i,j,k
    real(r_kind) :: tmp_sum
    real(r_kind),allocatable,dimension(:,:,:,:) :: wgvk_ens,wgvk_anl
@@ -5139,7 +5235,6 @@ subroutine setup_pwgt
             write(6,*) 'SETUP_PWGT: routine not built to load pwgt for global application'
             write(6,*) 'SETUP_PWGT: using defaults instead'
          endif
-         call die(myname_,': feature not implemented for GLOBAL, abort')
 
       endif ! if ( regional )
 
@@ -5150,14 +5245,11 @@ subroutine setup_pwgt
 end subroutine setup_pwgt
 
 #ifdef USE_ALL_ORIGINAL
-subroutine ens_iterate_update(nymd,nhms,jiter)
+subroutine ens_iterate_update(jiter)
   use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
   use hybrid_ensemble_parameters, only: bens_recenter
-  use hybrid_ensemble_parameters, only: gsi_create_ensemble
-  use hybrid_ensemble_parameters, only: gsi_destroy_ensemble
   use m_revBens, only: update_spread
   implicit none
-  integer(i_kind),intent(in) :: nymd,nhms
   integer(i_kind),intent(in) :: jiter
 
   if (jiter<2) return
@@ -5165,15 +5257,15 @@ subroutine ens_iterate_update(nymd,nhms,jiter)
 ! unload ensemble
   call destroy_hybens_localization_parameters
   call hybens_localization_unsetup
-  call gsi_destroy_ensemble
+  call destroy_ensemble
 
 ! set recentering of ensemble around analysis
   bens_recenter = .true.   ! use alternative mean as ensemble mean to calc Bens
   update_spread = .true.   ! use analysis as recenter field, updating spread on the fly
 
 ! reload ensemble but this time use analysis for recentering
-  call gsi_create_ensemble
-  call load_ensemble(nymd,nhms,-1)
+  call create_ensemble
+  call load_ensemble(-1)
   call hybens_localization_setup
 
 end subroutine ens_iterate_update

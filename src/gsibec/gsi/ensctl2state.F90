@@ -1,4 +1,4 @@
-subroutine ensctl2state(epts,xhat,mval,eval)
+subroutine ensctl2state(xhat,mval,eval)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    ensctl2state
@@ -30,7 +30,6 @@ use m_kinds, only: r_kind,i_kind
 use control_vectors, only: control_vector,cvars3d
 use gsi_4dvar, only: ibin_anl
 use hybrid_ensemble_parameters, only: uv_hyb_ens,dual_res,ntlevs_ens,q_hyb_ens
-use hybrid_ensemble_parameters, only: gsi_enperts
 use hybrid_ensemble_isotropic, only: ensemble_forward_model,ensemble_forward_model_dual_res
 use gsi_bundlemod, only: gsi_bundlecreate
 use gsi_bundlemod, only: gsi_bundle
@@ -53,7 +52,6 @@ use gridmod, only: nems_nmmb_regional
 implicit none
 
 ! Declare passed variables
-type(gsi_enperts)   , intent(inout) :: epts
 type(control_vector), intent(in   ) :: xhat
 type(gsi_bundle)    , intent(in   ) :: mval
 type(gsi_bundle)    , intent(inout) :: eval(ntlevs_ens)
@@ -171,9 +169,9 @@ do jj=1,ntlevs_ens
 !  For 4densvar, this is the "3D/Time-invariant contribution from static B"
 
    if(dual_res) then
-      call ensemble_forward_model_dual_res(wbundle_c,xhat%aens(1,:),epts,jj)
+      call ensemble_forward_model_dual_res(wbundle_c,xhat%aens(1,:),jj)
    else
-      call ensemble_forward_model(wbundle_c,xhat%aens(1,:),epts,jj)
+      call ensemble_forward_model(wbundle_c,xhat%aens(1,:),jj)
    end if
 
 !  Get pointers to required state variables
@@ -181,7 +179,7 @@ do jj=1,ntlevs_ens
    call gsi_bundlegetpointer (eval(jj),'tv'  ,sv_tv,  istatus)
    call gsi_bundlegetpointer (eval(jj),'q'   ,sv_q ,  istatus)
    call gsi_bundlegetpointer (eval(jj),'prse',sv_prse,istatus)
-   call gsi_bundlegetpointer (wbundle_c,'q'  ,cv_rh ,istatus)
+   call gsi_bundlegetpointer (wbundle_c,'q'  ,cv_rh  ,istatus)
    call gsi_bundlegetpointer (eval(jj),'u'   ,sv_u,   istatus)
    call gsi_bundlegetpointer (eval(jj),'v'   ,sv_v,   istatus)
    call gsi_bundlegetpointer (eval(jj),'tsen',sv_tsen,istatus)
