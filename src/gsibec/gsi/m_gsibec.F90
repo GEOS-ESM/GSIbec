@@ -193,7 +193,6 @@ contains
       allocate(nymd(ntlevs_ens),nhms(ntlevs_ens))
       nymd = inymd
       nhms = inhms
-      nfldsig=ntlevs_ens 
       ntguessig=(ntlevs_ens+1)/2
   endif
 
