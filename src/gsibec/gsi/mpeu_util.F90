@@ -1406,7 +1406,7 @@ do while( i+istp <= ln_tmpl )   ! A loop over all tokens in (tmpl)
         write(sbuf,'(i2.2)') ie2
         kstp=2
       case("3")
-        write(sbuf,'(i3.4)') ie3
+        write(sbuf,'(i3.3)') ie3
         kstp=3
       case("4")
         write(sbuf,'(i4.4)') ie4
