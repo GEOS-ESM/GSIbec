@@ -176,10 +176,15 @@ contains
   if (present(befile)) then
      call befname_(befile,0)
   endif
-  call gsimain_initialize(nmlfile=nmlfile)
 
   nfldsig=1 
   ntguessig=1
+  if (present(inymd) .and. present(inhms)) then
+      nfldsig=size(inymd) 
+  endif
+
+  call gsimain_initialize(nfldsig,nmlfile=nmlfile)
+
   if (present(inymd) .and. present(inhms)) then
       if (size(inymd)/=ntlevs_ens) then
          print *, 'nymd,ntlevs ', size(inymd), ntlevs_ens

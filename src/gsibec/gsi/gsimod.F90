@@ -69,8 +69,6 @@
   use tendsmod, only: create_ges_tendencies
   use tendsmod, only: destroy_ges_tendencies
 
-  use guess_grids, only: nfldsig
-
   use hybrid_ensemble_parameters,only : l_hyb_ens,uv_hyb_ens,aniso_a_en,generate_ens,&
                          n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test,oz_univ_static,&
                          regional_ensemble_option,merge_two_grid_ensperts, &
@@ -497,7 +495,7 @@
 
 ! ! INTERFACE:
 
-  subroutine gsimain_initialize_(nmlfile)
+  subroutine gsimain_initialize_(nfldsig,nmlfile)
 
 !*************************************************************
 ! Begin gsi code
@@ -505,10 +503,11 @@
   use gsi_fixture_GEOS, only: config_GEOS => fixture_config
   use gsi_fixture_GFS,  only: config_GFS  => fixture_config
   implicit none
+  integer,optional,intent(in):: nfldsig
   character(len=*),optional,intent(in):: nmlfile
 
   character(len=*),parameter :: myname_=myname//'*gsimain_initialize'
-  integer:: ier,ios,lendian_in
+  integer:: ier,ios,lendian_in,nfldsig_
   logical:: flag
   logical:: already_init_mpi
   real(r_kind):: varqc_max,c_varqc_new
@@ -519,6 +518,10 @@
      thisrc = trim(nmlfile)
   else
      thisrc = gsimain_rc
+  endif
+  nfldsig_ = 1
+  if (present(nfldsig)) then
+    nfldsig_ = nfldsig
   endif
 
 ! Read in user specification of state and control variables
@@ -625,7 +628,7 @@
 ! Initialize variables, create/initialize arrays
   lendian_in = -1
   call create_ges_tendencies(tendsflag,thisrc)
-  call create_ges_derivatives(switch_on_derivatives,nfldsig)
+  call create_ges_derivatives(switch_on_derivatives,nfldsig_)
   call init_reg_glob_ll(mype,lendian_in)
   call init_grid_vars(jcap,npe,cvars3d,cvars2d,nrf_var,mype)
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
