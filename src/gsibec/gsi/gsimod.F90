@@ -82,9 +82,11 @@
 
   use gsi_io, only: init_io, verbose
 
-  use mod_vtrans, only: nvmodes_keep,init_vtrans
+  use mod_vtrans, only: nvmodes_keep,init_vtrans,destroy_vtrans
   use mod_strong, only: reg_tlnmc_type,l_tlnmc,nstrong,tlnmc_option,&
-       period_max,period_width,init_strongvars,baldiag_full,baldiag_inc
+       period_max,period_width,baldiag_full,baldiag_inc, &
+       init_strongvars ! RT: this needs attention
+  use turblmod, only: create_turblvars
 
   implicit none
 
@@ -684,13 +686,14 @@
      if(mype==0)then
        write(6,*)' pseudo-q2 = ', pseudo_q2, ' qoption = ', qoption
        write(6,*)' pseudo-q2 must be used together w/ qoption=2 only, aborting.'
-       call die(myname_,'consistency(q2)',999)  
      endif
+     call die(myname_,'consistency(q2)',999)  
   endif
 
   if (qoption==2.or.l_tlnmc) then
      tendsflag =.true.
      switch_on_derivatives = .true.
+     if (mype==0) write(6,*)'GSIMOD:  tendencies and derivatives are on'
   endif
 
 ! Initialize variables, create/initialize arrays
@@ -702,6 +705,9 @@
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
                                    dvars2d,dvars3d)
   call init_general_commvars
+  if (tendsflag) then
+     call create_turblvars()
+  endif
 
   if(mype==0)then
     write(6,*) myname_, ': Complete'
@@ -805,6 +811,7 @@
   integer :: ier
 ! Deallocate arrays
 
+  call destroy_vtrans
   call destroy_ges_tendencies
   call destroy_ges_derivatives
 ! call final_reg_glob_ll ! if ever regional

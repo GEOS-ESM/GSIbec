@@ -327,10 +327,14 @@ contains
 
 !    allocate variables used in vertical mode transformations:
 
-    allocate(depths(nvmodes_keep),speeds(nvmodes_keep))
-    allocate(vmodes(nsig,nvmodes_keep),dualmodes(nsig,nvmodes_keep))
-    allocate(phihat2t(nsig,nvmodes_keep),phihat2p(nvmodes_keep))
-    allocate(p2phihat(nvmodes_keep),t2phihat(nsig,nvmodes_keep))
+    if(.not.allocated(depths)) allocate(depths(nvmodes_keep))
+    if(.not.allocated(speeds)) allocate(speeds(nvmodes_keep))
+    if(.not.allocated(vmodes)) allocate(vmodes(nsig,nvmodes_keep))
+    if(.not.allocated(dualmodes)) allocate(dualmodes(nsig,nvmodes_keep))
+    if(.not.allocated(phihat2t)) allocate(phihat2t(nsig,nvmodes_keep))
+    if(.not.allocated(phihat2p)) allocate(phihat2p(nvmodes_keep))
+    if(.not.allocated(p2phihat)) allocate(p2phihat(nvmodes_keep))
+    if(.not.allocated(t2phihat)) allocate(t2phihat(nsig,nvmodes_keep))
 
 if(mype==workpe) then    ! BEGIN MYPE=workpe SECTION !!!!!!!!!!!!!
 
@@ -373,8 +377,10 @@ if(mype==workpe) then    ! BEGIN MYPE=workpe SECTION !!!!!!!!!!!!!
 
 !     next get eigenvalues and eigenvectors.
 
-   allocate(swww(nvmodes_keep),swwwd(nvmodes_keep))
-   allocate(szzz(nsig,nvmodes_keep),szzzd(nsig,nvmodes_keep))
+   if(.not.allocated(swww)) allocate(swww(nvmodes_keep))
+   if(.not.allocated(swwwd)) allocate(swwwd(nvmodes_keep))
+   if(.not.allocated(szzz)) allocate(szzz(nsig,nvmodes_keep))
+   if(.not.allocated(szzzd)) allocate(szzzd(nsig,nvmodes_keep))
    call special_eigvv(qmat,hmat,smat,nsig,swww,szzz,swwwd,szzzd,nvmodes_keep)
 
    do k=1,nvmodes_keep

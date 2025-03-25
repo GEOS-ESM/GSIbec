@@ -14,8 +14,9 @@ use gsi_metguess_mod, only: gsi_metguess_bundle
 use gsi_metguess_mod, only: gsi_metguess_get
 use gsi_metguess_mod, only: gsi_metguess_create_grids
 use gsi_metguess_mod, only: gsi_metguess_destroy_grids
-use tendsmod, only: create_ges_tendencies
-use derivsmod, only: create_ges_derivatives
+use mod_vtrans, only: nvmodes_keep,create_vtrans
+use mod_strong, only: l_tlnmc
+use strong_fast_global_mod, only: init_strongvars
 implicit none
 private
 !
@@ -229,6 +230,15 @@ subroutine bkgcov_init_(need)
   logical, save :: init_pass = .true.
   call other_set_(need=need)  ! a little out of place, but ...
   call compute_derived(mype,init_pass) ! this belongs in a state set
+  if (l_tlnmc .and. nvmodes_keep>0) then
+     call create_vtrans(mype)
+!    if(regional) then
+!       if(reg_tlnmc_type==1) call zrnmi_initialize(mype)
+!       if(reg_tlnmc_type==2) call fmg_initialize_e(mype)
+!    else
+        call init_strongvars(mype)
+!    end if
+  end if
   init_pass = .false.
   gesgrid_initialized_ = .true.
 end subroutine bkgcov_init_
