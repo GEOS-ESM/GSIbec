@@ -115,6 +115,8 @@ module turblmod
 !m  parameter( eps_m   = 0.00000002_r_kind )
   parameter( eps_m   = 0.02_r_kind )
 
+  logical, save :: turbl_initialized_=.false. 
+
 contains
 
   subroutine init_turbl
@@ -174,6 +176,7 @@ contains
     implicit none
     
     if(.not. use_pbl)return
+    if(turbl_initialized_) return
     allocate(dudz (lat2,lon2,nsig_hlf) )
     allocate(dvdz (lat2,lon2,nsig_hlf) )
     allocate(dodz (lat2,lon2,nsig_hlf) )
@@ -192,6 +195,7 @@ contains
     allocate(lmix (lat2,lon2,nsig_hlf) )
     allocate(ri_int(lat2,lon2,nsig_hlf) )
     allocate(kar0my20(lat2,lon2) )
+    turbl_initialized_ = .true.
     
     return
   end subroutine create_turblvars
@@ -220,6 +224,7 @@ contains
     implicit none
 
     if(.not. use_pbl)return
+    if(.not. turbl_initialized_)return
     deallocate(dudz  )
     deallocate(dvdz  )
     deallocate(dodz  )
@@ -238,6 +243,7 @@ contains
     deallocate(lmix  )
     deallocate(kar0my20 )
     deallocate(ri_int )
+    turbl_initialized_ = .false.
 
     return
   end subroutine destroy_turblvars

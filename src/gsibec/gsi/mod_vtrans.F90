@@ -116,7 +116,7 @@ contains
 
   end subroutine init_vtrans
 
-  subroutine create_vtrans(mype)
+  subroutine create_vtrans(mype,ntguessig)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    create_vtrans   get vertical functions for dynamic constraint
@@ -207,7 +207,6 @@ contains
     use constants,only: zero,one,one_tenth,ten
     use gridmod,only: lat2,lon2,nsig,nlat,nlon
     use m_mpimod,only: mpi_rtype,gsi_mpi_comm_world,ierror,mpi_integer
-    use guess_grids, only: ntguessig
     use general_sub2grid_mod, only: general_sub2grid
     use general_commvars_mod, only: g1
     use gsi_metguess_mod, only: gsi_metguess_bundle
@@ -218,6 +217,7 @@ contains
 
 !   Declare passed variables
     integer(i_kind),intent(in   ) :: mype
+    integer(i_kind),intent(in   ) :: ntguessig
 
 !   Declare local variables
     character(len=*),parameter::myname_=myname//'*create_vtrans'

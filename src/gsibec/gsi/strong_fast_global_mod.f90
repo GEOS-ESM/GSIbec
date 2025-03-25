@@ -101,6 +101,7 @@ module strong_fast_global_mod
   integer(i_kind),allocatable,dimension(:,:)::info_send_ew2sd,info_recv_ew2sd
   integer(i_kind),allocatable,dimension(:,:)::info_send,info_recv
 
+  logical, save :: initialized_ = .false.
 contains
 
 subroutine init_strongvars(mype)
@@ -131,6 +132,7 @@ subroutine init_strongvars(mype)
 
   integer(i_kind),intent(in   ) :: mype
 
+  if(initialized_) return
   allocate(mode_list(3,nlat*nvmodes_keep),mmode_list(5,(sp_a%jcap+1)*nvmodes_keep))
   call inmi_coupler_sd2ew0(mype)
   call inmi_coupler_ew2ns0(mype)
@@ -138,6 +140,7 @@ subroutine init_strongvars(mype)
   call inmi_coupler_sd2ew1(mype)
   call inmi_coupler_ew2ns1(mype)
   call inmi_coupler_ew2sd1(mype)
+  initialized_ = .true.
 
   return
 end subroutine init_strongvars

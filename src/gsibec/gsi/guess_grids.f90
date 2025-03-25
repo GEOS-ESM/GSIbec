@@ -231,7 +231,7 @@ subroutine bkgcov_init_(need)
   call other_set_(need=need)  ! a little out of place, but ...
   call compute_derived(mype,init_pass) ! this belongs in a state set
   if (l_tlnmc .and. nvmodes_keep>0) then
-     call create_vtrans(mype)
+     call create_vtrans(mype,ntguessig)
 !    if(regional) then
 !       if(reg_tlnmc_type==1) call zrnmi_initialize(mype)
 !       if(reg_tlnmc_type==2) call fmg_initialize_e(mype)
