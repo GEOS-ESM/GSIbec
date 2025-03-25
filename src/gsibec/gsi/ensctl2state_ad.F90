@@ -40,9 +40,11 @@ use gsi_bundlemod, only : self_add
 use constants, only: zero,max_varname_length
 use mpeu_util, only: getindex
 use gsi_metguess_mod, only: gsi_metguess_get
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
 use balmod, only: strong_bk_ad
 use mod_strong, only: tlnmc_option
+#endif /* TLNMC */
+#ifdef USE_ALL_ORIGINAL
 use cwhydromod, only: cw2hydro_ad
 use cwhydromod, only: cw2hydro_ad_hwrf
 use timermod, only: timer_ini,timer_fnl
@@ -155,10 +157,10 @@ endif
 do jj=1,ntlevs_ens
 
 ! If calling TLNMC, already have u,v (so set last argument to true)
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
    do_tlnmc = lstrong_bk_vars .and. ( (tlnmc_option==3) .or. &
             (jj==ibin_anl .and. tlnmc_option==2))  
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
    wbundle_c%values=zero
 
@@ -176,7 +178,7 @@ do jj=1,ntlevs_ens
 !  Adjoint of consistency for sensible temperature, calculate sensible temperature
    if(do_tv_to_tsen_ad) call tv_to_tsen_ad(rv_tv,rv_q,rv_tsen)
 
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
    if(do_tlnmc) then
 
       ! Adjoint to convert ps to 3-d pressure
@@ -187,7 +189,7 @@ do jj=1,ntlevs_ens
       call strong_bk_ad(rv_u,rv_v,rv_ps,rv_tv,.true.)
 
    end if
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
    call self_add(mval,eval(jj))
 
