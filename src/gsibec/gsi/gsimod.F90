@@ -82,6 +82,12 @@
 
   use gsi_io, only: init_io, verbose
 
+  use mod_vtrans, only: nvmodes_keep,init_vtrans,destroy_vtrans
+  use mod_strong, only: reg_tlnmc_type,l_tlnmc,nstrong,tlnmc_option,&
+       period_max,period_width,baldiag_full,baldiag_inc, &
+       init_strongvars ! RT: this needs attention
+  use turblmod, only: create_turblvars
+
   implicit none
 
   private
@@ -408,6 +414,31 @@
 	bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
         simcv,bkgv_write_cv,bkgv_write_sv
 
+! STRONGOPTS (strong dynamic constraint)
+!     reg_tlnmc_type -  =1 for 1st version of regional strong constraint
+!                       =2 for 2nd version of regional strong constraint
+!     nstrong  - if > 0, then number of iterations of implicit normal mode initialization
+!                   to apply for each inner loop iteration
+!     period_max     - cutoff period for gravity waves included in implicit normal mode
+!                    initialization (units = hours)
+!     period_width   - defines width of transition zone from included to excluded gravity waves
+!     period_max - cutoff period for gravity waves included in implicit normal mode
+!                   initialization (units = hours)
+!     period_width - defines width of transition zone from included to excluded gravity waves
+!     nvmodes_keep - number of vertical modes to use in implicit normal mode initialization
+!     baldiag_full
+!     baldiag_inc
+!     tlnmc_option : integer flag for strong constraint (various capabilities for hybrid)
+!                   =0: no TLNMC
+!                   =1: TLNMC for 3DVAR mode
+!                   =2: TLNMC on total increment for single time level only (for 3D EnVar)
+!                       or if 4D EnVar mode, TLNMC applied to increment in center of window
+!                   =3: TLNMC on total increment over all time levels (if in 4D EnVar mode)
+!                   =4: TLNMC on static contribution to increment ONLY for any EnVar mode
+
+  namelist/strongopts/tlnmc_option, &
+                      nstrong,period_max,period_width,nvmodes_keep, &
+                      baldiag_full,baldiag_inc
 
 ! HYBRID_ENSEMBLE (parameters for use with hybrid ensemble option)
 !     l_hyb_ens     - if true, then turn on hybrid ensemble option
@@ -540,6 +571,8 @@
   call init_grid
   call init_compact_diffs
   call init_smooth_polcas
+  call init_strongvars
+  call init_vtrans
   call init_hybrid_ensemble_parameters
   call set_fgrid2agrid
   call init_4dvar
@@ -560,6 +593,13 @@
   open(11,file=thisrc)
   read(11,bkgerr,iostat=ios)
   if(ios/=0) call die(myname_,'read(bkgerr)',ios)
+  close(11)
+
+  open(11,file=thisrc)
+  read(11,strongopts,iostat=ios)
+  if(ios/=0) then
+    call die(myname_,'read(strongopts)',ios)
+  endif
   close(11)
 
   open(11,file=thisrc)
@@ -610,19 +650,50 @@
      write(6,hybrid_ensemble)
   endif
 
+! Consistency check for TLNMC options
+  if(reg_tlnmc_type>0) then
+     call die(myname_,'regional optional not available',999)  
+  endif
+  if (tlnmc_option>=2 .and. tlnmc_option<=4) then
+     if (.not.l_hyb_ens) then
+     if(mype==0) write(6,*)' GSIMOD: inconsistent set of options for Hybrid/EnVar & TLNMC = ',l_hyb_ens,tlnmc_option
+     if(mype==0) write(6,*)' GSIMOD: resetting tlnmc_option to 1 for 3DVAR mode'
+     tlnmc_option=1
+     end if
+  else if (tlnmc_option<0 .or. tlnmc_option>4) then
+     if(mype==0) write(6,*)' GSIMOD: This option does not yet exist for tlnmc_option: ',tlnmc_option
+     if(mype==0) write(6,*)' GSIMOD: Reset to default 0'
+     tlnmc_option=0
+  end if
+  if (tlnmc_option>0 .and. tlnmc_option<5) then
+     l_tlnmc=.true.
+     if(mype==0) write(6,*)' GSIMOD: valid TLNMC option chosen, setting l_tlnmc logical to true'
+  end if
+
+! If strong constraint is turned off, force other strong constraint variables to zero
+  if ((.not.l_tlnmc) .and. nstrong/=0 ) then
+     nstrong=0
+     if (mype==0) write(6,*)'GSIMOD:  reset nstrong=',nstrong,&
+          ' because TLNMC option is set to off= ',tlnmc_option
+  endif
+  if (.not.l_tlnmc) then
+     baldiag_full=.false.
+     baldiag_inc =.false.
+  end if
+
 ! check consistency in q option
   if(pseudo_q2 .and. qoption==1)then
      if(mype==0)then
        write(6,*)' pseudo-q2 = ', pseudo_q2, ' qoption = ', qoption
        write(6,*)' pseudo-q2 must be used together w/ qoption=2 only, aborting.'
-       call die(myname_,'consistency(q2)',999)  
      endif
+     call die(myname_,'consistency(q2)',999)  
   endif
 
-! if (qoption==2.or.l_tlnmc) then
-  if (qoption==2) then
+  if (qoption==2.or.l_tlnmc) then
      tendsflag =.true.
      switch_on_derivatives = .true.
+     if (mype==0) write(6,*)'GSIMOD:  tendencies and derivatives are on'
   endif
 
 ! Initialize variables, create/initialize arrays
@@ -634,6 +705,9 @@
   call init_general_commvars_dims (cvars2d,cvars3d,cvarsmd,nrf_var, &
                                    dvars2d,dvars3d)
   call init_general_commvars
+  if (tendsflag) then
+     call create_turblvars()
+  endif
 
   if(mype==0)then
     write(6,*) myname_, ': Complete'
@@ -737,6 +811,7 @@
   integer :: ier
 ! Deallocate arrays
 
+  call destroy_vtrans
   call destroy_ges_tendencies
   call destroy_ges_derivatives
 ! call final_reg_glob_ll ! if ever regional

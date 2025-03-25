@@ -74,9 +74,11 @@ module balmod
   public :: destroy_balance_vars_reg
   public :: prebal_reg
   public :: locatelat_reg
+#endif /* USE_ALL_ORIGINAL */
+#ifdef TLNMC
   public :: strong_bk
   public :: strong_bk_ad
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
   public :: prebal
   public :: balance
   public :: tbalance
@@ -404,10 +406,10 @@ contains
 !$$$
     use constants, only: one,half
     use gridmod, only: regional,lat2,nsig,lon2
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
     use gsi_4dvar, only: lsqrtb
     use mod_strong, only: tlnmc_option
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
     implicit none
     
 !   Declare passed variables
@@ -528,13 +530,13 @@ contains
 
 !!   Strong balance constraint
 !!   Pass uvflag=.false.
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
      if(lsqrtb) then
         call strong_bk(st,vp,p,t,.false.)
       else
         if(tlnmc_option==1 .or. tlnmc_option==4) call strong_bk(st,vp,p,t,.false.)
      endif
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
 
 
@@ -601,10 +603,10 @@ contains
 !$$$
     use constants,   only: one,half
     use gridmod,     only: regional,lon2,lat2,nsig
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
     use gsi_4dvar,   only: lsqrtb
     use mod_strong,  only: tlnmc_option
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
     implicit none
 
 !   Declare passed variables
@@ -620,13 +622,13 @@ contains
   
 !  Adjoint of strong balance constraint
 !  pass uvflag=.false.
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
     if(lsqrtb) then
        call strong_bk_ad(st,vp,p,t,.false.)
     else
        if(tlnmc_option==1 .or. tlnmc_option==4) call strong_bk_ad(st,vp,p,t,.false.)
     endif
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
 !   REGIONAL BRANCH
     if (regional) then
@@ -860,7 +862,7 @@ contains
     return
 end subroutine locatelat_reg
   
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
 subroutine strong_bk(st,vp,p,t,uvflag)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -1006,6 +1008,6 @@ subroutine strong_bk_ad(st,vp,p,t,uvflag)
 
   return
 end subroutine strong_bk_ad
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
 end module balmod

@@ -95,6 +95,26 @@ tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90
 xhat_vordivmod.f90
+)
+
+list(APPEND gsitlnmc_src_files_list
+calctends_ad.F90
+calctends_tl.F90
+calctends_no_ad.F90
+calctends_no_tl.F90
+get_semimp_mats.f90
+mod_strong.f90
+mod_vtrans.F90
+psichi2uvt_reg.f90
+psichi2uv_reg.f90
+rtlnmc_version3.f90
+strong_bal_correction.f90
+strong_baldiag_inc.f90
+strong_fast_global_mod.f90
+turblmod.f90
+turbl_ad.f90
+turbl_tl.f90
+zrnmi_mod.f90
 
 )
 
@@ -106,6 +126,7 @@ endif()
 set( gsi_src_files
 
 ${gsi_src_files_list}
+${gsitlnmc_src_files_list}
 
 PARENT_SCOPE
 )

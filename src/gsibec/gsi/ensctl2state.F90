@@ -41,9 +41,11 @@ use gsi_bundlemod, only: self_add
 use gsi_bundlemod, only: assignment(=)
 use mpeu_util, only: getindex
 use gsi_metguess_mod, only: gsi_metguess_get
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
 use mod_strong, only: tlnmc_option
 use balmod, only: strong_bk
+#endif /* TLNMC */
+#ifdef USE_ALL_ORIGINAL
 use cwhydromod, only: cw2hydro_tl
 use cwhydromod, only: cw2hydro_tl_hwrf
 use timermod, only: timer_ini,timer_fnl
@@ -160,10 +162,10 @@ end do
 
 do jj=1,ntlevs_ens 
 
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
    do_tlnmc = lstrong_bk_vars .and. ( (tlnmc_option==3) .or. &
          (jj==ibin_anl .and. tlnmc_option==2) )
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
 !  Initialize work bundle to first component 
 !  For 4densvar, this is the "3D/Time-invariant contribution from static B"
@@ -272,7 +274,7 @@ do jj=1,ntlevs_ens
    call self_add(eval(jj),mval)
 
 ! Call strong constraint if necessary
-#ifdef USE_ALL_ORIGINAL
+#ifdef TLNMC
    if(do_tlnmc) then
 
       call strong_bk(sv_u,sv_v,sv_ps,sv_tv,.true.)
@@ -282,7 +284,7 @@ do jj=1,ntlevs_ens
       if(do_getprs_tl) call getprs_tl(sv_ps,sv_tv,sv_prse)
   
    end if
-#endif /* USE_ALL_ORIGINAL */
+#endif /* TLNMC */
 
 !  Calculate sensible temperature 
    if(do_tv_to_tsen) call tv_to_tsen(sv_tv,sv_q,sv_tsen)
