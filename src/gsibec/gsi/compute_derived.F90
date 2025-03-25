@@ -125,7 +125,6 @@ subroutine compute_derived(mype,init_pass)
   use gridmod, only: lat2,lon2,nsig,nsig1o  
 #ifdef TLNMC
   use mod_strong, only: l_tlnmc,baldiag_full
-  use obsmod, only: write_diag
 #endif
   use gsi_4dvar, only: l4dvar
 
@@ -315,7 +314,7 @@ subroutine compute_derived(mype,init_pass)
                           gsi_tendency_bundle)
 
 #ifdef TLNMC
-           if(l_tlnmc .and. write_diag(jiter) .and. baldiag_full) then
+           if(l_tlnmc .and. baldiag_full) then
               fullfield=.true.
 
               call init_vars_('tendency')
