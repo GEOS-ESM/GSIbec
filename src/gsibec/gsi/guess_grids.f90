@@ -25,6 +25,8 @@ public :: ges_prsl
 public :: ges_tsen
 public :: ges_qsat
 public :: ges_teta
+public :: ges_prslavg 
+public :: ges_psfcavg
 
 public :: geop_hgtl
 public :: isli2
@@ -41,6 +43,8 @@ public :: gsiguess_bkgcov_final
 public :: nfldsig
 public :: ntguessig
 
+public :: ifilesig
+
 public :: tsensible
 logical, parameter ::  tsensible = .false.   ! jfunc: here set as in jfunc
                           !        gsi handles this completely
@@ -55,12 +59,18 @@ logical, parameter ::  use_compress = .true.   ! wired for now
 
 integer(i_kind) :: nfldsig
 integer(i_kind) :: ntguessig
+integer(i_kind),allocatable, dimension(:)::ifilesig
 
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsl
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_prsi
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_tsen
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_qsat
 real(r_kind),allocatable,dimension(:,:,:,:):: ges_teta
+
+real(r_kind):: ges_psfcavg
+real(r_kind),allocatable,dimension(:):: ges_prslavg
+real(r_kind),allocatable,dimension(:,:,:,:):: ges_lnprsl
+real(r_kind),allocatable,dimension(:,:,:,:):: ges_lnprsi
 
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgtl
 real(r_kind),allocatable,dimension(:,:,:,:):: geop_hgti
@@ -133,6 +143,8 @@ subroutine other_set_(need)
   if(.not.allocated(ges_tsen)) allocate(ges_tsen(lat2,lon2,nsig,nfldsig))
   if(.not.allocated(ges_prsi)) allocate(ges_prsi(lat2,lon2,nsig+1,nfldsig))
   if(.not.allocated(ges_prsl)) allocate(ges_prsl(lat2,lon2,nsig,nfldsig))
+  if(.not.allocated(ges_lnprsi)) allocate(ges_lnprsi(lat2,lon2,nsig+1,nfldsig))
+  if(.not.allocated(ges_lnprsl)) allocate(ges_lnprsl(lat2,lon2,nsig,nfldsig))
   if(.not.allocated(ges_qsat)) allocate(ges_qsat(lat2,lon2,nsig,nfldsig))
   if(.not.allocated(ges_teta)) allocate(ges_teta(lat2,lon2,nsig,nfldsig))
   if(.not.allocated(geop_hgtl)) allocate(geop_hgtl(lat2,lon2,nsig,nfldsig))
@@ -140,6 +152,7 @@ subroutine other_set_(need)
   if(.not.allocated(isli2)) allocate(isli2(lat2,lon2))
   if(.not.allocated(fact_tv)) allocate(fact_tv(lat2,lon2,nsig))
   if(.not.allocated(tropprs)) allocate(tropprs(lat2,lon2))
+  if(.not.allocated(ges_prslavg)) allocate(ges_prslavg(nsig))
   ges_tsen=zero
   ges_prsl=zero
   ges_qsat=zero
@@ -147,8 +160,11 @@ subroutine other_set_(need)
   geop_hgtl=zero
   geop_hgti=zero
   ges_prsi=zero
+  ges_lnprsi=zero
+  ges_lnprsl=zero
   tropprs=zero
   fact_tv=one
+  ges_prslavg=zero
   if (nfldsig /= size(GSI_MetGuess_Bundle)) then
      call die (myname_,': inconsistent time index in metguess',99)
   endif
@@ -544,6 +560,7 @@ end subroutine final_
     use constants,only: zero,one,rd_over_cp,one_tenth,half,ten,rd,r1000
     use gridmod,  only: lat2,lon2,nsig,idvc5
     use gridmod,  only: ck5,tref5
+    use gridmod, only: regional,aeta2_ll,fv3_regional,mpas_regional,aeta1_ll,eta2_ll
     implicit none
 
 ! !DESCRIPTION: populate guess pressure arrays
@@ -598,6 +615,20 @@ end subroutine final_
        endif
 
 !!!!!!!!!!!!  load delp to ges_prsi in read_fv3_netcdf_guess !!!!!!!!!!!!!!!!!
+    if (fv3_regional ) then
+       do j=1,lon2
+          do i=1,lat2
+             pinc(i,j)=(ges_ps(i,j)-ges_prsi(i,j,1,jj))
+          enddo
+       enddo
+       do k=1,nsig+1
+          do j=1,lon2
+             do i=1,lat2
+                ges_prsi(i,j,k,jj)=ges_prsi(i,j,k,jj)+eta2_ll(k)*pinc(i,j)
+             enddo
+          enddo
+       enddo
+    endif
 
        do k=1,nsig+1
           do j=1,lon2
@@ -616,12 +647,27 @@ end subroutine final_
                       end if
                    end if
                 ges_prsi(i,j,k,jj)=max(ges_prsi(i,j,k,jj),zero)
+                ges_lnprsi(i,j,k,jj)=log(max(ges_prsi(i,j,k,jj),0.0001_r_kind))
              end do
           end do
        end do
        ihaveprs(jj)=.true.
     end do
 
+       if (fv3_regional) then
+          do jj=1,nfldsig
+             do k=1,nsig
+                 kp=k+1
+                do j=1,lon2
+                   do i=1,lat2
+                      ges_prsl(i,j,k,jj)=(ges_prsi(i,j,k,jj)+ges_prsi(i,j,kp,jj))*half
+                      ges_lnprsl(i,j,k,jj)=log(ges_prsl(i,j,k,jj))
+
+                   end do
+                end do
+             end do
+          end do
+       end if   ! end if fv3 regional
 
 !      load mid-layer pressure by using phillips vertical interpolation
        if (idsl5/=2) then
@@ -656,6 +702,26 @@ end subroutine final_
              end do
           end do
        endif
+
+! For regional applications only, load variables containing mean
+! surface pressure and pressure profile at the layer midpoints
+    if (regional) then
+       ges_psfcavg = r1013
+       if (fv3_regional) then
+          do k=1,nsig
+             ges_prslavg(k)=aeta1_ll(k)*ten+r1013*aeta2_ll(k)
+          end do
+       endif
+       if (fv3_regional .and. mpas_regional) then
+          open(10,file="mpas_pave.txt")
+          do k=1,nsig
+            read(10,*)ges_prslavg(k)
+          enddo
+          close(10)
+       endif
+
+    endif
+
 
     return
   end subroutine load_prsges_

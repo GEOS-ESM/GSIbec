@@ -259,6 +259,8 @@ module hybrid_ensemble_parameters
 ! set passed variables to public
   public :: generate_ens,n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test,l_hyb_ens,&
        s_ens_h,oz_univ_static,vvlocal
+  public :: n_ens_gfs,n_ens_fv3sar
+  public :: weight_ens_gfs,weight_ens_fv3sar
   public :: uv_hyb_ens,q_hyb_ens,s_ens_v,beta_s0,aniso_a_en,s_ens_hv,s_ens_vv
   public :: readin_beta,beta_s,beta_e
   public :: readin_localization
@@ -318,6 +320,8 @@ module hybrid_ensemble_parameters
   logical ens_fast_read
   integer(i_kind) i_en_perts_io
   integer(i_kind) n_ens,nlon_ens,nlat_ens,jcap_ens,jcap_ens_test
+  integer(i_kind) n_ens_gfs,n_ens_fv3sar
+  real(r_kind) weight_ens_gfs,weight_ens_fv3sar
   real(r_kind) beta_s0,s_ens_h,s_ens_v,grid_ratio_ens
   type(sub2grid_info),save :: grd_ens,grd_loc,grd_sploc,grd_anl,grd_e1,grd_a1
   type(spec_vars),save :: sp_ens,sp_loc
@@ -430,6 +434,11 @@ subroutine init_hybrid_ensemble_parameters
   upd_ens_localization=.false.  ! update localization when upd_ens_spread=.t.
 
   EnsSource = 'NULL'
+
+  n_ens_gfs=0
+  n_ens_fv3sar=0
+  weight_ens_gfs=one
+  weight_ens_fv3sar=one
 
 end subroutine init_hybrid_ensemble_parameters
 

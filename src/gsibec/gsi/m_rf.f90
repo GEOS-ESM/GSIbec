@@ -7,16 +7,22 @@ use berror, only: create_berror_vars
 use berror, only: destroy_berror_vars
 use berror, only: final_rftable
 use berror, only: fut2ps,cwcoveqqcov
+use berror, only: create_berror_vars_reg
 
 use balmod, only: create_balance_vars
 use balmod, only: destroy_balance_vars
 use balmod, only: prebal
+use balmod, only: create_balance_vars_reg
+use balmod, only: destroy_balance_vars_reg
+use balmod, only: prebal_reg
 
 use smooth_polcarf, only: destroy_smooth_polcas
 use gridmod, only: nlon,nlat,lon2,lat2,lon2,nsig
+use gridmod, only: regional
 use m_berror_stats, only: berror_get_dims
 use m_berror_stats, only: berror_init
 use m_berror_stats, only: berror_final
+use m_berror_stats_reg, only: berror_get_dims_reg
 
 use hybrid_ensemble_parameters, only: l_hyb_ens
 use hybrid_ensemble_parameters, only: destroy_hybens_localization_parameters
@@ -41,17 +47,26 @@ contains
   integer(i_kind) msig,mlat,mlon
   logical good
 ! Load background error arrays used by recursive filters
-  call berror_get_dims(mype,msig,mlat,mlon)
-  good=nlat==mlat.and.nlon==mlon.and.nsig==msig
-  if (.not. good) then
-    print *, nlat, mlat, nlon, mlon, nsig, msig
-    call die(myname,': bad dims',99)
+  if(regional) then
+    call berror_get_dims_reg(msig,mlat)
+    call berror_init(mlat,msig)
+    call create_balance_vars_reg(mype)
+    call create_berror_vars_reg
+    call prebal_reg(cwcoveqqcov)
+    call prewgt_reg(mype)
+  else
+    call berror_get_dims(mype,msig,mlat,mlon)
+    good=nlat==mlat.and.nlon==mlon.and.nsig==msig
+    if (.not. good) then
+      print *, nlat, mlat, nlon, mlon, nsig, msig
+      call die(myname,': bad dims',99)
+    endif
+    call berror_init(mlat,msig)
+    call create_balance_vars
+    call create_berror_vars
+    call prebal(fut2ps,cwcoveqqcov)
+    call prewgt(mype)
   endif
-  call berror_init(mlat,msig)
-  call create_balance_vars
-  call create_berror_vars
-  call prebal(fut2ps,cwcoveqqcov)
-  call prewgt(mype)
 ! If hybrid covariance
   if(l_hyb_ens) then
      call load_ensemble(-1)

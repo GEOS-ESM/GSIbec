@@ -300,7 +300,7 @@ do jj=1,nsubwin
    if(do_normal_rh_to_q) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
 
 !  Calculate sensible temperature
-   if(do_tv_to_tsen) call tv_to_tsen(cv_t,sv_q,sv_tsen) 
+   if(do_tv_to_tsen .and. .not.regional) call tv_to_tsen(cv_t,sv_q,sv_tsen)
 
 !  Copy other variables
    call gsi_bundlegetvar ( wbundle, 't'  , sv_tv,  istatus )  

@@ -43,7 +43,7 @@
      use_sp_eqspace,final_grid_vars,&
      jcap_gfs,nlat_gfs,nlon_gfs,jcap_cut
 
-  use gridmod, only: init_reg_glob_ll
+  use gridmod, only: init_reg_glob_ll,regional,fv3_regional,grid_ratio_fv3_regional,mpas_regional
 
   use constants, only: zero,one,init_constants,gps_constants,three
   use constants, only: init_constants,init_constants_derived
@@ -381,7 +381,8 @@
 !                         poles.  if .false., then gaussian grid assumed for ensemble (global only)
 
 
-  namelist/gridopts/jcap,jcap_b,nlat,nlon,nsig,use_sp_eqspace
+  namelist/gridopts/jcap,jcap_b,nlat,nlon,nsig,use_sp_eqspace,fv3_regional,grid_ratio_fv3_regional,&
+                    regional,mpas_regional
 
 ! BKGERR (background error related variables):
 !     vs       - scale factor for vertical correlation lengths for background error
@@ -565,7 +566,7 @@
   call init_io(mype,npe-1)
   call jfunc_init
   call init_constants_derived
-  call init_constants(.false.)
+  call init_constants(regional)
   call init_balmod
   call init_berror
   call init_grid
@@ -694,6 +695,10 @@
      tendsflag =.true.
      switch_on_derivatives = .true.
      if (mype==0) write(6,*)'GSIMOD:  tendencies and derivatives are on'
+  endif
+
+  if (regional) then
+     call convert_fv3_regional
   endif
 
 ! Initialize variables, create/initialize arrays

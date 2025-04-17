@@ -31,13 +31,13 @@ general_specmod.f90
 general_spectral_transforms.f90
 general_sub2grid_mod.f90
 general_transform.f90
-genqsat.F90
+genqsat.f90
 gengrid_vars.f90
-get_derivatives.F90
-get_derivatives2.F90
+get_derivatives.f90
+get_derivatives2.f90
 get_gefs_ensperts_dualres.F90
 getprs.f90
-getuv.F90
+getuv.f90
 getvvel.f90
 gridmod.F90
 gsi_4dvar.f90
@@ -95,6 +95,16 @@ tv_to_tsen.f90
 write_bkgvars_grid.F90
 m_gbc4saber.f90
 xhat_vordivmod.f90
+directDA_radaruse_mod.f90
+m_berror_stats_reg.F90
+rapidrefresh_cldsurf_mod.f90
+chemmod.f90
+radarZ_global_module.f90
+fv3_regional_interface.f90
+gsi_rfv3io_mod.f90
+mod_fv3_lola.f90
+grdcrd.f90
+prewgt_reg.f90
 )
 
 list(APPEND gsitlnmc_src_files_list

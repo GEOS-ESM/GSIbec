@@ -51,8 +51,9 @@ module m_berror_stats
    private    ! except
 
    ! reconfigurable parameters, via NAMELIST/setup/
-   public :: berror_stats    ! reconfigurable filename
 
+   public :: usenewgfsberror
+   public :: berror_stats,inquire_berror
    ! interfaces to file berror_stats.
    public :: berror_get_dims ! get dimensions, jfunc::createj_func()
    public :: berror_read_bal ! get cross-cov.stats., balmod::prebal()
@@ -94,6 +95,7 @@ module m_berror_stats
 
    character(len=256),save :: berror_stats = "berror_stats"      ! filename
    logical,save :: cwcoveqqcov_
+   logical usenewgfsberror
 
    logical,save :: bin_berror=.false.
 
@@ -103,15 +105,18 @@ module m_berror_stats
 contains
 
 subroutine init_(mlat,msig)
+   use gridmod,  only: nsig
    integer,intent(in) :: mlat,msig
    if(.not.allocated(varq)) then
      if (getindex(cvars3d,'q')>0) then
-        allocate(varq(mlat,msig))
+        !allocate(varq(mlat,msig))
+        allocate(varq(mlat,nsig))
         varq=zero
      endif
    endif
    if(.not.allocated(varcw)) then
-      allocate(varcw(mlat,msig))
+      !allocate(varcw(mlat,msig))
+      allocate(varcw(mlat,nsig))
       varcw=zero
    endif
 end subroutine init_
@@ -202,6 +207,52 @@ subroutine get_dims(mype,msig,mlat,mlon,lunit)
    return
    end subroutine nc_
 end subroutine get_dims
+
+subroutine inquire_berror(lunit,mype)
+
+   use m_kinds,    only: r_single
+
+   implicit none
+
+   integer(i_kind),intent(in   ) :: lunit ! logical unit [22]
+   integer(i_kind),intent(in   ) :: mype
+
+   character(len=*),parameter :: myname_=myname//'::inquire_berror'
+   integer(i_kind) :: inerr,msig,mlat,mlon_,ier,errtot,i
+   real(r_single),dimension(:),allocatable::  clat_avn,sigma_avn
+
+   ! Read dimension of stats file
+   inerr = lunit
+   open(inerr,file=berror_stats,form='unformatted',status='old',iostat=ier)
+   call check_iostat(ier,myname_,'open('//trim(berror_stats)//')')
+   rewind inerr
+   read(inerr,iostat=ier) msig,mlat,mlon_
+   call check_iostat(ier,myname_,'read header')
+   errtot=ier
+
+   errtot=0
+   allocate ( clat_avn(mlat) )
+   allocate ( sigma_avn(1:msig) )
+   read(inerr,iostat=ier)clat_avn,sigma_avn
+!  Checking to see if sigma_avn fits required format if so newgfsberror file.
+   do i=1,msig-1
+     if(sigma_avn(i) < sigma_avn(i+1) .or. sigma_avn(i) < zero .or. sigma_avn(i) > one)then
+         errtot=1
+     end if
+   end do
+   deallocate(clat_avn,sigma_avn)
+   if(errtot /= 0)then
+     usenewgfsberror=.false.
+     if(mype == 0)write(6,*) 'usenewgfsberror = .false. old format file '
+   else
+     usenewgfsberror=.true.
+     if(mype == 0)write(6,*) 'usenewgfsberror = .true. new format file '
+   end if
+   close(inerr,iostat=ier)
+   call check_iostat(ier,myname_,'close('//trim(berror_stats)//')')
+
+   return
+end subroutine inquire_berror
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! NASA/GSFC, Global Modeling and Assimilation Office, 900.3, GEOS/DAS  !
