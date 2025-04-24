@@ -31,13 +31,13 @@ general_specmod.f90
 general_spectral_transforms.f90
 general_sub2grid_mod.f90
 general_transform.f90
-genqsat.f90
+genqsat.F90
 gengrid_vars.f90
-get_derivatives.f90
-get_derivatives2.f90
+get_derivatives.F90
+get_derivatives2.F90
 get_gefs_ensperts_dualres.F90
 getprs.f90
-getuv.f90
+getuv.F90
 getvvel.f90
 gridmod.F90
 gsi_4dvar.f90
