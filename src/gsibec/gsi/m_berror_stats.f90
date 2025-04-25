@@ -109,13 +109,11 @@ subroutine init_(mlat,msig)
    integer,intent(in) :: mlat,msig
    if(.not.allocated(varq)) then
      if (getindex(cvars3d,'q')>0) then
-        !allocate(varq(mlat,msig))
         allocate(varq(mlat,nsig))
         varq=zero
      endif
    endif
    if(.not.allocated(varcw)) then
-      !allocate(varcw(mlat,msig))
       allocate(varcw(mlat,nsig))
       varcw=zero
    endif
