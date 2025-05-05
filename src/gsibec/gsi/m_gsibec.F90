@@ -88,6 +88,7 @@ end interface gsibec_init_guess
 
 interface gsibec_get_grid
   module procedure get_hgrid_
+  module procedure get_hgrid_regional_
 end interface gsibec_get_grid
 
 interface gsibec_set_grid
@@ -177,10 +178,10 @@ contains
      call befname_(befile,0)
   endif
 
-  nfldsig=1 
+  nfldsig=1
   ntguessig=1
   if (present(inymd) .and. present(inhms)) then
-      nfldsig=size(inymd) 
+      nfldsig=size(inymd)
   endif
 
   call gsimain_initialize(nfldsig,nmlfile=nmlfile)
@@ -322,6 +323,27 @@ contains
 
   end subroutine get_hgrid_
 !--------------------------------------------------------
+  subroutine get_hgrid_regional_ (units,gsi_lats,gsi_lons) ! for now: redundant routine
+  use constants, only: init_constants_derived, init_constants
+  use constants, only: rad2deg
+  use gridmod, only: regional
+  use gsi_rfv3io_mod, only: m_gsi_rfv3io_get_grid_specs
+  implicit none
+   character(len=*), intent(in) :: units
+   integer :: ierr
+   real(r_kind),intent(inout) :: gsi_lats(:,:),gsi_lons(:,:)
+
+   call init_constants_derived
+   call init_constants(regional)
+   call m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
+
+   if (trim(units)=='degree') then
+      gsi_lons=gsi_lons*rad2deg
+      gsi_lats=gsi_lats*rad2deg
+   endif
+
+  end subroutine get_hgrid_regional_
+!--------------------------------------------------------
   subroutine set_vgrid_(myid,akbk)
   use gridmod, only: gridmod_vgrid
   implicit none
@@ -342,6 +364,7 @@ contains
    use gridmod, only: create_grid_vars
    use gridmod, only: use_sp_eqspace
    use gridmod, only: gridmod_vgrid
+   use gridmod, only: regional
    use compact_diffs, only: cdiff_created
    use compact_diffs, only: cdiff_initialized
    use compact_diffs, only: create_cdiff_coefs
@@ -362,49 +385,56 @@ contains
    if(.not.allocated(rlats)) ifail = 1
    if(ifail/=0) call die('init','dims not alloc', 99)
 
-   if (use_sp_eqspace) then
-      dlon=(pi+pi)/nlon    ! in radians
-      dlat=pi/(nlat-1)
+   if(regional) then
+     call gengrid_vars
+     if(present(vgrid)) then
+       if(vgrid) call gridmod_vgrid(mype)
+     endif
+   else
+     if (use_sp_eqspace) then
+        dlon=(pi+pi)/nlon    ! in radians
+        dlat=pi/(nlat-1)
 
 ! Set grid longitude array used by GSI.
-      do i=1,nlon                       ! from 0 to 2pi
-         rlons (i)=(i-one)*dlon
-         coslon(i)=cos(rlons(i))
-         sinlon(i)=sin(rlons(i))
-      end do
+        do i=1,nlon                       ! from 0 to 2pi
+           rlons (i)=(i-one)*dlon
+           coslon(i)=cos(rlons(i))
+           sinlon(i)=sin(rlons(i))
+        end do
 
 ! Set grid latitude array used by GSI.
-      pih =half*pi
-      do j=1,nlat                       ! from -pi/2 to +pi/2
-         rlats(j)=(j-one)*dlat - pih
-      end do
+        pih =half*pi
+        do j=1,nlat                       ! from -pi/2 to +pi/2
+           rlats(j)=(j-one)*dlat - pih
+        end do
 
 ! wgtlats is used by spectral code. The values are used as divisor in the
 ! compact_diffs::inisph() routine.  Therefore, set to TINY instead of ZERO.
-!     wgtlats(:)=TINY(wgtlats)
-      wgtlats=zero
-      do i=sp_a%jb,sp_a%je
-         i1=i+1
-         wgtlats(i1)=sp_a%wlat(i) !sp_a%clat(i)
-         i1=nlat-i
-         wgtlats(i1)=sp_a%wlat(i) !sp_a%clat(i)
-      end do
+!       wgtlats(:)=TINY(wgtlats)
+        wgtlats=zero
+        do i=sp_a%jb,sp_a%je
+           i1=i+1
+           wgtlats(i1)=sp_a%wlat(i) !sp_a%clat(i)
+           i1=nlat-i
+           wgtlats(i1)=sp_a%wlat(i) !sp_a%clat(i)
+        end do
 
 ! rbs2=1/cos^2(rlats)) is used in pcp.  polar points are set to zeroes.
-      rbs2(1       )=zero
-      rbs2(2:nlat-1)=cos(rlats(2:nlat-1))
-      rbs2(2:nlat-1)=one/(rbs2(2:nlat-1)*rbs2(2:nlat-1))
-      rbs2(  nlat  )=zero
-   else
-      if(mype==0) print *, 'Gaussian Grid in Use'
-      call gengrid_vars
-   endif
+        rbs2(1       )=zero
+        rbs2(2:nlat-1)=cos(rlats(2:nlat-1))
+        rbs2(2:nlat-1)=one/(rbs2(2:nlat-1)*rbs2(2:nlat-1))
+        rbs2(  nlat  )=zero
+     else
+        if(mype==0) print *, 'Gaussian Grid in Use'
+        call gengrid_vars
+     endif
 
-   if(present(vgrid)) then
-     if(vgrid) call gridmod_vgrid(mype)
+     if(present(vgrid)) then
+       if(vgrid) call gridmod_vgrid(mype)
+     endif
+     if(.not.cdiff_created()) call create_cdiff_coefs()
+     if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
    endif
-   if(.not.cdiff_created()) call create_cdiff_coefs()
-   if(.not.cdiff_initialized()) call inisph(rearth,rlats(2),wgtlats(2),nlon,nlat-2)
 !  call init_mp_compact_diffs1(nsig+1,mype,.false.)
    gsibec_iamset_ = .true.
   end subroutine set_

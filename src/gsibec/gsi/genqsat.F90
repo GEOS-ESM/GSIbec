@@ -52,24 +52,19 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
 !
 !$$$
   use m_kinds, only: r_kind,i_kind
-  use mpeu_util, only: die
   use constants, only: xai,tmix,xb,omeps,eps,xbi,one,zero,&
-       xa,psat,ttp,half,one_tenth
+       xa,psat,ttp,half,one_tenth,qmin
   use derivsmod, only:  qgues,dqdt,dqdrh,dqdp
   use jfunc, only:  pseudo_q2
-  use guess_grids, only: tropprs
-  use gridmod, only: regional
-#ifdef USE_ALL_ORIGINAL
-  use guess_grids, only: ges_prslavg,ges_psfcavg
   use gridmod, only:  wrf_nmm_regional,wrf_mass_regional,nems_nmmb_regional,aeta2_ll,regional,cmaq_regional
   use gridmod, only:  fv3_regional
-#endif /* USE_ALL_ORIGINAL */
+  use guess_grids, only: tropprs,ges_prslavg,ges_psfcavg
   implicit none
 
   logical                               ,intent(in   ) :: ice
-  integer(i_kind)                       ,intent(in   ) :: lat2,lon2,nsig,iderivative
   real(r_kind),dimension(lat2,lon2,nsig),intent(  out) :: qsat
   real(r_kind),dimension(lat2,lon2,nsig),intent(in   ) :: tsen,prsl
+  integer(i_kind)                       ,intent(in   ) :: lat2,lon2,nsig,iderivative
 
 
   integer(i_kind) k,j,i,kpres,k150
@@ -85,7 +80,6 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
 
   onep3 = 1.e3_r_kind
 
-#ifdef USE_ALL_ORIGINAL
   if(iderivative > 0)then
     if (regional) then
         k150 = nsig
@@ -107,7 +101,6 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
         end do
     end if
   end if
-#endif /* USE_ALL_ORIGINAL */
 !$omp parallel do  schedule(dynamic,1) private(k,j,i,tdry,tr,es,esw,esi,w) &
 !$omp private(pw,esmax,es2,idpupdate,idtupdate,desdt,dwdt,deswdt,desidt) &
 !$omp private(mint,lmint,estmax)
@@ -128,7 +121,6 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
      end do
      do i=1,lat2
         tdry = mint(i)
-        if( abs(tdry) < 1.0e-8_r_kind ) tdry = 1.0e-8_r_kind
         tr = ttp/tdry
         if (tdry >= ttp .or. .not. ice) then
            estmax(i) = psat * (tr**xa) * exp(xb*(one-tr))
@@ -144,7 +136,6 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
      do k = 1,nsig
         do i = 1,lat2
            tdry = tsen(i,j,k)
-           if( abs(tdry) < 1.0e-8_r_kind ) tdry = 1.0e-8_r_kind
            tr = ttp/tdry
            if (tdry >= ttp .or. .not. ice) then
               es = psat * (tr**xa) * exp(xb*(one-tr))
@@ -154,9 +145,9 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
               esw = psat * (tr**xa) * exp(xb*(one-tr)) 
               esi = psat * (tr**xai) * exp(xbi*(one-tr)) 
               w  = (tdry - tmix) / (ttp - tmix)
-!             es =  w * esw + (one-w) * esi
-              es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
-                       + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
+              es =  w * esw + (one-w) * esi
+!             es =  w * psat * (tr**xa) * exp(xb*(one-tr)) &
+!                      + (one-w) * psat * (tr**xai) * exp(xbi*(one-tr))
 
            endif
 
@@ -168,15 +159,16 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
            end if
            es2=min(es,esmax)
            qsat(i,j,k) = eps * es2 / (pw - omeps * es2)
+           qsat(i,j,k) = max(qmin,qsat(i,j,k))
 
            if(iderivative > 0)then
+!           if(es <= esmax .and. iderivative == 2 .and. qsat(i,j,k) > qmin )then
             if(es <= esmax .and. iderivative == 2)then
               idpupdate=.true.
               idtupdate=.true.
 
               if(regional)then
-                call die('gsi:genqsat',': regional opt not supported',99)
-#ifdef USE_ALL_ORIGINAL
+
 !    Special block to decouple temperature and pressure from moisture
 !    above specified levels.  For mass core decouple T and p above
 !    same level (approximately 150 hPa).  For nmm core decouple T
@@ -194,7 +186,6 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
                   if(k >= k150 )idtupdate = .false.
                 end if
              
-#endif /* USE_ALL_ORIGINAL */
               else
 !                Decouple Q from T above the tropopause for global
                 if(prsl(i,j,k) < (one_tenth*tropprs(i,j)))then

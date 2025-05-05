@@ -69,12 +69,10 @@ module balmod
   public :: init_balmod
   public :: create_balance_vars
   public :: destroy_balance_vars
-#ifdef USE_ALL_ORIGINAL
   public :: create_balance_vars_reg
   public :: destroy_balance_vars_reg
   public :: prebal_reg
   public :: locatelat_reg
-#endif /* USE_ALL_ORIGINAL */
 #ifdef TLNMC
   public :: strong_bk
   public :: strong_bk_ad
@@ -171,7 +169,6 @@ contains
     return
   end subroutine destroy_balance_vars
 
-#ifdef USE_ALL_ORIGINAL
   subroutine create_balance_vars_reg(mype)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -239,7 +236,6 @@ contains
 
     return
   end subroutine destroy_balance_vars_reg
-#endif /* USE_ALL_ORIGINAL */
 
   subroutine prebal(fut2ps,cwcoveqqcov)
 !$$$  subprogram documentation block
@@ -341,11 +337,182 @@ contains
     return
   end subroutine prebal
 
-#ifdef USE_ALL_ORIGINAL
-  subroutine prebal_reg()
+  subroutine prebal_reg(cwcoveqqcov)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    prebal_reg  setup balance vars
+!   prgmmr: wu               org: np22                date: 2000-03-15
+!
+! abstract: load balance variables agvz, bvz, wgvz, and ke_vp
+!
+! program history log:
+!   2000-03-15  wu
+!   2004-08-03  treadon - add only to module use; add intent in/out;
+!                         fix bug in which rdgstat_reg inadvertently
+!                         recomputed sigl (s/b done in gridmod)
+!   2004-10-26  wu - include factors hzscl in the range of RF table
+!   2004-11-16  treadon - add longitude dimension to variance array dssv
+!   2004-11-20  derber - modify to make horizontal table more reproducable and
+!               move most of table calculations to berror
+!   2005-01-23  parrish - split off from old prewgt_reg
+!   2005-02-07  treadon - add deallocate(corz,corp,hwll,hwllp,vz,agvi,bvi,wgvi)
+!   2005-03-28  wu - replace mlath with mlat and modify dim of corz, corp
+!   2006-04-17  treadon - replace sigl with ges_prslavg/ges_psfcavg
+!   2008-11-13  zhu - add changes for generalized control variables
+!                   - change the structure of covariance error file
+!                   - move horizontal interpolation into this subroutine
+!   2014-10-08  zhu - add cwcoveqqco in the interface
+!   2017-10-26  CAPS(G. Zhao)
+!                   - add option to clear balance coefficients when
+!                   - assimilating radar radial wind to avoid impact of
+!                   - wind observations on mass fields
+!
+!   input argument list:
+!
+!   output argument list:
+!
+!   other important variables
+!     nsig     - number of sigma levels
+!   agv,wgv,bv - balance correlation matrix for t,p,div
+
+! attributes:
+!   language: f90
+!   machine:  ibm RS/6000 SP
+!$$$
+    use gridmod, only: lat2,lon2,nsig,twodvar_regional
+    use guess_grids, only: ges_prslavg,ges_psfcavg
+    use m_mpimod, only: mype
+    use m_berror_stats_reg, only: berror_set_reg,berror_get_dims_reg,berror_read_bal_reg
+    use constants, only: zero,half,one
+    use directDA_radaruse_mod, only: l_decouple_sf_tps, l_decouple_sf_vp
+
+    implicit none
+
+!   Declare passed variables
+    logical,intent(in   ) :: cwcoveqqcov
+
+!   Declare local parameters
+    real(r_kind),parameter:: r08 = 0.8_r_kind
+
+!   Declare local variables
+    integer(i_kind) k,i,mlat
+    integer(i_kind) j,m,lm,l,l2
+    integer(i_kind) ke,inerr
+    integer(i_kind) msig                   ! stats dimensions
+
+    real(r_kind):: psfc08
+    real(r_kind):: dl1,dl2
+    real(r_kind),allocatable,dimension(:,:):: wgvi ,bvi
+    real(r_kind),allocatable,dimension(:,:,:):: agvi
+
+!   Set internal parameters to m_berror_stats
+    call berror_set_reg('cwcoveqqcov',cwcoveqqcov)
+
+!   ke_vp used to project SF to balanced VP
+!   below sigma level 0.8
+
+    psfc08=r08*ges_psfcavg
+    ke=nsig
+    j_loop: do j=1,nsig
+       if (ges_prslavg(j)<psfc08) then
+          ke=j
+          exit j_loop
+       endif
+    enddo j_loop
+
+    ke_vp=ke-1
+    if (twodvar_regional) ke_vp=ke
+
+!   Read dimension of stats file
+    inerr=22
+    call berror_get_dims_reg(msig,mlat)
+
+!   Allocate arrays in stats file
+    allocate ( agvi(0:mlat+1,1:nsig,1:nsig) )
+    allocate ( bvi(0:mlat+1,1:nsig),wgvi(0:mlat+1,1:nsig) )
+
+!   Read in background error stats and interpolate in vertical to that specified in namelist
+    call berror_read_bal_reg(msig,mlat,agvi,bvi,wgvi,mype,inerr)
+
+!   Alternatively, zero out all balance correlation matrices
+!   for univariate surface analysis
+    if (twodvar_regional .or. lnobalance) then
+       if(mype==0) write(6,*)"***WARNING*** running univariate analysis."
+       agvk=zero
+       bvk=zero
+       wgvk=zero
+       if(lnobalance) agvk_lm(:,:)=zero
+    else
+
+       do k=1,ke_vp
+          do j=1,lon2
+             do i=1,lat2
+                l=int(rllat1(i,j))
+                l2=min0(l+1,llmax)
+                dl2=rllat1(i,j)-real(l,r_kind)
+                dl1=one-dl2
+                bvk(i,j,k)=dl1*bvi(l,k)+dl2*bvi(l2,k)
+             end do
+          end do
+       end do
+       do k=ke_vp+1,nsig
+          do j=1,lon2
+             do i=1,lat2
+                bvk(i,j,k)=zero
+             enddo
+          enddo
+       enddo
+
+       lm=(llmax+llmin)*half
+       do k=1,nsig
+          do m=1,nsig
+             agvk_lm(m,k)=agvi(lm,m,k)
+             do j=1,lon2
+                do i=1,lat2
+                   l=int(rllat1(i,j))
+                   l2=min0(l+1,llmax)
+                   dl2=rllat1(i,j)-real(l,r_kind)
+                   dl1=one-dl2
+                   agvk(i,j,m,k)=dl1*agvi(l,m,k)+dl2*agvi(l2,m,k)
+                end do
+             end do
+          end do
+       end do
+       do k=1,nsig
+          do j=1,lon2
+             do i=1,lat2
+                l=int(rllat1(i,j))
+                l2=min0(l+1,llmax)
+                dl2=rllat1(i,j)-real(l,r_kind)
+                dl1=one-dl2
+                wgvk(i,j,k)=dl1*wgvi(l,k)+dl2*wgvi(l2,k)
+             end do
+          end do
+       end do
+    endif
+    deallocate (agvi,bvi,wgvi)
+
+!   zero out balance for using radar radial wind observation
+    if (l_decouple_sf_vp) then
+       if (mype==0) then
+          write(6,'(1x,A20,A60)')'PREBAL_REG:    ',  &
+               '  zero out balance correlation matrices for vp.'
+       end if
+       bvk(:,:,:)   = zero                ! sf and vp
+    endif
+    if (l_decouple_sf_tps) then
+       if (mype==0) then
+          write(6,'(1x,A20,A60)')'PREBAL_REG:    ',  &
+               '  zero out balance correlation matrices for t, ps.'
+       end if
+       agvk(:,:,:,:)= zero                ! sf and t
+       wgvk(:,:,:)  = zero                ! sf and ps
+    endif
+
+
+    return
   end subroutine prebal_reg
-#endif /* USE_ALL_ORIGINAL */
-  
+
   subroutine balance(t,p,st,vp,fpsproj,fut2ps)
 !$$$  subprogram documentation block
 !                .      .    .                                       .

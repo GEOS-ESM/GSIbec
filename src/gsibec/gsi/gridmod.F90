@@ -145,9 +145,10 @@ module gridmod
   public :: regional_fhr,region_dyi,coeffx,region_dxi,coeffy,nsig_hlf,regional_fmin
   public :: nsig2,wgtlats,corlats,rbs2,ncepgfs_headv,regional_time,wgtfactlats
   public :: nlat_regional,nlon_regional,update_regsfc,half_grid,gencode
+  public :: nlat_regionalens,nlon_regionalens
   public :: diagnostic_reg,nmmb_reference_grid,filled_grid
   public :: grid_ratio_nmmb,isd_g,isc_g,dx_gfs,lpl_gfs,nsig5,nmmb_verttype
-  public :: grid_ratio_fv3_regional,fv3_regional
+  public :: grid_ratio_fv3_regional,fv3_io_layout_y,fv3_regional,fv3_cmaq_regional,grid_type_fv3_regional
   public :: nsig3,nsig4,grid_ratio_wrfmass
   public :: use_gfs_ozone,check_gfs_ozone_date,regional_ozone,nvege_type
   public :: jcap,jcap_b,hires_b,sp_a,grd_a
@@ -160,7 +161,8 @@ module gridmod
   public :: jcap_gfs,nlat_gfs,nlon_gfs
   public :: use_sp_eqspace,jcap_cut
   public :: wrf_mass_hybridcord
- 
+  public :: mpas_regional
+
   interface gridmod_vgrid
      module procedure load_vert_coord_
   end interface
@@ -179,6 +181,8 @@ module gridmod
 
   logical wrf_nmm_regional  !
   logical fv3_regional      ! .t. to run with fv3 regional model
+  logical fv3_cmaq_regional ! .t. to run with fv3_cmaq_regional model
+  logical l_reg_update_hydro_delz  ! .true. to update delz in fv3 model
   logical nems_nmmb_regional! .t. to run with NEMS NMMB model
   logical wrf_mass_regional !
   logical wrf_mass_hybridcord
@@ -188,6 +192,8 @@ module gridmod
   logical check_gfs_ozone_date ! .t. to date check gfs ozone against regional
   logical regional_ozone    !    .t. to turn on ozone for regional analysis
   logical netcdf            ! .t. for regional netcdf i/o
+
+  logical mpas_regional
 
   logical filled_grid       ! 
   logical half_grid         !
@@ -202,6 +208,8 @@ module gridmod
   logical use_readin_anl_sfcmask        ! .t. for using readin surface mask
   character(1) nmmb_reference_grid      ! ='H': use nmmb H grid as reference for analysis grid
                                         ! ='V': use nmmb V grid as reference for analysis grid
+  integer(i_kind) fv3_io_layout_y       ! = io_layout(2) of fv3 regional model (subdomain y direction).
+  integer(i_kind) grid_type_fv3_regional! type of fv3 model grid (grid orientation).
   real(r_kind) grid_ratio_fv3_regional  ! ratio of analysis grid to fv3 model grid in fv3 grid units.
   real(r_kind) grid_ratio_nmmb ! ratio of analysis grid to nmmb model grid in nmmb model grid units.
   real(r_kind) grid_ratio_wrfmass ! ratio of analysis grid to wrf model grid in wrf mass grid units.
@@ -321,7 +329,7 @@ module gridmod
   real(r_kind) rlon_min_dd,rlon_max_dd,rlat_min_dd,rlat_max_dd
   real(r_kind) dt_ll,pdtop_ll,pt_ll
 
-  integer(i_kind) nlon_regional,nlat_regional
+  integer(i_kind) nlon_regional,nlat_regional,nlon_regionalens,nlat_regionalens
   real(r_kind) regional_fhr,regional_fmin
   integer(i_kind) regional_time(6)
   integer(i_kind) jcap_gfs,nlat_gfs,nlon_gfs
@@ -450,6 +458,9 @@ contains
     wrf_mass_hybridcord = .false.
     cmaq_regional=.false.
     fv3_regional=.false.
+    fv3_cmaq_regional=.false.
+    mpas_regional=.false.
+    l_reg_update_hydro_delz=.false.
     nems_nmmb_regional = .false.
     twodvar_regional = .false. 
     use_gfs_ozone = .false.
@@ -459,6 +470,8 @@ contains
     filled_grid = .false.
     half_grid = .false.
     grid_ratio_fv3_regional = one
+    fv3_io_layout_y = 1
+    grid_type_fv3_regional = 0
     grid_ratio_nmmb = sqrt(two)
     grid_ratio_wrfmass = one
     nmmb_reference_grid = 'H'
@@ -473,6 +486,8 @@ contains
     update_regsfc = .false.
     nlon_regional = 0
     nlat_regional = 0
+    nlon_regionalens = 0
+    nlat_regionalens = 0
 
     msig = nsig
     do k=1,size(nlayers)

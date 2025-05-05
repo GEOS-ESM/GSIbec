@@ -120,7 +120,6 @@ subroutine get_derivatives2(st,vp,t,p3d,u,v, &
   allocate(hwork_y(s2g4%inner_vars,s2g4%nlat,s2g4%nlon,s2g4%kbegin_loc:s2g4%kend_alloc))
 
 ! x  and y derivative
-#ifdef USE_ALL_ORIGINAL
   if(regional)then
      do k=s2g4%kbegin_loc,s2g4%kend_loc
         if(trim(s2g4%names(1,k))=='sf'.and.trim(s2g4%names(2,k))=='vp') then
@@ -150,7 +149,6 @@ subroutine get_derivatives2(st,vp,t,p3d,u,v, &
 !        !$omp end parallel do                     ! ?????fix later
 
   else
-#endif
      do k=s2g4%kbegin_loc,s2g4%kend_loc
         if(trim(s2g4%names(1,k))=='sf'.and.trim(s2g4%names(2,k))=='vp') then
            call stvp2uv(hwork(1,1,1,k),s2g4%inner_vars)
@@ -169,9 +167,7 @@ subroutine get_derivatives2(st,vp,t,p3d,u,v, &
         call compact_dlat(hwork(2,:,:,k),hwork_y(2,:,:,k),vector)
 !$omp end parallel sections
      end do
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
 
   call general_grid2sub(s2g4,hwork,hwork_sub)
   deallocate(hwork)
@@ -344,7 +340,6 @@ subroutine tget_derivatives2(st,vp,t,p3d,u,v,&
   hwork = zero
   call general_sub2grid(s2g4,hwork_sub,hwork)
 
-#ifdef USE_ALL_ORIGINAL
   if(regional)then
 !       !$omp parallel do private (k,vector)     ! ??????????fix this later
      do k=s2g4%kbegin_loc,s2g4%kend_loc
@@ -365,7 +360,6 @@ subroutine tget_derivatives2(st,vp,t,p3d,u,v,&
         end if
      end do
   else
-#endif
      do k=s2g4%kbegin_loc,s2g4%kend_loc
         vector=trim(s2g4%names(1,k))=='sf'.and.trim(s2g4%names(2,k))=='vp'
 !$omp parallel sections
@@ -383,9 +377,7 @@ subroutine tget_derivatives2(st,vp,t,p3d,u,v,&
            call tstvp2uv(hwork(1,1,1,k),s2g4%inner_vars)
         end if
      end do
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
   deallocate(hwork_x,hwork_y)
 
 !     use t_x,etc since don't need to save contents
@@ -537,7 +529,6 @@ subroutine get_derivatives2uv(st,vp,t,p3d,u,v, &
   allocate(hwork_y(s1g4%inner_vars,s1g4%nlat,s1g4%nlon,s1g4%kbegin_loc:s1g4%kend_alloc))
 
 ! x  and y derivative
-#ifdef USE_ALL_ORIGINAL
   if(regional)then
      do k=s1g4%kbegin_loc,s1g4%kend_loc
         vector=trim(s1g4%names(1,k))=='u'.or.trim(s1g4%names(1,k))=='v'
@@ -546,7 +537,6 @@ subroutine get_derivatives2uv(st,vp,t,p3d,u,v, &
      end do
 
   else
-#endif
      do k=s1g4%kbegin_loc,s1g4%kend_loc
         vector=trim(s1g4%names(1,k))=='u'.or.trim(s1g4%names(1,k))=='v'
 !$omp parallel sections
@@ -556,9 +546,7 @@ subroutine get_derivatives2uv(st,vp,t,p3d,u,v, &
         call compact_dlat(hwork(1,:,:,k),hwork_y(1,:,:,k),vector)
 !$omp end parallel sections
      end do
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
 
   deallocate(hwork)
   call general_grid2sub(s1g4,hwork_x,hwork_sub)
@@ -710,7 +698,6 @@ subroutine tget_derivatives2uv(st,vp,t,p3d,u,v,&
 !             initialize hwork to zero, so can accumulate contribution from
 !             all derivatives
 
-#ifdef USE_ALL_ORIGINAL
   if(regional)then
      do k=s1g4%kbegin_loc,s1g4%kend_loc
         vector=trim(s1g4%names(1,k))=='u'.or.trim(s1g4%names(1,k))=='v'
@@ -725,7 +712,6 @@ subroutine tget_derivatives2uv(st,vp,t,p3d,u,v,&
         hwork(1,:,:,k)=tmp1(:,:)+tmp2(:,:)
      end do
   else
-#endif
      do k=s1g4%kbegin_loc,s1g4%kend_loc
         vector=trim(s1g4%names(1,k))=='u'.or.trim(s1g4%names(1,k))=='v'
 !$omp parallel sections
@@ -738,9 +724,7 @@ subroutine tget_derivatives2uv(st,vp,t,p3d,u,v,&
 !$omp end parallel sections
         hwork(1,:,:,k)=tmp1(:,:)+tmp2(:,:)
      end do
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
   deallocate(hwork_x,hwork_y)
 
   call general_grid2sub(s1g4,hwork,hwork_sub)

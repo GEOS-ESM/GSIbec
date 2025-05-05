@@ -34,10 +34,7 @@ subroutine getuv(u,v,st,vp,iflg)
 !$$$
   use m_kinds, only: r_kind,i_kind
   use constants, only: zero
-#ifdef USE_ALL_ORIGINAL
-  use gridmod, only: regional
-#endif /* USE_ALL_ORIGINAL */
-  use gridmod, only: lat2,nsig,lon2,nlat,nlon
+  use gridmod, only: regional,lat2,nsig,lon2,nlat,nlon
   use compact_diffs, only: stvp2uv,tstvp2uv
   use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
   use general_commvars_mod, only: s2guv
@@ -80,7 +77,6 @@ subroutine getuv(u,v,st,vp,iflg)
   allocate(work1(2,s2guv%nlat,s2guv%nlon,s2guv%kbegin_loc:s2guv%kend_alloc))
   call general_sub2grid(s2guv,worksub,work1)
 
-#ifdef USE_ALL_ORIGINAL
   if(regional)then
      if(iflg == 0)then
         do k=s2guv%kbegin_loc,s2guv%kend_loc
@@ -104,7 +100,6 @@ subroutine getuv(u,v,st,vp,iflg)
         end do
      end if
   else
-#endif /* USE_ALL_ORIGINAL */
      if(iflg == 0)then
         do k=s2guv%kbegin_loc,s2guv%kend_loc
            call stvp2uv(work1(1,1,1,k),2)
@@ -114,9 +109,7 @@ subroutine getuv(u,v,st,vp,iflg)
            call tstvp2uv(work1(1,1,1,k),2)
         end do
      end if
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif /* USE_ALL_ORIGINAL */
 
   call general_grid2sub(s2guv,work1,worksub)
   deallocate(work1)

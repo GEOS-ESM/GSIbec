@@ -90,8 +90,6 @@ subroutine get_derivatives (guess,xderivative,yderivative)
 
 ! inquire variable names in x(y)derivative
 
-  if(xderivative%n2d<=0.and.xderivative%n3d<=0) return ! nothing to do
-
   if(xderivative%n2d>0) allocate(dvars2d(xderivative%n2d))
   if(xderivative%n3d>0) allocate(dvars3d(xderivative%n3d))
   call gsi_bundleinquire (xderivative,'shortnames::2d',dvars2d,istatus)
@@ -137,7 +135,6 @@ subroutine get_derivatives (guess,xderivative,yderivative)
      call general_sub2grid(s2g_d,work_bundle%values,hwork)
 
 !    x derivative
-#ifdef USE_ALL_ORIGINAL
      if(regional) then
         do k=s2g_d%kbegin_loc,s2g_d%kend_loc
 !$omp parallel sections 
@@ -148,7 +145,6 @@ subroutine get_derivatives (guess,xderivative,yderivative)
 !$omp end parallel sections
         end do
      else
-#endif
         do k=s2g_d%kbegin_loc,s2g_d%kend_loc
 !$omp parallel sections 
 !$omp section
@@ -157,9 +153,7 @@ subroutine get_derivatives (guess,xderivative,yderivative)
            call compact_dlat(hwork(1,:,:,k),hworke(1,:,:,k),s2g_d%vector(k))
 !$omp end parallel sections
         end do
-#ifdef USE_ALL_ORIGINAL
      end if
-#endif
      call general_grid2sub(s2g_d,hworkd,xderivative%values)
      call general_grid2sub(s2g_d,hworke,yderivative%values)
 
@@ -274,7 +268,6 @@ subroutine tget_derivatives(guess,xderivative,yderivative)
 
   call general_sub2grid(s2g_d,yderivative%values,hworke)
   call general_sub2grid(s2g_d,xderivative%values,hworkd)
-#ifdef USE_ALL_ORIGINAL
   if(regional) then
      do k=s2g_d%kbegin_loc,s2g_d%kend_loc
 !$omp parallel sections 
@@ -285,7 +278,6 @@ subroutine tget_derivatives(guess,xderivative,yderivative)
 !$omp end parallel sections
      end do
   else
-#endif
      do k=s2g_d%kbegin_loc,s2g_d%kend_loc
 !$omp parallel sections 
 !$omp section
@@ -294,9 +286,7 @@ subroutine tget_derivatives(guess,xderivative,yderivative)
         call tcompact_dlon(hwork(1,:,:,k),hworkd(1,:,:,k),s2g_d%vector(k))
 !$omp end parallel sections
      end do
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
   hworkd=hworkd+hworke
 
 
@@ -410,18 +400,14 @@ subroutine get_zderivs(z,z_x,z_y,mype)
   deallocate(z1)
 
   if(mype==workpe) then
-#ifdef USE_ALL_ORIGINAL
      if(regional) then
         call delx_reg(workh,workd1,(.false.))
         call dely_reg(workh,workd2,(.false.))
      else
-#endif
         call compact_dlon(workh,workd1,(.false.))
         call compact_dlat(workh,workd2,(.false.))
      end if
-#ifdef USE_ALL_ORIGINAL
   end if
-#endif
   deallocate(workh)
 
   call general_scatter2sub(g1,workd1,zx1,workpe)
