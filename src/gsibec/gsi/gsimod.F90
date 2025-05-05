@@ -648,6 +648,7 @@
      write(6,setup)
      write(6,gridopts)
      write(6,bkgerr)
+     write(6,strongopts)
      write(6,hybrid_ensemble)
   endif
 
