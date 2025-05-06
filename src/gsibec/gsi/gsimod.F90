@@ -599,14 +599,14 @@
   open(11,file=thisrc)
   read(11,strongopts,iostat=ios)
   if(ios/=0) then
-    call die(myname_,'read(strongopts)',ios)
+    call warn(myname_,'using default(strongopts)')
   endif
   close(11)
 
   open(11,file=thisrc)
   read(11,hybrid_ensemble,iostat=ios)
   if(ios/=0) then
-     call warn(myname_,'using defaults(hybrid_ensemble)')
+     call warn(myname_,'using default(hybrid_ensemble)')
   endif
   close(11)
 
