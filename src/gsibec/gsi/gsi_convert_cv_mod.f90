@@ -34,6 +34,7 @@ subroutine t_to_tv_tl_(t,t_tl,q,q_tl,tv_tl)
  real(r_kind), intent(out) :: tv_tl(:,:,:)
 
  tv_tl = t_tl*(one + epsilon*q) + t*epsilon*q_tl
+ print *, 'DEBUG_RT: convert: t_to_tv_tl_ '
 
 end subroutine t_to_tv_tl_
 
@@ -51,6 +52,7 @@ subroutine t_to_tv_ad_(t,t_ad,q,q_ad,tv_ad)
  t_ad = t_ad + tv_ad * (one + epsilon*q)
  q_ad = q_ad + tv_ad *        epsilon*t
  tv_ad= zero
+ print *, 'DEBUG_RT: convert: t_to_tv_ad_ '
 
 end subroutine t_to_tv_ad_
 
@@ -63,7 +65,9 @@ subroutine tv_to_t_tl_(tv,tv_tl,q,q_tl,t_tl)
  real(r_kind), intent(in   ) ::  q_tl(:,:,:)
  real(r_kind), intent(inout) ::  t_tl(:,:,:)
 
- t_tl = (tv_tl*(one+epsilon*q)-tv*epsilon*q_tl)/(one+epsilon*q)**2
+!t_tl = (tv_tl*(one+epsilon*q)-tv*epsilon*q_tl)/(one+epsilon*q)**2
+ t_tl =  tv_tl
+ print *, 'DEBUG_RT: convert: tv_to_t_tl_ '
 
 end subroutine tv_to_t_tl_
 
@@ -80,6 +84,8 @@ subroutine tv_to_t_ad_(tv,tv_ad,q,q_ad,t_ad)
 
  real(r_kind),allocatable :: temp(:,:,:)
 
+ t_ad = tv_ad
+ return
  allocate(temp(size(t_ad,1),size(t_ad,2),size(t_ad,3)))
 
  temp = t_ad/(epsilon*q+one)
@@ -87,6 +93,7 @@ subroutine tv_to_t_ad_(tv,tv_ad,q,q_ad,t_ad)
  tv_ad = tv_ad + temp
  q_ad  = q_ad  - tv*epsilon*temp/(epsilon*q+one)
  t_ad = zero
+ print *, 'DEBUG_RT: convert: tv_to_t_ad_ '
  
  deallocate(temp)
 

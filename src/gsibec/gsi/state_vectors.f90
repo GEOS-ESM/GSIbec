@@ -805,7 +805,7 @@ function dot_prod_red_st_r1(xst,yst,iroot,which) result(dotprod_red)
   end if
 end function dot_prod_red_st_r1
 ! ----------------------------------------------------------------------
-subroutine set_random_st ( xst )
+subroutine set_random_st ( xst, myseed )
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    set_random_st
@@ -830,13 +830,18 @@ subroutine set_random_st ( xst )
 !$$$ end documentation block
   implicit none
   type(gsi_bundle), intent(inout) :: xst
+  integer, optional, intent(in) :: myseed
 
   integer(i_kind):: i,jj,iseed,itsn,iprse,ierror,ier
   integer, allocatable :: nseed(:) ! Intentionaly default integer
   real(r_kind), pointer,dimension(:,:,:):: p_tv,p_q,p_prse,p_tsen
   real(r_kind), pointer,dimension(:,:  ):: p_ps
 
-  iseed=nsig ! just a number
+  if (present(myseed) ) then
+    iseed=myseed
+  else
+    iseed=nsig ! just a number
+  endif
   call random_seed(size=jj)
   allocate(nseed(jj))
   nseed(1:jj)=iseed
