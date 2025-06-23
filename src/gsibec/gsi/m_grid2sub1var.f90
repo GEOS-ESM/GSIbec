@@ -1,10 +1,8 @@
 module m_grid2sub1var
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: mype,mpi_rtype,gsi_mpi_comm_world
-!use gridmod, only: sg=>grd_a
 use general_sub2grid_mod, only: sub2grid_info
 use mpeu_util, only: die 
-! RTodling: this will need revision for dual resolution
 implicit none
 public :: grid2sub1var
 interface grid2sub1var 
