@@ -46,6 +46,7 @@ gsi_enscouplermod.f90
 gsi_chemguess_mod.F90
 gsi_io.f90
 gsi_metguess_mod.F90
+gsibec_adjtest_mod.F90
 gsimod.F90
 guess_grids.f90
 hybrid_ensemble_parameters.f90

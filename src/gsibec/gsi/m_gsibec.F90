@@ -11,6 +11,7 @@ use m_mpimod, only: setworld
 
 use gsi_4dvar, only: nsubwin
 use gsi_4dvar, only: lsqrtb
+use gsibec_adjtest_mod, only: iadtest
 use hybrid_ensemble_parameters, only: ntlevs_ens
 use hybrid_ensemble_parameters, only: nymd,nhms
 use jfunc, only: nsclen,npclen,ntclen
@@ -59,6 +60,10 @@ use hybrid_ensemble_isotropic, only: ensemble_forward_model
 use general_sub2grid_mod, only: sub2grid_info
 use general_sub2grid_mod, only: general_sub2grid_create_info
 use general_sub2grid_mod, only: general_sub2grid_destroy_info
+
+use gsibec_adjtest_mod, only: adtest_cv
+use gsibec_adjtest_mod, only: adtest_bkgcov
+use gsibec_adjtest_mod, only: adtest_stvp2uv
 
 use mpeu_util, only: die
 use mpeu_util, only: warn
@@ -767,6 +772,9 @@ contains
 ! get test vector (mval)
 ! call get_state_perts_ (mval(1))
 !
+  if(bkgv_write_sv/='null') &
+  call write_bundle(mval(1),trim(bkgv_write_sv)//'_initial')
+
   call set_silly_(mval(1))
   call gsi2model_units_ad_(mval(1))
 
@@ -783,7 +791,7 @@ contains
 
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
-  call write_bundle(mval(1),bkgv_write_sv)
+  call write_bundle(mval(1),trim(bkgv_write_sv)//'_final')
 
 ! convert back to model units (just for consistency here)
   call gsi2model_units_(mval(1))
@@ -824,6 +832,11 @@ contains
      if (bypassbe) bypassbe_ = .true.
   endif
 
+! Perform adjoint test
+  if (iadtest(1)) call adtest_cv()
+  if (iadtest(2)) call adtest_bkgcov(sval(1))
+  if (iadtest(3)) call adtest_stvp2uv(1,mype)
+
 ! start work space
   if (l_hyb_ens) then
      allocate(eval(ntlevs_ens))
@@ -855,6 +868,10 @@ contains
   do ii=1,ntlevs_ens
      call gsi2model_units_ad_(sval(ii))
   end do
+
+! if so write out fields from gsi (in GSI units)
+  if(bkgv_write_sv/='null') &
+  call write_bundle(sval(ntguessig),trim(bkgv_write_sv)//'_initial')
 
   if (l_hyb_ens) then
      do ii=1,ntlevs_ens
@@ -894,7 +911,7 @@ contains
 
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
-  call write_bundle(sval(ntguessig),bkgv_write_sv)
+  call write_bundle(sval(ntguessig),trim(bkgv_write_sv)//'_final')
 
 ! convert from gsi to model units
   do ii=1,ntlevs_ens
