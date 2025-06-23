@@ -10,10 +10,11 @@ module m_read_geosens
   use gsi_bundlemod, only: assignment(=)
   use gsi_bundlemod, only: gsi_bundlegetpointer
 
-  use gridmod,only: nlat,nlon,nsig,iglobal
+  use gridmod,only: nsig
   use control_vectors, only: nc2d,nc3d
   use control_vectors, only: cvars2d,cvars3d
 
+  use general_sub2grid_mod, only: sub2grid_info
   use m_grid2sub1var, only: grid2sub1var
 
 implicit none
@@ -28,10 +29,10 @@ end interface
 
 integer(i_kind),allocatable,dimension(:):: spec_send 
 integer(i_kind),allocatable,dimension(:):: disp_spec
-integer(i_kind) :: nsig1o
+integer(i_kind) :: nlat,nlon,iglobal,nsig1o
 
 contains
-subroutine read_geosens_(xx,filename,npe,mype,root,nreaders)
+subroutine read_geosens_(sgrid,xx,filename,npe,mype,root,nreaders)
 
   use m_nc_GEOSens, only: nc_GEOSens_vars
   use m_nc_GEOSens, only: nc_GEOSens_read
@@ -39,13 +40,14 @@ subroutine read_geosens_(xx,filename,npe,mype,root,nreaders)
 
   implicit none
 
+  type(sub2grid_info),intent(in) :: sgrid 
   type(gsi_bundle),intent(inout) :: xx(:)
   character(len=*),intent(in) :: filename(:)
   integer, intent(in) :: npe,mype,root
   integer, optional, intent(in) :: nreaders
 
 ! local variables
-  character(len=*), parameter :: myname="m_readpairs"
+  character(len=*), parameter :: myname="read_geosens_"
   integer i,iret,numcases,nreaders_
   integer :: mm1,nsig1,ii,ns,nskip
   type(nc_GEOSens_vars) :: evars
@@ -60,6 +62,10 @@ subroutine read_geosens_(xx,filename,npe,mype,root,nreaders)
   endif
   numcases = size(filename)
   nsig1 = nsig+1
+
+  nlat=sgrid%nlat
+  nlon=sgrid%nlon
+  iglobal=sgrid%iglobal
 
   call init_()
 
@@ -90,7 +96,7 @@ subroutine read_geosens_(xx,filename,npe,mype,root,nreaders)
      ns=ns-nreaders_/nskip
      do ii=1,nreaders_,nskip
         if(ns<=numcases) then
-           call scatter_(ns,nprocs(ii))
+           call scatter_(sgrid,ns,nprocs(ii))
         endif
         ns=ns+1
      enddo
@@ -298,7 +304,8 @@ contains
 
  end subroutine read_
 
- subroutine scatter_(n,proc1)
+ subroutine scatter_(sgrid,n,proc1)
+  type(sub2grid_info),intent(in) :: sgrid 
   integer, intent(in) :: n, proc1
 
 ! local variables
@@ -308,7 +315,7 @@ contains
 
   allocate(z41(iglobal,nsig1o))
 
-  call grid2subNvar_ ( reshape(z4all,(/nlat,nlon,nsig1o/)), xx(n), mype, proc1 )
+  call grid2subNvar_ ( sgrid, reshape(z4all,(/nlat,nlon,nsig1o/)), xx(n), mype, proc1 )
 
   deallocate(z41)
 
@@ -320,8 +327,9 @@ contains
 
 end subroutine read_geosens_
 
-subroutine grid2subNvar_ ( zvec, xx, mype, proc1 )
+subroutine grid2subNvar_ ( sgrid, zvec, xx, mype, proc1 )
   implicit none
+  type(sub2grid_info),intent(in) :: sgrid 
   real(r_kind),intent(in) :: zvec(:,:,:)
   type(gsi_bundle),intent(inout) :: xx
   integer,intent(in) :: mype
@@ -338,7 +346,7 @@ subroutine grid2subNvar_ ( zvec, xx, mype, proc1 )
     if(istatus==0) then
       is=ie+1
       ie=ie+nsig
-      call grid2sub1var ( zvec(:,:,is:ie), xx%r3(jj)%q, proc1, istatus )
+      call grid2sub1var ( sgrid, zvec(:,:,is:ie), xx%r3(jj)%q, proc1, istatus )
     endif
   enddo
 
@@ -348,7 +356,7 @@ subroutine grid2subNvar_ ( zvec, xx, mype, proc1 )
        ie=ie+1
        allocate(aux(size(xx%r2(jj)%q,1),size(xx%r2(jj)%q,2)))
        aux=zvec(:,:,ie)
-       call grid2sub1var ( aux, xx%r2(jj)%q, proc1, istatus )
+       call grid2sub1var ( sgrid, aux, xx%r2(jj)%q, proc1, istatus )
        deallocate(aux)
      endif
   enddo

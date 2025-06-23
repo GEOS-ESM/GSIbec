@@ -1,7 +1,8 @@
 module m_grid2sub1var
 use m_kinds, only: i_kind,r_kind
 use m_mpimod, only: mype,mpi_rtype,gsi_mpi_comm_world
-use gridmod, only: sg=>grd_a
+!use gridmod, only: sg=>grd_a
+use general_sub2grid_mod, only: sub2grid_info
 use mpeu_util, only: die 
 ! RTodling: this will need revision for dual resolution
 implicit none
@@ -12,8 +13,9 @@ interface grid2sub1var
 end interface
 character(len=*),parameter :: myname='m_grid2sub1var'
 contains
-      subroutine grid2sub3d_ ( fld, sub, proc, stat_ )
+      subroutine grid2sub3d_ ( sg, fld, sub, proc, stat_ )
 
+      type(sub2grid_info),intent(in) :: sg
       real(r_kind),   intent(in)   :: fld(:,:,:) ! only exists on proc
       real(r_kind),   intent(out)  :: sub(:,:,:)
       integer(i_kind),intent(in)   :: proc
@@ -76,8 +78,9 @@ contains
 
       end subroutine grid2sub3d_
 
-      subroutine grid2sub2d_ ( fld, sub, proc, stat_ )
+      subroutine grid2sub2d_ ( sg, fld, sub, proc, stat_ )
 
+      type(sub2grid_info),intent(in) :: sg
       real(r_kind),   intent(in)   :: fld(:,:) ! only exists on proc
       real(r_kind),   intent(out)  :: sub(:,:)
       integer(i_kind),intent(in)   :: proc

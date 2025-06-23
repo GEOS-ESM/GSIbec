@@ -81,12 +81,7 @@ use jfunc, only: iadate
 use hybrid_ensemble_parameters, only: uv_hyb_ens
 use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
 ! following needed for vor/div calculation ... need to be careful about resolution
-use constants, only: zero,rearth
-use gridmod, only: nlat,nlon
-use compact_diffs, only: cdiff_created
-use compact_diffs, only: cdiff_initialized
-use compact_diffs, only: create_cdiff_coefs
-use compact_diffs, only: inisph
+ use gridmod, only: nlat,nlon
 #ifdef USE_ALL_ORIGINAL
 use timermod, only: timer_ini,timer_fnl
 #endif /* USE_ALL_ORIGINAL */
@@ -243,12 +238,7 @@ use jfunc, only: iadate
 use hybrid_ensemble_parameters, only: uv_hyb_ens
 use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
 ! following needed for vor/div calculation ... need to be careful about resolution
-use constants, only: zero,rearth
 use gridmod, only: nlat,nlon
-use compact_diffs, only: cdiff_created
-use compact_diffs, only: cdiff_initialized
-use compact_diffs, only: create_cdiff_coefs
-use compact_diffs, only: inisph
 #ifdef USE_ALL_ORIGINAL
 use timermod, only: timer_ini,timer_fnl
 #endif /* USE_ALL_ORIGINAL */
@@ -458,8 +448,8 @@ implicit none
          write(6,*) myname, ': ges%(nlat,nlon) = ', nlat,nlon
          write(6,*) myname, ': dual resolution hybrid analysis in use'
       endif
-      call stop2(999) ! this is only ready for single resolution
-                      ! calc of u/v below prevents dual-resolution
+!     call stop2(999) ! this is only ready for single resolution
+!                     ! calc of u/v below prevents dual-resolution
    endif
 
 !  Create temporary bundle to hold input field
@@ -655,7 +645,7 @@ implicit none
 !  TODO: used NT to define time within window (RTodling)
    nymd = iadate(1)*10000 + iadate(2)*100 + iadate(3)
    nhms = iadate(4)*10000
-   call state_put(flds,grd,nymd,nhms,member)
+   call state_put(grd,flds,nymd,nhms,member)
 
 !  Clean up
    call gsi_bundledestroy(flds)

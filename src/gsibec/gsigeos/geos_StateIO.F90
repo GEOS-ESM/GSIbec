@@ -26,8 +26,8 @@ use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: assignment(=)
 use general_sub2grid_mod, only: sub2grid_info
 implicit none
-type(gsi_bundle),   intent(inout) :: xx
 type(sub2grid_info),intent(in   ) :: sgrid ! internal subdomain grid
+type(gsi_bundle),   intent(inout) :: xx
 integer(i_kind),    intent(in   ) :: nymd,nhms
 integer(i_kind),    intent(in   ) :: iwhat
 integer(i_kind),optional,intent(in ) :: tau   ! time interval in hours
@@ -40,8 +40,8 @@ use gsi_bundlemod, only: assignment(=)
 use gsi_bundlemod, only: gsi_bundlegetpointer
 use general_sub2grid_mod, only: sub2grid_info
 implicit none
-type(gsi_bundle),   intent(inout) :: xx(:)
 type(sub2grid_info),intent(in   ) :: sgrid ! internal subdomain grid
+type(gsi_bundle),   intent(inout) :: xx(:)
 integer(i_kind),    intent(in   ) :: nymd,nhms
 integer(i_kind),optional,intent(in ) :: tau   ! time interval in hours
 
@@ -53,17 +53,17 @@ allocate(fnames(size(xx)))
 do ii=1,size(xx)
    call strTemplate(fnames(ii),ens_fname_tmpl,nymd=nymd,nhms=nhms,ens=ii,stat=istatus)
 enddo
-call geos_readens(xx,fnames,npe,mype,0)
+call geos_readens(sgrid,xx,fnames,npe,mype,0)
 deallocate(fnames)
 
 end subroutine get_Nstate_
-subroutine state_put_(xx,sgrid,nymd,nhms,member)
+subroutine state_put_(sgrid,xx,nymd,nhms,member)
 use gsi_bundlemod, only: gsi_bundle
 use gsi_bundlemod, only: assignment(=)
 use general_sub2grid_mod, only: sub2grid_info
 implicit none
-type(gsi_bundle),   intent(inout) :: xx
 type(sub2grid_info),intent(in   ) :: sgrid ! internal subdomain grid
+type(gsi_bundle),   intent(inout) :: xx
 integer(i_kind),    intent(in   ) :: nymd,nhms
 integer(i_kind),    intent(in   ) :: member
 end subroutine state_put_
