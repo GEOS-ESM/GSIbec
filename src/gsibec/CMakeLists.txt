@@ -22,6 +22,7 @@ target_link_libraries( ${PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} )
 # NCEP spectral library
 if( ip_FOUND )
     target_link_libraries( gsibec PUBLIC ip::ip_d)
+    target_compile_definitions(gsibec PRIVATE USE_SP_MOD=1)
 endif()
 
 # Enable including of local header Fortran file templates

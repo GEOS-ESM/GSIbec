@@ -209,7 +209,7 @@ contains
   endif
   call set_pointer_()
 
-! create subdomain/grid indexes 
+! create subdomain/grid indexes
 ! call general_sub2grid_create_info(sg,0,nlat,nlon,nsig,1,.false.)
 ! istart=sg%istart
 ! jstart=sg%jstart
@@ -231,14 +231,14 @@ contains
   character(len=*),intent(in) :: varname
   integer(i_kind),intent(in) :: islot
   real(r_kind),intent(in) :: var(:,:)
-  call gsiguess_set(varname,islot,var) 
+  call gsiguess_set(varname,islot,var)
   end subroutine set_guess2_
 !--------------------------------------------------------
   subroutine set_guess3_(varname,islot,var)
   character(len=*),intent(in) :: varname
   integer(i_kind),intent(in) :: islot
   real(r_kind),intent(in) :: var(:,:,:)
-  call gsiguess_set(varname,islot,var) 
+  call gsiguess_set(varname,islot,var)
   end subroutine set_guess3_
 !--------------------------------------------------------
   subroutine final_(closempi)
@@ -255,6 +255,9 @@ contains
   use constants, only: init_constants_derived
   use constants, only: pi,one,two,half,rad2deg
   use mpeu_util, only: die
+#ifdef USE_SP_MOD
+  use sp_mod, only: splat
+#endif
   implicit none
    logical,intent(in) :: eqspace
    character(len=*), intent(in) :: units
@@ -460,13 +463,13 @@ contains
 ! subprogram:    set_pointer
 !   prgmmr: treadon          org: np23                date: 2004-07-28
 !
-! abstract: Set length of control vector and other control 
+! abstract: Set length of control vector and other control
 !           vector constants
 !
 ! program history log:
 !   2004-07-28  treadon
 !   2006-04-21  kleist - include pointers for more time tendency arrays
-!   2008-12-04  todling - increase number of 3d fields from 6 to 8 
+!   2008-12-04  todling - increase number of 3d fields from 6 to 8
 !   2009-09-16  parrish - add hybrid_ensemble connection in call to setup_control_vectors
 !   2010-03-01  zhu     - add nrf_levb and nrf_leve, generalize nval_levs
 !                       - generalize vector starting points such as nvpsm, nst2, and others
@@ -524,7 +527,7 @@ contains
     ntclen=0
     nclen=nsubwin*nval_len+nsclen+npclen+ntclen
     nrclen=nsclen+npclen+ntclen
-  
+
     n_ensz=0
     nval_lenz_enz=0
     if(l_hyb_ens.and.generate_ens) then
