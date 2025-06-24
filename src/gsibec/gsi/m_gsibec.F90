@@ -724,6 +724,11 @@ contains
 
   if (bypassbe_) then
      grady=gradx
+     if (l_hyb_ens) then
+        call ensemble_forward_model_ad(gradx%step(1),gradx%aens(1,:),1)
+        grady=gradx
+        call ensemble_forward_model(grady%step(1),grady%aens(1,:),1)
+     endif
   else
      grady=zero
      call bkerror(gradx,grady, &
@@ -937,6 +942,7 @@ contains
 !--------------------------------------------------------
   subroutine get_state_perts_(fc)
   use m_grid2sub1var, only: grid2sub1var
+  use gridmod, only: sg=>grd_a
   use gridmod, only: nlon,nlat,lat1,lon1
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -953,7 +959,7 @@ contains
      allocate(grdfld(0,0,0))
   endif
   allocate(subfld(lat2,lon2,nsig))
-  call grid2sub1var (grdfld,subfld,0,ier)
+! call grid2sub1var (sg,fc,subfld,0,ier)
   do ii=1,fc%n3d
      call gsi_bundlegetpointer(fc,trim(fc%r3(ii)%shortname),ptr3d,ier)
      ptr3d = subfld
