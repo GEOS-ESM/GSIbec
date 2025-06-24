@@ -130,8 +130,9 @@ zrnmi_mod.f90
 )
 
 # Stubs for sp lib if package is not found
-if( NOT sp_FOUND )
+if( ip_FOUND )
   list( APPEND gsi_src_files_list stub_sp.f90 )
+  set_source_files_properties( stub_sp.f90 PROPERTIES COMPILE_DEFINITIONS USE_SP_MOD )
 endif()
 
 set( gsi_src_files
