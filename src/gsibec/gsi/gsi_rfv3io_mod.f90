@@ -11,7 +11,7 @@ module gsi_rfv3io_mod
 !                           gsi_nemsio_mod as a pattern.
 !   2017-10-10  wu      - setup A grid and interpolation coeff in generate_anl_grid
 !   2018-02-22  wu      - add subroutines for read/write fv3_ncdf
-!   2019        ting    - modifications for use for ensemble IO and cold start files 
+!   2019        ting    - modifications for use for ensemble IO and cold start files
 !   2019-03-13  CAPS(C. Tong) - Port direct radar DA capabilities.
 !   2021-11-01  lei     - modify for fv3-lam parallel IO
 !   2022-01-07  Hu      - add code to read/write subdomain restart files.
@@ -21,16 +21,16 @@ module gsi_rfv3io_mod
 !   2022-03-01 X.Lu @ X.Wang - add gsi_rfv3io_get_ens_grid_specs for dual ens HAFS. POC: xuguang.wang@ou.edu
 !   2022-03-15  Hu      - add code to read/write 2m T and Q for they will be
 !                         used as background for surface observation operator
-!   2022-04-15  Wang    - add IO for regional FV3-CMAQ (RRFS-CMAQ) model 
-!   2022-08-10  Wang    - add IO for regional FV3-SMOKE (RRFS-SMOKE) model 
+!   2022-04-15  Wang    - add IO for regional FV3-CMAQ (RRFS-CMAQ) model
+!   2022-08-10  Wang    - add IO for regional FV3-SMOKE (RRFS-SMOKE) model
 !   2023-07-30  Zhao    - add IO for the analysis of the significant wave height
 !                         (SWH, aka howv in GSI) in fv3-lam based DA (eg., RRFS-3DRTMA)
-!   2024-01-24  X.Zhang - bug fix for reading the soil temp and mois from the wram start file 
+!   2024-01-24  X.Zhang - bug fix for reading the soil temp and mois from the wram start file
 !
 ! subroutines included:
 !   sub gsi_rfv3io_get_grid_specs
 !   sub gsi_rfv3io_get_ens_grid_specs
-!   sub read_fv3_files 
+!   sub read_fv3_files
 !   sub read_fv3_netcdf_guess
 !   sub gsi_fv3ncdf2d_read
 !   sub gsi_fv3ncdf_read
@@ -60,7 +60,7 @@ module gsi_rfv3io_mod
   use guess_grids, only: nfldsig,ntguessig,ifilesig
   use rapidrefresh_cldsurf_mod, only: i_use_2mq4b,i_use_2mt4b
   use chemmod, only: naero_cmaq_fv3,aeronames_cmaq_fv3,imodes_cmaq_fv3,laeroana_fv3cmaq
-  use chemmod, only: naero_smoke_fv3,aeronames_smoke_fv3,laeroana_fv3smoke  
+  use chemmod, only: naero_smoke_fv3,aeronames_smoke_fv3,laeroana_fv3smoke
   use rapidrefresh_cldsurf_mod, only: i_howv_3dda, i_gust_3dda
 
   implicit none
@@ -82,7 +82,7 @@ module gsi_rfv3io_mod
   end type type_fv3regfilenameg
 
   integer(i_kind):: fv3sar_bg_opt=0
-  
+
   type(type_fv3regfilenameg),allocatable:: bg_fv3regfilenameg(:)
   integer(i_kind) nx,ny,nz
   integer(i_kind) nxens,nyens
@@ -93,28 +93,30 @@ module gsi_rfv3io_mod
   integer(i_kind),allocatable:: ijns2d(:),displss2d(:),ijns(:),displss(:)
   integer(i_kind),allocatable:: ijnz(:),displsz_g(:)
 
-  real(r_kind),dimension(:,:  ),allocatable:: ges_ps_bg 
-  real(r_kind),dimension(:,:  ),allocatable:: ges_ps_inc 
-  real(r_kind),dimension(:,:,:  ),allocatable:: ges_delp_bg 
-  type(sub2grid_info) :: grd_fv3lam_dynvar_ionouv 
-  type(sub2grid_info) :: grd_fv3lam_tracer_ionouv 
+  real(r_kind),dimension(:,:  ),allocatable:: ges_ps_bg
+  real(r_kind),dimension(:,:  ),allocatable:: ges_ps_inc
+  real(r_kind),dimension(:,:,:  ),allocatable:: ges_delp_bg
+  type(sub2grid_info) :: grd_fv3lam_dynvar_ionouv
+  type(sub2grid_info) :: grd_fv3lam_tracer_ionouv
   type(sub2grid_info) :: grd_fv3lam_tracerchem_ionouv
-  type(sub2grid_info) :: grd_fv3lam_tracersmoke_ionouv 
+  type(sub2grid_info) :: grd_fv3lam_tracersmoke_ionouv
   type(sub2grid_info) :: grd_fv3lam_phyvar_ionouv
-  type(sub2grid_info) :: grd_fv3lam_uv 
+  type(sub2grid_info) :: grd_fv3lam_uv
   integer(i_kind) ,parameter:: ndynvarslist=13, ntracerslist=8, nphyvarslist=2
 
   character(len=max_varname_length), dimension(ndynvarslist), parameter :: &
     vardynvars = [character(len=max_varname_length) :: &
       "u","v","u_w","u_s","v_w","v_s","t","tv","tsen","w","delp","ps","delzinc"]
-  character(len=max_varname_length), dimension(ntracerslist+naero_cmaq_fv3+7+naero_smoke_fv3), parameter :: & 
+  character(len=max_varname_length), dimension(ntracerslist+naero_cmaq_fv3+7+naero_smoke_fv3), parameter :: &
     vartracers =  [character(len=max_varname_length) :: &
-      'q','oz','ql','qi','qr','qs','qg','qnr',aeronames_cmaq_fv3,'pm25at','pm25ac','pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3]
+      'q','oz','ql','qi','qr','qs','qg','qnr',aeronames_cmaq_fv3,'pm25at','pm25ac',&
+      'pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3]
   character(len=max_varname_length), dimension(nphyvarslist), parameter :: &
     varphyvars = [character(len=max_varname_length) :: 'dbz','fed']
   character(len=max_varname_length), dimension(16+naero_cmaq_fv3+7+naero_smoke_fv3+1), parameter :: &
     varfv3name = [character(len=max_varname_length) :: &
-      'u','v','W','T','delp','sphum','o3mr','liq_wat','ice_wat','rainwat','snowwat','graupel','rain_nc','ref_f3d','flash_extent_density','ps','DZ', & 
+      'u','v','W','T','delp','sphum','o3mr','liq_wat','ice_wat','rainwat',&
+      'snowwat','graupel','rain_nc','ref_f3d','flash_extent_density','ps','DZ', &
       aeronames_cmaq_fv3,'pm25at','pm25ac','pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3], &
       vgsiname = [character(len=max_varname_length) :: &
         'u','v','w','tsen','delp','q','oz','ql','qi','qr','qs','qg','qnr','dbz','fed','ps','delzinc', &
@@ -157,7 +159,7 @@ module gsi_rfv3io_mod
 
   integer(i_kind) k_slmsk,k_tsea,k_vfrac,k_vtype,k_stype,k_zorl,k_smc,k_stc
   integer(i_kind) k_snwdph,k_f10m,mype_2d,n2d,k_orog,k_psfc,k_t2m,k_q2m,k_howv,k_gust
-  parameter(                   &  
+  parameter(                   &
     k_f10m =1,                  &   !fact10
     k_stype=2,                  &   !soil_type
     k_vfrac=3,                  &   !veg_frac
@@ -175,29 +177,29 @@ module gsi_rfv3io_mod
     k_gust =15,                 &   ! wind gust (aka gust in GSI)
     n2d=15                   )
   logical :: grid_reverse_flag
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_dynmetvars3d_nouv 
-                                    ! copy of cvars3d excluding uv 3-d fields   
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracermetvars3d_nouv 
-                                    ! copy of cvars3d excluding uv 3-d fields   
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_dynmetvars3d_nouv
+                                    ! copy of cvars3d excluding uv 3-d fields
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracermetvars3d_nouv
+                                    ! copy of cvars3d excluding uv 3-d fields
   character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_phymetvars3d_nouv
   character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracerchemvars3d_nouv
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracersmokevars3d_nouv 
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracersmokevars3d_nouv
                                     ! copy of cvars3d excluding uv 3-d fields
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_dynmetvars2d_nouv 
-                                    ! copy of cvars3d excluding uv 3-d fields   
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracermetvars2d_nouv 
-                                    ! copy of cvars3d excluding uv 3-d fields   
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_names_gsibundle_dynvar_nouv 
-                                    !to define names in gsibundle 
-  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_names_gsibundle_tracer_nouv 
-                                    !to define names in gsibundle 
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_dynmetvars2d_nouv
+                                    ! copy of cvars3d excluding uv 3-d fields
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_io_tracermetvars2d_nouv
+                                    ! copy of cvars3d excluding uv 3-d fields
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_names_gsibundle_dynvar_nouv
+                                    !to define names in gsibundle
+  character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_names_gsibundle_tracer_nouv
+                                    !to define names in gsibundle
   character(len=max_varname_length),allocatable,dimension(:) :: fv3lam_names_gsibundle_phyvar_nouv
-  type(gsi_bundle):: gsibundle_fv3lam_dynvar_nouv 
-  type(gsi_bundle):: gsibundle_fv3lam_tracer_nouv 
+  type(gsi_bundle):: gsibundle_fv3lam_dynvar_nouv
+  type(gsi_bundle):: gsibundle_fv3lam_tracer_nouv
   type(gsi_bundle):: gsibundle_fv3lam_phyvar_nouv
   type(gsi_bundle):: gsibundle_fv3lam_tracerchem_nouv
-  type(gsi_bundle):: gsibundle_fv3lam_tracersmoke_nouv 
- 
+  type(gsi_bundle):: gsibundle_fv3lam_tracersmoke_nouv
+
 contains
   subroutine fv3regfilename_init(this,it)
   implicit None
@@ -300,7 +302,7 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
   integer(i_kind) gfile_grid_spec
   character(:),allocatable    :: grid_spec
   character(:),allocatable    :: ak_bk
-  character(len=:),allocatable :: coupler_res_filenam 
+  character(len=:),allocatable :: coupler_res_filenam
   integer(i_kind) i,k,ndimensions,iret,nvariables,nattributes,unlimiteddimid
   integer(i_kind) len,gfile_loc
   character(len=max_varname_length) :: name
@@ -411,7 +413,7 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
        endif
     enddo
 !
-!  need to decide the grid orientation of the FV regional model    
+!  need to decide the grid orientation of the FV regional model
 !
 !   grid_type_fv3_regional = 0 : decide grid orientation based on
 !                                grid_lat/grid_lon
@@ -422,7 +424,7 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
         imiddle=nx/2
         jmiddle=ny/2
         if( (grid_latt(imiddle,1) < grid_latt(imiddle,ny)) .and. &
-            (grid_lont(1,jmiddle) < grid_lont(nx,jmiddle)) ) then 
+            (grid_lont(1,jmiddle) < grid_lont(nx,jmiddle)) ) then
             grid_type_fv3_regional = 2
         else
             grid_type_fv3_regional = 1
@@ -434,7 +436,7 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
        grid_reverse_flag=.true.    ! grid is revered comparing to usual map view
     else if(grid_type_fv3_regional == 2) then
        !if(mype==0) write(6,*) 'FV3 regional input grid is  W-E S-N grid'
-       grid_reverse_flag=.false.   ! grid orientated just like we see on map view    
+       grid_reverse_flag=.false.   ! grid orientated just like we see on map view
     else
        write(6,*) 'Error: FV3 regional input grid is unknown grid'
        call stop2(678)
@@ -487,7 +489,7 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
     enddo
     iret=nf90_close(gfile_loc)
 
-!!!!! change unit of ak 
+!!!!! change unit of ak
     do i=1,nsig+1
        eta1_ll(i)=ak(i)*0.001_r_kind
        eta2_ll(i)=bk(i)
@@ -673,16 +675,16 @@ end subroutine gsi_rfv3io_get_ens_grid_specs
 subroutine gsi_fv3ncdf2d_read_v1(filenamein,varname,varname2,work_sub,mype_io)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    gsi_fv23ncdf2d_readv1       
+! subprogram:    gsi_fv23ncdf2d_readv1
 !   prgmmr: T. Lei                               date: 2019-03-28
 !           modified from gsi_fv3ncdf_read and gsi_fv3ncdf2d_read
 !
 ! abstract: read in a 2d field from a netcdf FV3 file in mype_io
-!          then scatter the field to each PE 
+!          then scatter the field to each PE
 ! program history log:
 !
 !   input argument list:
-!     filename    - file name to read from       
+!     filename    - file name to read from
 !     varname     - variable name to read in
 !     varname2    - variable name to read in
 !     mype_io     - pe to read in the field
@@ -709,7 +711,7 @@ subroutine gsi_fv3ncdf2d_read_v1(filenamein,varname,varname2,work_sub,mype_io)
 
     implicit none
     character(*)   ,   intent(in   ) :: varname,varname2,filenamein
-    real(r_kind)   ,   intent(out  ) :: work_sub(lat2,lon2) 
+    real(r_kind)   ,   intent(out  ) :: work_sub(lat2,lon2)
     integer(i_kind)   ,intent(in   ) :: mype_io
     real(r_kind),allocatable,dimension(:,:,:):: uu
     real(r_kind),allocatable,dimension(:):: work
@@ -768,12 +770,12 @@ subroutine gsi_fv3ncdf2d_read_v1(filenamein,varname,varname2,work_sub,mype_io)
 
     deallocate (work)
     return
-end subroutine  gsi_fv3ncdf2d_read_v1 
+end subroutine  gsi_fv3ncdf2d_read_v1
 
 subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ensgrid)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    gsi_fv3ncdf_read       
+! subprogram:    gsi_fv3ncdf_read
 !   prgmmr: wu               org: np22                date: 2017-10-10
 !           lei  re-write for parallelization         date: 2021-09-29
 !                 similar for horizontal recurisve filtering
@@ -781,7 +783,7 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
 ! program history log:
 !
 !   input argument list:
-!     filename    - file name to read from       
+!     filename    - file name to read from
 !     varname     - variable name to read in
 !     varname2    - variable name to read in
 !     mype_io     - pe to read in the field
@@ -808,7 +810,7 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
     use general_sub2grid_mod, only: sub2grid_info,general_grid2sub
 
     implicit none
-    type(sub2grid_info),        intent(in   ) :: grd_ionouv 
+    type(sub2grid_info),        intent(in   ) :: grd_ionouv
     type(gsi_bundle),           intent(inout) :: cstate_nouv
     character(*),               intent(in   ) :: filenamein
     type (type_fv3regfilenameg),intent(in   ) ::fv3filenamegin
@@ -870,7 +872,7 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
           mype_read_rank(nread) = members_read(i)
        endif
     enddo
-    
+
     call setcomm(iworld,iworld_group,nread,mype_read_rank,mpi_comm_read,ierror)
 
     if (procuse) then
@@ -879,9 +881,11 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),'.',nio
-             iret=nf90_open(filename_layout,ior(nf90_nowrite,nf90_mpiio),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
+             iret=nf90_open(filename_layout,ior(nf90_nowrite,nf90_mpiio),gfile_loc_layout(nio),&
+                            comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
              if(iret/=nf90_noerr) then
-                write(6,*)' gsi_fv3ncdf_read: problem opening ',trim(filename_layout),gfile_loc_layout(nio),', Status = ',iret
+                write(6,*)' gsi_fv3ncdf_read: problem opening ',trim(filename_layout),&
+                            gfile_loc_layout(nio),', Status = ',iret
                 call stop2(333)
              endif
           enddo
@@ -894,11 +898,11 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
        endif
        do ilevtot=kbgn,kend
           vgsiname=grd_ionouv%names(1,ilevtot)
-          if(trim(vgsiname)=='delzinc') cycle  !delzinc is not read from DZ ,it's started from hydrostatic height 
-          if(trim(vgsiname)=='amassi') cycle 
-          if(trim(vgsiname)=='amassj') cycle 
-          if(trim(vgsiname)=='amassk') cycle 
-          if(trim(vgsiname)=='pm2_5') cycle 
+          if(trim(vgsiname)=='delzinc') cycle  !delzinc is not read from DZ ,it's started from hydrostatic height
+          if(trim(vgsiname)=='amassi') cycle
+          if(trim(vgsiname)=='amassj') cycle
+          if(trim(vgsiname)=='amassk') cycle
+          if(trim(vgsiname)=='pm2_5') cycle
           call getfv3lamfilevname(vgsiname,fv3filenamegin,filenamein2,varname)
           name=trim(varname)
           if(trim(filenamein) /= trim(filenamein2)) then
@@ -927,7 +931,7 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
              end if
              startloc_tmp=(/1,1,ilev,1/)
           end if
-          
+
           if(fv3_io_layout_y > 1) then
              do nio=0,fv3_io_layout_y-1
                 if (ensgrid) then
@@ -954,7 +958,7 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
                 where(uu2d_tmp < 0.0_r_kind)
                    uu2d_tmp = 0.0_r_kind
                 endwhere
-                
+
                 if( phy_smaller_domain )then
                    uu2d(4:nxcase-3,4:nycase-3) = uu2d_tmp
                 else
@@ -965,14 +969,14 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
                 iret=nf90_get_var(gfile_loc,var_id,uu2d,start=startloc,count=countloc)
              end if
           endif
-          
+
           if (ensgrid) then
              call fv3_h_to_ll_ens(uu2d,hwork(1,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,grid_reverse_flag)
           else
              call fv3_h_to_ll(uu2d,hwork(1,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,grid_reverse_flag)
           endif
        enddo  ! ilevtot
-       
+
        if(fv3_io_layout_y > 1) then
           do nio=1,fv3_io_layout_y-1
              iret=nf90_close(gfile_loc_layout(nio))
@@ -983,27 +987,27 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
        endif
     endif
     call mpi_barrier(gsi_mpi_comm_world,ierror)
-       
+
     deallocate (uu2d)
     call general_grid2sub(grd_ionouv,hwork,cstate_nouv%values)
-    
+
     return
   end subroutine gsi_fv3ncdf_read
 
 subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ensgrid)
-  
+
 !$$$  subprogram documentation block
 !                 .      .    .                                       .
-! subprogram:    gsi_fv3ncdf_read _v1      
+! subprogram:    gsi_fv3ncdf_read _v1
 !            Lei modified from gsi_fv3ncdf_read
 !   prgmmr: wu               org: np22                date: 2017-10-10
 !
 ! abstract: read in a field from a netcdf FV3 file in mype_io
-!          then scatter the field to each PE 
+!          then scatter the field to each PE
 ! program history log:
 !
 !   input argument list:
-!     filename    - file name to read from       
+!     filename    - file name to read from
 !     varname     - variable name to read in
 !     varname2    - variable name to read in
 !     mype_io     - pe to read in the field
@@ -1030,7 +1034,7 @@ subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,
     use general_sub2grid_mod, only: sub2grid_info,general_grid2sub
 
     implicit none
-    type(sub2grid_info),         intent(in):: grd_ionouv 
+    type(sub2grid_info),         intent(in):: grd_ionouv
     character(*),                intent(in):: filenamein
     logical,                     intent(in ) :: ensgrid
     type (type_fv3regfilenameg), intent(in) :: fv3filenamegin
@@ -1048,7 +1052,7 @@ subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,
     integer(i_kind) inative,ilev,ilevtot
     integer(i_kind) gfile_loc,iret
     integer(i_kind) nzp1,mm1
-    
+
     integer(i_kind):: iworld,iworld_group,nread,mpi_comm_read,i,ierror
     integer(i_kind),dimension(npe):: members,members_read,mype_read_rank
     logical:: procuse
@@ -1087,10 +1091,10 @@ subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,
           mype_read_rank(nread) = members_read(i)
        endif
     enddo
-    
+
     call setcomm(iworld,iworld_group,nread,mype_read_rank,mpi_comm_read,ierror)
 
-    if (procuse) then 
+    if (procuse) then
     iret=nf90_open(filenamein,ior(nf90_nowrite,nf90_mpiio),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
     if(iret/=nf90_noerr) then
        write(6,*)' gsi_fv3ncdf_read_v1: problem opening ',trim(filenamein),gfile_loc,', Status = ',iret
@@ -1116,7 +1120,7 @@ subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,
         write(6,*)' wrong to get var_id ',var_id
         call stop2(333)
       endif
-      
+
       iret=nf90_get_var(gfile_loc,var_id,uu2d,start=startloc,count=countloc)
 
       if (ensgrid) then
@@ -1124,7 +1128,7 @@ subroutine gsi_fv3ncdf_read_v1(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,
       else
         call fv3_h_to_ll(uu2d,hwork(1,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,grid_reverse_flag)
       end if
-        
+
     enddo ! i
     iret=nf90_close(gfile_loc)
     endif
@@ -1143,7 +1147,7 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
 !   prgmmr: wu w             org: np22                date: 2017-11-22
 !
 ! abstract: read in a field from a netcdf FV3 file in mype_u,mype_v
-!           then scatter the field to each PE 
+!           then scatter the field to each PE
 ! program history log:
 !
 !   input argument list:
@@ -1167,7 +1171,7 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
     use general_sub2grid_mod, only: sub2grid_info,general_grid2sub
 
     implicit none
-    type(sub2grid_info),        intent(in):: grd_uv 
+    type(sub2grid_info),        intent(in):: grd_uv
     real(r_kind),dimension(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig),intent(inout)::ges_u
     real(r_kind),dimension(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig),intent(inout)::ges_v
     type (type_fv3regfilenameg),intent (in) :: fv3filenamegin
@@ -1258,7 +1262,7 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
              call stop2(333)
           endif
        endif
-       
+
        do ilevtot=kbgn,kend
           vgsiname=grd_uv%names(1,ilevtot)
           call getfv3lamfilevname(vgsiname,fv3filenamegin,filenamein2,varname)
@@ -1283,22 +1287,22 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
                    u_countloc=(/nxcase,ny_layout_len(nio)+1,1,1/)
                    allocate(u2d_layout(nxcase,ny_layout_len(nio)+1))
                 end if
-                call check( nf90_inq_varid(gfile_loc_layout(nio),'u',u_grd_VarId) ) 
+                call check( nf90_inq_varid(gfile_loc_layout(nio),'u',u_grd_VarId) )
                 iret=nf90_get_var(gfile_loc_layout(nio),u_grd_VarId,u2d_layout,start=u_startloc,count=u_countloc)
                 if (ensgrid) then
                    u2d(:,ny_layout_bens(nio):ny_layout_eens(nio))=u2d_layout(:,1:ny_layout_lenens(nio))
-                   if(nio==fv3_io_layout_y-1) u2d(:,ny_layout_eens(nio)+1)=u2d_layout(:,ny_layout_lenens(nio)+1) 
+                   if(nio==fv3_io_layout_y-1) u2d(:,ny_layout_eens(nio)+1)=u2d_layout(:,ny_layout_lenens(nio)+1)
                    deallocate(u2d_layout)
                    v_countloc=(/nxcase+1,ny_layout_lenens(nio),1,1/)
                    allocate(v2d_layout(nxcase+1,ny_layout_lenens(nio)))
                 else
                    u2d(:,ny_layout_b(nio):ny_layout_e(nio))=u2d_layout(:,1:ny_layout_len(nio))
-                   if(nio==fv3_io_layout_y-1) u2d(:,ny_layout_e(nio)+1)=u2d_layout(:,ny_layout_len(nio)+1) 
+                   if(nio==fv3_io_layout_y-1) u2d(:,ny_layout_e(nio)+1)=u2d_layout(:,ny_layout_len(nio)+1)
                    deallocate(u2d_layout)
                    v_countloc=(/nxcase+1,ny_layout_len(nio),1,1/)
                    allocate(v2d_layout(nxcase+1,ny_layout_len(nio)))
                 end if
-                call check( nf90_inq_varid(gfile_loc_layout(nio),'v',v_grd_VarId) ) 
+                call check( nf90_inq_varid(gfile_loc_layout(nio),'v',v_grd_VarId) )
                 iret=nf90_get_var(gfile_loc_layout(nio),v_grd_VarId,v2d_layout,start=v_startloc,count=v_countloc)
                 if (ensgrid) then
                    v2d(:,ny_layout_bens(nio):ny_layout_eens(nio))=v2d_layout
@@ -1308,13 +1312,13 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
                 deallocate(v2d_layout)
              enddo
           else
-             call check( nf90_inq_varid(gfile_loc,'u',u_grd_VarId) ) 
+             call check( nf90_inq_varid(gfile_loc,'u',u_grd_VarId) )
              iret=nf90_get_var(gfile_loc,u_grd_VarId,u2d,start=u_startloc,count=u_countloc)
-             call check( nf90_inq_varid(gfile_loc,'v',v_grd_VarId) ) 
+             call check( nf90_inq_varid(gfile_loc,'v',v_grd_VarId) )
              iret=nf90_get_var(gfile_loc,v_grd_VarId,v2d,start=v_startloc,count=v_countloc)
           endif
-          
-          if(.not.grid_reverse_flag) then 
+
+          if(.not.grid_reverse_flag) then
              call reverse_grid_r_uv (u2d,nxcase,nycase+1,1)
              call reverse_grid_r_uv (v2d,nxcase+1,nycase,1)
           endif
@@ -1323,14 +1327,14 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
           else
              call fv3uv2earth(u2d(:,:),v2d(:,:),nxcase,nycase,uc2d,vc2d)
           end if
-          
+
           !    NOTE on transfor to earth u/v:
           !       The u and v before transferring need to be in E-W/N-S grid, which is
           !       defined as reversed grid here because it is revered from map view.
           !
           !       Have set the following flag for grid orientation
           !         grid_reverse_flag=true:  E-W/N-S grid
-          !         grid_reverse_flag=false: W-E/S-N grid 
+          !         grid_reverse_flag=false: W-E/S-N grid
           !
           !       So for preparing the wind transferring, need to reverse the grid from
           !       W-E/S-N grid to E-W/N-S grid when grid_reverse_flag=false:
@@ -1348,7 +1352,7 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
             call fv3_h_to_ll(vc2d,hwork(2,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,.true.)
           end if
        enddo ! i
-       
+
        if(fv3_io_layout_y > 1) then
           do nio=0,fv3_io_layout_y-1
              iret=nf90_close(gfile_loc_layout(nio))
@@ -1361,8 +1365,8 @@ subroutine gsi_fv3ncdf_readuv(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
 
     call mpi_barrier(gsi_mpi_comm_world,ierror)
     deallocate(u2d,v2d,uc2d,vc2d)
-    
-    call general_grid2sub(grd_uv,hwork,worksub) 
+
+    call general_grid2sub(grd_uv,hwork,worksub)
     ges_u=worksub(1,:,:,:)
     ges_v=worksub(2,:,:,:)
     deallocate(worksub)
@@ -1375,7 +1379,7 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
 ! program history log:
 !   2019-04 lei  modified from  gsi_fv3ncdf_readuv to deal with cold start files                                       .
 ! abstract: read in a field from a "cold start" netcdf FV3 file in mype_u,mype_v
-!           then scatter the field to each PE 
+!           then scatter the field to each PE
 ! program history log:
 !
 !   input argument list:
@@ -1401,9 +1405,9 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
     use general_sub2grid_mod, only: sub2grid_info,general_grid2sub
 
     implicit none
-    type(sub2grid_info),        intent(in):: grd_uv 
-    real(r_kind)   ,            intent(out  ) :: ges_u(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig) 
-    real(r_kind)   ,            intent(out  ) :: ges_v(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig) 
+    type(sub2grid_info),        intent(in):: grd_uv
+    real(r_kind)   ,            intent(out  ) :: ges_u(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig)
+    real(r_kind)   ,            intent(out  ) :: ges_v(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig)
     type (type_fv3regfilenameg),intent (in) :: fv3filenamegin
     logical,                    intent(in ) :: ensgrid
 
@@ -1412,7 +1416,7 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
     real(r_kind),allocatable,dimension(:,:):: us2d,vw2d
     real(r_kind),allocatable,dimension(:,:):: uorv2d
     real(r_kind),allocatable,dimension(:,:,:,:):: worksub
-    character(len=max_filename_length) :: filenamein2 
+    character(len=max_filename_length) :: filenamein2
     character(len=max_varname_length) :: varname
     integer(i_kind) nlatcase,nloncase
     integer(i_kind) kbgn,kend
@@ -1465,14 +1469,14 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
     call setcomm(iworld,iworld_group,nread,mype_read_rank,mpi_comm_read,ierror)
 
     if (procuse) then
-    
+
     filenamein=fv3filenamegin%dynvars
     iret=nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_nowrite,nf90_mpiio)),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
     if(iret/=nf90_noerr) then
        write(6,*)' gsi_fv3ncdf_read_v1: problem opening ',trim(filenamein),gfile_loc,', Status = ',iret
        call stop2(333)
     endif
-    
+
     do ilevtot=kbgn,kend
       varname=grd_uv%names(1,ilevtot)
       filenamein2=fv3filenamegin%dynvars
@@ -1497,14 +1501,14 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
 
 ! transfor to earth u/v, interpolate to analysis grid, reverse vertical order
       call check(nf90_inq_varid(gfile_loc,trim(adjustl("u_s")),var_id))
-           
+
       call check(nf90_get_var(gfile_loc,var_id,us2d,start=us_startloc,count=us_countloc))
       iret=nf90_inq_varid(gfile_loc,trim(adjustl("v_w")),var_id)
       iret=nf90_get_var(gfile_loc,var_id,vw2d,start=vw_startloc,count=vw_countloc)
       do j=1,ny
         uorv2d(:,j)=half*(us2d(:,j)+us2d(:,j+1))
       enddo
-          
+
       if (ensgrid) then
         call fv3_h_to_ll_ens(uorv2d(:,:),hwork(1,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,.true.)
       else
@@ -1518,11 +1522,11 @@ subroutine gsi_fv3ncdf_readuv_v1(grd_uv,ges_u,ges_v,fv3filenamegin,ensgrid)
       else
         call fv3_h_to_ll(uorv2d(:,:),hwork(2,:,:,ilevtot),nxcase,nycase,nloncase,nlatcase,grid_reverse_flag)
       end if
-          
+
     enddo ! iilevtoto
     iret=nf90_close(gfile_loc)
     endif !procuse
-    call general_grid2sub(grd_uv,hwork,worksub) 
+    call general_grid2sub(grd_uv,hwork,worksub)
     ges_u=worksub(1,:,:,:)
     ges_v=worksub(2,:,:,:)
     deallocate (us2d,vw2d,worksub)
@@ -1533,17 +1537,17 @@ subroutine gsi_fv3ncdf_read_ens_parallel_over_ens(filenamein,fv3filenamegin, &
            delp,tsen,w,q,oz,ql,qr,qs,qi,qg,dbz,fed,iope)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    gsi_fv3ncdf_read_ens_parallel_over_ens    
+! subprogram:    gsi_fv3ncdf_read_ens_parallel_over_ens
 ! program history log:
-!     2022-04-01 Y. Wang and X. Wang, changed from gsi_fv3ncdf_read_ens 
+!     2022-04-01 Y. Wang and X. Wang, changed from gsi_fv3ncdf_read_ens
 !                                     for FV3LAM ensemble parallel IO in hybrid EnVar
-!                                     poc: xuguang.wang@ou.edu    
+!                                     poc: xuguang.wang@ou.edu
 !
 ! abstract: read in fields excluding u and v
 ! program history log:
 !
 !   input argument list:
-!     filenamein    - file name to read from       
+!     filenamein    - file name to read from
 !     iope     - pe to read in the field
 !
 !
@@ -1623,7 +1627,7 @@ subroutine gsi_fv3ncdf_read_ens_parallel_over_ens(filenamein,fv3filenamegin, &
        elseif( present(dbz) )then            ! phyvars: dbz
           allocate(varname_files(1))
           varname_files = (/'ref_f3d'/)
-       elseif( present(fed) )then            ! phyvars: fed 
+       elseif( present(fed) )then            ! phyvars: fed
           allocate(varname_files(1))
           varname_files = (/'flash_extent_density'/)
        end if
@@ -1736,7 +1740,7 @@ subroutine gsi_fv3ncdf_read_ens_parallel_over_ens(filenamein,fv3filenamegin, &
             if(ivar == 2) fed = hwork
           elseif( present(dbz) )then            ! phyvars: dbz
             dbz = hwork
-          elseif( present(fed) )then            ! phyvars: fed 
+          elseif( present(fed) )then            ! phyvars: fed
             fed = hwork
           end if
 
@@ -1760,14 +1764,14 @@ end subroutine gsi_fv3ncdf_read_ens_parallel_over_ens
 subroutine gsi_fv3ncdf_readuv_ens_parallel_over_ens(ges_u,ges_v,fv3filenamegin,iope)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    gsi_fv3ncdf_readuv_ens_parallel_over_ens    
+! subprogram:    gsi_fv3ncdf_readuv_ens_parallel_over_ens
 ! program history log:
-!     2022-04-01 Y. Wang and X. Wang, changed from gsi_fv3ncdf_readuv_ens 
+!     2022-04-01 Y. Wang and X. Wang, changed from gsi_fv3ncdf_readuv_ens
 !                                     for FV3LAM ensemble parallel IO in hybrid EnVar
-!                                     poc: xuguang.wang@ou.edu 
+!                                     poc: xuguang.wang@ou.edu
 !
 ! abstract: read in a field from a netcdf FV3 file in mype_u,mype_v
-!           then scatter the field to each PE 
+!           then scatter the field to each PE
 ! program history log:
 !
 !   input argument list:
@@ -1894,7 +1898,7 @@ subroutine gsi_fv3ncdf_readuv_ens_parallel_over_ens(ges_u,ges_v,fv3filenamegin,i
      !
      !       Have set the following flag for grid orientation
      !         grid_reverse_flag=true:  E-W/N-S grid
-     !         grid_reverse_flag=false: W-E/S-N grid 
+     !         grid_reverse_flag=false: W-E/S-N grid
      !
      !       So for preparing the wind transferring, need to reverse the grid
      !       from
@@ -1960,7 +1964,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     use general_sub2grid_mod, only: sub2grid_info,general_sub2grid
 
     implicit none
-    type(sub2grid_info), intent(in):: grd_uv 
+    type(sub2grid_info), intent(in):: grd_uv
 
     logical,                    intent(in   ) :: add_saved
     type (type_fv3regfilenameg),intent(in) ::fv3filenamegin
@@ -1995,7 +1999,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     integer(i_kind):: istat
 
     mm1=mype+1
-    
+
     nloncase=grd_uv%nlon
     nlatcase=grd_uv%nlat
     nxcase=nx
@@ -2044,7 +2048,8 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),".",nio
-             call check( nf90_open(filename_layout,ior(nf90_write, nf90_mpiio),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) )
+             call check( nf90_open(filename_layout,ior(nf90_write, nf90_mpiio),gfile_loc_layout(nio),&
+                         comm=mpi_comm_read,info=MPI_INFO_NULL) )
           enddo
           gfile_loc=gfile_loc_layout(0)
        else
@@ -2068,7 +2073,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
              work_bu(:,ny_layout_b(nio):ny_layout_e(nio),:)=u2d_layout(:,1:ny_layout_len(nio),:)
              if(nio==fv3_io_layout_y-1) work_bu(:,ny_layout_e(nio)+1,:)=u2d_layout(:,ny_layout_len(nio)+1,:)
              deallocate(u2d_layout)
-             
+
              allocate(v2d_layout(nxcase+1,ny_layout_len(nio),kend_native-kbgn_native+1))
              v_countloc=(/nxcase+1,ny_layout_len(nio),kend_native-kbgn_native+1,1/)
              call check( nf90_get_var(gfile_loc_layout(nio),vgrd_VarId,v2d_layout,start=v_startloc,count=v_countloc) )
@@ -2085,24 +2090,24 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
        endif
 
 
-       
+
        do ilevtot=kbgn,kend
           varname=grd_uv%names(1,ilevtot)
           ilev=grd_uv%lnames(1,ilevtot)
           inative=nzp1-ilev
-          
+
           work_au=hwork(1,:,:,ilevtot)
           work_av=hwork(2,:,:,ilevtot)
-          
-          
+
+
           if(add_saved)then
              allocate( workau2(nlatcase,nloncase),workav2(nlatcase,nloncase))
              allocate( workbu2(nlon_regional,nlat_regional+1))
              allocate( workbv2(nlon_regional+1,nlat_regional))
 !!!!!!!!  readin work_b !!!!!!!!!!!!!!!!
- 
-!clt for fv3_io_layout<=1  now the nf90_get_var has been moved outside of this do loop 
-!to avoid failure on hercules when L_MPI_EXTRA_FILESYSTEM=1 
+
+!clt for fv3_io_layout<=1  now the nf90_get_var has been moved outside of this do loop
+!to avoid failure on hercules when L_MPI_EXTRA_FILESYSTEM=1
              if(.not.grid_reverse_flag) then
                 call reverse_grid_r_uv(work_bu(:,:,inative),nlon_regional,nlat_regional+1,1)
                 call reverse_grid_r_uv(work_bv(:,:,inative),nlon_regional+1,nlat_regional,1)
@@ -2130,7 +2135,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
              call reverse_grid_r_uv(work_bv(:,:,inative),nlon_regional+1,nlat_regional,1)
           endif
        enddo !ilevltot
-          
+
        if(fv3_io_layout_y > 1) then
              do nio=0,fv3_io_layout_y-1
                 allocate(u2d_layout(nxcase,ny_layout_len(nio)+1,kend_native-kbgn_native+1))
@@ -2138,7 +2143,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
                 u2d_layout=work_bu(:,ny_layout_b(nio):ny_layout_e(nio)+1,:)
                 call check( nf90_put_var(gfile_loc_layout(nio),ugrd_VarId,u2d_layout,start=u_startloc,count=u_countloc) )
                 deallocate(u2d_layout)
-                
+
                 allocate(v2d_layout(nxcase+1,ny_layout_len(nio),kend_native-kbgn_native+1))
                 v_countloc=(/nxcase+1,ny_layout_len(nio),kend_native-kbgn_native+1,1/)
                 v2d_layout=work_bv(:,ny_layout_b(nio):ny_layout_e(nio),:)
@@ -2162,7 +2167,7 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     endif
 
     call mpi_barrier(gsi_mpi_comm_world,ierror)
- 
+
     deallocate(u2d,v2d)
     deallocate(work_au,work_av)
 
@@ -2204,7 +2209,7 @@ subroutine gsi_fv3ncdf_writeuv_v1(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     use netcdf, only: nf90_put_var,nf90_get_var
     use general_sub2grid_mod, only: sub2grid_info,general_sub2grid
     implicit none
-    type(sub2grid_info),        intent(in) :: grd_uv 
+    type(sub2grid_info),        intent(in) :: grd_uv
     real(r_kind),dimension(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig),intent(inout)::ges_u
     real(r_kind),dimension(grd_uv%lat2,grd_uv%lon2,grd_uv%nsig),intent(inout)::ges_v
     logical,                    intent(in) :: add_saved
@@ -2255,7 +2260,7 @@ subroutine gsi_fv3ncdf_writeuv_v1(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     end do
     call general_sub2grid(grd_uv,worksub,hwork)
 
-    allocate( u2d(nlon_regional,nlat_regional)) 
+    allocate( u2d(nlon_regional,nlat_regional))
     allocate( v2d(nlon_regional,nlat_regional))
     allocate( work_au(nlatcase,nloncase),work_av(nlatcase,nloncase))
 
@@ -2314,8 +2319,8 @@ subroutine gsi_fv3ncdf_writeuv_v1(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     us_countloc= (/nlon_regional,nlat_regional+1,kdim_native,1/)
     vw_countloc= (/nlon_regional+1,nlat_regional,kdim_native,1/)
     vs_countloc= (/nlon_regional,nlat_regional+1,kdim_native,1/)
-      
-    uw_startloc=(/1,1,kbgn_native+1,1/)  !In the coldstart files, there is an extra top level 
+
+    uw_startloc=(/1,1,kbgn_native+1,1/)  !In the coldstart files, there is an extra top level
     us_startloc=(/1,1,kbgn_native+1,1/)
     vw_startloc=(/1,1,kbgn_native+1,1/)
     vs_startloc=(/1,1,kbgn_native+1,1/)
@@ -2410,7 +2415,7 @@ subroutine gsi_fv3ncdf_writeuv_v1(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
     call check( nf90_put_var(gfile_loc,u_sgrd_VarId,work_bu_s,start=us_startloc,count=us_countloc) )
     call check( nf90_put_var(gfile_loc,v_wgrd_VarId,work_bv_w,start=vw_startloc,count=vw_countloc) )
     call check( nf90_put_var(gfile_loc,v_sgrd_VarId,work_bv_s,start=vs_startloc,count=vs_countloc) )
-      
+
     call check( nf90_close(gfile_loc) )
     deallocate(work_bu_w,work_bv_w)
     deallocate(work_bu_s,work_bv_s)
@@ -2436,7 +2441,7 @@ subroutine gsi_fv3ncdf_write_sfc(fv3filenamegin,varname,var,add_saved)
 ! abstract:
 !
 ! program history log:
-! 2022-02-25  Hu  write surface fields  
+! 2022-02-25  Hu  write surface fields
 !   input argument list:
 !
 !   output argument list:
@@ -2593,14 +2598,14 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
     use general_sub2grid_mod, only: sub2grid_info,general_sub2grid
     implicit none
 
-    type(sub2grid_info),           intent(in)   :: grd_ionouv 
+    type(sub2grid_info),           intent(in)   :: grd_ionouv
     type(gsi_bundle),              intent(inout):: cstate_nouv
     logical,                       intent(in   ):: add_saved
     character(len=:), allocatable, intent(in)   :: filenamein
     type (type_fv3regfilenameg),   intent(in)   :: fv3filenamegin
 
     real(r_kind),dimension(1,grd_ionouv%nlat,grd_ionouv%nlon,grd_ionouv%kbegin_loc:grd_ionouv%kend_alloc):: hwork
-    character(len=max_filename_length) :: filenamein2 
+    character(len=max_filename_length) :: filenamein2
     character(len=max_varname_length) :: varname,vgsiname,name
 
     integer(i_kind) nlatcase,nloncase,nxcase,nycase,countloc(4),startloc(4)
@@ -2618,7 +2623,7 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
     integer(i_kind):: iworld,iworld_group,nread,mpi_comm_read,i,ierror
     integer(i_kind),dimension(npe):: members,members_read,mype_read_rank
     logical:: procuse
-    
+
 ! for io_layout > 1
     real(r_kind),allocatable,dimension(:,:):: work_b_layout
     integer(i_kind) :: nio
@@ -2666,19 +2671,21 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),'.',nio
-             call check( nf90_open(filename_layout,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) )
+             call check( nf90_open(filename_layout,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),&
+                         gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) )
           enddo
           gfile_loc=gfile_loc_layout(0)
        else
-          call check( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL) )
+          call check( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,&
+               comm=mpi_comm_read,info=MPI_INFO_NULL) )
        endif
-       
+
        do ilevtot=kbgn,kend
           vgsiname=grd_ionouv%names(1,ilevtot)
           if(trim(vgsiname)=='amassi') cycle
           if(trim(vgsiname)=='amassj') cycle
           if(trim(vgsiname)=='amassk') cycle
-          if(trim(vgsiname)=='pm2_5') cycle 
+          if(trim(vgsiname)=='pm2_5') cycle
           call getfv3lamfilevname(vgsiname,fv3filenamegin,filenamein2,varname)
           if(trim(filenamein) /= trim(filenamein2)) then
              write(6,*)'filenamein and filenamein2 are not the same as expected, stop'
@@ -2690,9 +2697,9 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
           inative=nzp1-ilev
           countloc=(/nxcase,nycase,1,1/)
           startloc=(/1,1,inative,1/)
-          
+
           work_a=hwork(1,:,:,ilevtot)
-          
+
           if( trim(varname) == 'ref_f3d' .or. trim(adjustl(varname)) == 'flash_extent_density' )then
              iret=nf90_inquire_dimension(gfile_loc,1,name,len)
              if(trim(name)=='xaxis_1') nx_phy=len
@@ -2707,11 +2714,11 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
              end if
              startloc_tmp=(/1,1,ilev,1/)
           end if
-          
+
           call check( nf90_inq_varid(gfile_loc,trim(varname),VarId) )
           call check( nf90_var_par_access(gfile_loc, VarId, nf90_independent))
-          
-          
+
+
           if(index(vgsiname,"delzinc") > 0) then
              if(fv3_io_layout_y > 1) then
                 do nio=0,fv3_io_layout_y-1
@@ -2757,7 +2764,7 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
                 work_a(:,:)=work_a(:,:)-worka2(:,:)
                 call fv3_ll_to_h(work_a(:,:),workb2,nloncase,nlatcase,nlon_regional,nlat_regional,grid_reverse_flag)
                 work_b(:,:)=work_b(:,:)+workb2(:,:)
-             else  
+             else
                 call fv3_ll_to_h(work_a(:,:),work_b(:,:),nloncase,nlatcase,nlon_regional,nlat_regional,grid_reverse_flag)
              endif
           endif
@@ -2788,7 +2795,7 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
                 call check( nf90_put_var(gfile_loc,VarId,work_b, start = startloc, count = countloc) )
              end if
           endif
-          
+
        enddo !ilevtotl loop
        if(fv3_io_layout_y > 1) then
           do nio=0,fv3_io_layout_y-1
@@ -2813,7 +2820,7 @@ subroutine check(status)
 
     if(status /= nf90_noerr) then
        print *,'ncdf error ', trim(nf90_strerror(status))
-       stop  
+       stop
     end if
 end subroutine check
 subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3filenamegin)
@@ -2825,7 +2832,7 @@ subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3f
 ! abstract:
 !
 ! program history log:
-! 2020-03-05  lei  modified from gsi_fv3ncdf_write to gsi_fv3ncdf_write_v1  
+! 2020-03-05  lei  modified from gsi_fv3ncdf_write to gsi_fv3ncdf_write_v1
 !   input argument list:
 !    varu,varv
 !    add_saved
@@ -2851,14 +2858,14 @@ subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3f
     use general_sub2grid_mod, only: sub2grid_info,general_sub2grid
     implicit none
 
-    type(sub2grid_info),        intent(in)   :: grd_ionouv 
+    type(sub2grid_info),        intent(in)   :: grd_ionouv
     type(gsi_bundle),           intent(inout):: cstate_nouv
     logical,                    intent(in   ):: add_saved
     character(*),               intent(in)   :: filenamein
     type (type_fv3regfilenameg),intent(in)   :: fv3filenamegin
 
     real(r_kind),dimension(1,grd_ionouv%nlat,grd_ionouv%nlon,grd_ionouv%kbegin_loc:grd_ionouv%kend_alloc):: hwork
-    character(len=max_filename_length) :: filenamein2 
+    character(len=max_filename_length) :: filenamein2
 
     integer(i_kind) kbgn,kend
     integer(i_kind) inative,ilev,ilevtot
@@ -2911,13 +2918,14 @@ subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3f
     call setcomm(iworld,iworld_group,nread,mype_read_rank,mpi_comm_read,ierror)
 
     if (procuse) then
-    call check ( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL)) !clt
+    call check ( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,&
+                           comm=mpi_comm_read,info=MPI_INFO_NULL)) !clt
     do ilevtot=kbgn,kend
       vgsiname=grd_ionouv%names(1,ilevtot)
       if(trim(vgsiname)=='amassi') cycle
       if(trim(vgsiname)=='amassj') cycle
       if(trim(vgsiname)=='amassk') cycle
-      if(trim(vgsiname)=='pm2_5') cycle 
+      if(trim(vgsiname)=='pm2_5') cycle
       call getfv3lamfilevname(vgsiname,fv3filenamegin,filenamein2,varname)
       if(trim(filenamein) /= trim(filenamein2)) then
         write(6,*)'filenamein and filenamein2 are not the same as expected, stop'
@@ -2942,7 +2950,7 @@ subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3f
       endif
 
       if(add_saved)then
-! for being now only lev between (including )  2 and nsig+1 of work_b (:,:,lev) 
+! for being now only lev between (including )  2 and nsig+1 of work_b (:,:,lev)
 ! are updated
         call fv3_h_to_ll(work_b(:,:),worka2,nlon_regional,nlat_regional,nloncase,nlatcase,grid_reverse_flag)
 !!!!!!!! analysis_inc:  work_a !!!!!!!!!!!!!!!!
@@ -2982,7 +2990,7 @@ subroutine reverse_grid_r(grid,nx,ny,nz)
        do j=1,ny
           do i=1,nx
              grid(i,j,k)=tmp_grid(nx+1-i,ny+1-j)
-          enddo        
+          enddo
        enddo
     enddo
 
@@ -3021,16 +3029,16 @@ subroutine convert_qx_to_cvpqx(qr_arr,qs_arr,qg_arr,use_cvpqx,cvpqx_pvalue)
 ! abstract: convert qx(mixing ratio) to cvpqx using power transform for qr, qs, qg
 !
 ! program history log:
-!   2021-05-05 - initial commit 
+!   2021-05-05 - initial commit
 !              - this is used when GSI reads qx data from a background file
 !                (subroutine read_fv3_netcdf_guess)
 !              - since minimum qr, qs, and qg are set for CVlogq,
 !                it reads three qx arrays and then processes.
 !
 !   input argument list:
-!     qr_arr         - array of qr 
-!     qs_arr         - array of qs 
-!     qg_arr         - array of qg 
+!     qr_arr         - array of qr
+!     qs_arr         - array of qs
+!     qg_arr         - array of qg
 !     use_cvpqx      - flag to use power transform or not
 !     cvpqx_pvalue - value to be used for power transform
 !
@@ -3070,7 +3078,7 @@ subroutine convert_qx_to_cvpqx(qr_arr,qs_arr,qg_arr,use_cvpqx,cvpqx_pvalue)
           if ( cvpqx_pvalue == 0._r_kind ) then        ! CVlogq
               write(6,*)'read_fv3_netcdf_guess: ',     &
                         ' reset zero of qr/qs/qg to specified values (~0dbz)', &
-                        'before log transformation. (for dbz assimilation)' 
+                        'before log transformation. (for dbz assimilation)'
               write(6,*)'read_fv3_netcdf_guess: convert qr/qs/qg to log transform.'
           else if ( cvpqx_pvalue > 0._r_kind ) then   ! CVpq
               write(6,*)'read_fv3_netcdf_guess: convert qr/qs/qg with power transform .'
@@ -3084,7 +3092,7 @@ subroutine convert_qx_to_cvpqx(qr_arr,qs_arr,qg_arr,use_cvpqx,cvpqx_pvalue)
     do k=1,nsig
       do i=1,lon2
         do j=1,lat2
-!         Apply power transform if option is ON 
+!         Apply power transform if option is ON
           if (use_cvpqx) then
              if ( cvpqx_pvalue == 0._r_Kind ) then ! CVlogq
                  if (ges_tsen(j,i,k,it) > 274.15_r_kind) then
@@ -3147,7 +3155,7 @@ subroutine convert_nx_to_cvpnx(qnx_arr,cvpnr,cvpnr_pvalue)
 ! abstract: convert nx (number concentration) to cvpnx using power transform
 !
 ! program history log:
-!   2021-05-05 - initial commit 
+!   2021-05-05 - initial commit
 !              - this is used when GSI reads nx data from a background file
 !                (subroutine read_fv3_netcdf_guess)
 !              - this can be used for other nx variables
@@ -3204,16 +3212,16 @@ subroutine convert_cvpqx_to_qx(qr_arr,qs_arr,qg_arr,use_cvpqx,cvpqx_pvalue)
 ! abstract: convert cvpqx to qx for qr, qs, qg
 !
 ! program history log:
-!   2021-05-05 - initial commit 
+!   2021-05-05 - initial commit
 !              - this is used when GSI writes qx data to a background file
 !                (subroutine wrfv3_netcdf)
 !              - since minimum qr, qs, and qg are set for CVlogq,
 !                it reads three qx arrays and then processes.
 !
 !   input argument list:
-!     qr_arr         - array of qr 
-!     qs_arr         - array of qs 
-!     qg_arr         - array of qg 
+!     qr_arr         - array of qr
+!     qs_arr         - array of qs
+!     qg_arr         - array of qg
 !     use_cvpqx      - flag to use power transform or not
 !     cvpqx_pvalue   - value to be used for power transform
 !
@@ -3382,7 +3390,7 @@ subroutine convert_cvpnx_to_nx(qnx_arr,cvpnr,cvpnr_pvalue,cloud_nt_updt,q_arr,qr
 ! abstract: convert cvpnx to nx (number concentration)
 !
 ! program history log:
-!   2021-05-05 - initial commit 
+!   2021-05-05 - initial commit
 !              - this is used when GSI writes nx data from a background file
 !                (subroutine wrfv3_netcdf)
 !              - this can be used for other nx variables
@@ -3452,7 +3460,7 @@ subroutine convert_cvpnx_to_nx(qnx_arr,cvpnr,cvpnr_pvalue,cloud_nt_updt,q_arr,qr
           if ( cloud_nt_updt == 2 ) then
              T1D=ges_tsen(j,i,k,it)                                 ! sensible temperature (K)
              P1D=r100*(aeta1_ll(k)*(r10*ps_arr(j,i)-pt_ll)+pt_ll)   ! pressure hPa --> Pa
-             Q1D=q_arr(j,i,k)/(one-q_arr(j,i,k))                    ! mixing ratio 
+             Q1D=q_arr(j,i,k)/(one-q_arr(j,i,k))                    ! mixing ratio
              RHO=P1D/(rd*T1D*(one+D608*Q1D))                        ! air density in kg m^-3
              QR1D=qr_arr(j,i,k)
              CALL init_mm_qnr(RHO,QR1D,qnr_tmp)
@@ -3475,12 +3483,12 @@ subroutine convert_cvpnx_to_nx(qnx_arr,cvpnr,cvpnr_pvalue,cloud_nt_updt,q_arr,qr
     qnx_arr=tmparr_qnr
 
 end subroutine convert_cvpnx_to_nx
-subroutine gsi_copy_bundle(bundi,bundo) 
+subroutine gsi_copy_bundle(bundi,bundo)
     use gsi_bundlemod, only:gsi_bundleinquire, gsi_bundlegetpointer,gsi_bundleputvar
-    implicit none  
-     
+    implicit none
+
  !  copy the variables in the gsi_metguess_bundle_inout to gsi_bundle_inout or
- !  vice versa, according to icopy_flag  
+ !  vice versa, according to icopy_flag
  ! !INPUT PARAMETERS:
 
     type(gsi_bundle), intent(in   ) :: bundi
@@ -3492,7 +3500,7 @@ subroutine gsi_copy_bundle(bundi,bundo)
     character(len=max_varname_length),dimension(:),allocatable:: src_name_vars3d
     character(len=max_varname_length),dimension(:),allocatable:: target_name_vars2d
     character(len=max_varname_length),dimension(:),allocatable:: target_name_vars3d
-    character(len=max_varname_length) ::varname 
+    character(len=max_varname_length) ::varname
     real(r_kind),dimension(:,:,:),pointer:: pvar3d=>NULL()
     real(r_kind),dimension(:,:),pointer:: pvar2d =>NULL()
     integer(i_kind):: src_nc3d,src_nc2d,target_nc3d,target_nc2d
@@ -3542,21 +3550,21 @@ subroutine getfv3lamfilevname(vgsinamein,fv3filenamegref,filenameout,vname)
       write(6,*)'the name ',vgsinamein ,'cannot be treated correctly in getfv3lamfilevname,stop'
       call stop2(333)
     endif
-    if(ifindstrloc(vardynvars,vgsinamein)> 0)  then 
+    if(ifindstrloc(vardynvars,vgsinamein)> 0)  then
         filenameout=fv3filenamegref%dynvars
-    else if(ifindstrloc(vartracers,vgsinamein)> 0 )  then 
+    else if(ifindstrloc(vartracers,vgsinamein)> 0 )  then
         filenameout=fv3filenamegref%tracers
     else if(ifindstrloc(varphyvars,vgsinamein)> 0)  then
         filenameout=fv3filenamegref%phyvars
     else
-        write(6,*)'the filename corresponding to var ',trim(vgsinamein),' is not found, stop ' 
+        write(6,*)'the filename corresponding to var ',trim(vgsinamein),' is not found, stop '
         call stop2(333)
     endif
     vname=varfv3name(ifindstrloc(vgsiname,vgsinamein))
     if(trim(vname)=="T".and. fv3sar_bg_opt==1) then
        vname="t"
-    endif 
-    
+    endif
+
     return
 end subroutine getfv3lamfilevname
 function ifindstrloc(str_array,strin)
@@ -3566,13 +3574,13 @@ function ifindstrloc(str_array,strin)
     integer(i_kind) i
     ifindstrloc=0
     do i=1,size(str_array)
-      if(trim(str_array(i)) == trim(strin)) then 
+      if(trim(str_array(i)) == trim(strin)) then
         ifindstrloc=i
         exit
       endif
     enddo
 end function ifindstrloc
-    
+
 subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
 !$$$  subprogram documentation block
 !                .      .    .                                        .
@@ -3623,7 +3631,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   integer(i_kind) gfile_grid_spec
   character(:),allocatable    :: grid_spec
   character(:),allocatable    :: ak_bk
-  character(len=:),allocatable :: coupler_res_filenam 
+  character(len=:),allocatable :: coupler_res_filenam
   integer(i_kind) i,k,ndimensions,iret,nvariables,nattributes,unlimiteddimid
   integer(i_kind) len,gfile_loc
   character(len=max_varname_length) :: name
@@ -3738,7 +3746,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
        endif
     enddo
 !
-!  need to decide the grid orientation of the FV regional model    
+!  need to decide the grid orientation of the FV regional model
 !
 !   grid_type_fv3_regional = 0 : decide grid orientation based on
 !                                grid_lat/grid_lon
@@ -3749,7 +3757,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
         imiddle=nx/2
         jmiddle=ny/2
         if( (grid_latt(imiddle,1) < grid_latt(imiddle,ny)) .and. &
-            (grid_lont(1,jmiddle) < grid_lont(nx,jmiddle)) ) then 
+            (grid_lont(1,jmiddle) < grid_lont(nx,jmiddle)) ) then
             grid_type_fv3_regional = 2
         else
             grid_type_fv3_regional = 1
@@ -3761,7 +3769,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
        grid_reverse_flag=.true.    ! grid is revered comparing to usual map view
     else if(grid_type_fv3_regional == 2) then
        !if(mype==0) write(6,*) 'FV3 regional input grid is  W-E S-N grid'
-       grid_reverse_flag=.false.   ! grid orientated just like we see on map view    
+       grid_reverse_flag=.false.   ! grid orientated just like we see on map view
     else
        write(6,*) 'Error: FV3 regional input grid is unknown grid'
        call stop2(678)
@@ -3818,7 +3826,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     enddo
     iret=nf90_close(gfile_loc)
 
-!!!!! change unit of ak 
+!!!!! change unit of ak
     do i=1,nsig+1
        eta1_ll(i)=ak(i)*0.001_r_kind
        eta2_ll(i)=bk(i)

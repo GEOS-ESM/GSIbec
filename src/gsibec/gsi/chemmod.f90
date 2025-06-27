@@ -49,7 +49,8 @@ module chemmod
   public :: pm2_5_guess,init_pm2_5_guess,&
        aerotot_guess,init_aerotot_guess
   public :: init_chem
-  public :: berror_chem,berror_fv3_cmaq_regional,berror_fv3_sd_regional,oneobtest_chem,maginnov_chem,magoberr_chem,oneob_type_chem,conconeobs
+  public :: berror_chem,berror_fv3_cmaq_regional,berror_fv3_sd_regional,oneobtest_chem,maginnov_chem
+  public :: magoberr_chem,oneob_type_chem,conconeobs
   public :: oblat_chem,oblon_chem,obpres_chem,diag_incr
   public :: site_scale,nsites
   public :: tunable_error
