@@ -296,6 +296,7 @@ do jj=1,nsubwin
 
 !  Get 3d pressure
    if(do_getprs_tl .or. fv3_regional) call getprs_tl(cv_ps,cv_t,sv_prse)
+!_RT   if(do_getprs_tl) call getprs_tl(cv_ps,cv_t,sv_prse)
 
 !  Convert input normalized RH to q
    if(do_normal_rh_to_q .or. fv3_regional) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
