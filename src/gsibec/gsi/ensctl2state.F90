@@ -95,6 +95,8 @@ real(r_kind),pointer,dimension(:,:,:) :: sv_oz=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_rank3=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_w=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_dw=>NULL()
+real(r_kind),pointer,dimension(:,:,:) :: sv_ext1=>NULL()
+real(r_kind),pointer,dimension(:,:,:) :: sv_ext2=>NULL()
 
 logical :: do_getprs_tl,do_normal_rh_to_q,do_tv_to_tsen,do_getuv,lstrong_bk_vars
 logical :: do_tlnmc,do_q_copy
@@ -185,6 +187,8 @@ do jj=1,ntlevs_ens
    call gsi_bundlegetpointer (eval(jj),'u'   ,sv_u,   istatus)
    call gsi_bundlegetpointer (eval(jj),'v'   ,sv_v,   istatus)
    call gsi_bundlegetpointer (eval(jj),'tsen',sv_tsen,istatus)
+   call gsi_bundlegetpointer (eval(jj),'ext1',sv_ext1,istatus)
+   call gsi_bundlegetpointer (eval(jj),'ext2',sv_ext2,istatus)
 !$omp parallel sections private(ic,id,istatus)
 
 !$omp section
@@ -207,6 +211,10 @@ do jj=1,ntlevs_ens
 !  Copy variables
    call gsi_bundlegetvar ( wbundle_c, 't'  , sv_tv,  istatus )
    call gsi_bundlegetvar ( wbundle_c, 'ps' , sv_ps,  istatus )
+   if (associated(sv_ext1)) &
+   call gsi_bundlegetvar ( wbundle_c, 'ext1',sv_ext1,istatus )
+   if (associated(sv_ext2)) &
+   call gsi_bundlegetvar ( wbundle_c, 'ext2',sv_ext2,istatus )
 !  Get 3d pressure
    if(do_q_copy) then
       call gsi_bundlegetvar ( wbundle_c, 'q', sv_q, istatus )

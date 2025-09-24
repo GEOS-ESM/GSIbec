@@ -13,6 +13,7 @@ module m_read_geosens
   use gridmod,only: nsig
   use control_vectors, only: nc2d,nc3d
   use control_vectors, only: cvars2d,cvars3d
+  use control_vectors, only: fvars2d,fvars3d
 
   use general_sub2grid_mod, only: sub2grid_info
   use m_grid2sub1var, only: grid2sub1var
@@ -34,6 +35,7 @@ integer(i_kind) :: nlat,nlon,iglobal,nsig1o
 contains
 subroutine read_geosens_(sgrid,xx,filename,npe,mype,root,nreaders)
 
+  use m_nc_GEOSens, only: nc_GEOSens_vars_set
   use m_nc_GEOSens, only: nc_GEOSens_vars
   use m_nc_GEOSens, only: nc_GEOSens_read
   use m_nc_GEOSens, only: nc_GEOSens_vars_final
@@ -67,6 +69,7 @@ subroutine read_geosens_(sgrid,xx,filename,npe,mype,root,nreaders)
   nlon=sgrid%nlon
   iglobal=sgrid%iglobal
 
+  call nc_GEOSens_vars_set(fvars2d,fvars3d) ! wired for test
   call init_()
 
   mm1=mype+1
@@ -108,6 +111,7 @@ subroutine read_geosens_(sgrid,xx,filename,npe,mype,root,nreaders)
   call mpi_barrier(gsi_mpi_comm_world,iret)
 
   call final_()
+
 
   return
 contains
@@ -269,6 +273,30 @@ contains
              do i=1,nlat
                 ii = ii +1
                 z4all(ii,ke+k)=evars%qs(i,j,k)
+             end do
+             end do
+          enddo
+          ke=ke+nsig
+       endif
+       if (cvars3d(nv)=='ext1') then
+          do k=1,nsig
+             ii =0
+             do j=1,nlon
+             do i=1,nlat
+                ii = ii +1
+                z4all(ii,ke+k)=evars%ext1(i,j,k)
+             end do
+             end do
+          enddo
+          ke=ke+nsig
+       endif
+       if (cvars3d(nv)=='ext2') then
+          do k=1,nsig
+             ii =0
+             do j=1,nlon
+             do i=1,nlat
+                ii = ii +1
+                z4all(ii,ke+k)=evars%ext2(i,j,k)
              end do
              end do
           enddo

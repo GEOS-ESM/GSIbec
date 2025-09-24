@@ -118,6 +118,7 @@ public prt_control_norms, axpy, random_cv, setup_control_vectors, &
 ! Public variables
 !
 public cvars2d, cvars3d, cvarsmd, evars2d, evars3d, nrf_var
+public fvars2d, fvars3d
 public nc2d        ! number of 2d static control fields
 public nc3d        ! number of 3d static control fields
 public mvars       ! number of motley fields
@@ -167,6 +168,8 @@ character(len=max_varname_length),allocatable,dimension(:) :: cvars2d  ! 2-d fie
 character(len=max_varname_length),allocatable,dimension(:) :: cvars3d  ! 3-d fields for static   CV
 character(len=max_varname_length),allocatable,dimension(:) :: evars2d  ! 2-d fields for ensemble CV
 character(len=max_varname_length),allocatable,dimension(:) :: evars3d  ! 3-d fields for ensemble CV
+character(len=max_varname_length),allocatable,dimension(:) :: fvars2d  ! 2-d CV field names in file
+character(len=max_varname_length),allocatable,dimension(:) :: fvars3d  ! 3-d CV field names in file
 character(len=max_varname_length),allocatable,dimension(:) :: cvarsmd  ! motley variable names
 real(r_kind)    ,allocatable,dimension(:) :: as3d
 real(r_kind)    ,allocatable,dimension(:) :: as2d
@@ -350,6 +353,7 @@ do ii=1,nvars
 enddo
 
 allocate(nrf_var(nvars),cvars3d(nc3d),cvars2d(nc2d))
+allocate(fvars3d(nc3d),fvars2d(nc2d))
 allocate(as3d(nc3d),as2d(nc2d))
 allocate(be3d(nc3d),be2d(nc2d),bemo(mvars))
 allocate(cvarsmd(mvars))
@@ -378,11 +382,13 @@ do ii=1,nvars
       if(ilev==1) then
          nc2d=nc2d+1
          cvars2d(nc2d)=trim(adjustl(var))
+         fvars2d(nc2d)=trim(adjustl(funcof))
          as2d(nc2d)=aas
          be2d(nc2d)=bes
       else
          nc3d=nc3d+1
          cvars3d(nc3d)=trim(adjustl(var))
+         fvars3d(nc3d)=trim(adjustl(funcof))
          nrf_3d(ii)=.true.
          as3d(nc3d)=aas
          be3d(nc3d)=bes
@@ -422,6 +428,7 @@ subroutine final_anacv
   deallocate(cvarsmd)
   deallocate(be3d,be2d,bemo)
   deallocate(as3d,as2d)
+  deallocate(fvars2d,fvars3d)
   deallocate(nrf_var,cvars2d,cvars3d)
   llinit=.false.
 end subroutine final_anacv

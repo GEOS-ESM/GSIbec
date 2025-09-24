@@ -106,6 +106,7 @@ integer(i_kind) :: icpblh,icgust,icvis,icoz,icwspd10m,icw
 integer(i_kind) :: ictd2m,icmxtm,icmitm,icpmsl,ichowv
 integer(i_kind) :: icsfwter,icvpwter,ictcamt,iclcbas
 integer(i_kind) :: iccldch,icuwnd10m,icvwnd10m
+integer(i_kind) :: icext1,icext2
 character(len=3), parameter :: mycvars(ncvars) = (/  &  ! vars from CV needed here
                 'sf ', 'vp ', 'ps ', 't  ', 'q  ', 'cw ', 'ql ', 'qi ', 'w  ' /)
 logical :: lc_sf,lc_vp,lc_w,lc_ps,lc_t,lc_rh,lc_cw,lc_ql,lc_qi
@@ -137,6 +138,7 @@ real(r_kind),pointer,dimension(:,:,:) :: sv_u=>NULL(),sv_v=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_w=>NULL(),sv_dw=>NULL(),sv_prse=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_q=>NULL(),sv_tsen=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_tv=>NULL(),sv_oz=>NULL()
+real(r_kind),pointer,dimension(:,:,:) :: sv_ext1=>NULL(),sv_ext2=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: sv_rank3=>NULL()
 real(r_kind),pointer,dimension(:,:)   :: sv_rank2=>NULL()
 
@@ -219,6 +221,8 @@ call gsi_bundlegetpointer (xhat%step(1),'lcbas',iclcbas,istatus)
 call gsi_bundlegetpointer (xhat%step(1),'cldch',iccldch,istatus)
 call gsi_bundlegetpointer (xhat%step(1),'uwnd10m',icuwnd10m,istatus)
 call gsi_bundlegetpointer (xhat%step(1),'vwnd10m',icvwnd10m,istatus)
+call gsi_bundlegetpointer (xhat%step(1),'ext1',icext1,istatus)
+call gsi_bundlegetpointer (xhat%step(1),'ext2',icext2,istatus)
 
 ! Loop over control steps
 do jj=1,nsubwin
@@ -415,6 +419,15 @@ do jj=1,nsubwin
    if (icvwnd10m>0) then
       call gsi_bundlegetpointer (sval(jj),'vwnd10m' ,sv_vwnd10m, istatus)
       call gsi_bundlegetvar ( wbundle, 'vwnd10m', sv_vwnd10m, istatus )
+   end if
+   if (icext1>0) then
+      print *, 'DEBUG_RT: cv(tl) ext1'
+      call gsi_bundlegetpointer (sval(jj),'ext1' ,sv_ext1, istatus)
+      call gsi_bundlegetvar ( wbundle, 'ext1', sv_ext1, istatus )
+   end if
+   if (icext2>0) then
+      call gsi_bundlegetpointer (sval(jj),'ext2' ,sv_ext2, istatus)
+      call gsi_bundlegetvar ( wbundle, 'ext2', sv_ext2, istatus )
    end if
 
 !  Same one-to-one map for chemistry-vars; take care of them together 
