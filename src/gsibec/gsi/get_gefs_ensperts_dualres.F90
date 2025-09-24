@@ -99,7 +99,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 ! integer(i_kind),dimension(grd_ens%nlat,grd_ens%nlon):: idum
   integer(i_kind) istatus,iret,i,ic2,ic3,j,k,n,mm1,iderivative,im,jm,km,m,ipic
   integer(i_kind) ipc3d(nc3d),ipc2d(nc2d)
-  integer(i_kind) ier
+  integer(i_kind) itv,iqv,ier
 ! integer(i_kind) il,jl
   logical ice,hydrometeor 
   type(sub2grid_info) :: grd_tmp
@@ -181,12 +181,18 @@ subroutine get_gefs_ensperts_dualres (tau)
 
        if (.not.q_hyb_ens) then !use RH
          call gsi_bundlegetpointer(en_read(n),'ps',ps,ier);istatus=ier
-         call gsi_bundlegetpointer(en_read(n),'t' ,tv,ier);istatus=istatus+ier
-         call gsi_bundlegetpointer(en_read(n),'q' ,q ,ier);istatus=istatus+ier
+         call gsi_bundlegetpointer(en_read(n),'t' ,tv,ier);itv=ier
+         call gsi_bundlegetpointer(en_read(n),'q' ,q ,ier);iqv=ier
 ! Compute RH
 ! Get 3d pressure field now on interfaces
          allocate(pri(im,jm,km+1))
-         call general_getprs_glb(ps,tv,pri)
+         if(itv/=0) then
+            allocate(tv(im,jm,km))
+            call general_getprs_glb(ps,tv,pri)
+            deallocate(tv)
+         else
+            call general_getprs_glb(ps,tv,pri)
+         endif
          allocate(prsl(im,jm,km),tsen(im,jm,km),qs(im,jm,km))
 ! Get sensible temperature and 3d layer pressure
          if (idsl5 /= 2) then
@@ -196,10 +202,19 @@ subroutine get_gefs_ensperts_dualres (tau)
                   do i=1,im
                      prsl(i,j,k)=((pri(i,j,k)**kap1-pri(i,j,k+1)**kap1)/&
                             (kap1*(pri(i,j,k)-pri(i,j,k+1))))**kapr
-                     tsen(i,j,k)= tv(i,j,k)/(one+fv*max(zero,q(i,j,k)))
                   end do
                end do
             end do
+            if (itv==0.and.iqv==0) then
+!$omp parallel do schedule(dynamic,1) private(k,j,i)
+               do k=1,km
+                  do j=1,jm
+                     do i=1,im
+                        tsen(i,j,k)= tv(i,j,k)/(one+fv*max(zero,q(i,j,k)))
+                     end do
+                  end do
+               end do
+            end if
          else
 !$omp parallel do schedule(dynamic,1) private(k,j,i)
             do k=1,km

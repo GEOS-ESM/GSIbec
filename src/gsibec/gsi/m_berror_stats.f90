@@ -585,7 +585,7 @@ subroutine read_wgt(corz,corp,hwll,hwllp,vz,corsst,hsst,qoption,cwoption,mype, &
          call stop2(101)
       endif
 
-      write(6,*) myname_,'(PREWGT):  read error amplitudes ', &
+      write(6,*) myname_,':  read error amplitudes ', &
          '"',trim(berror_stats),'".  ', &
          'mype,nsigstat,nlatstat =', &
          mype,nsigstat,nlatstat
@@ -838,15 +838,15 @@ subroutine setcoroz_(coroz,mype)
    if ( ierror/=0 ) return ! nothing to do
 
    ! sanity check
-   if ( mype==0 ) write(6,*) myname_,'(PREWGT): mype = ',mype
+   if ( mype==0 ) write(6,*) myname_,': mype = ',mype
 
    mlat=size(coroz,1)
    msig=size(coroz,2)
    if ( mlat/=nlat .or. msig/=nsig ) then
-      write(6,*) myname_,'(PREWGT): shape mismatching on PE ',mype
-      write(6,*) myname_,'(PREWGT): shape(coroz) = ',shape(coroz)
-      write(6,*) myname_,'(PREWGT): while expecting nlat = ',nlat
-      write(6,*) myname_,'(PREWGT): while expecting nsig = ',nsig
+      write(6,*) myname_,': shape mismatching on PE ',mype
+      write(6,*) myname_,': shape(coroz) = ',shape(coroz)
+      write(6,*) myname_,': while expecting nlat = ',nlat
+      write(6,*) myname_,': while expecting nsig = ',nsig
       call stop2(default_rc_)
    endif
 
@@ -869,7 +869,7 @@ subroutine setcoroz_(coroz,mype)
    call mpi_allreduce(work_oz,work_oz1,(nsig+1)*npe,mpi_rtype,mpi_sum,&
       gsi_mpi_comm_world,ierror)
    if ( ierror/=0 ) then
-      write(6,*) myname_,'(PREWGT): MPI_allreduce() error on PE ',mype
+      write(6,*) myname_,': MPI_allreduce() error on PE ',mype
       call stop2(ierror)
    endif
 
@@ -937,13 +937,13 @@ subroutine sethwlloz_(hwlloz,mype)
    real(r_kind) :: fact
    real(r_kind) :: s2u
     
-   if ( mype==0 ) write(6,*) myname_,'(PREWGT): mype = ',mype
+   if ( mype==0 ) write(6,*) myname_,': mype = ',mype
 
    s2u=(two*pi*rearth_equator)/nlon
    do k=1,nnnn1o
       k1=levs_id(k)
       if ( k1>0 ) then
-      if(mype==0) write(6,*) myname_,'(PREWGT): mype = ',mype, k1
+      if(mype==0) write(6,*) myname_,': mype = ',mype, k1
          if ( k1<=nsig*3/4 ) then
            ! fact=1./hwl
            fact=r40000/(r400*nlon)
@@ -955,7 +955,7 @@ subroutine sethwlloz_(hwlloz,mype)
       endif
    enddo
 
-   if ( mype==0 ) write(6,*) myname_,'(PREWGT): mype = ',mype, 'finish sethwlloz_'
+   if ( mype==0 ) write(6,*) myname_,': mype = ',mype, 'finish sethwlloz_'
 
    return
 end subroutine sethwlloz_
@@ -1017,6 +1017,7 @@ subroutine setcorchem_(cname,corchem,rc)
    use guess_grids,only: ntguessig
    use guess_grids,only: ges_prsi ! interface pressures (kPa)
 
+   use gsi_metguess_mod, only: gsi_metguess_bundle
    use gsi_chemguess_mod,only: gsi_chemguess_bundle
    use gsi_bundlemod,    only: gsi_bundlegetpointer
 
@@ -1044,32 +1045,40 @@ subroutine setcorchem_(cname,corchem,rc)
    integer(i_kind) :: mlat,msig
    integer(i_kind) :: i,j,k,n,iptr,mm1
    integer(i_kind) :: ierror
+   logical :: found_inchm, found_inmet
 
    rc=0
+   found_inchm = .false.
+   found_inmet = .false.
 
    ! sanity check
-   if ( mype==0 ) write(6,*) myname_,'(PREWGT): mype = ',mype
+   if ( mype==0 ) write(6,*) myname_,': mype = ',mype
 
    ! Get information for how to use CO2
    iptr=-1
    if ( size(gsi_chemguess_bundle)>0 ) then ! check to see if bundle's allocated
-       call gsi_bundlegetpointer(gsi_chemguess_bundle(1),cname,iptr,ierror)
+      call gsi_bundlegetpointer(gsi_chemguess_bundle(1),cname,iptr,ierror)
       if ( ierror/=0 ) then
          rc=-2  ! field not found
          return 
       endif
+      found_inchm=.true.
    else
-      rc=-1     ! chem not allocated
-      return
+      call gsi_bundlegetpointer(gsi_metguess_bundle(1),cname,iptr,ierror)
+      if ( ierror/=0 ) then
+         rc=-1     ! chem not allocated
+         return
+      endif
+      found_inmet=.true.
    endif
 
    mlat=size(corchem,1)
    msig=size(corchem,2)
    if ( mlat/=nlat .or. msig/=nsig ) then
-      write(6,*) myname_,'(PREWGT): shape mismatching on PE ',mype
-      write(6,*) myname_,'(PREWGT): shape(corchem',trim(cname),') = ',shape(corchem)
-      write(6,*) myname_,'(PREWGT): while expecting nlat = ',nlat
-      write(6,*) myname_,'(PREWGT): while expecting nsig = ',nsig
+      write(6,*) myname_,': shape mismatching on PE ',mype
+      write(6,*) myname_,': shape(corchem',trim(cname),') = ',shape(corchem)
+      write(6,*) myname_,': while expecting nlat = ',nlat
+      write(6,*) myname_,': while expecting nsig = ',nsig
       call stop2(default_rc_)
    endif
 
@@ -1079,22 +1088,39 @@ subroutine setcorchem_(cname,corchem,rc)
    ! Calculate sums for constituent to estimate variance.
    mm1=mype+1
    work_chem = zero
-   do k=1,nsig
-      do j=2,lon1+1
-         do i=2,lat1+1
-            work_chem(k,mm1) = work_chem(k,mm1) + gsi_chemguess_bundle(ntguessig)%r3(iptr)%q(i,j,k)* &
-               (ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
-            !_RT not sure yet how to handle scaling factor (rozcon) in general
-            !_RT            rozcon*(ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
+   if ( found_inchm ) then
+      do k=1,nsig
+         do j=2,lon1+1
+            do i=2,lat1+1
+               work_chem(k,mm1) = work_chem(k,mm1) + gsi_chemguess_bundle(ntguessig)%r3(iptr)%q(i,j,k)* &
+                  (ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
+               !_RT not sure yet how to handle scaling factor (rozcon) in general
+               !_RT            rozcon*(ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
+            enddo
          enddo
       enddo
-   enddo
+   else if ( found_inmet ) then
+      do k=1,nsig
+         do j=2,lon1+1
+            do i=2,lat1+1
+               work_chem(k,mm1) = work_chem(k,mm1) + gsi_metguess_bundle(ntguessig)%r3(iptr)%q(i,j,k)* &
+                  (ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
+               !_RT not sure yet how to handle scaling factor (rozcon) in general
+               !_RT            rozcon*(ges_prsi(i,j,k,ntguessig)-ges_prsi(i,j,k+1,ntguessig))
+            enddo
+         enddo
+      enddo
+   else
+      write(6,*) myname_,': should not be here '
+      call stop2(ierror)
+   endif
+
    work_chem(nsig+1,mm1)=float(lon1*lat1)
   
    call mpi_allreduce(work_chem,work_chem1,(nsig+1)*npe,mpi_rtype,mpi_sum,&
         gsi_mpi_comm_world,ierror)
    if ( ierror/=0 ) then
-      write(6,*) myname_,'(PREWGT): MPI_allreduce() error on PE ',mype
+      write(6,*) myname_,': MPI_allreduce() error on PE ',mype
       call stop2(ierror)
    endif
 
@@ -1167,14 +1193,14 @@ end subroutine setcorchem_
       real(r_kind)    :: s2u
     
       if (mype == 0) then
-         write(6,*) myname_, '(PREWGT): mype = ', mype
+         write(6,*) myname_, ': mype = ', mype
       end if
 
       s2u = (two*pi*rearth_equator)/nlon
       do k = 1,nnnn1o
          k1 = levs_id(k)
          if (k1 > 0) then
-            if (mype == 0) write(6,*) myname_, '(PREWGT): mype = ', mype, k1
+            if (mype == 0) write(6,*) myname_, ': mype = ', mype, k1
 !           make everything constant
 !           fact = real(k1,r_kind)**2._r_kind
             fact = 1._r_kind
@@ -1184,7 +1210,7 @@ end subroutine setcorchem_
       end do
 
       if (mype == 0) then
-         write(6,*) myname_, '(PREWGT): mype = ', mype, 'finish sethwllchem_'
+         write(6,*) myname_, ': mype = ', mype, 'finish sethwllchem_'
       end if
 
    end subroutine sethwllchem_
