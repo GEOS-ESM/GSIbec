@@ -69,7 +69,7 @@ subroutine read_geosens_(sgrid,xx,filename,npe,mype,root,nreaders)
   nlon=sgrid%nlon
   iglobal=sgrid%iglobal
 
-  call nc_GEOSens_vars_set(fvars2d,fvars3d) ! wired for test
+  call nc_GEOSens_vars_set(fvars2d,fvars3d,evars) ! wired for test
   call init_()
 
   mm1=mype+1
@@ -170,161 +170,27 @@ contains
 
     ke=0
     do nv=1,nc3d
-       if (cvars3d(nv)=='sf') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%u(i,j,k)
-             enddo
-             enddo
+       do k=1,nsig
+          ii =0
+          do j=1,nlon
+          do i=1,nlat
+             ii = ii +1
+             z4all(ii,ke+k)=evars%ptr3d(i,j,k,nv)
           enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='vp') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%v(i,j,k)
-             enddo
-             enddo
           enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='t') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%tv(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='q') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qv(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='oz') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%oz(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='qi') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qi(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='ql') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%ql(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='qr') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qr(i,j,k)
-             enddo
-             enddo
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='qs') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%qs(i,j,k)
-             end do
-             end do
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='ext1') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%ext1(i,j,k)
-             end do
-             end do
-          enddo
-          ke=ke+nsig
-       endif
-       if (cvars3d(nv)=='ext2') then
-          do k=1,nsig
-             ii =0
-             do j=1,nlon
-             do i=1,nlat
-                ii = ii +1
-                z4all(ii,ke+k)=evars%ext2(i,j,k)
-             end do
-             end do
-          enddo
-          ke=ke+nsig
-       endif
+       enddo
+       ke=ke+nsig
     enddo
 
     do nv=1,nc2d
-       if (cvars2d(nv)=='ps') then
-          ii=0
-          do j=1,nlon
-          do i=1,nlat
-             ii = ii+1
-             z4all(ii,ke+1)=evars%ps(i,j)
-          enddo
-          enddo
-          ke=ke+1
-       endif
-       if (cvars2d(nv)=='ts') then
-          ii=0
-          do j=1,nlon
-          do i=1,nlat
-             ii = ii+1
-             z4all(ii,ke+1)=evars%ts(i,j)
-          enddo
-          enddo
-          ke=ke+1
-       endif
+       ii=0
+       do j=1,nlon
+       do i=1,nlat
+          ii = ii+1
+          z4all(ii,ke+1)=evars%ptr2d(i,j,nv)
+       enddo
+       enddo
+       ke=ke+1
     enddo
 
     call nc_GEOSens_vars_final(evars)
