@@ -27,10 +27,10 @@ ensctl2state.F90
 ensctl2state_ad.F90
 fgrid2agrid_mod.f90
 general_commvars_mod.f90
-general_specmod.f90
+general_specmod.F90
 general_spectral_transforms.f90
 general_sub2grid_mod.f90
-general_transform.f90
+general_transform.F90
 genqsat.F90
 gengrid_vars.f90
 get_derivatives.F90
@@ -121,7 +121,7 @@ psichi2uv_reg.f90
 rtlnmc_version3.f90
 strong_bal_correction.f90
 strong_baldiag_inc.f90
-strong_fast_global_mod.f90
+strong_fast_global_mod.F90
 turblmod.f90
 turbl_ad.f90
 turbl_tl.f90
@@ -130,7 +130,7 @@ zrnmi_mod.f90
 )
 
 # Stubs for sp lib if package is not found
-if( NOT sp_FOUND )
+if( NOT ip_FOUND )
   list( APPEND gsi_src_files_list stub_sp.f90 )
 endif()
 
