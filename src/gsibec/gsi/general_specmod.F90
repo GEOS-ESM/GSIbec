@@ -171,6 +171,8 @@ contains
     real(r_kind),dimension(nlat_a-2) :: wlatx,slatx
     real(r_kind) :: epsi0(0:jcap)  ! epsilon factor for m=0
     real(r_kind) :: fnum, fden
+    real(r_kind), dimension(:, :), allocatable :: dummy_w
+    real(r_kind), dimension(:, :), allocatable :: dummy_g
 
 !   Set constants used in transforms for analysis grid
     sp%jcap=jcap
@@ -192,7 +194,6 @@ contains
     sp%kw=2*sp%ncd2
     sp%jb=1
     sp%je=(sp%jmax+1)/2
-
 
 
 !   Allocate and initialize fact arrays
@@ -236,7 +237,13 @@ contains
     allocate( sp%wlat(sp%jb:sp%je) )
     call spwget(sp%iromb,sp%jcap,sp%eps,sp%epstop,sp%enn1, &
           sp%elonn1,sp%eon,sp%eontop)
-    call spffte(sp%imax,(sp%imax+2)/2,sp%imax,2,0.,0.,0,sp%afft)
+! Allocate dummy_w and dummy_g arrays for spffte (unused, but required by spffte)
+    allocate(dummy_w((sp%imax+2)/2,2), dummy_g(sp%imax,2))
+    dummy_w=zero
+    dummy_g=zero
+    call spffte(sp%imax,(sp%imax+2)/2,sp%imax,2,dummy_w,dummy_g,0,sp%afft)
+    if(allocated(dummy_w)) deallocate(dummy_w)
+    if(allocated(dummy_g)) deallocate(dummy_g)
     call splat(sp%idrt,sp%jmax,slatx,wlatx)
     jhe=(sp%jmax+1)/2
     if(jhe > sp%jmax/2)wlatx(jhe)=wlatx(jhe)/2
@@ -251,7 +258,7 @@ contains
       allocate( sp%plntop(sp%jcap+1,sp%jb:sp%je) )
       do j=sp%jb,sp%je
         call splegend(sp%iromb,sp%jcap,sp%slat(j),sp%clat(j),sp%eps, &
-          sp%epstop,sp%pln(1,j),sp%plntop(1,j))
+          sp%epstop,sp%pln(:,j),sp%plntop(:,j))
       end do
     else
       sp%precalc_pln=.false.
