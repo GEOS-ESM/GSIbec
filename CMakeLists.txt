@@ -3,7 +3,7 @@
 ################################################################################
 
 cmake_minimum_required( VERSION 3.12 )
-project( gsibec VERSION 1.3.2 LANGUAGES Fortran )
+project( gsibec VERSION 1.4.0 LANGUAGES Fortran )
 
 ## Ecbuild integration
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
@@ -38,7 +38,7 @@ find_package( MPI REQUIRED COMPONENTS Fortran )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
 
 # NCEP spectral library (optional)
-find_package( sp QUIET )
+find_package(ip 5.1 QUIET)
 
 ################################################################################
 # Sources
