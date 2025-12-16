@@ -816,13 +816,8 @@ subroutine m_generate_anl_grid(nx,ny,grid_lon,grid_lont,grid_lat,grid_latt,gsi_l
      enddo
   enddo
   
-  !call init_general_transform(glat_an,glon_an)
- 
-  !deallocate(glat_an,glon_an)
-
   deallocate( xc,yc,zc,gclat,gclon,gcrlat,gcrlon)
   deallocate(rlat_in,rlon_in)
-
   deallocate(region_dxi,region_dyi)
   !deallocate(coeffx,coeffy)
 
