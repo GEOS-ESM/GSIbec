@@ -1109,6 +1109,7 @@ end subroutine final_
   end subroutine guess_basics0_
 !--------------------------------------------------------
   subroutine guess_basics2_(vname,islot,var)
+  use gridmod, only: regional
   character(len=*),intent(in) :: vname
   integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:) :: var
@@ -1121,13 +1122,7 @@ end subroutine final_
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
   endif
-!cltdebug  if ( trim(vname) == 'ps' ) then 
 
-!cltdebug         var=10000
-!cltdebug  endif
-  
-   write(6,*)'thinkdeb77var imin/max val = ',minval(var), maxval(var)
-   write(6,*)'thinkdeb77varsizeofptr var= ',size(ptr), maxval(var)
   ptr=var
   write(6,*)"thinkdeb77-1 guess_set vname is ",trim(vname)
   if ( trim(vname) == 'ps' ) then 
@@ -1149,6 +1144,7 @@ end subroutine final_
   end subroutine guess_basics2_
 !--------------------------------------------------------
   subroutine guess_basics3_(vname,islot,var)
+  use gridmod, only: regional
   character(len=*),intent(in)   :: vname
   integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:,:) :: var
@@ -1161,6 +1157,78 @@ end subroutine final_
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
+  endif
+
+  if(regional) then
+    if(mype == 0) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d(var(:,i,:))
+      enddo
+      !$omp end parallel do
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    else if(mype == nxpe-1) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d(var(:,i,:))
+      enddo
+      !$omp end parallel do
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d_rev(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    else if(mype == nxpe*(nype-1)) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d_rev(var(:,i,:))
+      enddo
+      !$omp end parallel do
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    else if(mype == nxpe*nype-1) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d_rev(var(:,i,:))
+      enddo
+      !$omp end parallel do
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d_rev(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    else if(mype>0 .and. mype<nxpe-1) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d(var(:,i,:))
+      enddo
+      !$omp end parallel do
+    else if(mype>nxpe*(nype-1) .and. mype<nxpe*nype-1) then
+      !$omp parallel do default(shared) private(i)
+      do i = 1, size(var,2)
+        call put_data_2d_rev(var(:,i,:))
+      enddo
+      !$omp end parallel do
+    else if(mod(mype,nxpe)==0 .and. mype>0 .and. mype<nxpe*(nype-1)) then
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    else if(mod(mype,nxpe)==nxpe-1 .and. mype>nxpe-1 .and. mype<nxpe*nype-1) then
+      !$omp parallel do default(shared) private(j)
+      do j = 1, size(var,1)
+        call put_data_2d_rev(var(j,:,:))
+      enddo
+      !$omp end parallel do
+    endif
   endif
   ptr=var
   if ( trim(vname) == 'oz' ) then
