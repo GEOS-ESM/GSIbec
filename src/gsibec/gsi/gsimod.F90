@@ -36,6 +36,7 @@
      bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,nhscrf,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
      bkgv_write_cv,bkgv_write_sv
   use berror, only: simcv !_RT intro for testing
+  use m_berror_stats, only: usenewgfsberror
   use compact_diffs, only: noq,init_compact_diffs
 
   use gridmod, only: nlat,nlon,nsig,&
@@ -417,7 +418,7 @@
 
   namelist/bkgerr/vs,nhscrf,hzscl,hswgt,norh,ndeg,noq,bw,norsp,fstat,pert_berr,pert_berr_fct, &
 	bkgv_flowdep,bkgv_rewgtfct,bkgv_write,fpsproj,adjustozvar,fut2ps,cwcoveqqcov,adjustozhscl,&
-        simcv,bkgv_write_cv,bkgv_write_sv
+        simcv,bkgv_write_cv,bkgv_write_sv,usenewgfsberror
 
 ! STRONGOPTS (strong dynamic constraint)
 !     reg_tlnmc_type -  =1 for 1st version of regional strong constraint
