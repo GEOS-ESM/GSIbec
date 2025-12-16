@@ -1,3 +1,5 @@
+module gen_qsat
+contains
 subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -62,8 +64,8 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
   implicit none
 
   logical                               ,intent(in   ) :: ice
-  real(r_kind),dimension(lat2,lon2,nsig),intent(  out) :: qsat
-  real(r_kind),dimension(lat2,lon2,nsig),intent(in   ) :: tsen,prsl
+  real(r_kind),dimension(:,:,:),intent(  out) :: qsat
+  real(r_kind),dimension(:,:,:),intent(in   ) :: tsen,prsl
   integer(i_kind)                       ,intent(in   ) :: lat2,lon2,nsig,iderivative
 
 
@@ -234,4 +236,4 @@ subroutine genqsat(qsat,tsen,prsl,lat2,lon2,nsig,ice,iderivative)
   end do
   return
 end subroutine genqsat
-
+end module gen_qsat
