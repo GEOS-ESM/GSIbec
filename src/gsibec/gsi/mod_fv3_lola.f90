@@ -209,10 +209,8 @@ subroutine generate_anl_grid(nx,ny,grid_lon,grid_lont,grid_lat,grid_latt)
 !--------------------------obtain analysis grid dimensions nxa,nya
   nxa=1+nint((nx-one)/grid_ratio_fv3_regional)
   nya=1+nint((ny-one)/grid_ratio_fv3_regional)
-  !nlat=nya
-  !nlon=nxa
-  nlat=ny
-  nlon=nx
+  nlat=nya
+  nlon=nxa
   if(mype==0) print *,'nlat,nlon=nya,nxa= ',nlat,nlon
 
 !--------------------------obtain analysis grid spacing
@@ -712,10 +710,8 @@ subroutine m_generate_anl_grid(nx,ny,grid_lon,grid_lont,grid_lat,grid_latt,gsi_l
 !--------------------------obtain analysis grid dimensions nxa,nya
   nxa=1+nint((nx-one)/grid_ratio_fv3_regional)
   nya=1+nint((ny-one)/grid_ratio_fv3_regional)
-  !nlat=nya
-  !nlon=nxa
-  nlat=ny
-  nlon=nx
+  nlat=nya
+  nlon=nxa
   if(mype==0) print *,'nlat,nlon=nya,nxa= ',nlat,nlon
 
 !--------------------------obtain analysis grid spacing
