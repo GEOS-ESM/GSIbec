@@ -101,7 +101,6 @@ m_berror_stats_reg.F90
 rapidrefresh_cldsurf_mod.f90
 chemmod.f90
 radarZ_global_module.f90
-fv3_regional_interface.f90
 gsi_rfv3io_mod.f90
 mod_fv3_lola.f90
 grdcrd.f90
