@@ -656,6 +656,8 @@ end subroutine final_
        ihaveprs(jj)=.true.
     end do
 
+    if(regional) then
+
        if (fv3_regional) then
           do jj=1,nfldsig
              do k=1,nsig
@@ -670,6 +672,8 @@ end subroutine final_
              end do
           end do
        end if   ! end if fv3 regional
+
+    else
 
 !      load mid-layer pressure by using phillips vertical interpolation
        if (idsl5/=2) then
@@ -704,6 +708,8 @@ end subroutine final_
              end do
           end do
        endif
+
+    end if
 
 ! For regional applications only, load variables containing mean
 ! surface pressure and pressure profile at the layer midpoints
