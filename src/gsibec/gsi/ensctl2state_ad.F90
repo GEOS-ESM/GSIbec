@@ -91,6 +91,8 @@ real(r_kind),pointer,dimension(:,:,:) :: rv_oz=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: rv_rank3=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: rv_w=>NULL()
 real(r_kind),pointer,dimension(:,:,:) :: rv_dw=>NULL()
+real(r_kind),pointer,dimension(:,:,:) :: rv_ext1=>NULL()
+real(r_kind),pointer,dimension(:,:,:) :: rv_ext2=>NULL()
 
 logical :: do_getuv,do_tv_to_tsen_ad,do_normal_rh_to_q_ad,do_getprs_ad,lstrong_bk_vars
 logical :: do_tlnmc,do_q_copy
@@ -174,6 +176,8 @@ do jj=1,ntlevs_ens
    call gsi_bundlegetpointer (eval(jj),'tsen',rv_tsen,istatus)
    call gsi_bundlegetpointer (eval(jj),'q'   ,rv_q ,  istatus)
    call gsi_bundlegetpointer (wbundle_c,'q'  ,cv_rh ,istatus)
+   call gsi_bundlegetpointer (eval(jj),'ext1',rv_ext1 ,istatus)
+   call gsi_bundlegetpointer (eval(jj),'ext2',rv_ext2 ,istatus)
 
 !  Adjoint of consistency for sensible temperature, calculate sensible temperature
    if(do_tv_to_tsen_ad) call tv_to_tsen_ad(rv_tv,rv_q,rv_tsen)
@@ -265,6 +269,10 @@ do jj=1,ntlevs_ens
 !  Adjoint of control to initial state
    call gsi_bundleputvar ( wbundle_c, 't' ,  rv_tv,  istatus )
    call gsi_bundleputvar ( wbundle_c, 'ps',  rv_ps,  istatus )
+   if (associated(rv_ext1)) &
+   call gsi_bundleputvar ( wbundle_c, 'ext1',  rv_ext1,  istatus )
+   if (associated(rv_ext2)) &
+   call gsi_bundleputvar ( wbundle_c, 'ext2',  rv_ext2,  istatus )
 !  call gsi_bundleputvar ( wbundle_c, 'q' ,  zero,   istatus )                  
 !$omp end parallel sections
 
