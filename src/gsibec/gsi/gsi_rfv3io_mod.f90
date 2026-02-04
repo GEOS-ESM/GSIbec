@@ -466,9 +466,13 @@ subroutine gsi_rfv3io_get_grid_specs(ierr)
 
 !!!    get ak,bk
 
-    allocate(aeta1_ll(nsig),aeta2_ll(nsig))
-    allocate(eta1_ll(nsig+1),eta2_ll(nsig+1))
-    allocate(ak(nz),bk(nz),abk_fv3(nz))
+    if(.not.allocated(aeta1_ll))allocate(aeta1_ll(nsig))
+    if(.not.allocated(aeta2_ll))allocate(aeta2_ll(nsig))
+    if(.not.allocated(eta1_ll))allocate(eta1_ll(nsig+1))
+    if(.not.allocated(eta2_ll))allocate(eta2_ll(nsig+1))
+    if(.not.allocated(ak))allocate(ak(nz))
+    if(.not.allocated(bk))allocate(bk(nz))
+    if(.not.allocated(abk_fv3))allocate(abk_fv3(nz))
 
     do k=ndimensions+1,nvariables
        iret=nf90_inquire_variable(gfile_loc,k,name,len)
@@ -3635,10 +3639,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   integer(i_kind),allocatable :: gfile_loc_layout(:)
   character(len=180)  :: filename_layout
 
-    !coupler_res_filenam='/home/masanori/da/RDASApp_gsib/jedi-assim_test_gsib/rrfs-data_fv3jedi_2022052619/Data/gsibec/coupler.res'
-    !grid_spec='/home/masanori/da/RDASApp_gsib/jedi-assim_test_gsib/rrfs-data_fv3jedi_2022052619/Data/gsibec/fv3_grid_spec'
-    !ak_bk='/home/masanori/da/RDASApp_gsib/jedi-assim_test_gsib/rrfs-data_fv3jedi_2022052619/Data/gsibec/fv3_akbk'
-
     coupler_res_filenam='coupler.res'
     grid_spec='fv3_grid_spec'
     ak_bk='fv3_akbk'
@@ -3837,11 +3837,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     call m_generate_anl_grid(nx,ny,grid_lon,grid_lont,grid_lat,grid_latt,gsi_lats,gsi_lons)
 
     deallocate (grid_lon,grid_lat,grid_lont,grid_latt)
-    deallocate (ak,bk,abk_fv3)
-
     deallocate(ny_layout_len,ny_layout_b,ny_layout_e)
-    deallocate(aeta1_ll,aeta2_ll)
-    deallocate(eta1_ll,eta2_ll)
 
     return
 end subroutine m_gsi_rfv3io_get_grid_specs
