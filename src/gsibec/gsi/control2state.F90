@@ -298,13 +298,13 @@ do jj=1,nsubwin
    call gsi_bundlegetpointer (wbundle,'q'  ,cv_rh ,istatus)
 
 !  Get 3d pressure
-!_RT   if(do_getprs_tl) call getprs_tl(cv_ps,cv_t,sv_prse)
+   if(do_getprs_tl) call getprs_tl(cv_ps,cv_t,sv_prse)
 
 !  Convert input normalized RH to q
    if(do_normal_rh_to_q) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
 
 !  Calculate sensible temperature
-!_RT   if(do_tv_to_tsen .and. .not.regional) call tv_to_tsen(cv_t,sv_q,sv_tsen)
+   if(do_tv_to_tsen .and. .not.regional) call tv_to_tsen(cv_t,sv_q,sv_tsen)
 
 !  Copy other variables
    call gsi_bundlegetvar ( wbundle, 't'  , sv_tv,  istatus )  
@@ -416,7 +416,6 @@ do jj=1,nsubwin
       call gsi_bundlegetvar ( wbundle, 'vwnd10m', sv_vwnd10m, istatus )
    end if
    if (icext1>0) then
-      print *, 'DEBUG_RT: cv(tl) ext1'
       call gsi_bundlegetpointer (sval(jj),'ext1' ,sv_ext1, istatus)
       call gsi_bundlegetvar ( wbundle, 'ext1', sv_ext1, istatus )
    end if
