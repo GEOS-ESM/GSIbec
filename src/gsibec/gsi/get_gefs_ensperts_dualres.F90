@@ -75,6 +75,7 @@ subroutine get_gefs_ensperts_dualres (tau)
 #ifdef USE_ALL_ORIGINAL
   use m_revBens, only: revBens_ensmean_overwrite
 #endif /* USE_ALL_ORIGINAL */
+  use gen_qsat
   implicit none
 
   integer(i_kind),intent(in) :: tau

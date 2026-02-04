@@ -55,6 +55,8 @@ subroutine compute_qvar3d
   use m_berror_stats, only: varq
 #endif /* USE_ALL_ORIGINAL */
 
+  use gen_qsat
+
   implicit none
 
 ! Declare local variables
@@ -84,7 +86,7 @@ subroutine compute_qvar3d
   iderivative = 0
   ice=.true.
   do it=1,nfldsig
-     call genqsat(ges_qsat(1,1,1,it),ges_tsen(1,1,1,it),ges_prsl(1,1,1,it),lat2,lon2, &
+     call genqsat(ges_qsat(:,:,:,it),ges_tsen(:,:,:,it),ges_prsl(:,:,:,it),lat2,lon2, &
                   nsig,ice,iderivative)
   enddo
 
@@ -127,7 +129,7 @@ subroutine compute_qvar3d
       iderivative = 2
   end if
   ice=.true.
-  call genqsat(qsatg,ges_tsen(1,1,1,ntguessig),ges_prsl(1,1,1,ntguessig),lat2,lon2,nsig,ice,iderivative)
+  call genqsat(qsatg,ges_tsen(:,:,:,ntguessig),ges_prsl(:,:,:,ntguessig),lat2,lon2,nsig,ice,iderivative)
 
   if (qoption==2) then
      allocate(rhgues(lat2,lon2,nsig))
