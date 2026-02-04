@@ -421,7 +421,6 @@ do jj=1,nsubwin
       call gsi_bundlegetvar ( wbundle, 'vwnd10m', sv_vwnd10m, istatus )
    end if
    if (icext1>0) then
-      print *, 'DEBUG_RT: cv(tl) ext1'
       call gsi_bundlegetpointer (sval(jj),'ext1' ,sv_ext1, istatus)
       call gsi_bundlegetvar ( wbundle, 'ext1', sv_ext1, istatus )
    end if
