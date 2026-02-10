@@ -17,6 +17,7 @@ use gsi_metguess_mod, only: gsi_metguess_destroy_grids
 use mod_vtrans, only: nvmodes_keep,create_vtrans
 use mod_strong, only: l_tlnmc
 use strong_fast_global_mod, only: init_strongvars
+use m_mpimod, only: nxpe,nype
 implicit none
 private
 !
@@ -1142,6 +1143,13 @@ end subroutine final_
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
   endif
+!cltdebug  if ( trim(vname) == 'ps' ) then 
+
+!cltdebug         var=10000
+!cltdebug  endif
+  
+   write(6,*)'thinkdeb77var imin/max val = ',minval(var), maxval(var)
+   write(6,*)'thinkdeb77varsizeofptr var= ',size(ptr), maxval(var)
   ptr=var
   write(6,*)"thinkdeb77-1 guess_set vname is ",trim(vname)
   if ( trim(vname) == 'ps' ) then 
@@ -1169,7 +1177,8 @@ end subroutine final_
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
   character(len=80) :: uvar
-  integer jj,ier
+  integer jj,ier,i,j
+
   jj=islot
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
@@ -1183,5 +1192,6 @@ end subroutine final_
          ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
       endif
   endif
+
   end subroutine guess_basics3_
 end module guess_grids

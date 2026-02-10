@@ -3640,7 +3640,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   character(len=180)  :: filename_layout
   integer(i_kind) :: ios
   real(r_kind) :: pmpas
-
   if(fv3_regional) then
 
     coupler_res_filenam='coupler.res'
