@@ -54,7 +54,7 @@ subroutine t_to_tv_ad_(t,t_ad,q,q_ad,tv_ad)
 
 end subroutine t_to_tv_ad_
 
-subroutine tv_to_t_tl_(tv,tv_tl,q,q_tl,t_tl)
+subroutine tv_to_t_tl_(tv,tv_tl,q,q_tl,t_tl,t)
 
  implicit none
  real(r_kind), intent(in   ) ::    tv(:,:,:)
@@ -62,14 +62,31 @@ subroutine tv_to_t_tl_(tv,tv_tl,q,q_tl,t_tl)
  real(r_kind), intent(in   ) ::     q(:,:,:)
  real(r_kind), intent(in   ) ::  q_tl(:,:,:)
  real(r_kind), intent(inout) ::  t_tl(:,:,:)
+ real(r_kind), intent(in   ) ::     t(:,:,:)
 
- t_tl = (tv_tl*(one+epsilon*q)-tv*epsilon*q_tl)/(one+epsilon*q)**2
+ integer :: i,j,k
+ real(r_kind), parameter :: rmiss_th = -1.0e30
+
+ do k = 1, size(t_tl,3)
+   do j = 1, size(t_tl,2)
+     do i = 1, size(t_tl,1)
+ 
+       if(t(i,j,k) < rmiss_th) then
+         t_tl(i,j,k) = zero
+         cycle
+       endif
+
+       t_tl(i,j,k)= (tv_tl(i,j,k)*(one+epsilon*q(i,j,k))-tv(i,j,k)*epsilon*q_tl(i,j,k))/(one+epsilon*q(i,j,k))**2
+
+     enddo
+   enddo
+ enddo
 
 end subroutine tv_to_t_tl_
 
 !----------------------------------------------------------------------------
 
-subroutine tv_to_t_ad_(tv,tv_ad,q,q_ad,t_ad)
+subroutine tv_to_t_ad_(tv,tv_ad,q,q_ad,t_ad,t)
 
  implicit none
  real(r_kind), intent(in   ) ::    tv(:,:,:)
@@ -77,16 +94,34 @@ subroutine tv_to_t_ad_(tv,tv_ad,q,q_ad,t_ad)
  real(r_kind), intent(in   ) ::     q(:,:,:)
  real(r_kind), intent(inout) ::  q_ad(:,:,:)
  real(r_kind), intent(inout) ::  t_ad(:,:,:)
+ real(r_kind), intent(in   ) ::     t(:,:,:)
 
  real(r_kind),allocatable :: temp(:,:,:)
 
+ integer :: i,j,k
+ real(r_kind), parameter :: rmiss_th = -1.0e30
+
  allocate(temp(size(t_ad,1),size(t_ad,2),size(t_ad,3)))
 
- temp = t_ad/(epsilon*q+one)
+ do k = 1, size(t_ad,3)
+   do j = 1, size(t_ad,2)
+     do i = 1, size(t_ad,1)
 
- tv_ad = tv_ad + temp
- q_ad  = q_ad  - tv*epsilon*temp/(epsilon*q+one)
- t_ad = zero
+       if(t(i,j,k) < rmiss_th) then
+         tv_ad(i,j,k) = zero
+         q_ad(i,j,k) = zero
+         t_ad(i,j,k) = zero
+         cycle
+       endif
+
+       temp(i,j,k) = t_ad(i,j,k)/(epsilon*q(i,j,k)+one)
+
+       tv_ad(i,j,k) = tv_ad(i,j,k) + temp(i,j,k)
+       q_ad(i,j,k)  = q_ad(i,j,k)  - tv(i,j,k)*epsilon*temp(i,j,k)/(epsilon*q(i,j,k)+one)
+       t_ad(i,j,k) = zero
+     enddo
+   enddo
+ enddo
  
  deallocate(temp)
 

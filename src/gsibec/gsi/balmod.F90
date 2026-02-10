@@ -921,6 +921,8 @@ contains
 !   2005-03-28  wu - replace mlath with mlat
 !   2005-04-22  treadon - change berror file to 4-byte reals
 !   2005-06-06  wu - setup f1 for balance projection (st->t) when fstat=.true.
+!   2022-04-20  x.zhang - add switch (usenewgfsberror)for no need to convert
+!                         the unit of clat for using global 127-L BE in regional DA
 !
 !   input argument list:
 !     mype     - mpi task id
@@ -937,6 +939,7 @@ contains
     use m_kinds, only: r_single
     use gridmod, only: nlon,nlat,lat2,lon2,istart,jstart,region_lat
     use constants, only: deg2rad,one
+    use m_berror_stats, only: usenewgfsberror
     implicit none
     
 !   Declare passed variables
@@ -960,9 +963,16 @@ contains
     allocate( clat_avn(mlat), clat_avn4(mlat) )
     read(lunin)clat_avn4
     close(lunin)
-    do i=1,mlat
-       clat_avn(i)=clat_avn4(i)*deg2rad
-    end do
+    if (usenewgfsberror) then
+!      'The unit of clat from global BE is radian, do not need to convert'
+       do i=1,mlat
+         clat_avn(i)=clat_avn4(i)
+       end do
+    else
+       do i=1,mlat
+         clat_avn(i)=clat_avn4(i)*deg2rad
+       end do
+    end if
     deallocate(clat_avn4)
     
 

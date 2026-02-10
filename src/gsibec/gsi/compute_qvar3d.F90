@@ -39,7 +39,7 @@ subroutine compute_qvar3d
   use berror, only: dssv
   use derivsmod, only: qsatg,qgues
   use control_vectors, only: cvars3d
-  use gridmod, only: lat2,lon2,nsig
+  use gridmod, only: lat2,lon2,nsig,regional
   use constants, only: zero,one,fv,r100,qmin
   use guess_grids, only: fact_tv,ntguessig,nfldsig,ges_tsen,ges_prsl,ges_qsat
   use mpeu_util, only: getindex
@@ -54,6 +54,8 @@ subroutine compute_qvar3d
 #else
   use m_berror_stats, only: varq
 #endif /* USE_ALL_ORIGINAL */
+
+  use gen_qsat
 
   implicit none
 
@@ -76,6 +78,7 @@ subroutine compute_qvar3d
   real(r_kind),pointer,dimension(:,:,:):: ges_q =>NULL()
   integer(i_kind):: maxvarq1
 
+  real(r_kind), parameter :: rmiss_th = -1.0e30
 
   nrf3_q=getindex(cvars3d,'q')
   nrf3_cw=getindex(cvars3d,'cw')
@@ -84,7 +87,7 @@ subroutine compute_qvar3d
   iderivative = 0
   ice=.true.
   do it=1,nfldsig
-     call genqsat(ges_qsat(1,1,1,it),ges_tsen(1,1,1,it),ges_prsl(1,1,1,it),lat2,lon2, &
+     call genqsat(ges_qsat(:,:,:,it),ges_tsen(:,:,:,it),ges_prsl(:,:,:,it),lat2,lon2, &
                   nsig,ice,iderivative)
   enddo
 
@@ -127,7 +130,7 @@ subroutine compute_qvar3d
       iderivative = 2
   end if
   ice=.true.
-  call genqsat(qsatg,ges_tsen(1,1,1,ntguessig),ges_prsl(1,1,1,ntguessig),lat2,lon2,nsig,ice,iderivative)
+  call genqsat(qsatg,ges_tsen(:,:,:,ntguessig),ges_prsl(:,:,:,ntguessig),lat2,lon2,nsig,ice,iderivative)
 
   if (qoption==2) then
      allocate(rhgues(lat2,lon2,nsig))
@@ -136,6 +139,9 @@ subroutine compute_qvar3d
         do j=1,lon2
            do i=1,lat2
               rhgues(i,j,k)=qgues(i,j,k)/qsatg(i,j,k)
+              if(regional .and. ges_tsen(i,j,k,ntguessig) < rmiss_th) then
+                rhgues(i,j,k)=0.5
+              endif
            end do
         end do
      end do
