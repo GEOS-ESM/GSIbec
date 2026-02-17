@@ -1109,89 +1109,16 @@ end subroutine final_
   end subroutine guess_basics0_
 !--------------------------------------------------------
   subroutine guess_basics2_(vname,islot,var)
-  use gridmod, only: regional
   character(len=*),intent(in) :: vname
   integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics2_'
   real(r_kind),dimension(:,:),pointer::ptr
-  integer jj,ier,i,j
+  integer jj,ier
   jj=islot
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
-  endif
-
-  if(regional) then
-    if(mype == 0) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d(var(:,i))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d(var(j,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d(var(:,i))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d_rev(var(j,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe*(nype-1)) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d_rev(var(:,i))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d(var(j,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe*nype-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d_rev(var(:,i))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d_rev(var(j,:))
-      enddo
-      !$omp end parallel do
-    else if(mype>0 .and. mype<nxpe-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d(var(:,i))
-      enddo
-      !$omp end parallel do
-    else if(mype>nxpe*(nype-1) .and. mype<nxpe*nype-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_1d_rev(var(:,i))
-      enddo
-      !$omp end parallel do
-    else if(mod(mype,nxpe)==0 .and. mype>0 .and. mype<nxpe*(nype-1)) then
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d(var(j,:))
-      enddo
-      !$omp end parallel do
-    else if(mod(mype,nxpe)==nxpe-1 .and. mype>nxpe-1 .and. mype<nxpe*nype-1) then
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_1d_rev(var(j,:))
-      enddo
-      !$omp end parallel do
-    endif
   endif
   ptr=var
   if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
@@ -1199,91 +1126,17 @@ end subroutine final_
   end subroutine guess_basics2_
 !--------------------------------------------------------
   subroutine guess_basics3_(vname,islot,var)
-  use gridmod, only: regional
   character(len=*),intent(in)   :: vname
   integer(i_kind), intent(in) :: islot
   real(r_kind),dimension(:,:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
   character(len=80) :: uvar
-  integer jj,ier,i,j
-
+  integer jj,ier
   jj=islot
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
-  endif
-
-  if(regional) then
-    if(mype == 0) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d(var(:,i,:))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d(var(:,i,:))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d_rev(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe*(nype-1)) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d_rev(var(:,i,:))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    else if(mype == nxpe*nype-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d_rev(var(:,i,:))
-      enddo
-      !$omp end parallel do
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d_rev(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    else if(mype>0 .and. mype<nxpe-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d(var(:,i,:))
-      enddo
-      !$omp end parallel do
-    else if(mype>nxpe*(nype-1) .and. mype<nxpe*nype-1) then
-      !$omp parallel do default(shared) private(i)
-      do i = 1, size(var,2)
-        call put_data_2d_rev(var(:,i,:))
-      enddo
-      !$omp end parallel do
-    else if(mod(mype,nxpe)==0 .and. mype>0 .and. mype<nxpe*(nype-1)) then
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    else if(mod(mype,nxpe)==nxpe-1 .and. mype>nxpe-1 .and. mype<nxpe*nype-1) then
-      !$omp parallel do default(shared) private(j)
-      do j = 1, size(var,1)
-        call put_data_2d_rev(var(j,:,:))
-      enddo
-      !$omp end parallel do
-    endif
   endif
   ptr=var
   if ( trim(vname) == 'oz' ) then
@@ -1292,111 +1145,6 @@ end subroutine final_
          ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
       endif
   endif
-
   end subroutine guess_basics3_
-!--------------------------------------------------------
- subroutine put_data_1d(x)
- implicit none
- real(r_kind), intent(inout) :: x(:)
- real(r_kind), parameter :: rmiss = -3.334767057904812e38
- real(r_kind), parameter :: rmiss_th = -1.0e30
- integer :: n, k, first_valid
-
- n = size(x)
-
- first_valid = 0
- do k = 1, n
-   if (x(k) > rmiss_th) then
-     first_valid = k
-     exit
-   end if
- end do
-
- if (first_valid <= 0) return
-
- if (first_valid > 1) then
-   x(1:first_valid-1) = x(first_valid)
- end if
-
- end subroutine put_data_1d
-!--------------------------------------------------------
- subroutine put_data_1d_rev(x)
- implicit none
- real(r_kind), intent(inout) :: x(:)
- real(r_kind), parameter :: rmiss = -3.334767057904812e38
- real(r_kind), parameter :: rmiss_th = -1.0e30
- integer :: n, k, first_valid
-
- n = size(x)
-
- first_valid = 0
- do k = n, 1, -1
-   if (x(k) > rmiss_th) then
-     first_valid = k
-     exit
-   end if
- end do
-
- if (first_valid <= 0) return
-
- if (first_valid > 1) then
-   x(first_valid+1:n) = x(first_valid)
- end if
-
- end subroutine put_data_1d_rev
-!--------------------------------------------------------
- subroutine put_data_2d(x)
- implicit none
- real(r_kind), intent(inout) :: x(:,:)
- real(r_kind), parameter :: rmiss = -3.334767057904812e38
- real(r_kind), parameter :: rmiss_th = -1.0e30
- integer :: n, k, first_valid, i
-
- n = size(x,1)
-
- first_valid = 0
- do k = 1, n
-   if (x(k,1) > rmiss_th) then
-     first_valid = k
-     exit
-   end if
- end do
-
- if (first_valid <= 0) return
-
- if (first_valid > 1) then
-   do i = 1, first_valid-1
-     x(i,:) = x(first_valid,:)
-   enddo
- end if
-
- end subroutine put_data_2d
-!--------------------------------------------------------
- subroutine put_data_2d_rev(x)
- implicit none
- real(r_kind), intent(inout) :: x(:,:)
- real(r_kind), parameter :: rmiss = -3.334767057904812e38
- real(r_kind), parameter :: rmiss_th = -1.0e30
- integer :: n, k, first_valid, i
-
- n = size(x,1)
-
- first_valid = 0
- do k = n, 1, -1 
-   if (x(k,1) > rmiss_th) then
-     first_valid = k
-     exit
-   end if
- end do
-
- if (first_valid <= 0) return
-
- if (first_valid > 1) then
-   do i = first_valid+1, n
-     x(i,:) = x(first_valid,:)
-   enddo
- end if
-
- end subroutine put_data_2d_rev
 !--------------------------------------------------------
 end module guess_grids
