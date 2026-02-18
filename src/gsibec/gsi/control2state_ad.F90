@@ -54,7 +54,7 @@ use m_kinds, only: i_kind,r_kind
 use control_vectors, only: control_vector
 use control_vectors, only: cvars3d,cvars2d
 use bias_predictors, only: predictors
-use gridmod, only: regional,lat2,lon2,nsig,twodvar_regional
+use gridmod, only: regional,lat2,lon2,nsig,twodvar_regional,mpas_regional
 use jfunc, only: nsclen,npclen,ntclen
 use gsi_4dvar, only: nsubwin, lsqrtb
 #ifdef USE_ALL_ORIGINAL
@@ -315,7 +315,7 @@ do jj=1,nsubwin
 !  Adjoint of convert input normalized RH to q to add contribution of moisture
 !  to t, p , and normalized rh
    if(regional .and. ls_prse) rv_prse = 0.
-   if(do_normal_rh_to_q_ad) call normal_rh_to_q_ad(cv_rh,cv_t,rv_prse,rv_q)
+   if(do_normal_rh_to_q_ad .or. mpas_regional) call normal_rh_to_q_ad(cv_rh,cv_t,rv_prse,rv_q)
 
 !  Adjoint to convert ps to 3-d pressure
    if(do_getprs_ad) call getprs_ad(cv_ps,cv_t,rv_prse)

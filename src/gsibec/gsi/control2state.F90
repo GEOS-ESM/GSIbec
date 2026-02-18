@@ -59,7 +59,7 @@ use m_kinds, only: r_kind,i_kind
 use control_vectors, only: control_vector
 use control_vectors, only: cvars3d,cvars2d
 use bias_predictors, only: predictors
-use gridmod, only: regional,lat2,lon2,nsig, nlat, nlon, twodvar_regional            
+use gridmod, only: regional,lat2,lon2,nsig, nlat, nlon, twodvar_regional, mpas_regional 
 use jfunc, only: nsclen,npclen,ntclen
 use gsi_4dvar, only: nsubwin, l4dvar, lsqrtb, ladtest_obs
 #ifdef USE_ALL_ORIGINAL
@@ -301,7 +301,7 @@ do jj=1,nsubwin
    if(do_getprs_tl) call getprs_tl(cv_ps,cv_t,sv_prse)
 
 !  Convert input normalized RH to q
-   if(do_normal_rh_to_q) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
+   if(do_normal_rh_to_q .or. mpas_regional) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
 
 !  Calculate sensible temperature
    if(do_tv_to_tsen .and. .not.regional) call tv_to_tsen(cv_t,sv_q,sv_tsen)

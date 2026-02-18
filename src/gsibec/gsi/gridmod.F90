@@ -149,6 +149,7 @@ module gridmod
   public :: diagnostic_reg,nmmb_reference_grid,filled_grid
   public :: grid_ratio_nmmb,isd_g,isc_g,dx_gfs,lpl_gfs,nsig5,nmmb_verttype
   public :: grid_ratio_fv3_regional,fv3_io_layout_y,fv3_regional,fv3_cmaq_regional,grid_type_fv3_regional
+  public :: use_fv3_grid_spec
   public :: nsig3,nsig4,grid_ratio_wrfmass
   public :: use_gfs_ozone,check_gfs_ozone_date,regional_ozone,nvege_type
   public :: jcap,jcap_b,hires_b,sp_a,grd_a
@@ -162,6 +163,7 @@ module gridmod
   public :: use_sp_eqspace,jcap_cut
   public :: wrf_mass_hybridcord
   public :: mpas_regional
+  public :: rlat_start,rlat_end,rlon_start,rlon_end,north_pole_lat,north_pole_lon
 
   interface gridmod_vgrid
      module procedure load_vert_coord_
@@ -194,6 +196,7 @@ module gridmod
   logical netcdf            ! .t. for regional netcdf i/o
 
   logical mpas_regional
+  logical use_fv3_grid_spec
 
   logical filled_grid       ! 
   logical half_grid         !
@@ -329,6 +332,14 @@ module gridmod
   real(r_kind) rlon_min_dd,rlon_max_dd,rlat_min_dd,rlat_max_dd
   real(r_kind) dt_ll,pdtop_ll,pt_ll
 
+  ! variables to define a regional rotated lat-lon grid
+  real(r_kind):: rlat_start
+  real(r_kind):: rlat_end
+  real(r_kind):: rlon_start
+  real(r_kind):: rlon_end
+  real(r_kind):: north_pole_lat
+  real(r_kind):: north_pole_lon
+
   integer(i_kind) nlon_regional,nlat_regional,nlon_regionalens,nlat_regionalens
   real(r_kind) regional_fhr,regional_fmin
   integer(i_kind) regional_time(6)
@@ -460,6 +471,7 @@ contains
     fv3_regional=.false.
     fv3_cmaq_regional=.false.
     mpas_regional=.false.
+    use_fv3_grid_spec=.false.
     l_reg_update_hydro_delz=.false.
     nems_nmmb_regional = .false.
     twodvar_regional = .false. 
@@ -480,6 +492,13 @@ contains
     lon1 = nlon
     lat2 = lat1+2
     lon2 = lon1+2
+
+    rlat_start = 0.
+    rlat_end = 0.
+    rlon_start = 0.
+    rlon_end = 0.
+    north_pole_lat = 0.
+    north_pole_lon = 0.
 
     diagnostic_reg = .false.
     if(verbose)diagnostic_reg = .true.

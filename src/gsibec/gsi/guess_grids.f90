@@ -600,6 +600,7 @@ end subroutine final_
     real(r_kind) kap1,kapr,trk
     real(r_kind),dimension(:,:)  ,pointer::ges_ps=>NULL()
     real(r_kind),dimension(:,:,:),pointer::ges_tv=>NULL()
+    real(r_kind),dimension(:,:,:),pointer::ges_p=>NULL()
     real(r_kind) pinc(lat2,lon2)
     integer(i_kind) i,j,k,ii,jj,itv,ips,kp
     logical ihaveprs(nfldsig)
@@ -673,6 +674,21 @@ end subroutine final_
           end do
        end if   ! end if fv3 regional
 
+       if (mpas_regional) then
+          do jj=1,nfldsig
+            call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'prsl' ,ges_p,ips)
+            if(ips/=0) call die(myname_,': prsl not available in guess, abort',ips)
+             do k=1,nsig
+                do j=1,lon2
+                   do i=1,lat2
+                      ges_prsl(i,j,k,jj)=ges_p(i,j,k)
+                      ges_lnprsl(i,j,k,jj)=log(ges_prsl(i,j,k,jj))
+                   end do
+                end do
+             end do
+          end do
+       endif
+
     else
 
 !      load mid-layer pressure by using phillips vertical interpolation
@@ -720,7 +736,7 @@ end subroutine final_
              ges_prslavg(k)=aeta1_ll(k)*ten+r1013*aeta2_ll(k)
           end do
        endif
-       if (fv3_regional .and. mpas_regional) then
+       if (mpas_regional) then
           open(10,file="mpas_pave.txt")
           do k=1,nsig
             read(10,*)ges_prslavg(k)
@@ -1139,6 +1155,7 @@ end subroutine final_
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
   endif
   ptr=var
+  if ( trim(vname) == 'prsl' ) ptr=kPa_per_Pa*ptr ! To read 3D pressure from MPAS-JEDI
   if ( trim(vname) == 'oz' ) then
       call gsi_metguess_get ( 'usrvar::o3ppmv', uvar, ier )
       if (trim(uvar)=='o3ppmv') then
