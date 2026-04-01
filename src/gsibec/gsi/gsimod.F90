@@ -27,7 +27,7 @@
   use gsi_4dvar, only: setup_4dvar,init_4dvar,clean_4dvar
   use gsi_4dvar, only: l4densvar,nmn_obsbin
 
-  use gsibec_adjtest_mod, only: iadtest
+  use gsibec_adjtest_mod, only: iadtest,iadtest_maxiter
 
   use state_vectors, only: init_anasv,final_anasv
   use control_vectors, only: init_anacv,final_anacv,nrf,nvars,nrf_3d,cvars3d,cvars2d,&
@@ -364,6 +364,8 @@
 !     pseudo_q2- breed between q1/q2 options, that is, (q1/sig(q))
 !     mockbgk - if .true., use internally defined (fake) background fields
 !     iadtest - perform various adjoint tests: <=0: none; 1=cv/sv; 2=<x,By>
+!     iadtest_maxiter - will keep doing AD-test up this iteration+1
+!                       (default 0: do tests only once)
 !
 
   namelist/setup/&
@@ -374,6 +376,7 @@
        l4densvar,&
        nmn_obsbin,&
        iadtest,&
+       iadtest_maxiter,&
        mockbkg
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
