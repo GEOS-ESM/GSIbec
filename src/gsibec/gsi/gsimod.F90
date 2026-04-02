@@ -44,9 +44,12 @@
      init_grid,init_grid_vars,&
      nlayers,jcap,jcap_b,vlevs,&
      use_sp_eqspace,final_grid_vars,&
-     jcap_gfs,nlat_gfs,nlon_gfs,jcap_cut
+     jcap_gfs,nlat_gfs,nlon_gfs,jcap_cut,&
+     rlat_start,rlat_end,&
+     rlon_start,rlon_end,&
+     north_pole_lat,north_pole_lon
 
-  use gridmod, only: init_reg_glob_ll,regional,fv3_regional,grid_ratio_fv3_regional,mpas_regional
+  use gridmod, only: init_reg_glob_ll,regional,fv3_regional,grid_ratio_fv3_regional,mpas_regional,use_fv3_grid_spec
 
   use constants, only: zero,one,init_constants,gps_constants,three
   use constants, only: init_constants,init_constants_derived
@@ -390,7 +393,8 @@
 
 
   namelist/gridopts/jcap,jcap_b,nlat,nlon,nsig,use_sp_eqspace,fv3_regional,grid_ratio_fv3_regional,&
-                    regional,mpas_regional
+                    regional,mpas_regional,use_fv3_grid_spec,rlat_start,rlat_end,rlon_start,rlon_end,&
+                    north_pole_lat,north_pole_lon
 
 ! BKGERR (background error related variables):
 !     vs       - scale factor for vertical correlation lengths for background error
