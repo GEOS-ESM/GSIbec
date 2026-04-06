@@ -109,12 +109,14 @@ module gsi_rfv3io_mod
       "u","v","u_w","u_s","v_w","v_s","t","tv","tsen","w","delp","ps","delzinc"]
   character(len=max_varname_length), dimension(ntracerslist+naero_cmaq_fv3+7+naero_smoke_fv3), parameter :: & 
     vartracers =  [character(len=max_varname_length) :: &
-      'q','oz','ql','qi','qr','qs','qg','qnr',aeronames_cmaq_fv3,'pm25at','pm25ac','pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3]
+      'q','oz','ql','qi','qr','qs','qg','qnr',aeronames_cmaq_fv3, &
+      'pm25at','pm25ac','pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3]
   character(len=max_varname_length), dimension(nphyvarslist), parameter :: &
     varphyvars = [character(len=max_varname_length) :: 'dbz','fed']
   character(len=max_varname_length), dimension(16+naero_cmaq_fv3+7+naero_smoke_fv3+1), parameter :: &
     varfv3name = [character(len=max_varname_length) :: &
-      'u','v','W','T','delp','sphum','o3mr','liq_wat','ice_wat','rainwat','snowwat','graupel','rain_nc','ref_f3d','flash_extent_density','ps','DZ', & 
+      'u','v','W','T','delp','sphum','o3mr','liq_wat','ice_wat','rainwat','snowwat', &
+      'graupel','rain_nc','ref_f3d','flash_extent_density','ps','DZ', & 
       aeronames_cmaq_fv3,'pm25at','pm25ac','pm25co','pm2_5','amassi','amassj','amassk',aeronames_smoke_fv3], &
       vgsiname = [character(len=max_varname_length) :: &
         'u','v','w','tsen','delp','q','oz','ql','qi','qr','qs','qg','qnr','dbz','fed','ps','delzinc', &
@@ -883,7 +885,8 @@ subroutine gsi_fv3ncdf_read(grd_ionouv,cstate_nouv,filenamein,fv3filenamegin,ens
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),'.',nio
-             iret=nf90_open(filename_layout,ior(nf90_nowrite,nf90_mpiio),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
+             iret=nf90_open(filename_layout,ior(nf90_nowrite,nf90_mpiio), &
+               gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) !clt
              if(iret/=nf90_noerr) then
                 write(6,*)' gsi_fv3ncdf_read: problem opening ',trim(filename_layout),gfile_loc_layout(nio),', Status = ',iret
                 call stop2(333)
@@ -2048,7 +2051,8 @@ subroutine gsi_fv3ncdf_writeuv(grd_uv,ges_u,ges_v,add_saved,fv3filenamegin)
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),".",nio
-             call check( nf90_open(filename_layout,ior(nf90_write, nf90_mpiio),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) )
+             call check( nf90_open(filename_layout,ior(nf90_write, nf90_mpiio),gfile_loc_layout(nio), &
+               comm=mpi_comm_read,info=MPI_INFO_NULL) )
           enddo
           gfile_loc=gfile_loc_layout(0)
        else
@@ -2670,11 +2674,13 @@ subroutine gsi_fv3ncdf_write(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3file
           allocate(gfile_loc_layout(0:fv3_io_layout_y-1))
           do nio=0,fv3_io_layout_y-1
              write(filename_layout,'(a,a,I4.4)') trim(filenamein),'.',nio
-             call check( nf90_open(filename_layout,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc_layout(nio),comm=mpi_comm_read,info=MPI_INFO_NULL) )
+             call check( nf90_open(filename_layout,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc_layout(nio), &
+               comm=mpi_comm_read,info=MPI_INFO_NULL) )
           enddo
           gfile_loc=gfile_loc_layout(0)
        else
-          call check( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL) )
+          call check( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc, &
+            comm=mpi_comm_read,info=MPI_INFO_NULL) )
        endif
        
        do ilevtot=kbgn,kend
@@ -2915,7 +2921,8 @@ subroutine gsi_fv3ncdf_write_v1(grd_ionouv,cstate_nouv,add_saved,filenamein,fv3f
     call setcomm(iworld,iworld_group,nread,mype_read_rank,mpi_comm_read,ierror)
 
     if (procuse) then
-    call check ( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc,comm=mpi_comm_read,info=MPI_INFO_NULL)) !clt
+    call check ( nf90_open(filenamein,ior(nf90_netcdf4,ior(nf90_write, nf90_mpiio)),gfile_loc, &
+      comm=mpi_comm_read,info=MPI_INFO_NULL)) !clt
     do ilevtot=kbgn,kend
       vgsiname=grd_ionouv%names(1,ilevtot)
       if(trim(vgsiname)=='amassi') cycle

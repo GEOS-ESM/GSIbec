@@ -497,13 +497,15 @@ contains
       if ( trim(svars2d(i2))=='howv' .or. trim(svars2d(i2))=='HOWV'   ) then
         i_howv_3dda = 1
         if ( mype == 0 ) then
-          write(6,'(1x,A,1x,A8,1x,A,1x,I4)')"init_rapidrefresh_cldsurf: anavinfo svars2d (state variable): ",trim(adjustl(svars2d(i2))), " is found in anavinfo, set i_howv_3dda = ", i_howv_3dda
+          write(6,'(1x,A,1x,A8,1x,A,1x,I4)')"init_rapidrefresh_cldsurf: anavinfo svars2d (state variable): ", &
+            trim(adjustl(svars2d(i2))), " is found in anavinfo, set i_howv_3dda = ", i_howv_3dda
         end if
       end if
       if ( trim(svars2d(i2))=='gust' .or. trim(svars2d(i2))=='GUST'   ) then
         i_gust_3dda = 1
         if ( mype == 0 ) then
-          write(6,'(1x,A,1x,A8,1x,A,1x,I4)')"init_rapidrefresh_cldsurf: anavinfo svars2d (state variable): ",trim(adjustl(svars2d(i2))), " is found in anavinfo, set i_gust_3dda = ", i_gust_3dda
+          write(6,'(1x,A,1x,A8,1x,A,1x,I4)')"init_rapidrefresh_cldsurf: anavinfo svars2d (state variable): ", &
+            trim(adjustl(svars2d(i2))), " is found in anavinfo, set i_gust_3dda = ", i_gust_3dda
         end if
       end if
     end do ! i2 : looping over 2-D anasv

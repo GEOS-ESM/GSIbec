@@ -354,7 +354,8 @@ subroutine write_GEOSens_ (fname,bvars,lats,lons,rc, myid,root,plevs)
   enddo
   allocate(varid3d(bvars%nv3d))
   do nv = 1, bvars%nv3d
-     call check_( nf90_def_var(ncid, trim(bvars%fvars3d(nv)), NF90_REAL, (/ x_dimid, y_dimid, z_dimid /), varid3d(nv)), rc, mype_, root_ )
+     call check_( nf90_def_var(ncid, trim(bvars%fvars3d(nv)), NF90_REAL, (/ x_dimid, y_dimid, z_dimid /), &
+       varid3d(nv)), rc, mype_, root_ )
   enddo
 
 ! End define mode. This tells netCDF we are done defining metadata.

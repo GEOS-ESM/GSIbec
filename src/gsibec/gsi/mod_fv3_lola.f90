@@ -67,11 +67,13 @@ module mod_fv3_lola
   implicit none
 !
   private
-  public :: generate_anl_grid,m_generate_anl_grid,m_generate_anl_grid_without_fv3gridspec,fv3_h_to_ll,fv3_ll_to_h,fv3uv2earth,earthuv2fv3
+  public :: generate_anl_grid,m_generate_anl_grid,m_generate_anl_grid_without_fv3gridspec, &
+    fv3_h_to_ll,fv3_ll_to_h,fv3uv2earth,earthuv2fv3
   public :: fv3dx,fv3dx1,fv3dy,fv3dy1,fv3ix,fv3ixp,fv3jy,fv3jyp,a3dx,a3dx1,a3dy,a3dy1,a3ix,a3ixp,a3jy,a3jyp
   public :: nxa,nya,cangu,sangu,cangv,sangv,nx,ny,bilinear
   public :: definecoef_regular_grids,fv3_h_to_ll_ens,fv3uv2earthens
-  public :: fv3dxens,fv3dx1ens,fv3dyens,fv3dy1ens,fv3ixens,fv3ixpens,fv3jyens,fv3jypens,a3dxens,a3dx1ens,a3dyens,a3dy1ens,a3ixens,a3ixpens,a3jyens,a3jypens
+  public :: fv3dxens,fv3dx1ens,fv3dyens,fv3dy1ens,fv3ixens,fv3ixpens,fv3jyens,fv3jypens, &
+    a3dxens,a3dx1ens,a3dyens,a3dy1ens,a3ixens,a3ixpens,a3jyens,a3jypens
   public :: nxe,nye,canguens,sanguens,cangvens,sangvens
 
   logical bilinear
@@ -1558,9 +1560,11 @@ subroutine fv3uv2earthens(u,v,nxen,nyen,u_out,v_out)
   do j=1,nyen
      do i=1,nxen
         u_out(i,j)=half *((u(i,j)*sangvens(i,j)-v(i,j)*sanguens(i,j))/(canguens(i,j)*sangvens(i,j)-sanguens(i,j)*cangvens(i,j)) &
-                       +(u(i,j+1)*sangvens(i+1,j)-v(i+1,j)*sanguens(i,j+1))/(canguens(i,j+1)*sangvens(i+1,j)-sanguens(i,j+1)*cangvens(i+1,j)))
+                       +(u(i,j+1)*sangvens(i+1,j)-v(i+1,j)*sanguens(i,j+1))/(canguens(i,j+1)*sangvens(i+1,j) &
+                       -sanguens(i,j+1)*cangvens(i+1,j)))
         v_out(i,j)=half *((u(i,j)*cangvens(i,j)-v(i,j)*canguens(i,j))/(sanguens(i,j)*cangvens(i,j)-canguens(i,j)*sangvens(i,j)) &
-                       +(u(i,j+1)*cangvens(i+1,j)-v(i+1,j)*canguens(i,j+1))/(sanguens(i,j+1)*cangvens(i+1,j)-canguens(i,j+1)*sangvens(i+1,j)))
+                       +(u(i,j+1)*cangvens(i+1,j)-v(i+1,j)*canguens(i,j+1))/(sanguens(i,j+1)*cangvens(i+1,j) &
+                       -canguens(i,j+1)*sangvens(i+1,j)))
      end do
   end do
   return
