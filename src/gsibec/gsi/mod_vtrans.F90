@@ -874,7 +874,7 @@ subroutine special_eigvv(qmat0,hmat0,smat0,nmat,swww0,szzz0,swwwd0,szzzd0,nvmode
   end do
   mv=0
   atemp8=atemp
-  call eigen(atemp8,btemp8,nmat,mv)
+  call gsi_eigen(atemp8,btemp8,nmat,mv)
   btemp=btemp8
   atemp=atemp8
   do i=1,nvmodes_keep

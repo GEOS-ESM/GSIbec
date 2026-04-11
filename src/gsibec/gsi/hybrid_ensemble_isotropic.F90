@@ -338,8 +338,9 @@ subroutine init_rf_z(z_len)
               d1=abs(z_len(k))/dlnp
               d1=min(rnsig,d1)
               aspect(k)=d1**2
-!!            if(mype == 0) write(400,'(" k, vertical localization in grid units for ln(p) scaling =",i4,f10.2,f10.2,f10.2)') &
-!!                                         k,sqrt(aspect(k))
+              if(debug .and. mype == 0) write(400, &
+               '(" k, vertical localization in grid units for ln(p) scaling =", &
+                i4,f10.2,f10.2,f10.2)') k,sqrt(aspect(k))
            enddo
    
            call get_new_alpha_beta(aspect,nsig,fmatz_tmp,fmat0z_tmp)
@@ -844,6 +845,7 @@ subroutine normal_new_factorization_rf_z
 
 ! Check result:
   if(debug)then
+
     do k=1,grd_ens%nsig
        f=zero
        f(:,k)=one
