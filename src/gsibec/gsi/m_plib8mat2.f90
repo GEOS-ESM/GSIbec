@@ -1183,6 +1183,7 @@ REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
 INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
 
 c=zero
+CALL madbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
 END SUBROUTINE mulbb
 !=============================================================================
 SUBROUTINE madbb(a,b,c,m1,m2,mah1,mah2,mbh1,mbh2,mch1,mch2)
@@ -1221,7 +1222,7 @@ REAL(r_kind),     INTENT(INOUT) :: c(m1,-mch1:mch2)
 INTEGER(i_kind)                :: nch1, nch2, j, k, jpk, i1,i2
 
 nch1=mah1+mbh1; nch2=mah2+mbh2
-IF(nch1 /= mch1 .OR. nch2 /= mch2)STOP 'In MULBB, dimensions inconsistent'
+IF(nch1 /= mch1 .OR. nch2 /= mch2)STOP 'In MADBB, dimensions inconsistent'
 DO j=-mah1,mah2
    DO k=-mbh1,mbh2; jpk=j+k; i1=MAX(1,1-j); i2=MIN(m1,m2-j)
       c(i1:i2,jpk)=c(i1:i2,jpk)+a(i1:i2,j)*b(j+i1:j+i2,k)
@@ -1776,7 +1777,7 @@ SUBROUTINE DLDLB(a,b,d,m,mah) ! Modified Cholesky [L(D**-1)U, without sqrt]
 !=============================================================================
 !$$$  subprogram documentation block
 !                .      .    .
-! subprogram:    dl1lb
+! subprogram:    dldlb
 !
 !   prgrmmr:    
 !

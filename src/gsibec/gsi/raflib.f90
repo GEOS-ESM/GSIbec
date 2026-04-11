@@ -4376,10 +4376,10 @@ end subroutine quadfil
 end module raflib
 
 
-SUBROUTINE EIGEN(A,R,N,MV)
+SUBROUTINE GSI_EIGEN(A,R,N,MV)
 !$$$  subprogram documentation block
 !                .      .    .
-! subprogram:    EIGEN
+! subprogram:    GSI_EIGEN
 !
 !   prgrmmr:     R. J. Purser, NCEP 2005
 !
@@ -4617,7 +4617,7 @@ SUBROUTINE EIGEN(A,R,N,MV)
             end do
          end do
          RETURN
-END SUBROUTINE EIGEN
+END SUBROUTINE GSI_EIGEN
 
 
 SUBROUTINE gettri4(us,lguess,lv,lui,w4)
