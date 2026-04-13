@@ -61,8 +61,8 @@ use general_sub2grid_mod, only: sub2grid_info
 use general_sub2grid_mod, only: general_sub2grid_create_info
 use general_sub2grid_mod, only: general_sub2grid_destroy_info
 
-use gsibec_adjtest_mod, only: adtest_cv
-use gsibec_adjtest_mod, only: adtest_bkgcov
+use gsibec_adjtest_mod, only: adtest_cv1,adtest_cv2
+use gsibec_adjtest_mod, only: adtest_bkgerr
 use gsibec_adjtest_mod, only: adtest_stvp2uv
 
 use mpeu_util, only: die
@@ -841,9 +841,9 @@ contains
   endif
 
 ! Perform adjoint test
-  if (iadtest(1)) call adtest_cv()
-  if (iadtest(2)) call adtest_bkgcov(sval(1))
-  if (iadtest(3)) call adtest_stvp2uv(1,mype)
+  if (iadtest(1)) call adtest_cv1()
+  if (iadtest(2)) call adtest_cv2()
+! if (iadtest(3)) call adtest_bkgerr()
 
 ! start work space
   if (l_hyb_ens) then
@@ -917,6 +917,13 @@ contains
      enddo
   end if
 
+! Perform adjoint test
+  if (iadtest(1)) call adtest_cv1(grady)
+  if (iadtest(2)) call adtest_cv2(grady)
+  if (iadtest(3)) call adtest_bkgerr(g1=gradx,g2=grady)
+  if (iadtest(4)) call adtest_stvp2uv(1,mype)
+
+  call control2state(grady,mval,sbias)
 ! if so write out fields from gsi (in GSI units)
   if(bkgv_write_sv/='null') &
   call write_bundle(sval(ntguessig),trim(bkgv_write_sv)//'_final')
