@@ -13,6 +13,8 @@ module gsi_fixture_GFS
 !                       . a generic module name "gsi_fixture" is used to let
 !                         the code compilable with a simple switch through
 !                         CMakeLists.txt file selection.
+!   2024-01-01         - register cplr_gfs_ensemble for GFS gaussian grid
+!                         NetCDF4 ensemble reading (EnsSource=GFS).
 !
 !   input argument list: see Fortran 90 style document below
 !
@@ -41,24 +43,22 @@ contains
 subroutine fixture_config()
 !> In a GFS fixture as it is,
 !>      - use GSI stub_timer
-!>      - use GSI get_gfs_ensmod_mod from cplr_gfs_ensmod.f90.
+!>      - use GSI cplr_gfs_ensemble for GFS gaussian grid ensemble reading.
 
 !> singleton timermod and gsi_enscouplemod, which manage the actual timer and
 !> gfs_ensenble extentions.
 
-! use gsi_enscouplermod, only: ensemble_typedef => gsi_enscoupler_registry
+  use gsi_enscouplermod, only: ensemble_typedef => gsi_enscoupler_registry
 
-!> Define the actual extensions (timermod and gfs_ensemble) to be used.
+!> Define the actual extensions (gfs_ensemble) to be used.
 
-! use get_gfs_ensmod_mod, only: my_ensemble_mold => ensemble_typemold
+  use cplr_gfs_ensemble, only: my_ensemble_mold => ensemble_typemold
 
   implicit none
 
 !> Fix up the extensions used by corresponding GSI singleton modules.
 
-! call ensemble_typedef(my_ensemble_mold())
-  print *, 'Want to read GFS ensemble, not avail, abort ... ' 
-  call stop2(9999)
+  call ensemble_typedef(my_ensemble_mold())
 
 end subroutine fixture_config
 end module gsi_fixture_GFS
