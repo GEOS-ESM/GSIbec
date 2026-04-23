@@ -17,7 +17,6 @@ use gsi_metguess_mod, only: gsi_metguess_destroy_grids
 use mod_vtrans, only: nvmodes_keep,create_vtrans
 use mod_strong, only: l_tlnmc
 use strong_fast_global_mod, only: init_strongvars
-use m_mpimod, only: nxpe,nype
 implicit none
 private
 !
