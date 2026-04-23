@@ -515,7 +515,7 @@ subroutine prewgt(mype)
      else if (n==nrf2_sst) then
         do j=1,lat2         
            do i=1,lon2
-              if(mvars>=2 .and. isli2(j,i)==1)then
+              if(mvars>=1 .and. isli2(j,i)==1)then
                  dssvs(j,i,nc2d+1)= atsfc_sdv(1)          ! land surface temperature
               else if(mvars>=2 .and. isli2(j,i)==2)then
                  dssvs(j,i,nc2d+2)= atsfc_sdv(2)          ! ice surface temperature
