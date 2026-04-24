@@ -335,6 +335,7 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
    logical :: gsi_, gfspoles_, verbose, init_
    character(len=32) :: fvname
    integer :: uid, vid                  ! indices of u/v (sf/vp) in gsi_vnames3d
+   integer :: i, j
    character(len=*), parameter :: myname_ = myname//'::read_GFSens_'
 
    rc = 0; mype_ = 0; root_ = 0
@@ -407,7 +408,11 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
             ! file rows 1..nlat_file -> GSI rows 2..nlat-1 (S->N CF ordering preserved).
             bvars%ptr3d(:,:,:,nv) = 0.0
             do kk = 1, nlev
-               bvars%ptr3d(2:nlat-1,:,kk,nv) = transpose(data3d(:,:,kk))
+               do j=1,nlat_file
+                  do i=1,nlon
+                     bvars%ptr3d(j+1,i,kk,nv) = data3d(i,j,kk)
+                  end do
+               end do
             enddo
          else
             do kk = 1, nlev
@@ -435,7 +440,11 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
       if (gsi_) then
          if (gfspoles_) then
             bvars%ptr2d(:,:,nv) = 0.0
-            bvars%ptr2d(2:nlat-1,:,nv) = transpose(data2d)
+            do j=1,nlat_file
+               do i=1,nlon
+                  bvars%ptr2d(j+1,i,nv) = data2d(i,j)
+               end do
+            end do
          else
             bvars%ptr2d(:,:,nv) = transpose(data2d)
          endif
@@ -463,7 +472,7 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
       do nv = 1, bvars%nv3d
          do kk = 1, nlev
             call fillpoles_s_nc_(bvars%ptr3d(:,:,kk,nv), nlon, nlat)
-         enddo
+         end do
       enddo
       ! Scalar pole fill for all 2D fields
       do nv = 1, bvars%nv2d
@@ -515,11 +524,8 @@ subroutine gfs2gsi_(x)
    type(nc_GFSens_vars), intent(inout) :: x
    integer :: id, id_t, id_q, nv
 
-   ! Vertical flip: GFS NetCDF4 files store levels top-to-bottom (k=1 = model top).
-   ! GSI uses bottom-to-top (k=1 = surface).  Flip all 3D fields.
-   do nv = 1, x%nv3d
-      call levflip_(x%ptr3d(:,:,:,nv), x%nlon, x%nlat, x%nsig, x%gsiset)
-   enddo
+   ! need flip so localization function applies equally to EnKF and Hybrid-GSI
+   call flip_(x)
 
    ! Surface pressure: Pa -> centibars (1 cb = 1000 Pa)
    id = getindex(x%gsi_vnames2d, 'ps')
@@ -533,6 +539,7 @@ subroutine gfs2gsi_(x)
    id_t = getindex(x%gsi_vnames3d, 't')
    if (id_t <= 0) id_t = getindex(x%gsi_vnames3d, 'tv')
    id_q = getindex(x%gsi_vnames3d, 'q')
+   
    if (id_t > 0 .and. id_q > 0) then
       x%ptr3d(:,:,:,id_t) = x%ptr3d(:,:,:,id_t) * (1.0 + real(fv, kind=4) * x%ptr3d(:,:,:,id_q))
    endif
@@ -616,124 +623,130 @@ end subroutine fillpoles_v_nc_
 !---------------------------------------------------------------------------
 ! flip_ combines latflip and levflip for cases where the file has both
 ! N->S latitude ordering AND bottom-to-top level ordering.
-! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is already
-! S->N; gfs2gsi_ handles the vertical flip via levflip_ directly.
+! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is already S->N
 subroutine flip_(x)
-   implicit none
-   type(nc_GFSens_vars), intent(inout) :: x
-   integer :: im, jm, km, nv
+  implicit none
+  type(nc_GFSens_vars), intent(inout) :: x
+  integer :: im, jm, km, nv
 
-   im = x%nlon
-   jm = x%nlat
-   km = x%nsig
-
-   do nv = 1, x%nv2d
-      call latflip2_(x%ptr2d(:,:,nv), im, jm, x%gsiset)
-   enddo
-   do nv = 1, x%nv3d
-      call latflip3_(x%ptr3d(:,:,:,nv), im, jm, km, x%gsiset)
-      call levflip_ (x%ptr3d(:,:,:,nv), im, jm, km, x%gsiset)
-   enddo
+  im=x%nlon
+  jm=x%nlat
+  km=x%nsig
+!
+  do nv=1,x%nv2d
+     call hflip2_(x%ptr2d(:,:,nv),im,jm,x%gsiset)
+  enddo
+!
+  do nv=1,x%nv3d
+     call hflip3_(x%ptr3d(:,:,:,nv),im,jm,km,x%gsiset)
+     call vflip_ (x%ptr3d(:,:,:,nv),im,jm,km)
+  enddo
+  
 end subroutine flip_
 
 !---------------------------------------------------------------------------
 ! Flip latitude dimension (N->S to S->N).
 ! In GSI orientation (gsiset=.true.): array is (nlat,nlon[,nlev])
 ! In file orientation (gsiset=.false.): array is (nlon,nlat[,nlev])
-subroutine latflip2_(q, im, jm, gsi)
+subroutine hflip3_ ( q,im,jm,km, gsi )
+  implicit none
+  integer, intent(in) :: im,jm,km
+  logical, intent(in) :: gsi
+  real(4), intent(inout) :: q(:,:,:)
+  integer :: i, j, k
+  real(4), allocatable   :: dum(:)
+
+  allocate ( dum(jm) )
+  
+  if (gsi) then
+     ! Array is (nlat, nlon, nlev): flip first dimension
+     do k=1,km
+        do i=1,im
+           dum = 0.0
+           do j=1,jm
+              dum(jm+1-j) = q(j,i,k)
+           end do
+           do j=1,jm
+              q(j,i,k) = dum(j)
+           end do
+        enddo
+     enddo
+  else
+     ! Array is (nlon, nlat, nlev): flip second dimension
+     do k=1,km
+        do i=1,im
+           dum=0.0
+           do j=1,jm
+              dum(jm+1-j) = q(i,j,k)
+           end do
+           do j=1,jm
+              q(i,j,k) = dum(j)
+           end do
+        enddo
+     enddo
+  endif
+  
+  deallocate ( dum )
+  
+end subroutine hflip3_
+
+subroutine hflip2_ ( q,im,jm, gsi )
+  implicit none
+  integer, intent(in) :: im,jm
+  logical, intent(in) :: gsi
+  real(4), intent(inout) :: q(:,:)
+  integer :: i, j
+  real(4), allocatable   :: dum(:)
+  
+  allocate ( dum(jm) )
+  
+  if (gsi) then
+     ! Array is (nlat, nlon): flip first dimension     
+     do i=1,im
+        dum = 0.0
+        do j=1,jm
+           dum(jm+1-j) = q(j,i)
+        end do
+        do j=1,jm
+           q(j,i) = dum(j)
+        end do
+     enddo
+  else
+     ! Array is (nlon, nlat): flip second dimension
+     do i=1,im
+        dum = 0.0
+        do j=1,jm
+           dum(jm+1-j) = q(i,j)
+        end do
+        do j=1,jm
+           q(i,j) = dum(j)
+        end do
+     enddo
+  endif
+  
+  deallocate ( dum )
+  
+end subroutine hflip2_
+  
+subroutine vflip_(q,im,jm,km)
    implicit none
-   integer, intent(in) :: im, jm
-   logical, intent(in) :: gsi
-   real(4), intent(inout) :: q(:,:)
-   real(4), allocatable :: dum(:)
+   integer,intent(in) :: im, jm, km
+   real(4),intent(inout) :: q(im,jm,km)
+   real(4), allocatable  :: dum(:)
    integer :: i, j
+   
+   allocate( dum(km) )
+   do j=1,jm
+      do i=1,im
+         dum      = q(i,j,:)
+         q(i,j,:) = dum(km:1:-1)
+     end do
+  end do
+  
+  deallocate( dum )
+  
+end subroutine vflip_
 
-   if (gsi) then
-      ! Array is (nlat, nlon): flip first dimension
-      allocate(dum(im))
-      do i = 1, jm/2
-         dum(:) = q(i,:)
-         q(i,:) = q(jm+1-i,:)
-         q(jm+1-i,:) = dum(:)
-      enddo
-      deallocate(dum)
-   else
-      ! Array is (nlon, nlat): flip second dimension
-      allocate(dum(im))
-      do j = 1, jm/2
-         dum(:) = q(:,j)
-         q(:,j) = q(:,jm+1-j)
-         q(:,jm+1-j) = dum(:)
-      enddo
-      deallocate(dum)
-   endif
-end subroutine latflip2_
-
-!---------------------------------------------------------------------------
-subroutine latflip3_(q, im, jm, km, gsi)
-   implicit none
-   integer, intent(in) :: im, jm, km
-   logical, intent(in) :: gsi
-   real(4), intent(inout) :: q(:,:,:)
-   real(4), allocatable :: dum(:)
-   integer :: i, j, k
-
-   if (gsi) then
-      ! Array is (nlat, nlon, nlev): flip first dimension
-      allocate(dum(im))
-      do k = 1, km
-         do i = 1, jm/2
-            dum(:) = q(i,:,k)
-            q(i,:,k) = q(jm+1-i,:,k)
-            q(jm+1-i,:,k) = dum(:)
-         enddo
-      enddo
-      deallocate(dum)
-   else
-      ! Array is (nlon, nlat, nlev): flip second dimension
-      allocate(dum(im))
-      do k = 1, km
-         do j = 1, jm/2
-            dum(:) = q(:,j,k)
-            q(:,j,k) = q(:,jm+1-j,k)
-            q(:,jm+1-j,k) = dum(:)
-         enddo
-      enddo
-      deallocate(dum)
-   endif
-end subroutine latflip3_
-
-!---------------------------------------------------------------------------
-! Flip vertical levels: converts top-to-bottom (k=1=model top, as in GFS NetCDF4)
-! to bottom-to-top (k=1=surface, as required by GSI).  Called from gfs2gsi_.
-subroutine levflip_(q, im, jm, km, gsi)
-   implicit none
-   integer, intent(in) :: im, jm, km
-   logical, intent(in) :: gsi
-   real(4), intent(inout) :: q(:,:,:)
-   real(4), allocatable :: dum(:,:)
-   integer :: k
-
-   if (gsi) then
-      ! Array is (nlat, nlon, nlev)
-      allocate(dum(jm, im))
-      do k = 1, km/2
-         dum(:,:) = q(:,:,k)
-         q(:,:,k) = q(:,:,km+1-k)
-         q(:,:,km+1-k) = dum(:,:)
-      enddo
-      deallocate(dum)
-   else
-      ! Array is (nlon, nlat, nlev)
-      allocate(dum(im, jm))
-      do k = 1, km/2
-         dum(:,:) = q(:,:,k)
-         q(:,:,k) = q(:,:,km+1-k)
-         q(:,:,km+1-k) = dum(:,:)
-      enddo
-      deallocate(dum)
-   endif
-end subroutine levflip_
 
 !---------------------------------------------------------------------------
 subroutine get_pointer_2d_(vname, bvars, ptr, rc)
