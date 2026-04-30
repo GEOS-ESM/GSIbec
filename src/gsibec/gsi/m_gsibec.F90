@@ -155,6 +155,9 @@ contains
   integer :: ier
   logical :: already_init_mpi
 
+  if (present(bkgmock) ) then
+    bkgmock = mockbkg
+  endif
   jouter_def = jouter_def + 1
   if(present(jouter)) then
     jouter=jouter_def
@@ -216,9 +219,6 @@ contains
 ! call general_sub2grid_destroy_info(sg)
 
   cv = simcv
-  if (present(bkgmock) ) then
-    bkgmock = mockbkg
-  endif
   gsibec_initialized_=.true.
   end subroutine init_
 !--------------------------------------------------------
