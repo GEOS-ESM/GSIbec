@@ -78,7 +78,6 @@ subroutine compute_qvar3d
   real(r_kind),pointer,dimension(:,:,:):: ges_q =>NULL()
   integer(i_kind):: maxvarq1
 
-  real(r_kind), parameter :: rmiss_th = -1.0e30
 
   nrf3_q=getindex(cvars3d,'q')
   nrf3_cw=getindex(cvars3d,'cw')
@@ -139,9 +138,6 @@ subroutine compute_qvar3d
         do j=1,lon2
            do i=1,lat2
               rhgues(i,j,k)=qgues(i,j,k)/qsatg(i,j,k)
-              if(regional .and. ges_tsen(i,j,k,ntguessig) < rmiss_th) then
-                rhgues(i,j,k)=0.5
-              endif
            end do
         end do
      end do

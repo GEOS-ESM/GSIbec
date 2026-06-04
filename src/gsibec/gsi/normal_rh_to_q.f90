@@ -43,17 +43,12 @@ subroutine normal_rh_to_q(rhnorm,t,p,q)
   real(r_kind),intent(in   ) :: p(lat2,lon2,nsig+1)  
   real(r_kind),intent(  out) :: q(lat2,lon2,nsig)
  
-  real(r_kind), parameter :: rmiss_th = -1.0e30
   integer(i_kind) i,j,k
 
 ! Convert normalized rh to q
    do k=1,nsig
       do j=1,lon2
          do i=1,lat2
-            if(regional .and. ges_tsen(i,j,k,ntguessig) < rmiss_th) then
-              q(i,j,k) = zero
-              cycle
-            endif
             q(i,j,k) = dqdrh(i,j,k)*rhnorm(i,j,k)
             if ( qoption == 2 ) then
                q(i,j,k) = q(i,j,k) + &
@@ -115,7 +110,6 @@ subroutine normal_rh_to_q_ad(rhnorm,t,p,q)
   real(r_kind),intent(inout) :: p(lat2,lon2,nsig+1)
   real(r_kind),intent(inout) :: q(lat2,lon2,nsig)
 
-  real(r_kind), parameter :: rmiss_th = -1.0e30
 
 ! local variables:
   integer(i_kind) i,j,k
@@ -124,14 +118,6 @@ subroutine normal_rh_to_q_ad(rhnorm,t,p,q)
    do k=1,nsig
       do j=1,lon2
          do i=1,lat2
-            if(regional .and. ges_tsen(i,j,k,ntguessig) < rmiss_th) then
-              rhnorm(i,j,k) = zero
-              t(i,j,k  ) = zero
-              p(i,j,k  ) = zero
-              p(i,j,k+1) = zero
-              q(i,j,k) = zero
-              cycle
-            endif
             rhnorm(i,j,k) = rhnorm(i,j,k) + dqdrh(i,j,k)*q(i,j,k)
             if ( qoption == 2 ) then
                t(i,j,k  ) = t(i,j,k  ) + dqdt(i,j,k)*q(i,j,k)

@@ -17,7 +17,6 @@ use gsi_metguess_mod, only: gsi_metguess_destroy_grids
 use mod_vtrans, only: nvmodes_keep,create_vtrans
 use mod_strong, only: l_tlnmc
 use strong_fast_global_mod, only: init_strongvars
-use m_mpimod, only: nxpe,nype
 implicit none
 private
 !
@@ -247,7 +246,6 @@ subroutine bkgcov_init_(need)
   logical, save :: init_pass = .true.
   call other_set_(need=need)  ! a little out of place, but ...
   call compute_derived(mype,init_pass) ! this belongs in a state set
-
   if (l_tlnmc .and. nvmodes_keep>0) then
      call create_vtrans(mype,ntguessig)
 !    if(regional) then
@@ -622,12 +620,8 @@ end subroutine final_
        do j=1,lon2
           do i=1,lat2
              pinc(i,j)=(ges_ps(i,j)-ges_prsi(i,j,1,jj))
-            if(ges_ps(i,j) < 1E-5) then  
-             write(6,*)'thinkdeb777 ges_ps 0 i,j ',i,j,' ',ges_ps(i,j)
-            endif
           enddo
        enddo
-       call flush(6)
        do k=1,nsig+1
           do j=1,lon2
              do i=1,lat2
@@ -676,8 +670,6 @@ end subroutine final_
                 end do
              end do
           end do
-                       write(6,*)"thinkdeb888-end of ges_prsl calc "
-                       call flush(6)
        end if   ! end if fv3 regional
 
        if (mpas_regional) then
@@ -1136,36 +1128,13 @@ end subroutine final_
   real(r_kind),dimension(:,:) :: var
   character(len=*), parameter :: myname_ = myname//'*guess_basics2_'
   real(r_kind),dimension(:,:),pointer::ptr
-    real(r_kind),dimension(:,:)  ,pointer::ges_ps=>NULL()
-  integer jj,ier,i,j
+  integer jj,ier
   jj=islot
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
     call die(myname_,'pointer to '//trim(vname)//" not found",ier)
   endif
-!cltdebug  if ( trim(vname) == 'ps' ) then 
-
-!cltdebug         var=10000
-!cltdebug  endif
-  
-   write(6,*)'thinkdeb77var imin/max val = ',minval(var), maxval(var)
-   write(6,*)'thinkdeb77varsizeofptr var= ',size(ptr), maxval(var)
   ptr=var
-  write(6,*)"thinkdeb77-1 guess_set vname is ",trim(vname)
-  if ( trim(vname) == 'ps' ) then 
-           write(6,*)'thinkdeb77 in guess_set ,size of ptr and input var of ps ',size(ptr) ,' ',size(var)
-           !cltothink
-       call gsi_bundlegetpointer(gsi_metguess_bundle(jj),'ps' ,ges_ps,ier)
-       write(6,*)'thinkdeb77 in guess_basic '
-       do j=1,lon2
-          do i=1,lat2
-            if(ges_ps(i,j) < 1E-5) then  
-             write(6,*)'thinkdeb777 ges_ps 0 i,j ',i,j,' ',ges_ps(i,j)
-            endif
-          enddo
-       enddo
-  endif
-          ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
   if ( trim(vname) == 'ps' ) ptr=kPa_per_Pa*ptr ! RT_TBD: is this the best place for this?
   if ( trim(vname) == 'z'  ) ptr=ptr/grav       ! RT_TBD: is this the best place for this?
   end subroutine guess_basics2_
@@ -1177,8 +1146,7 @@ end subroutine final_
   character(len=*), parameter :: myname_ = myname//'*guess_basics3_'
   real(r_kind),dimension(:,:,:),pointer::ptr
   character(len=80) :: uvar
-  integer jj,ier,i,j
-
+  integer jj,ier
   jj=islot
   call gsi_bundlegetpointer(gsi_metguess_bundle(jj),trim(vname),ptr,ier)
   if (ier/=0) then
@@ -1192,6 +1160,6 @@ end subroutine final_
          ptr=ptr/constoz   ! RT_TBD: is this the best place for this?
       endif
   endif
-
   end subroutine guess_basics3_
+!--------------------------------------------------------
 end module guess_grids
