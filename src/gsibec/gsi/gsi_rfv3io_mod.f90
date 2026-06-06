@@ -3661,7 +3661,7 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     regional_time(6)=msecond
     regional_fhr=zero          ! forecast hour set zero for now
     regional_fmin=zero          ! forecast min set zero for now
-
+    write(6,*)'thinkdeb99 use_fv3_grid_spec ',use_fv3_grid_spec
     if(use_fv3_grid_spec) then
 !!!!!!!!!!    grid_spec  !!!!!!!!!!!!!!!
       ierr=0

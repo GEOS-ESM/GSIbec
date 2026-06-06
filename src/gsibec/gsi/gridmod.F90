@@ -471,7 +471,7 @@ contains
     fv3_regional=.false.
     fv3_cmaq_regional=.false.
     mpas_regional=.false.
-    use_fv3_grid_spec=.false.
+    use_fv3_grid_spec=.true.
     l_reg_update_hydro_delz=.false.
     nems_nmmb_regional = .false.
     twodvar_regional = .false. 
