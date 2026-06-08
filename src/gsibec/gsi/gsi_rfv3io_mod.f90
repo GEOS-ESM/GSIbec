@@ -3661,7 +3661,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     regional_time(6)=msecond
     regional_fhr=zero          ! forecast hour set zero for now
     regional_fmin=zero          ! forecast min set zero for now
-    write(6,*)'thinkdeb99 use_fv3_grid_spec ',use_fv3_grid_spec
     if(use_fv3_grid_spec) then
 !!!!!!!!!!    grid_spec  !!!!!!!!!!!!!!!
       ierr=0
@@ -3865,8 +3864,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   if(fv3_regional .and. use_fv3_grid_spec) then
     call m_generate_anl_grid(nx,ny,grid_lon,grid_lont,grid_lat,grid_latt,gsi_lats,gsi_lons)
     deallocate (grid_lon,grid_lat,grid_lont,grid_latt)
-    !deallocate (ak,bk,abk_fv3)
-
     deallocate(ny_layout_len,ny_layout_b,ny_layout_e)
   endif
 
