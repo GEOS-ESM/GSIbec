@@ -3873,7 +3873,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   if(.not.use_fv3_grid_spec) then
     call m_generate_anl_grid_without_fv3gridspec(gsi_lats,gsi_lons)
   endif
->>>>>>> 3dd7a57 (Add filter grid generation routine for regional MPAS-JEDI)
 
     return
 end subroutine m_gsi_rfv3io_get_grid_specs
