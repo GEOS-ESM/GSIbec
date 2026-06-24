@@ -515,9 +515,6 @@ end subroutine read_GFSens_
 ! Conversions applied:
 !   - Vertical levels flipped (top->bottom to bottom->top) for 3D fields
 !   - Surface pressure: Pa -> centibars (1 cb = 1 kPa = 1000 Pa)
-!   - Temperature T -> virtual temperature Tv = T*(1 + fv*q)
-!     (GFS files store actual temperature; GSI expects virtual temperature,
-!      same as the move2bundle_ convention in cplr_gfs_ensmod.f90)
 subroutine gfs2gsi_(x)
    use constants, only: fv
    implicit none
@@ -530,19 +527,6 @@ subroutine gfs2gsi_(x)
    ! Surface pressure: Pa -> centibars (1 cb = 1000 Pa)
    id = getindex(x%gsi_vnames2d, 'ps')
    if (id > 0) x%ptr2d(:,:,id) = x%ptr2d(:,:,id) * Pa_to_cb
-
-   ! Temperature: T -> virtual temperature Tv = T*(1 + fv*q)
-   ! GFS files contain actual temperature ('tmp').  GSI expects virtual temperature
-   ! in the 't'/'tv' bundle slot (same as move2bundle_ in cplr_gfs_ensmod.f90).
-   ! fv is r_kind (double precision); cast to real(4) to match ptr3d storage.
-   ! If neither 't' nor 'tv' is present (id_t<=0), the guard below skips the conversion.
-   id_t = getindex(x%gsi_vnames3d, 't')
-   if (id_t <= 0) id_t = getindex(x%gsi_vnames3d, 'tv')
-   id_q = getindex(x%gsi_vnames3d, 'q')
-   
-   if (id_t > 0 .and. id_q > 0) then
-      x%ptr3d(:,:,:,id_t) = x%ptr3d(:,:,:,id_t) * (1.0 + real(fv, kind=4) * x%ptr3d(:,:,:,id_q))
-   endif
 
 end subroutine gfs2gsi_
 
