@@ -515,6 +515,7 @@ end subroutine read_GFSens_
 ! Conversions applied:
 !   - Vertical levels flipped (top->bottom to bottom->top) for 3D fields
 !   - Surface pressure: Pa -> centibars (1 cb = 1 kPa = 1000 Pa)
+!   - Temperature T -> virtual temperature Tv = T*(1 + fv*q)
 subroutine gfs2gsi_(x)
    use constants, only: fv
    implicit none
@@ -528,6 +529,13 @@ subroutine gfs2gsi_(x)
    id = getindex(x%gsi_vnames2d, 'ps')
    if (id > 0) x%ptr2d(:,:,id) = x%ptr2d(:,:,id) * Pa_to_cb
 
+  ! Temperature: sensible -> virtual (T_v = T * (1 + 0.61 * q))                                                                                        id_t = getindex(x%gsi_vnames3d, 't')
+   if (id_t <= 0) id_t = getindex(x%gsi_vnames3d, 'tv')
+   id_q = getindex(x%gsi_vnames3d, 'q')
+   if (id_t > 0 .and. id_q > 0) then
+      x%ptr3d(:,:,:,id_t) = x%ptr3d(:,:,:,id_t) * (1.0 + fv * max(0.0, x%ptr3d(:,:,:,id_q)))
+   endif
+   
 end subroutine gfs2gsi_
 
 !---------------------------------------------------------------------------
@@ -607,7 +615,7 @@ end subroutine fillpoles_v_nc_
 !---------------------------------------------------------------------------
 ! flip_ combines latflip and levflip for cases where the file has both
 ! N->S latitude ordering AND bottom-to-top level ordering.
-! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is already S->N
+! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is N->S
 subroutine flip_(x)
   implicit none
   type(nc_GFSens_vars), intent(inout) :: x
