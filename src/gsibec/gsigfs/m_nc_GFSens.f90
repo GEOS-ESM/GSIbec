@@ -405,7 +405,7 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
       if (gsi_) then
          if (gfspoles_) then
             ! GFS pole expansion: poles (rows 1 and nlat) initialised to zero;
-            ! file rows 1..nlat_file -> GSI rows 2..nlat-1 (S->N CF ordering preserved).
+            ! file rows 1..nlat_file -> GSI rows 2..nlat-1 (N->S ordering preserved before flip).
             bvars%ptr3d(:,:,:,nv) = 0.0
             do kk = 1, nlev
                do j=1,nlat_file
@@ -505,7 +505,7 @@ end subroutine read_GFSens_
 !---------------------------------------------------------------------------
 ! Convert GFS file units/orientation to GSI convention.
 ! GFS NetCDF4 files (FV3/CF-compliant) are assumed to have:
-!   - latitude south-to-north (same as GSI convention, no horizontal flip needed)
+!   - latitude north-to-south (GSI convention is south-to-north, flip is needed)
 !   - longitude 0-360 eastward (same as GSI convention)
 !   - vertical levels from model top to near-surface (k=1 = model top)
 !
@@ -513,6 +513,7 @@ end subroutine read_GFSens_
 ! A vertical level flip is therefore required.
 !
 ! Conversions applied:
+!   - Latitude flipped (north->south to south->north)
 !   - Vertical levels flipped (top->bottom to bottom->top) for 3D fields
 !   - Surface pressure: Pa -> centibars (1 cb = 1 kPa = 1000 Pa)
 !   - Temperature T -> virtual temperature Tv = T*(1 + fv*q)
@@ -529,7 +530,8 @@ subroutine gfs2gsi_(x)
    id = getindex(x%gsi_vnames2d, 'ps')
    if (id > 0) x%ptr2d(:,:,id) = x%ptr2d(:,:,id) * Pa_to_cb
 
-  ! Temperature: sensible -> virtual (T_v = T * (1 + 0.61 * q))                                                                                        id_t = getindex(x%gsi_vnames3d, 't')
+  ! Temperature: sensible -> virtual (T_v = T * (1 + 0.61 * q))
+   id_t = getindex(x%gsi_vnames3d, 't')
    if (id_t <= 0) id_t = getindex(x%gsi_vnames3d, 'tv')
    id_q = getindex(x%gsi_vnames3d, 'q')
    if (id_t > 0 .and. id_q > 0) then
@@ -614,7 +616,7 @@ end subroutine fillpoles_v_nc_
 
 !---------------------------------------------------------------------------
 ! flip_ combines latflip and levflip for cases where the file has both
-! N->S latitude ordering AND bottom-to-top level ordering.
+! N->S latitude ordering AND top-to-bottom level ordering.
 ! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is N->S
 subroutine flip_(x)
   implicit none
