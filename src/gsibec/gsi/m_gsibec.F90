@@ -995,10 +995,12 @@ contains
   subroutine gsi2model_units_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
+  use gsi_metguess_mod, only: gsi_metguess_get
   implicit none
   type(gsi_bundle) bundle
   real(r_kind),pointer :: ptr2(:,:)  =>NULL()
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
+  character(len=80) :: uvar
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
@@ -1006,17 +1008,25 @@ contains
   endif
   call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
   if(ier==0) then
-     ptr3 = ptr3 * constoz
+     ! model-side ozone is ppmv only when the met_guess table says so
+     ! (usrname o3ppmv); for o3mr (kg/kg, FV3/RRFS) no conversion applies,
+     ! consistent with guess_basics3_ in guess_grids.
+     call gsi_metguess_get('usrvar::o3ppmv', uvar, ier)
+     if(trim(uvar)=='o3ppmv') then
+        ptr3 = ptr3 * constoz
+     endif
   endif
   end subroutine gsi2model_units_
 !--------------------------------------------------------
   subroutine gsi2model_units_ad_(bundle)
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
+  use gsi_metguess_mod, only: gsi_metguess_get
   implicit none
   type(gsi_bundle) bundle
   real(r_kind),pointer :: ptr2(:,:)  =>NULL()
   real(r_kind),pointer :: ptr3(:,:,:)=>NULL()
+  character(len=80) :: uvar
   integer ier
   call gsi_bundlegetpointer(bundle,'ps',ptr2,ier)
   if(ier==0) then
@@ -1024,7 +1034,12 @@ contains
   endif
   call gsi_bundlegetpointer(bundle,'oz',ptr3,ier)
   if(ier==0) then
-     ptr3 = ptr3 * constoz
+     ! adjoint of the kg/kg->ppmv map; applies only when the model-side
+     ! ozone is ppmv (met_guess usrname o3ppmv), see gsi2model_units_
+     call gsi_metguess_get('usrvar::o3ppmv', uvar, ier)
+     if(trim(uvar)=='o3ppmv') then
+        ptr3 = ptr3 * constoz
+     endif
   endif
   end subroutine gsi2model_units_ad_
 !--------------------------------------------------------
