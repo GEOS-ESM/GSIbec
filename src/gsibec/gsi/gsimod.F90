@@ -68,7 +68,7 @@
   use general_commvars_mod, only: init_general_commvars_dims
   use general_commvars_mod, only: final_general_commvars_dims
 
-  use radiance_mod, only: radiance_mode_init, radiance_mode_destroy
+  use setup_radcov, only: setup_radcov_init, setup_radcov_destroy
   
   use derivsmod, only: dvars2d, dvars3d
   use derivsmod, only: create_ges_derivatives,init_anadv,destroy_ges_derivatives
@@ -577,7 +577,7 @@
   call init_anacv(rcname=thisrc)
   call init_anadv(rcname=thisrc)
 
-  call radiance_mode_init
+  call setup_radcov_init
 
   call init_io(mype,npe-1)
   call jfunc_init
@@ -837,7 +837,7 @@
   call final_general_commvars_dims
   call final_grid_vars
   call clean_4dvar
-  call radiance_mode_destroy
+  call setup_radcov_destroy
   call final_anadv
   call final_anacv
   call final_anasv

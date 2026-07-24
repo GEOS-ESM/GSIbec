@@ -113,7 +113,7 @@ subroutine prewgt(mype)
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use gsi_metguess_mod, only: gsi_metguess_bundle
   use mpeu_util, only: die
-  use radiance_mod, only: n_clouds_fwd, cloud_names_fwd
+  use setup_radcov, only: n_clouds_fwd, cloud_names_fwd
 
   implicit none
 
