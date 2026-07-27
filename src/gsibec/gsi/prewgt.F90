@@ -113,6 +113,7 @@ subroutine prewgt(mype)
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use gsi_metguess_mod, only: gsi_metguess_bundle
   use mpeu_util, only: die
+  use setup_radcov, only: n_clouds_fwd, cloud_names_fwd
 
   implicit none
 
@@ -309,8 +310,8 @@ subroutine prewgt(mype)
 
 ! Get background error statistics from a file ("berror_stats").
   call berror_read_wgt(corz,corp,hwllin,hwllinp,vscalesin,corsst,hsst,&
-                       qoption,cwoption,mype)
-                      !n_clouds_fwd,cloud_names_fwd,lunit)
+                       qoption,cwoption,mype,&
+                       n_clouds_fwd,cloud_names_fwd)
   mlat=nlat
 
 ! load the horizontal length scales

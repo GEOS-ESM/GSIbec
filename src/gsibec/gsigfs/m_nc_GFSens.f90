@@ -405,7 +405,7 @@ subroutine read_GFSens_(fname, bvars, rc, myid, root, gsiset, gfspoles)
       if (gsi_) then
          if (gfspoles_) then
             ! GFS pole expansion: poles (rows 1 and nlat) initialised to zero;
-            ! file rows 1..nlat_file -> GSI rows 2..nlat-1 (S->N CF ordering preserved).
+            ! file rows 1..nlat_file -> GSI rows 2..nlat-1 (N->S ordering preserved before flip).
             bvars%ptr3d(:,:,:,nv) = 0.0
             do kk = 1, nlev
                do j=1,nlat_file
@@ -505,7 +505,7 @@ end subroutine read_GFSens_
 !---------------------------------------------------------------------------
 ! Convert GFS file units/orientation to GSI convention.
 ! GFS NetCDF4 files (FV3/CF-compliant) are assumed to have:
-!   - latitude south-to-north (same as GSI convention, no horizontal flip needed)
+!   - latitude north-to-south (GSI convention is south-to-north, flip is needed)
 !   - longitude 0-360 eastward (same as GSI convention)
 !   - vertical levels from model top to near-surface (k=1 = model top)
 !
@@ -513,11 +513,10 @@ end subroutine read_GFSens_
 ! A vertical level flip is therefore required.
 !
 ! Conversions applied:
+!   - Latitude flipped (north->south to south->north)
 !   - Vertical levels flipped (top->bottom to bottom->top) for 3D fields
 !   - Surface pressure: Pa -> centibars (1 cb = 1 kPa = 1000 Pa)
 !   - Temperature T -> virtual temperature Tv = T*(1 + fv*q)
-!     (GFS files store actual temperature; GSI expects virtual temperature,
-!      same as the move2bundle_ convention in cplr_gfs_ensmod.f90)
 subroutine gfs2gsi_(x)
    use constants, only: fv
    implicit none
@@ -531,19 +530,14 @@ subroutine gfs2gsi_(x)
    id = getindex(x%gsi_vnames2d, 'ps')
    if (id > 0) x%ptr2d(:,:,id) = x%ptr2d(:,:,id) * Pa_to_cb
 
-   ! Temperature: T -> virtual temperature Tv = T*(1 + fv*q)
-   ! GFS files contain actual temperature ('tmp').  GSI expects virtual temperature
-   ! in the 't'/'tv' bundle slot (same as move2bundle_ in cplr_gfs_ensmod.f90).
-   ! fv is r_kind (double precision); cast to real(4) to match ptr3d storage.
-   ! If neither 't' nor 'tv' is present (id_t<=0), the guard below skips the conversion.
+  ! Temperature: sensible -> virtual (T_v = T * (1 + 0.61 * q))
    id_t = getindex(x%gsi_vnames3d, 't')
    if (id_t <= 0) id_t = getindex(x%gsi_vnames3d, 'tv')
    id_q = getindex(x%gsi_vnames3d, 'q')
-   
    if (id_t > 0 .and. id_q > 0) then
-      x%ptr3d(:,:,:,id_t) = x%ptr3d(:,:,:,id_t) * (1.0 + real(fv, kind=4) * x%ptr3d(:,:,:,id_q))
+      x%ptr3d(:,:,:,id_t) = x%ptr3d(:,:,:,id_t) * (1.0 + fv * max(0.0, x%ptr3d(:,:,:,id_q)))
    endif
-
+   
 end subroutine gfs2gsi_
 
 !---------------------------------------------------------------------------
@@ -622,8 +616,8 @@ end subroutine fillpoles_v_nc_
 
 !---------------------------------------------------------------------------
 ! flip_ combines latflip and levflip for cases where the file has both
-! N->S latitude ordering AND bottom-to-top level ordering.
-! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is already S->N
+! N->S latitude ordering AND top-to-bottom level ordering.
+! For standard GFS NetCDF4 (FV3) gaussian grid files the latitude is N->S
 subroutine flip_(x)
   implicit none
   type(nc_GFSens_vars), intent(inout) :: x

@@ -49,7 +49,7 @@ subroutine compute_qvar3d
   use jfunc, only: qoption,clip_supersaturation
 #ifdef USE_ALL_ORIGINAL
   use jfunc, only: varq,varcw,cwoption
-  use radiance_mod, only: icloud_cv,n_clouds_fwd,cloud_names_fwd
+  use setup_radcov, only: icloud_cv,n_clouds_fwd,cloud_names_fwd
   use obsmod, only: l_wcp_cwm
 #else
   use m_berror_stats, only: varq

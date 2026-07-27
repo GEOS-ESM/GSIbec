@@ -75,6 +75,7 @@ outgrads1.f90
 plib8.f90
 polcarf.f90
 prewgt.F90
+setup_radcov.f90
 raflib.f90
 rfdpar.f90
 rsearch.F90
