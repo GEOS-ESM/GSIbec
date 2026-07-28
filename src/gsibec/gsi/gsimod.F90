@@ -585,7 +585,9 @@
   call init_constants(regional)
   call init_balmod
   call init_berror
+  write(6,*)'thinkdeb999 -0.6 in gsimod  use_fv3_grid_spec ',use_fv3_grid_spec
   call init_grid
+  write(6,*)'thinkdeb999 -0.5 in gsimod  use_fv3_grid_spec ',use_fv3_grid_spec
   call init_compact_diffs
   call init_smooth_polcas
   call init_strongvars
@@ -747,6 +749,8 @@
   endif
 
 ! read in basic grid parameters
+  write(6,*)'thinkdeb999 xx-0.5 in gsimod  use_fv3_grid_spec ',use_fv3_grid_spec
+  use_fv3_grid_spec=.true.
   open(11,file=thisrc)
   read(11,gridopts,iostat=ios)
   if(ios/=0) call die(myname_,'read(gridopts)',ios)  
@@ -774,7 +778,7 @@
   integer(i_kind),allocatable :: iglat1(:),igstart(:),jglon1(:),jgstart(:)
 
   verbose = thispe==0
-
+  write(6,*)'thinkdeb999gridopts1 '
   call gridopts0_(nmlfile=thisrc)
   gnlat=nlat
   gnlon=nlon

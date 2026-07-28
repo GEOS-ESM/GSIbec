@@ -3640,7 +3640,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
   character(len=180)  :: filename_layout
   integer(i_kind) :: ios
   real(r_kind) :: pmpas
-
   if(fv3_regional) then
 
     coupler_res_filenam='coupler.res'
@@ -3662,7 +3661,6 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     regional_time(6)=msecond
     regional_fhr=zero          ! forecast hour set zero for now
     regional_fmin=zero          ! forecast min set zero for now
-
     if(use_fv3_grid_spec) then
 !!!!!!!!!!    grid_spec  !!!!!!!!!!!!!!!
       ierr=0
@@ -3796,6 +3794,16 @@ subroutine m_gsi_rfv3io_get_grid_specs(gsi_lats,gsi_lons,ierr)
     !if(mype==0)write(6,'(" nz=",i5)') nz
 
     nsig=nz-1
+    if(mpas_regional) then
+      nsig=0
+      open(11,file='mpas_pave.txt')
+      do
+        read(11,*,iostat=ios) pmpas
+        if(ios /= 0) exit
+        nsig = nsig + 1
+      enddo
+      close(11)
+    endif
 
 !!!    get ak,bk
 

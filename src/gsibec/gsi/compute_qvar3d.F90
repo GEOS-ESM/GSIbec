@@ -39,7 +39,7 @@ subroutine compute_qvar3d
   use berror, only: dssv
   use derivsmod, only: qsatg,qgues
   use control_vectors, only: cvars3d
-  use gridmod, only: lat2,lon2,nsig
+  use gridmod, only: lat2,lon2,nsig,regional
   use constants, only: zero,one,fv,r100,qmin
   use guess_grids, only: fact_tv,ntguessig,nfldsig,ges_tsen,ges_prsl,ges_qsat
   use mpeu_util, only: getindex
