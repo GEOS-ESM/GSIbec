@@ -310,8 +310,7 @@ do jj=1,nsubwin
       enddo
    end if
 !  Calculate sensible temperature
-!cltrog   if(do_tv_to_tsen_ad .and. .not.regional) call tv_to_tsen_ad(cv_t,rv_q,rv_tsen)
-   if(do_tv_to_tsen_ad .and. .not.regional) call tv_to_tsen_ad(cv_t,rv_q,rv_tsen)
+   if(do_tv_to_tsen_ad ) call tv_to_tsen_ad(cv_t,rv_q,rv_tsen)
 
 !  Adjoint of convert input normalized RH to q to add contribution of moisture
 !  to t, p , and normalized rh
