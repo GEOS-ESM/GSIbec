@@ -863,8 +863,13 @@ contains
 
   subroutine create_vgrid_vars
     implicit none
-    if(.not.allocated(ak5)) &
-      allocate(ak5(nsig+1),bk5(nsig+1),ck5(nsig+1),tref5(nsig))
+    if(.not.allocated(ak5)) then
+       allocate(ak5(nsig+1),bk5(nsig+1),ck5(nsig+1),tref5(nsig))
+       ak5=0.0_r_kind
+       bk5=0.0_r_kind
+       ck5=0.0_r_kind
+       tref5=0.0_r_kind
+    endif
   end subroutine create_vgrid_vars
     
 !-------------------------------------------------------------------------
