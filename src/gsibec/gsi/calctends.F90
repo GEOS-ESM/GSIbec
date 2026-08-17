@@ -371,7 +371,7 @@ subroutine calctends(mype,teta,pri,guess,xderivative,yderivative,tendency)
       end do
     end do  !end do k
 
-!   call turbl(u,v,pri,t,teta,z,u_t,v_t,t_t,jtstart(kk),jtstop(kk))
+    call turbl(u,v,pri,t,teta,z,u_t,v_t,t_t,jtstart(kk),jtstop(kk))
 
 #ifdef USE_ALL_ORIGINAL
     if(.not.wrf_nmm_regional.and..not.nems_nmmb_regional)then
