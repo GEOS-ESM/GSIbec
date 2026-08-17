@@ -246,6 +246,7 @@ subroutine bkgcov_init_(need)
   logical, save :: init_pass = .true.
   call other_set_(need=need)  ! a little out of place, but ...
   call compute_derived(mype,init_pass) ! this belongs in a state set
+!cltcrt  call compute_derived(mype,.true.) ! this belongs in a state set
 
   if (l_tlnmc .and. nvmodes_keep>0) then
      call create_vtrans(mype,ntguessig)

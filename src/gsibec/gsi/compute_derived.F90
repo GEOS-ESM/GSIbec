@@ -354,7 +354,6 @@ subroutine compute_derived(mype,init_pass)
   endif         ! (!twodvar_regional)
 #endif
 
-  if(.not. init_pass) return
 
 ! Load guess q for use in limq.  Initialize saturation array to guess.
   call gsi_bundlegetpointer (gsi_metguess_bundle(ntguessig),'q',ges_q,istatus)
@@ -369,6 +368,7 @@ subroutine compute_derived(mype,init_pass)
      end do
   end if
 
+  if(.not. init_pass) return
 ! Load guess gust, vis, pblh, lcbas, & cldch for use in limg, limv, limp, & liml.
   call gsi_bundlegetpointer (gsi_metguess_bundle(ntguessig),'gust',ptr2d,istatus)
   if (istatus==0) then
