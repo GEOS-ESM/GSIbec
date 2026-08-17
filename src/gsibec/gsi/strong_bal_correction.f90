@@ -1,4 +1,6 @@
-subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnostic,fullfield,update,uvflag)
+subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,&
+                                 psi,chi,t,ps,&
+                                 bal_diagnostic,fullfield,update,uvflag)
 
 !$$$  subprogram documentation block
 !                .      .    .                                       .
@@ -66,7 +68,8 @@ subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnost
   implicit none
 
   integer(i_kind)                       ,intent(in   ) :: mype
-  logical                               ,intent(in   ) :: bal_diagnostic,update,fullfield,uvflag
+  logical                               ,intent(in   ) :: bal_diagnostic,update
+  logical                               ,intent(in   ) :: fullfield,uvflag
   real(r_kind),dimension(lat2,lon2,nsig),intent(inout) :: u_t,v_t,t_t
   real(r_kind),dimension(lat2,lon2)     ,intent(inout) :: ps_t
   real(r_kind),dimension(lat2,lon2,nsig),intent(inout) :: psi,chi,t
@@ -76,7 +79,8 @@ subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnost
 
 !    global option:
 
-     call strong_bal_correction_fast_global(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnostic,fullfield,update,uvflag)
+     call strong_bal_correction_fast_global(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,&
+                                            bal_diagnostic,fullfield,update,uvflag)
 
   else
 
@@ -84,7 +88,8 @@ subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnost
 
 !       regional option 1:
 
-        call zrnmi_strong_bal_correction(u_t,v_t,t_t,ps_t,psi,chi,t,ps,bal_diagnostic,fullfield,update,mype)
+        call zrnmi_strong_bal_correction(u_t,v_t,t_t,ps_t,psi,chi,t,ps,&
+                                         bal_diagnostic,fullfield,update,mype)
 
      elseif(reg_tlnmc_type==2) then
 
@@ -93,7 +98,8 @@ subroutine strong_bal_correction(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,bal_diagnost
         !call fmg_strong_bal_correction_ad_test(u_t,v_t,t_t,ps_t,psi,chi,t,ps,mype)
         !call zrnmi_filter_uvm_ad_test(mype)
 
-        call fmg_strong_bal_correction(u_t,v_t,t_t,ps_t,psi,chi,t,ps,bal_diagnostic,fullfield,update,mype)
+        call fmg_strong_bal_correction(u_t,v_t,t_t,ps_t,psi,chi,t,ps,&
+                                      bal_diagnostic,fullfield,update,mype)
 
      end if
 
@@ -173,7 +179,8 @@ subroutine strong_bal_correction_ad(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,uvflag)
 
 !    global option:
 
-     call strong_bal_correction_fast_global_ad(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,uvflag)
+     call strong_bal_correction_fast_global_ad(u_t,v_t,t_t,ps_t,mype,&
+                                               psi,chi,t,ps,uvflag)
 
   else
 
@@ -182,7 +189,8 @@ subroutine strong_bal_correction_ad(u_t,v_t,t_t,ps_t,mype,psi,chi,t,ps,uvflag)
 !       regional option 1:
 
         update=.true.
-        call zrnmi_strong_bal_correction_ad(u_t,v_t,t_t,ps_t,psi,chi,t,ps,update,mype)
+        call zrnmi_strong_bal_correction_ad(u_t,v_t,t_t,ps_t,&
+                                            psi,chi,t,ps,update,mype)
 
      elseif(reg_tlnmc_type==2) then
 
