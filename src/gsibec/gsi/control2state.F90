@@ -304,7 +304,6 @@ do jj=1,nsubwin
    if(do_normal_rh_to_q .or. mpas_regional) call normal_rh_to_q(cv_rh,cv_t,sv_prse,sv_q)
 
 !  Calculate sensible temperature
-   write(6,*)"thinkdebgsibec"
    if(do_tv_to_tsen ) call tv_to_tsen(cv_t,sv_q,sv_tsen)
 
 !  Copy other variables
