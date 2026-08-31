@@ -310,11 +310,11 @@ do jj=1,nsubwin
       enddo
    end if
 !  Calculate sensible temperature
-   if(do_tv_to_tsen_ad .and. .not.regional) call tv_to_tsen_ad(cv_t,rv_q,rv_tsen)
+   if(do_tv_to_tsen_ad ) call tv_to_tsen_ad(cv_t,rv_q,rv_tsen)
 
 !  Adjoint of convert input normalized RH to q to add contribution of moisture
 !  to t, p , and normalized rh
-   if(regional .and. ls_prse) rv_prse = 0.
+
    if(do_normal_rh_to_q_ad .or. mpas_regional) call normal_rh_to_q_ad(cv_rh,cv_t,rv_prse,rv_q)
 
 !  Adjoint to convert ps to 3-d pressure
