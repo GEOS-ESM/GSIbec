@@ -51,6 +51,8 @@
 
   use gridmod, only: init_reg_glob_ll,regional,fv3_regional,grid_ratio_fv3_regional,mpas_regional,use_fv3_grid_spec
 
+  use turblmod, only: use_pbl,init_turbl
+
   use constants, only: zero,one,init_constants,gps_constants,three
   use constants, only: init_constants,init_constants_derived
   use constants, only: final_constants,final_constants_derived
@@ -382,7 +384,8 @@
        nmn_obsbin,&
        iadtest,&
        iadtest_maxiter,&
-       mockbkg
+       mockbkg,&
+       use_pbl
 
 ! GRIDOPTS (grid setup variables,including regional specific variables):
 !     jcap     - spectral resolution
@@ -586,6 +589,7 @@
   call init_balmod
   call init_berror
   call init_grid
+  call init_turbl
   call init_compact_diffs
   call init_smooth_polcas
   call init_strongvars
