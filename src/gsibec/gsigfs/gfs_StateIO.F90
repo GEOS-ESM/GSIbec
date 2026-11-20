@@ -128,7 +128,8 @@ do ii = 1, size(xx)
    endif
 enddo
 
-call gfs_readens(sgrid, xx, fnames, npe, mype, 0)
+!call gfs_readens(sgrid, xx, fnames, npe, mype, 0) ! Original
+call gfs_readens(sgrid, xx, fnames, npe, mype) ! Optimized
 deallocate(fnames)
 
 end subroutine get_Nstate_
