@@ -2958,12 +2958,11 @@ subroutine init_sf_xy(jcap_in)
   integer(i_kind),intent(in   ) :: jcap_in
 
   integer(i_kind) i,ii,j,k,l,n,jcap,kk,nsigend
-  real(r_kind),allocatable::g(:),gsave(:)
+  real(r_kind),allocatable::g(:)
   real(r_kind) factor
   real(r_kind),allocatable::rkm(:),f(:,:),f0(:,:)
   real(r_kind) ftest(grd_loc%nlat,grd_loc%nlon,grd_loc%kbegin_loc:grd_loc%kend_alloc)
   real(r_single) out1(grd_ens%nlon,grd_ens%nlat)
-  real(r_single),allocatable::pn0_npole(:)
   real(r_kind) s_ens_h_min
   real(r_kind) rlats_ens_local(grd_ens%nlat)
   real(r_kind) rlons_ens_local(grd_ens%nlon)
@@ -3119,8 +3118,7 @@ subroutine init_sf_xy(jcap_in)
 
   if(.not.allocated(spectral_filter)) allocate(spectral_filter(sp_loc%nc,grd_sploc%nsig))
   if(.not.allocated(sqrt_spectral_filter)) allocate(sqrt_spectral_filter(sp_loc%nc,grd_sploc%nsig))
-  allocate(g(sp_loc%nc),gsave(sp_loc%nc))
-  allocate(pn0_npole(0:sp_loc%jcap))
+  allocate(g(sp_loc%nc))
   allocate(ksame(grd_sploc%nsig))
   ksame=.false.
   do k=2,grd_sploc%nsig
@@ -3161,20 +3159,11 @@ subroutine init_sf_xy(jcap_in)
                                         i10,f10.2,e20.10)
         end if
 
-!            correct spectrum by dividing by pn0_npole
-        gsave=g
-
-!       obtain pn0_npole
+!       correct spectrum by dividing by pn0_npole
         do n=0,sp_loc%jcap
-           g=zero
-           g(2*n+1)=one
-           call general_s2g0(grd_sploc,sp_loc,g,f)
-           pn0_npole(n)=f(grd_sploc%nlat,1)
-        enddo
-   
-        g=zero
-        do n=0,sp_loc%jcap
-           g(2*n+1)=gsave(2*n+1)/pn0_npole(n)
+           if (.not. sp_loc%factsml(2*n+1)) then
+              g(2*n+1) = g(2*n+1) / sp_loc%alp0(n)
+           end if
         enddo
 
 !       obtain spectral_filter
@@ -3200,7 +3189,7 @@ subroutine init_sf_xy(jcap_in)
         enddo
      end if
   enddo
-  deallocate(g,gsave,pn0_npole,ksame)
+  deallocate(g,ksame)
 
 ! Compute sqrt(spectral_filter).  Ensure spectral_filter >=0 zero
 !$omp parallel do schedule(dynamic,1) private(k,i)
